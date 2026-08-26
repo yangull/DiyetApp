@@ -1,0 +1,40 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+coverage/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Melos (generated during bootstrap)
+pubspec_overrides.yaml
+.melos_tool/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Android signing (never commit the keystore)
+*.jks
+*.keystore
+**/key.properties
+
+# iOS signing
+*.p12
+*.mobileprovision
+*.certSigningRequest
+
+# Supabase local dev
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# OS / WSL artifacts
+.DS_Store
+*:Zone.Identifier
