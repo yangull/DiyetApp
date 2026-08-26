@@ -35,6 +35,11 @@ supabase/.env
 .env.*
 !.env.example
 
+# Compile-time config for --dart-define-from-file: real values stay local,
+# the *.example.json templates are committed
+env/*.json
+!env/*.example.json
+
 # OS / WSL artifacts
 .DS_Store
 *:Zone.Identifier

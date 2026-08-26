@@ -3,7 +3,7 @@
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
 > **Durum:** Baseline (v0.1) — 1 günlük beyin fırtınasına dayanıyor, her şey değişebilir.
-> **Son güncelleme:** 26 Ağustos 2026
+> **Son güncelleme:** 26 Ağustos 2026 (Faz 0 iskelet grill seansı)
 
 ---
 
@@ -31,6 +31,42 @@ Bunlar tartışıldı ve şimdilik sabit:
 1. **AI taslak hazırlar, diyetisyen onaylar.** Müşteri, diyetisyen onayından geçmemiş AI planı görmez (insan-hizmet tarafında).
 2. **Tüm görüşmeler uygulama içinde kalır.** Chat + gömülü video. WhatsApp/Instagram'a kaçış = komisyon kaybı riski.
 3. **Build sırası:** Ortak çekirdek (shared core) → Diyetisyen marketplace → AI-only tier.
+
+## 2.1 Kilitlenen Teknik Kararlar — Faz 0 İskeleti
+
+> 26 Ağustos 2026 grill seansında karara bağlandı.
+> Kapsam: **sadece iskelet** — Supabase şeması bu dilime dahil değil.
+
+**Ortam ve araçlar**
+
+1. Flutter stable, **WSL2 içine resmî yöntemle** kurulur. Şimdilik FVM yok: Codemagic kendi Flutter sürümünü sabitleyebiliyor, gerekirse FVM sonradan eklenir (10 dakikalık değişiklik).
+2. Günlük geliştirme **web öncelikli**: `flutter run -d web-server`, Windows tarayıcısından açılır. Böylece WSL içine Chrome kurmak gerekmez.
+3. Windows tarafındaki **Android emulator + adb köprüsü Faz 1'in erken bir dilimi** — bu dilimde yok. "Sonra" değil erken, çünkü Chrome mobile özgü sorunları gizler.
+4. Bağımlılık çözümü için **Dart pub workspaces**, script'ler için üstünde **Melos 7**. Kilitli "Melos" kararını modern mekanikle karşılar.
+5. Melos script'leri: `analyze`, `format`, `test`.
+6. Lint temeli **flutter_lints**, workspace kökünden üç paketçe paylaşılır. Sıkılık sonradan artırılabilir.
+
+**Repo yapısı**
+
+7. `apps/client` — platformlar: **android, ios, web**. Web hedefi *sadece geliştirme içindir* (Android/iOS toolchain'leri kurulana kadar Chrome önizlemesi); kaldırılıp kaldırılmayacağı yayından önce tekrar değerlendirilir. ⚠️ RevenueCat/IAP ve video SDK web'de çalışmayabilir — web bir duman testi, doğrulama ortamı değil.
+8. `apps/dietitian_panel` — **sadece web**.
+9. `packages/core` — ortak paket.
+10. `supabase/migrations/` ve `supabase/functions/` — `.gitkeep` ile **boş** oluşturulur; bu dilimde şema/Edge Function işi yapılmaz ama iskelet planlanan ağaca uyar.
+11. Dart paket adları tam olarak: `client`, `dietitian_panel`, `core`.
+12. Org tanımlayıcı placeholder: **`com.dietapp`** (örn. `com.dietapp.client`). Gerçek marka adı belirlenince, herhangi bir TestFlight/Play yüklemesinden **önce** değiştirilir → Açık Soru #14.
+
+**Bu dilimde `packages/core` içeriği**
+
+13. Material 3 teması (açık + koyu), tek bir placeholder seed renginden. Seed'e `// TODO: replace with brand color` işareti konur.
+14. Derleme zamanı değerlerini `--dart-define-from-file` ile okuyan tipli **`AppConfig`** sınıfı. Gerçek değerler `.gitignore`'daki `env/dev.json`'da; şablon commit'lenen `env/dev.example.json`'da.
+15. `AppConfig`'in doc comment'i üç şeyi açıkça yazar: **Supabase anon key tasarım gereği publictir**; veriyi asıl koruyan **Row Level Security**'dir; **`service_role` anahtarı client tarafında asla yer almaz.**
+16. Paket başına bir adet basit smoke test — `melos run test` ilk günden yeşil.
+17. **Henüz mock Supabase client wrapper yok** — o bir sonraki dilim (§12 adım 2).
+18. Her iki app de temayı ve config'i `core`'dan import eder — monorepo bağlantısının çalıştığını kanıtlayan şey budur.
+
+**İskelet sonrası**
+
+19. Özel (private) **GitHub reposu** açılır ve push edilir. Push öncesi Can'a sorulur.
 
 ---
 
@@ -174,6 +210,10 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 8 | İsim, logo, renk paleti | Daha sonra |
 | 9 | "Diyetisyenlik hocaları" iptal fikri neydi? | Can açıklayacak (arşiv) |
 | 10 | Excel diyet listesi workflow'unun (Kutay) uygulamadaki karşılığı | Kutay ile detaylandırılacak |
+| 11 | State management kütüphanesi hangisi (Riverpod / Bloc / …)? | Auth dilimi — ihtiyacı doğuran ilk kod orada |
+| 12 | l10n/ARB altyapısı kurulacak mı? | Şimdilik Türkçe metinler hardcode; ikinci bir dil gerçekten gündeme gelirse (retrofit maliyeti kabul edildi) |
+| 13 | `client` app'te web hedefi kalacak mı? | Yayından önce |
+| 14 | Nihai bundle id / org tanımlayıcı (`com.dietapp` placeholder) | Marka adı belirlenince — **ilk store yüklemesinden önce** |
 
 ---
 
@@ -185,15 +225,20 @@ En temiz yol: iki uygulama + ortak paket, tek repo. Kod tekrarı yok, tek PR'da 
 diyetisyenlik-app/
 ├── PLANNING.md              ← bu dosya (repo köküne koy)
 ├── CLAUDE.md                ← Claude Code'un her seansta okuduğu kısa özet
+├── .gitignore
 ├── apps/
-│   ├── client/              ← Flutter (iOS + Android müşteri uygulaması)
+│   ├── client/              ← Flutter (android + ios + web*)  *web sadece geliştirme
 │   └── dietitian_panel/     ← Flutter Web (diyetisyen paneli)
 ├── packages/
 │   └── core/                ← ortak modeller, Supabase client, auth, tema
+├── env/
+│   ├── dev.example.json     ← commit'lenir (şablon: hangi anahtarlar gerekiyor)
+│   └── dev.json             ← .gitignore'da (gerçek değerler, asla commit'lenmez)
 ├── supabase/
 │   ├── migrations/          ← SQL şema versiyonları
 │   └── functions/           ← Edge Functions (AI çağrıları)
-└── melos.yaml               ← Flutter monorepo yönetimi (Melos)
+├── pubspec.yaml             ← pub workspace kökü (resolution: workspace)
+└── melos.yaml               ← Melos 7 script'leri (analyze / format / test)
 ```
 
 ## 12. İlk Claude Code Seansı — Sıra
