@@ -123,3 +123,17 @@ Scaffold the Melos monorepo → `packages/core` models + mocked Supabase wrapper
 the Supabase project together (EU) with the first migration → auth flow with role
 selection (`client`/`dietitian`/`admin`) → both apps reach "login → empty home screen".
 Store/Codemagic accounts come after this milestone.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (yangull/DiyetApp), via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
