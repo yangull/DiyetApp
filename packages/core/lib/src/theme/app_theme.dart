@@ -51,7 +51,10 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: Size.fromHeight(density.controlHeight),
+          // Height is fixed, width is not: Size.fromHeight would set an
+          // infinite width and break any button placed inside a Row.
+          // Full-width buttons stretch at the call site instead.
+          minimumSize: Size(64, density.controlHeight),
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           textStyle: text.labelLarge,

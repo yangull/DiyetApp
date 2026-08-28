@@ -11,7 +11,7 @@ class ClientApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Diyetisyenlik App',
+      title: 'Wellkit',
       theme: AppTheme.light(AppDensity.comfortable),
       home: const _HomePlaceholder(),
     );
@@ -28,7 +28,7 @@ class _HomePlaceholder extends StatelessWidget {
     final density = context.density;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Diyetisyenlik App')),
+      appBar: AppBar(title: const Text('Wellkit')),
       body: Padding(
         padding: EdgeInsets.all(density.pagePadding),
         child: Column(

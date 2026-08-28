@@ -1,4 +1,4 @@
-# Diyetisyenlik App — Proje Planlama & Context Dosyası
+# Wellkit — Proje Planlama & Context Dosyası
 
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
@@ -9,7 +9,7 @@
 
 ## 1. Ürün Özeti
 
-Türkiye pazarı için iki taraflı bir diyetisyen marketplace uygulaması.
+Türkiye pazarı için iki taraflı bir diyetisyen marketplace uygulaması. Ürün adı: **Wellkit**.
 
 **İki kitle:**
 - **Diyetisyenler** → yönetim paneli + marketplace'te görünürlük + müşteri kazanımı
@@ -20,7 +20,8 @@ Türkiye pazarı için iki taraflı bir diyetisyen marketplace uygulaması.
 - AI-only tier için **aylık subscription** (fiyat henüz belirlenmedi)
 - İleride B2B: catering firmaları, yemek kartı entegrasyonları, kurumsal satış
 
-**İsim, renk paleti, marka:** Daha sonra seçilecek. Şimdilik kod adı "Diyetisyenlik App".
+**İsim: Wellkit** (28 Ağu 2026'da belirlendi). Renk paleti §2.5'te kilitlendi. Logo henüz yok.
+⚠️ Bundle id hâlâ `com.dietapp` placeholder'ı — Açık Soru #14, ilk store yüklemesinden **önce** değişmeli.
 
 ---
 
@@ -169,6 +170,38 @@ Bunlar tartışıldı ve şimdilik sabit:
 
 ---
 
+## 2.6 Araştırma Bulgusu — Diyet Planı Gerçekte Nasıl Kurulur
+
+> 28 Ağustos 2026 araştırma taraması. **Doğrulanmamış hipotez** — diyetisyen
+> görüşmelerinde teyit edilecek, tek başına şema değiştirmek için yeterli değil.
+
+Türk diyetisyenler planı "besin + miktar" olarak yazmıyor; **değişim listesi**
+kullanıyorlar (ADA exchange system'in Türkçe hâli). Besinler sekiz gruba ayrılır —
+**süt, et, nişastalı yiyecekler, kuru baklagil, A grubu sebze, B grubu sebze, meyve,
+yağ** — ve bir grubun içindeki her besin, **standart ev ölçüsünde** (yemek kaşığı,
+çay bardağı, kibrit kutusu; gram değil) kalori ve makro olarak eşdeğerdir. Plan,
+hangi öğünde hangi gruptan **kaç değişim** olduğunu söyler; besin seçimi değişim
+listesinden yapılır.
+
+⚠️ **Mevcut prototip modeli bunu taşıyamaz.** `MealItem { food, amount }` yerine
+gerçek primitive muhtemelen `(değişimGrubu, adet)` ve her plana ayrı yazılmayan,
+**paylaşılan bir değişim tablosu**. Açık Soru #10'un cevabı bu olabilir — ilk
+görüşmede doğrudan sorulacak.
+
+**İkinci bulgu — kilitli kararla çelişiyor:** İncelenen tüm Türk diyetisyen
+yazılımları hatırlatma ve randevu teyidini **WhatsApp üzerinden** yapıyor
+(DiyetBulut bunu açıkça reklam ediyor; ayrıca e-Nabız aktarımı ve dijital onam
+formları var). Kilitli karar §2 #2 iletişimin uygulama içinde kalmasını şart koşuyor.
+Karar iş modeli açısından doğru, ama rakiplerin tamamı tersini yapıyor çünkü
+danışanlar zaten orada. **Gerçek bir benimseme sürtünmesi** — görüşmelerde sorulacak,
+Can'a sormadan değiştirilmeyecek.
+
+Uluslararası araçlarda (Nutrium, Practice Better, Healthie, Kahunas) danışan portalı,
+randevu, faturalama, mesajlaşma ve form/anamnez **standart**; ama hiçbiri plan
+oluşturucuyu çözülmüş saymıyor. Ürünün kazanabileceği yer orası.
+
+---
+
 ## 3. Teknoloji Stack'i (kararlaştırıldı)
 
 | Katman | Seçim | Not |
@@ -306,7 +339,7 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 5 | Video SDK hangisi? | Teknik POC |
 | 6 | Spor PT konsepti dahil mi? | Keşfedilmedi, askıda |
 | 7 | WhatsApp/IG entegrasyonu — otomasyonla mı, hiç mi? | Komisyon koruması öncelikli |
-| 8 | İsim, logo, renk paleti | Daha sonra |
+| 8 | ~~İsim~~ ✅ **Wellkit**. Logo ve ikon hâlâ açık; renk paleti §2.5'te kilitlendi | Logo: marka çalışması |
 | 9 | "Diyetisyenlik hocaları" iptal fikri neydi? | Can açıklayacak (arşiv) |
 | 10 | Excel diyet listesi workflow'unun (Kutay) uygulamadaki karşılığı | Kutay ile detaylandırılacak |
 | 11 | ~~State management kütüphanesi hangisi?~~ | ✅ **Riverpod** (28 Ağu 2026, §2.2 #22) |

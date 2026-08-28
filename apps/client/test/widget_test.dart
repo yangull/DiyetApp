@@ -10,7 +10,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const ClientApp());
 
-    expect(find.text('Diyetisyenlik App'), findsOneWidget);
+    expect(find.text('Wellkit'), findsOneWidget);
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.theme?.colorScheme.primary, AppColors.primary);

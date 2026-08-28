@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Start here
+
+**Read `HANDOFF.md` first.** It records where the last session stopped, what was
+learned about how Turkish dietitians actually build diet plans, which decisions are
+blocking, and the traps worth avoiding.
+
 ## Project status
 
 `PLANNING.md` (in Turkish) is the product/technical plan. Read it at the start of every
@@ -13,7 +19,7 @@ the Supabase identity schema, applied to the live EU project. Not built yet: aut
 and everything in Phase 1. The next slice is the repository interfaces and in-memory fakes
 in `packages/core` (PLANNING.md §12 step 2), then the auth flow.
 
-This is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
+**Wellkit** is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an
 AI-only diet plan tier.
 
