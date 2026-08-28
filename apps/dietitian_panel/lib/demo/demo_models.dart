@@ -2,14 +2,28 @@ enum VerificationStatus { pending, approved, rejected }
 
 enum PlanState { aiDraft, approved }
 
+/// Dart identifiers cannot carry the dotless i, so the names are transliterated
+/// and the Turkish labels live with the screens that show them.
+enum Sex { kadin, erkek }
+
+/// Five levels, not four, because the dietitian's own energy sheet has five
+/// activity factors (1.2 – 1.6) and the levels exist to pick one.
+enum ActivityLevel { sedanter, hafifAktif, ortaAktif, aktif, cokAktif }
+
 class DemoClient {
   DemoClient({
     required this.id,
     required this.name,
     required this.age,
+    required this.sex,
     required this.heightCm,
     required this.weightKg,
     required this.goal,
+    required this.activityLevel,
+    required this.dietType,
+    required this.allergies,
+    required this.chronicConditions,
+    required this.medications,
     required this.note,
     required this.startedOn,
   });
@@ -17,9 +31,22 @@ class DemoClient {
   final String id;
   final String name;
   final int age;
+  final Sex sex;
   final int heightCm;
   double weightKg;
   final String goal;
+  final ActivityLevel activityLevel;
+
+  /// Open vocabulary on purpose ('standart', 'vejetaryen', ...): the real list
+  /// is an interview answer, and an enum would have to change to learn it.
+  final String dietType;
+  final List<String> allergies;
+  final List<String> chronicConditions;
+
+  /// Medication and supplement in one list; a dietitian reads them together.
+  final List<String> medications;
+
+  /// What is left once the structured facts above are pulled out. May be empty.
   final String note;
   final DateTime startedOn;
 }
@@ -150,4 +177,139 @@ class ReminderSettings {
 
   /// 'push' costs nothing; 'sms' needs a paid provider.
   String channel;
+}
+
+// ---------------------------------------------------------------------------
+// Exchange lists (değişim listesi)
+//
+// The second, competing answer to "what is a diet plan". Research says Turkish
+// dietitians do not write food + amount; they write how many exchanges from
+// which group, and the client picks the food from a substitution list, where
+// everything in a group is equivalent at its household measure. HANDOFF §2
+// calls this an unconfirmed hypothesis: this model exists to be shown to a
+// dietitian next to the freeform editor, not because the question is settled.
+// ---------------------------------------------------------------------------
+
+enum ExchangeGroup { sut, et, nisasta, baklagil, sebzeA, sebzeB, meyve, yag }
+
+/// Kilocalories in one exchange. Placeholder values from the published ADA
+/// tables; the numbers a dietitian actually uses are an interview answer.
+const kExchangeKcal = <ExchangeGroup, int>{
+  ExchangeGroup.sut: 120,
+  ExchangeGroup.et: 75,
+  ExchangeGroup.nisasta: 80,
+  ExchangeGroup.baklagil: 110,
+  ExchangeGroup.sebzeA: 0,
+  ExchangeGroup.sebzeB: 25,
+  ExchangeGroup.meyve: 60,
+  ExchangeGroup.yag: 45,
+};
+
+const kExchangeGroupLabels = <ExchangeGroup, String>{
+  ExchangeGroup.sut: 'Süt',
+  ExchangeGroup.et: 'Et',
+  ExchangeGroup.nisasta: 'Nişastalı yiyecek',
+  ExchangeGroup.baklagil: 'Kuru baklagil',
+  ExchangeGroup.sebzeA: 'A grubu sebze',
+  ExchangeGroup.sebzeB: 'B grubu sebze',
+  ExchangeGroup.meyve: 'Meyve',
+  ExchangeGroup.yag: 'Yağ',
+};
+
+/// One exchange, in household measures rather than grams. Shown as the
+/// substitution sheet: the part that makes the model recognisable.
+const kExchangeFoods = <ExchangeGroup, List<String>>{
+  ExchangeGroup.sut: [
+    '1 su bardağı süt',
+    '1 su bardağı yoğurt',
+    '1 kase ayran',
+    '2 kibrit kutusu beyaz peynir',
+  ],
+  ExchangeGroup.et: [
+    '1 köfte kadar kırmızı et',
+    '1 köfte kadar tavuk',
+    '1 yumurta',
+    '1 kibrit kutusu beyaz peynir',
+    '2 yemek kaşığı ton balığı',
+  ],
+  ExchangeGroup.nisasta: [
+    '1 ince dilim ekmek',
+    '4 yemek kaşığı pilav',
+    '4 yemek kaşığı makarna',
+    '1 küçük patates',
+    '3 yemek kaşığı yulaf',
+  ],
+  ExchangeGroup.baklagil: [
+    '4 yemek kaşığı nohut',
+    '4 yemek kaşığı kuru fasulye',
+    '4 yemek kaşığı mercimek',
+  ],
+  ExchangeGroup.sebzeA: [
+    'Salatalık',
+    'Marul',
+    'Domates',
+    'Biber',
+    'Ispanak',
+    'Kabak',
+  ],
+  ExchangeGroup.sebzeB: [
+    '2 yemek kaşığı bezelye',
+    '1 küçük havuç',
+    '2 yemek kaşığı mısır',
+  ],
+  ExchangeGroup.meyve: [
+    '1 küçük elma',
+    '2 küçük mandalina',
+    '1 orta dilim karpuz',
+    '10 tane çilek',
+    '3 tane kayısı',
+  ],
+  ExchangeGroup.yag: [
+    '1 çay kaşığı zeytinyağı',
+    '6 tane badem',
+    '2 tane ceviz içi',
+    '1 tatlı kaşığı tahin',
+  ],
+};
+
+class ExchangeLine {
+  ExchangeLine({required this.group, required this.count});
+
+  final ExchangeGroup group;
+  int count;
+
+  int get kcal => count * (kExchangeKcal[group] ?? 0);
+}
+
+class ExchangeMeal {
+  ExchangeMeal({required this.name, required this.time, required this.lines});
+
+  final String name;
+  final String time;
+  final List<ExchangeLine> lines;
+
+  int get kcal => lines.fold(0, (sum, line) => sum + line.kcal);
+}
+
+/// The same plan as [DietPlan], counted instead of written out. Reuses
+/// [PlanState] so the AI-draft and approval mechanics are identical in both.
+class ExchangePlan {
+  ExchangePlan({
+    required this.clientId,
+    required this.day,
+    required this.state,
+    required this.meals,
+    this.aiNote,
+  });
+
+  final String clientId;
+  final String day;
+  PlanState state;
+  final List<ExchangeMeal> meals;
+  final String? aiNote;
+
+  bool get isDraft => state == PlanState.aiDraft;
+
+  /// Derived, not stored: every stepper tap moves this number.
+  int get kcal => meals.fold(0, (sum, meal) => sum + meal.kcal);
 }

@@ -17,6 +17,7 @@ class DemoState {
   DemoState({
     required this.clients,
     required this.plans,
+    required this.exchangePlans,
     required this.appointments,
     required this.weights,
     required this.macros,
@@ -26,6 +27,10 @@ class DemoState {
 
   final List<DemoClient> clients;
   final List<DietPlan> plans;
+
+  /// The same days as [plans], counted as exchanges instead. Seeded for one
+  /// client only: this is an interview instrument, not a second product.
+  final List<ExchangePlan> exchangePlans;
   final List<Appointment> appointments;
   final Map<String, List<WeightEntry>> weights;
   final Map<String, Macros> macros;
@@ -58,6 +63,14 @@ class DemoState {
 
   DietPlan planFor(String clientId) =>
       plans.firstWhere((p) => p.clientId == clientId);
+
+  /// Null for every client without an exchange-list version of their plan.
+  ExchangePlan? exchangePlanFor(String clientId) {
+    for (final plan in exchangePlans) {
+      if (plan.clientId == clientId) return plan;
+    }
+    return null;
+  }
 
   Conversation conversationOf(String clientId) =>
       conversations.firstWhere((c) => c.clientId == clientId);
@@ -177,6 +190,25 @@ class DemoNotifier extends Notifier<DemoState> {
     _changed();
   }
 
+  void setExchangeCount(
+    String clientId,
+    int mealIndex,
+    int lineIndex,
+    int count,
+  ) {
+    final plan = state.exchangePlanFor(clientId);
+    if (plan == null) return;
+    plan.meals[mealIndex].lines[lineIndex].count = count.clamp(0, 20);
+    _changed();
+  }
+
+  void approveExchangePlan(String clientId) {
+    final plan = state.exchangePlanFor(clientId);
+    if (plan == null) return;
+    plan.state = PlanState.approved;
+    _changed();
+  }
+
   void sendMessage(String clientId, String text) {
     if (text.trim().isEmpty) return;
     state
@@ -203,6 +235,7 @@ final demoProvider = NotifierProvider<DemoNotifier, DemoState>(
 DemoState _seedState() => DemoState(
   clients: _seedClients(),
   plans: _seedPlans(),
+  exchangePlans: _seedExchangePlans(),
   appointments: _seedAppointments(),
   weights: _seedWeights(),
   macros: _seedMacros(),
@@ -215,24 +248,39 @@ DemoState _seedState() => DemoState(
   conversations: _seedConversations(),
 );
 
+// The health facts below used to sit inside `note` as prose. They are seeded
+// as fields now so the list can filter on them and a plan can be checked
+// against them; `note` keeps only what stayed genuinely free-form.
 List<DemoClient> _seedClients() => [
   DemoClient(
     id: 'c1',
     name: 'Elif Aydın',
     age: 34,
+    sex: Sex.kadin,
     heightCm: 165,
     weightKg: 72.4,
     goal: 'Kilo verme',
-    note: 'Ofiste çalışıyor, öğle yemeğini dışarıda yiyor. Laktoz hassasiyeti.',
+    activityLevel: ActivityLevel.ortaAktif,
+    dietType: 'standart',
+    allergies: ['Laktoz'],
+    chronicConditions: [],
+    medications: [],
+    note: 'Ofiste çalışıyor, öğle yemeğini dışarıda yiyor.',
     startedOn: DateTime(2026, 7, 14),
   ),
   DemoClient(
     id: 'c2',
     name: 'Merve Yılmaz',
     age: 28,
+    sex: Sex.kadin,
     heightCm: 171,
     weightKg: 63.0,
     goal: 'Sporcu beslenmesi',
+    activityLevel: ActivityLevel.cokAktif,
+    dietType: 'standart',
+    allergies: [],
+    chronicConditions: [],
+    medications: [],
     note: 'Haftada 4 gün antrenman. Akşam geç saatte acıkıyor.',
     startedOn: DateTime(2026, 8, 2),
   ),
@@ -240,9 +288,15 @@ List<DemoClient> _seedClients() => [
     id: 'c3',
     name: 'Ahmet Demir',
     age: 45,
+    sex: Sex.erkek,
     heightCm: 178,
     weightKg: 94.8,
     goal: 'Tip 2 diyabet yönetimi',
+    activityLevel: ActivityLevel.sedanter,
+    dietType: 'standart',
+    allergies: [],
+    chronicConditions: ['Tip 2 diyabet'],
+    medications: ['Metformin'],
     note: 'Doktor takibinde. Kan değerleri her ay güncelleniyor.',
     startedOn: DateTime(2026, 6, 21),
   ),
@@ -250,21 +304,100 @@ List<DemoClient> _seedClients() => [
     id: 'c4',
     name: 'Zeynep Kaya',
     age: 31,
+    sex: Sex.kadin,
     heightCm: 160,
     weightKg: 58.2,
     goal: 'Kilo koruma',
-    note: 'Vejetaryen. Demir takviyesi kullanıyor.',
+    activityLevel: ActivityLevel.ortaAktif,
+    dietType: 'vejetaryen',
+    allergies: [],
+    chronicConditions: [],
+    medications: ['Demir takviyesi'],
+    note: '',
     startedOn: DateTime(2026, 8, 11),
   ),
   DemoClient(
     id: 'c5',
     name: 'Burak Şahin',
     age: 39,
+    sex: Sex.erkek,
     heightCm: 183,
     weightKg: 88.1,
     goal: 'Kilo verme',
+    activityLevel: ActivityLevel.hafifAktif,
+    dietType: 'standart',
+    allergies: [],
+    chronicConditions: [],
+    medications: [],
     note: 'Vardiyalı çalışıyor, öğün saatleri düzensiz.',
     startedOn: DateTime(2026, 5, 30),
+  ),
+];
+
+// Elif's day, counted as exchanges instead of written out, so the two editors
+// can be put side by side in an interview. Adds up to roughly her 1600 kcal.
+// Only c1: the point is to show the model, not to maintain it five times.
+List<ExchangePlan> _seedExchangePlans() => [
+  ExchangePlan(
+    clientId: 'c1',
+    day: 'Pazartesi',
+    state: PlanState.aiDraft,
+    aiNote:
+        'Aynı gün, değişim listesiyle kurulmuş hâli. Grup değerleri örnektir; '
+        'sizin kullandığınız tabloyu öğrenmek istiyoruz.',
+    meals: [
+      ExchangeMeal(
+        name: 'Kahvaltı',
+        time: '08:00',
+        lines: [
+          ExchangeLine(group: ExchangeGroup.et, count: 1),
+          ExchangeLine(group: ExchangeGroup.nisasta, count: 2),
+          ExchangeLine(group: ExchangeGroup.sebzeA, count: 1),
+          ExchangeLine(group: ExchangeGroup.yag, count: 1),
+        ],
+      ),
+      ExchangeMeal(
+        name: 'Ara Öğün',
+        time: '11:00',
+        lines: [
+          ExchangeLine(group: ExchangeGroup.meyve, count: 1),
+          ExchangeLine(group: ExchangeGroup.yag, count: 1),
+        ],
+      ),
+      ExchangeMeal(
+        name: 'Öğle Yemeği',
+        time: '13:00',
+        lines: [
+          ExchangeLine(group: ExchangeGroup.et, count: 2),
+          ExchangeLine(group: ExchangeGroup.nisasta, count: 2),
+          ExchangeLine(group: ExchangeGroup.sebzeA, count: 2),
+          ExchangeLine(group: ExchangeGroup.yag, count: 1),
+        ],
+      ),
+      ExchangeMeal(
+        name: 'İkindi',
+        time: '16:30',
+        lines: [
+          ExchangeLine(group: ExchangeGroup.meyve, count: 1),
+          ExchangeLine(group: ExchangeGroup.sut, count: 1),
+        ],
+      ),
+      ExchangeMeal(
+        name: 'Akşam Yemeği',
+        time: '19:30',
+        lines: [
+          ExchangeLine(group: ExchangeGroup.et, count: 2),
+          ExchangeLine(group: ExchangeGroup.baklagil, count: 1),
+          ExchangeLine(group: ExchangeGroup.sebzeA, count: 2),
+          ExchangeLine(group: ExchangeGroup.yag, count: 1),
+        ],
+      ),
+      ExchangeMeal(
+        name: 'Gece',
+        time: '22:00',
+        lines: [ExchangeLine(group: ExchangeGroup.sut, count: 1)],
+      ),
+    ],
   ),
 ];
 

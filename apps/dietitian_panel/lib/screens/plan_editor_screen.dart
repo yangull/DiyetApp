@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_repository.dart';
+import '../demo/energy.dart';
 import '../widgets/ai_draft_banner.dart';
 import '../widgets/macro_summary.dart';
 import '../widgets/status_pill.dart';
@@ -63,6 +64,15 @@ class PlanEditorScreen extends ConsumerWidget {
                   onChanged: (v) => ref
                       .read(demoProvider.notifier)
                       .setKcal(clientId, int.tryParse(v) ?? plan.kcal),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              // The computed number sits beside the field rather than in it:
+              // whether a dietitian overrides it is itself the thing to learn.
+              Flexible(
+                child: Text(
+                  'Hesaplanan: ${targetEnergy(client)} kcal',
+                  style: text.bodyMedium?.copyWith(color: palette.textMuted),
                 ),
               ),
             ],

@@ -8,7 +8,9 @@ import 'demo_repository.dart';
 /// place to debug a migration.
 ///
 /// v2 added `conversations` (the Mesajlar screen).
-const _schemaVersion = 2;
+/// v3 added the structured health fields on `DemoClient`.
+/// v4 added `exchangePlans` (the değişim listesi editor).
+const _schemaVersion = 4;
 
 String encodeDemoState(DemoState state) => jsonEncode({
   'version': _schemaVersion,
@@ -18,9 +20,15 @@ String encodeDemoState(DemoState state) => jsonEncode({
         'id': c.id,
         'name': c.name,
         'age': c.age,
+        'sex': c.sex.name,
         'heightCm': c.heightCm,
         'weightKg': c.weightKg,
         'goal': c.goal,
+        'activityLevel': c.activityLevel.name,
+        'dietType': c.dietType,
+        'allergies': c.allergies,
+        'chronicConditions': c.chronicConditions,
+        'medications': c.medications,
         'note': c.note,
         'startedOn': c.startedOn.toIso8601String(),
       },
@@ -40,6 +48,26 @@ String encodeDemoState(DemoState state) => jsonEncode({
               'time': m.time,
               'items': [
                 for (final i in m.items) {'food': i.food, 'amount': i.amount},
+              ],
+            },
+        ],
+      },
+  ],
+  'exchangePlans': [
+    for (final p in state.exchangePlans)
+      {
+        'clientId': p.clientId,
+        'day': p.day,
+        'state': p.state.name,
+        'aiNote': p.aiNote,
+        'meals': [
+          for (final m in p.meals)
+            {
+              'name': m.name,
+              'time': m.time,
+              'lines': [
+                for (final l in m.lines)
+                  {'group': l.group.name, 'count': l.count},
               ],
             },
         ],
@@ -108,9 +136,19 @@ DemoState? decodeDemoState(String raw) {
             id: c['id'] as String,
             name: c['name'] as String,
             age: c['age'] as int,
+            sex: Sex.values.byName(c['sex'] as String),
             heightCm: c['heightCm'] as int,
             weightKg: (c['weightKg'] as num).toDouble(),
             goal: c['goal'] as String,
+            activityLevel: ActivityLevel.values.byName(
+              c['activityLevel'] as String,
+            ),
+            dietType: c['dietType'] as String,
+            allergies: List<String>.from(c['allergies'] as List),
+            chronicConditions: List<String>.from(
+              c['chronicConditions'] as List,
+            ),
+            medications: List<String>.from(c['medications'] as List),
             note: c['note'] as String,
             startedOn: DateTime.parse(c['startedOn'] as String),
           ),
@@ -133,6 +171,31 @@ DemoState? decodeDemoState(String raw) {
                       MealItem(
                         food: i['food'] as String,
                         amount: i['amount'] as String,
+                      ),
+                  ],
+                ),
+            ],
+          ),
+      ],
+      exchangePlans: [
+        for (final p in json['exchangePlans'] as List)
+          ExchangePlan(
+            clientId: p['clientId'] as String,
+            day: p['day'] as String,
+            state: PlanState.values.byName(p['state'] as String),
+            aiNote: p['aiNote'] as String?,
+            meals: [
+              for (final m in p['meals'] as List)
+                ExchangeMeal(
+                  name: m['name'] as String,
+                  time: m['time'] as String,
+                  lines: [
+                    for (final l in m['lines'] as List)
+                      ExchangeLine(
+                        group: ExchangeGroup.values.byName(
+                          l['group'] as String,
+                        ),
+                        count: l['count'] as int,
                       ),
                   ],
                 ),
