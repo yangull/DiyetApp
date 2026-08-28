@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
+import '../export/plan_pdf.dart';
 import '../widgets/ai_draft_banner.dart';
+import '../widgets/export_plan_button.dart';
 import '../widgets/status_pill.dart';
 
 /// The same plan as [PlanEditorScreen], built the way the research says Turkish
@@ -121,6 +123,16 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ExportPlanButton(
+            enabled: !plan.isDraft,
+            filename: '${client.name} - değişim listesi',
+            build: () => buildExchangePlanPdf(
+              client: client,
+              plan: plan,
+              targetKcal: target,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),

@@ -18,6 +18,8 @@ dependencies:
   # Web-only panel (locked decision §2.3 #38); used for localStorage so a
   # reload cannot wipe an interview.
   web: ^1.1.1
+  pdf: ^3.13.0
+  printing: ^5.15.0
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
+import '../export/plan_pdf.dart';
+import '../widgets/export_plan_button.dart';
 import '../widgets/ai_draft_banner.dart';
 import '../widgets/macro_summary.dart';
 import '../widgets/status_pill.dart';
@@ -76,6 +78,16 @@ class PlanEditorScreen extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ExportPlanButton(
+            enabled: !plan.isDraft,
+            filename: '${client.name} - ${plan.day}',
+            build: () => buildPlanPdf(
+              client: client,
+              plan: plan,
+              targetKcal: targetEnergy(client),
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           MacroSummary(kcal: plan.kcal, macros: demo.macros[clientId]!),
