@@ -1,14 +1,10 @@
 import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  // google_fonts touches ServicesBinding when a TextStyle is built, and plain
-  // test() cases have no binding of their own.
+  // Building a TextStyle touches ServicesBinding, and plain test() cases have
+  // no binding of their own.
   TestWidgetsFlutterBinding.ensureInitialized();
-  // Tests have no network; without this google_fonts logs a failed fetch for
-  // every style it builds. Metrics still resolve, so theme assertions hold.
-  GoogleFonts.config.allowRuntimeFetching = false;
 
   test('AppConfig reports missing configuration without dart-defines', () {
     expect(AppConfig.supabaseUrl, isEmpty);
@@ -33,5 +29,12 @@ void main() {
       greaterThan(compact.extension<AppDensity>()!.controlHeight),
     );
     expect(compact.extension<AppDensity>()!.isCompact, isTrue);
+  });
+
+  test('typography uses the bundled font assets, never a runtime fetch', () {
+    final text = AppTheme.light(AppDensity.comfortable).textTheme;
+
+    expect(text.headlineLarge!.fontFamily, 'packages/core/Fraunces');
+    expect(text.bodyMedium!.fontFamily, 'packages/core/Figtree');
   });
 }

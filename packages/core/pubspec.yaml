@@ -10,9 +10,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^8.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+flutter:
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: fonts/Fraunces-SemiBold.ttf
+          weight: 600
+    - family: Figtree
+      fonts:
+        - asset: fonts/Figtree-Regular.ttf
+          weight: 400
+        - asset: fonts/Figtree-SemiBold.ttf
+          weight: 600

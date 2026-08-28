@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_density.dart';
 
@@ -8,22 +7,31 @@ import 'app_density.dart';
 /// (ı İ ğ Ğ ş Ş ç Ç ö Ö ü Ü).
 ///
 /// The serif is for headings only — never body text, tables or buttons.
-// TODO: bundle the font files as assets before release; google_fonts fetches
-// them at runtime, which costs a first-load flash and fails offline.
+///
+/// The files ship as assets in `packages/core/fonts` (latin + latin-ext
+/// subsets, licences alongside them). Nothing is fetched at runtime, so the
+/// panel renders identically offline and there is no first-load flash.
 abstract final class AppTypography {
-  static TextStyle _serif(double size, double lineHeight) =>
-      GoogleFonts.fraunces(
-        fontSize: size,
-        height: lineHeight / size,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.2,
-      );
+  static const _serifFamily = 'Fraunces';
+  static const _sansFamily = 'Figtree';
+  static const _package = 'core';
+
+  static TextStyle _serif(double size, double lineHeight) => TextStyle(
+    fontFamily: _serifFamily,
+    package: _package,
+    fontSize: size,
+    height: lineHeight / size,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.2,
+  );
 
   static TextStyle _sans(
     double size,
     double lineHeight, [
     FontWeight weight = FontWeight.w400,
-  ]) => GoogleFonts.figtree(
+  ]) => TextStyle(
+    fontFamily: _sansFamily,
+    package: _package,
     fontSize: size,
     height: lineHeight / size,
     fontWeight: weight,
