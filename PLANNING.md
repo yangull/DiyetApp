@@ -21,7 +21,7 @@ Türkiye pazarı için iki taraflı bir diyetisyen marketplace uygulaması. Ür�
 - İleride B2B: catering firmaları, yemek kartı entegrasyonları, kurumsal satış
 
 **İsim: Wellkit** (28 Ağu 2026'da belirlendi). Renk paleti §2.5'te kilitlendi. Logo henüz yok.
-⚠️ Bundle id hâlâ `com.dietapp` placeholder'ı — Açık Soru #14, ilk store yüklemesinden **önce** değişmeli.
+Bundle id: **`com.wellkit.client`** — Açık Soru #14, çözüldü.
 
 ---
 
@@ -260,9 +260,9 @@ Kişi kaydoldu
 **Faz 0 — Shared Core** *(← BURADAN BAŞLIYORUZ)*
 - [x] Monorepo iskeleti kur (aşağıdaki yapı) — kuruldu (§2.1 Durum)
 - [x] Supabase projesi aç (EU) + şema taslağı — açıldı, ilk migration uygulandı (§2.2 Durum)
-- [ ] Auth: e-posta + parola (Supabase Auth) — telefon/SMS ertelendi, bkz. §2.2 #20
-- [ ] Roller: `client`, `dietitian`, `admin`
-- [ ] Temel profil modelleri
+- [x] Auth: e-posta + parola (Supabase Auth) — telefon/SMS ertelendi, bkz. §2.2 #20 (§2.8, 3. seans)
+- [x] Roller: `client`, `dietitian`, `admin` — `client`/`dietitian` uygulamada auth'lu; `admin` MVP'de dashboard'dan (§2.2 #23, değişmedi)
+- [x] Temel profil modelleri (§2.8 #73)
 - [x] Flutter monorepo iskeleti (customer app + dietitian panel, ortak `core` paketi)
 
 **Faz 1 — Diyetisyen Marketplace (insan hizmeti)**
@@ -345,7 +345,7 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 11 | ~~State management kütüphanesi hangisi?~~ | ✅ **Riverpod** (28 Ağu 2026, §2.2 #22) |
 | 12 | l10n/ARB altyapısı kurulacak mı? | Şimdilik Türkçe metinler hardcode; ikinci bir dil gerçekten gündeme gelirse (retrofit maliyeti kabul edildi) |
 | 13 | `client` app'te web hedefi kalacak mı? | Yayından önce |
-| 14 | Nihai bundle id / org tanımlayıcı (`com.dietapp` placeholder) | Marka adı belirlenince — **ilk store yüklemesinden önce** |
+| 14 | ~~Nihai bundle id~~ ✅ **`com.wellkit.client`** (3. seans, 28 Ağustos 2026). Android `applicationId`/`namespace`, Kotlin paketi ve iOS `PRODUCT_BUNDLE_IDENTIFIER` güncellendi. Panel web-only olduğu için bundle id'si yok (§2.3 #38). Kesin olmayan tek şey: Can'ın gerçekten sahip olduğu bir domain'e göre değiştirilebilir, ama şimdilik nihai. | ✅ Çözüldü |
 | 15 | Telefon/SMS OTP hiç eklenecek mi? | Ertelendi — ücretli SMS sağlayıcı gerekiyor (§2.2 #20) |
 | 16 | ~~`role` nerede duracak ve tek/değişmez mi?~~ | ✅ `profiles.role`, tek ve değişmez (§2.2 #31–32) |
 | 17 | ~~İlk migration'ın kapsamı + RLS duruşu~~ | ✅ Karar verildi (§2.2 #33–36) |
@@ -448,6 +448,75 @@ Bu seansta **değiştirilmeyenler, bilerek:** `MealItem { food, amount }` modeli
 
 ---
 
+## 2.8 Üçüncü Seans — Gerçek Auth ve Domain Katmanı (28 Ağustos 2026)
+
+> Can'ın açık kararıyla: görüşmeler beklenmeden §12 adım 2–5 şimdi kuruldu.
+> Gerekçe — bu dilim plan modeli sorusuna (§2.6) bağlı değil; risk düşük ve
+> ertelemenin getirisi yok. Panelin danışan yönetimi ve plan editörü hâlâ
+> görüşme sonrası bekliyor (bkz. §2.6, §2.7).
+
+**Domain katmanı ve auth (§12 adım 2–4, tamamlandı)**
+
+73. `packages/core/lib/src/auth/` altında soyut `AuthRepository` +
+    `ProfileRepository`, her ikisinin Supabase implementasyonu
+    (`supabase_flutter` artık `core`'un bağımlılığı — §2.2 #28'in
+    öngördüğü adım 3 eşiği bu) ve in-memory sahteleri (`FakeAuthRepository`,
+    `FakeProfileRepository`) eklendi. Modeller (`AppProfile`,
+    `DietitianDetail`, `ClientDetail`, `UserRole`, `VerificationStatus`)
+    migration 1'deki şemayı birebir yansıtıyor.
+74. **`AuthGate`** widget'ı §2.3 #45'in tarif ettiği router: oturum akışını,
+    profil + detay okumasını, yükleme/hata durumlarını ve ters uygulama
+    kontrolünü (§2.3 #39 — yanlış roldeki kullanıcıya tam ekran mesaj +
+    çıkış, otomatik logout yok) taşıyor. Hangi diyetisyen durumunun
+    (`pending`/`approved`/`rejected`) hangi ekrana gideceğine **karar
+    vermiyor** — o dallanma uygulamaya özgü kod olarak kalıyor, `AuthGate`
+    sadece kimliği (`AuthedIdentity`) ve eylemleri (`refreshIdentity`,
+    `signOut`) sağlıyor.
+75. Riverpod provider'ları (`authRepositoryProvider`,
+    `profileRepositoryProvider`, `sessionProvider`, `identityProvider`)
+    varsayılan olarak gerçek Supabase implementasyonlarına bağlı; testler
+    `ProviderScope(overrides: […])` ile sahtelerle değiştiriyor. Codegen yok
+    (§2.2 #22'nin devamı).
+
+**Her iki app gerçek auth akışına kavuştu (§12 adım 4–5)**
+
+76. `apps/client`: giriş/kayıt ekranları ("sen" hitabı), gerçek isimle
+    selamlayan 2 sekmeli ana ekran (Ana Sayfa/Profil) — kartlar §2.3 #51'in
+    gerektirdiği tek "Yakında" etiketini taşıyor, tıklanamıyor.
+    `apps/client` artık "temalı yer tutucu" değil.
+77. `apps/dietitian_panel`: giriş/kayıt ekranları ("siz" hitabı), onay
+    bekleyen/reddedilen için panel çerçevesiz tek kart (§2.3 #52, "Durumu
+    Yenile" çalışıyor), onaylı diyetisyen için **2 hedefli** gerçek rail —
+    Genel Bakış (dürüst boş durum: "Henüz danışanınız yok") ve Profil
+    (§2.3 #53). Bu, demo panelin 5 hedefli rail'inden **kasıtlı olarak
+    farklı**.
+78. **Demo ile gerçek panel artık iki ayrı giriş noktası.** `lib/main.dart`
+    gerçek, auth'lu panel; `lib/main_demo.dart` (yeni) görüşme demosu —
+    `PanelShell` + `demo/` sahte verisi, login yok, değişmedi. `flutter run`
+    komutu artık hedef belirtmeli:
+    `flutter run -t lib/main_demo.dart -d web-server …` görüşme demosu için,
+    `flutter run -d web-server …` (varsayılan `lib/main.dart`) gerçek panel
+    için. HANDOFF.md güncellendi.
+79. Şifre sıfırlama hâlâ yok (§2.2 #21, §2.3 #43 ile tutarlı — bilinçli
+    kapsam dışı, unutulmuş değil). Auth hata metinleri hâlâ İngilizce
+    (§2.3 #44).
+80. `Supabase.initialize` artık `publishableKey:` parametresini kullanıyor,
+    `anonKey:` değil — `supabase_flutter` 2.17'de ikincisi deprecated.
+    `env/dev.json`'daki `sb_publishable_...` anahtarı zaten bu türdü
+    (§2.2 "Durum" notu); sadece client kod tarafı güncellendi.
+
+Bu seansta **değiştirilmeyenler:** migration şeması (auth kodu mevcut
+tablolara birebir yazıldı, yeni migration yok), `MealItem` modeli, demo
+panelin `lib/demo/` katmanı ve beş hedefli rail'i.
+
+⚠️ **Faz 1 hâlâ yapılmadı.** Onaylı bir diyetisyen gerçek panelde danışan
+göremiyor çünkü danışan-diyetisyen eşleştirmesi, `diet_plans` ve ilgili
+tablolar henüz yok — bu bilerek böyle (§2.3 #53, boş rail hedefleri
+eklenmez). "Tam panel" ancak görüşmelerden gelen plan modeli kararından
+sonra anlamlı biçimde inşa edilebilir.
+
+---
+
 ## 11. Repo Yapısı (karar: tek monorepo)
 
 En temiz yol: iki uygulama + ortak paket, tek repo. Kod tekrarı yok, tek PR'da her ikisi güncellenir.
@@ -479,6 +548,12 @@ diyetisyenlik-app/
 3. Supabase projesini birlikte aç (EU region) → migration olarak ilk şemayı yaz
 4. Auth akışı: kayıt/giriş, rol seçimi (client/dietitian)
 5. Her iki app'te "login → boş ana ekran" çalışır hale gelsin → bu ilk milestone
+
+✅ **1–5 tamamlandı (3. seans, 28 Ağustos 2026, §2.8).** İlk milestone'a
+ulaşıldı: her iki app gerçek Supabase auth'una bağlı, login sonrası her
+biri kendi "boş ana ekranına" düşüyor (client: 2 sekmeli Ana Sayfa/Profil;
+panel: onay durumuna göre bekleme ekranı ya da 2 hedefli rail). Sıradaki
+gerçek adım Faz 1 — bkz. §7.
 
 > Codemagic ve store hesapları acil değil — ilk milestone'dan sonra Apple/Google hesaplarını aç (onay süreleri için erken davran, ama kod önce).
 

@@ -14,10 +14,15 @@ blocking, and the traps worth avoiding.
 session; it is a living document that gets updated, not rewritten. Big decisions move into
 its "Kilitlenen Kararlar" (locked decisions) sections.
 
-Built so far: the Flutter monorepo skeleton (both apps reach a placeholder home screen) and
-the Supabase identity schema, applied to the live EU project. Not built yet: auth itself,
-and everything in Phase 1. The next slice is the repository interfaces and in-memory fakes
-in `packages/core` (PLANNING.md §12 step 2), then the auth flow.
+Built so far: the Flutter monorepo skeleton, the Supabase identity schema (applied to the
+live EU project), and real Supabase auth in both apps — `packages/core/lib/src/auth/` holds
+the repository interfaces, Supabase implementations, in-memory fakes, and the shared
+`AuthGate` router. Both apps reach a real "login → first screen" (PLANNING.md §12 steps 1–5,
+done). `apps/dietitian_panel` has a second, separate entry point, `lib/main_demo.dart` — the
+unauthenticated interview prototype with fake data, used to drive discovery interviews; don't
+confuse it with `lib/main.dart`, the real app. Not built yet: everything in Phase 1 (client
+management, the real plan editor, matching) — gated on the diet-plan-model question in
+HANDOFF.md §2.
 
 **Wellkit** is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an
@@ -79,6 +84,10 @@ Then open `http://localhost:8080` from the Windows browser. Note that `flutter d
 **not** list the `web-server` device in this WSL setup even though `-d web-server` works —
 don't chase that. There is no Chrome, no Android SDK, and no Linux desktop toolchain inside
 WSL, so `flutter doctor` shows three expected failures.
+
+`apps/dietitian_panel` has a second entry point: add `-t lib/main_demo.dart` to the command
+above to run the unauthenticated interview prototype (fake data, no login) instead of the
+real auth-gated app. See HANDOFF.md §1.
 
 ## Supabase (working commands)
 
