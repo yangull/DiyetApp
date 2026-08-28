@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'demo/demo_repository.dart';
 import 'screens/appointments_screen.dart';
 import 'screens/clients_screen.dart';
 import 'screens/overview_screen.dart';
@@ -56,6 +58,15 @@ class _PanelShellState extends State<PanelShell> {
                 label: Text('Hatırlatmalar'),
               ),
             ],
+            trailing: const Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.lg),
+                  child: _ResetDemoButton(),
+                ),
+              ),
+            ),
           ),
           VerticalDivider(width: 1, color: palette.borderSubtle),
           Expanded(
@@ -72,6 +83,43 @@ class _PanelShellState extends State<PanelShell> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Between interviews the panel has to go back to a known state. Everything a
+/// dietitian typed is kept until this is pressed.
+class _ResetDemoButton extends ConsumerWidget {
+  const _ResetDemoButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      tooltip: 'Demoyu sıfırla',
+      icon: Icon(Icons.restart_alt, color: context.palette.textMuted),
+      onPressed: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Demoyu sıfırla'),
+            content: const Text(
+              'Bu görüşmede yapılan tüm değişiklikler silinir ve '
+              'başlangıç verileri geri gelir.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Vazgeç'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Sıfırla'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed ?? false) ref.read(demoProvider.notifier).resetDemo();
+      },
     );
   }
 }

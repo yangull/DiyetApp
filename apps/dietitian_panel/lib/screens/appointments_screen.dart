@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
+import '../util/panel_date.dart';
 
 class AppointmentsScreen extends ConsumerWidget {
   const AppointmentsScreen({super.key});
@@ -35,6 +36,14 @@ class AppointmentsScreen extends ConsumerWidget {
             children: [
               for (var i = 0; i < upcoming.length; i++)
                 _AppointmentRow(appointment: upcoming[i], showDivider: i > 0),
+              if (upcoming.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Text(
+                    'Yaklaşan randevu yok.',
+                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                  ),
+                ),
             ],
           ),
         ),
@@ -45,7 +54,10 @@ class AppointmentsScreen extends ConsumerWidget {
             const SizedBox(width: AppSpacing.md),
             Text(
               '${demo.unpaidCount} seans · ${demo.unpaidTotal} ₺',
-              style: text.bodyMedium?.copyWith(color: palette.warning),
+              style: text.bodyMedium?.copyWith(
+                color: palette.warning,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ],
         ),
@@ -66,6 +78,12 @@ class AppointmentsScreen extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          'Bu ekran görüşme için hazırlanmıştır. Randevu ve ödeme takibinin '
+          'işinize ne kadar yaradığını sizden öğrenmek istiyoruz.',
+          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        ),
       ],
     );
   }
@@ -83,8 +101,7 @@ String _when(DateTime at) {
   ];
   final hh = at.hour.toString().padLeft(2, '0');
   final mm = at.minute.toString().padLeft(2, '0');
-  return '${at.day}.${at.month.toString().padLeft(2, '0')} '
-      '${days[at.weekday - 1]} · $hh:$mm';
+  return '${formatDayMonth(at)} ${days[at.weekday - 1]} · $hh:$mm';
 }
 
 class _AppointmentRow extends ConsumerWidget {

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../demo/demo_models.dart';
 
-/// Four independent measures, each against its own target — not four competing
-/// series. So they share the brand hue and take their identity from the label
-/// rather than from four decorative colors. Numbers lead; the bar is secondary.
+/// Four independent measures. Each shares the brand hue and takes its
+/// identity from the label rather than from four decorative colors — no
+/// progress bar here, since the plan carries no separate per-macro target to
+/// measure against yet (only the kcal figure the dietitian sets directly).
 class MacroSummary extends StatelessWidget {
   const MacroSummary({super.key, required this.kcal, required this.macros});
 
@@ -19,12 +20,7 @@ class MacroSummary extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: _Macro(
-              label: 'Kalori',
-              value: '$kcal',
-              unit: 'kcal',
-              filled: 0.94,
-            ),
+            child: _Macro(label: 'Kalori', value: '$kcal', unit: 'kcal'),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -32,7 +28,6 @@ class MacroSummary extends StatelessWidget {
               label: 'Protein',
               value: '${macros.proteinG}',
               unit: 'g',
-              filled: 0.88,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -41,17 +36,11 @@ class MacroSummary extends StatelessWidget {
               label: 'Karbonhidrat',
               value: '${macros.carbG}',
               unit: 'g',
-              filled: 0.97,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: _Macro(
-              label: 'Yağ',
-              value: '${macros.fatG}',
-              unit: 'g',
-              filled: 0.81,
-            ),
+            child: _Macro(label: 'Yağ', value: '${macros.fatG}', unit: 'g'),
           ),
         ],
       ),
@@ -60,17 +49,11 @@ class MacroSummary extends StatelessWidget {
 }
 
 class _Macro extends StatelessWidget {
-  const _Macro({
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.filled,
-  });
+  const _Macro({required this.label, required this.value, required this.unit});
 
   final String label;
   final String value;
   final String unit;
-  final double filled;
 
   @override
   Widget build(BuildContext context) {
@@ -104,21 +87,6 @@ class _Macro extends StatelessWidget {
                   style: text.bodySmall?.copyWith(color: palette.textMuted),
                 ),
               ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: filled,
-                minHeight: 4,
-                backgroundColor: palette.surfaceSubtle,
-                valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'hedefin %${(filled * 100).round()}\'i',
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
             ),
           ],
         ),

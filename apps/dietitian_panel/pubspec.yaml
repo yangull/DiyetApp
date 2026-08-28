@@ -14,6 +14,9 @@ dependencies:
   flutter_riverpod: ^3.4.2
   core:
     path: ../../packages/core
+  # Web-only panel (locked decision §2.3 #38); used for localStorage so a
+  # reload cannot wipe an interview.
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

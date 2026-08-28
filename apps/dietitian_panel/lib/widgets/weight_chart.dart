@@ -23,7 +23,8 @@ class WeightChart extends StatelessWidget {
           surface: AppColors.surface,
           labelStyle: Theme.of(context).textTheme.bodySmall!
               .copyWith(color: context.palette.textMuted),
-          valueStyle: Theme.of(context).textTheme.titleMedium!,
+          valueStyle: Theme.of(context).textTheme.titleMedium!
+              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
         ),
         size: Size.infinite,
       ),

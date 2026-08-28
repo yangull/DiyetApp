@@ -138,6 +138,7 @@ class _Metric extends StatelessWidget {
                 color: emphasise
                     ? context.palette.aiDraft
                     : Theme.of(context).colorScheme.onSurface,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_repository.dart';
+import '../util/panel_date.dart';
 import '../widgets/status_pill.dart';
+import '../widgets/weight_chart.dart';
 import 'plan_editor_screen.dart';
 
 class ClientDetailScreen extends ConsumerWidget {
@@ -16,6 +18,7 @@ class ClientDetailScreen extends ConsumerWidget {
     final demo = ref.watch(demoProvider);
     final client = demo.clients.firstWhere((c) => c.id == clientId);
     final plan = demo.planFor(clientId);
+    final weights = demo.weights[clientId] ?? const [];
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
@@ -45,8 +48,7 @@ class ClientDetailScreen extends ConsumerWidget {
                       _Fact(label: 'Hedef', value: client.goal),
                       _Fact(
                         label: 'Başlangıç',
-                        value:
-                            '${client.startedOn.day}.${client.startedOn.month.toString().padLeft(2, '0')}.${client.startedOn.year}',
+                        value: formatDate(client.startedOn),
                       ),
                     ],
                   ),
@@ -112,11 +114,60 @@ class ClientDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Ölçüm geçmişi', style: text.titleLarge),
+                  Row(
+                    children: [
+                      Text('Ölçüm geçmişi', style: text.titleLarge),
+                      const Spacer(),
+                      Text(
+                        '${weights.length} ölçüm · haftalık',
+                        style: text.bodySmall?.copyWith(
+                          color: palette.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (weights.isEmpty)
+                    Text(
+                      'Henüz ölçüm kaydı yok.',
+                      style: text.bodyMedium?.copyWith(
+                        color: palette.textMuted,
+                      ),
+                    )
+                  else ...[
+                    WeightChart(entries: weights),
+                    const SizedBox(height: AppSpacing.lg),
+                    for (final entry in weights.reversed.take(4))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 96,
+                              child: Text(
+                                formatDate(entry.date),
+                                style: text.bodyMedium?.copyWith(
+                                  color: palette.textSecondary,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '${entry.kg.toStringAsFixed(1)} kg',
+                              style: text.titleMedium?.copyWith(
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Yakında',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                    'Ölçümleri şimdilik yalnızca görüntülüyoruz. Kilo dışında '
+                    'hangi ölçümleri aldığınızı sizden öğrenmek istiyoruz.',
+                    style: text.bodySmall?.copyWith(color: palette.textMuted),
                   ),
                 ],
               ),
@@ -145,7 +196,12 @@ class _Fact extends StatelessWidget {
           style: text.labelSmall?.copyWith(color: context.palette.textMuted),
         ),
         const SizedBox(height: 2),
-        Text(value, style: text.titleMedium),
+        Text(
+          value,
+          style: text.titleMedium?.copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
       ],
     );
   }

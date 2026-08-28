@@ -84,7 +84,7 @@ class Appointment {
   final int fee;
   bool paid;
 
-  bool get isPast => at.isBefore(DateTime(2026, 8, 28, 15));
+  bool get isPast => at.isBefore(DateTime.now());
 }
 
 class WeightEntry {

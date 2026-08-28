@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'demo_codec.dart';
 import 'demo_models.dart';
+import 'demo_store.dart';
 
-/// In-memory data for the discovery prototype. No Supabase, no network: the
-/// panel is driven live in front of a dietitian, and everything they change
-/// stays in memory for the length of the conversation.
+/// Local data for the discovery prototype. No Supabase, no network: the panel
+/// is driven live in front of a dietitian, and everything they change is
+/// mirrored into browser storage so a reload does not wipe the conversation.
 class DemoState {
   DemoState({
     required this.clients,
@@ -41,34 +43,49 @@ class DemoState {
 }
 
 class DemoNotifier extends Notifier<DemoState> {
+  static const _store = DemoStore();
+
   @override
-  DemoState build() => DemoState(
-    clients: _seedClients,
-    plans: _seedPlans,
-    appointments: _seedAppointments,
-    weights: _seedWeights,
-    macros: _seedMacros,
-    reminders: ReminderSettings(
-      dayBefore: true,
-      hoursBefore: true,
-      paymentReminder: false,
-      channel: 'push',
-    ),
-  );
+  DemoState build() {
+    final stored = _store.read();
+    if (stored == null) return _seedState();
+
+    final restored = decodeDemoState(stored);
+    if (restored == null) {
+      // Unreadable leftovers from an older build: drop them rather than let
+      // them fail again on the next load.
+      _store.clear();
+      return _seedState();
+    }
+    return restored;
+  }
+
+  /// Back to the seed data — the between-interviews button.
+  void resetDemo() {
+    _store.clear();
+    state = _seedState();
+  }
+
+  /// Every mutator edits the objects in place, so listeners need waking by
+  /// hand; storage is written from the same place so the two cannot drift.
+  void _changed() {
+    _store.write(encodeDemoState(state));
+    ref.notifyListeners();
+  }
 
   void sendReminder(String appointmentId) {
     _appointment(appointmentId).status = AppointmentStatus.reminderSent;
-    ref.notifyListeners();
+    _changed();
   }
 
   void cancelAppointment(String appointmentId) {
     _appointment(appointmentId).status = AppointmentStatus.cancelled;
-    ref.notifyListeners();
+    _changed();
   }
 
   void markPaid(String appointmentId) {
     _appointment(appointmentId).paid = true;
-    ref.notifyListeners();
+    _changed();
   }
 
   void toggleReminder(String which, bool value) {
@@ -81,12 +98,12 @@ class DemoNotifier extends Notifier<DemoState> {
       case 'payment':
         r.paymentReminder = value;
     }
-    ref.notifyListeners();
+    _changed();
   }
 
   void setChannel(String channel) {
     state.reminders.channel = channel;
-    ref.notifyListeners();
+    _changed();
   }
 
   Appointment _appointment(String id) =>
@@ -94,7 +111,7 @@ class DemoNotifier extends Notifier<DemoState> {
 
   void approve(String clientId) {
     state.planFor(clientId).state = PlanState.approved;
-    ref.notifyListeners();
+    _changed();
   }
 
   void editItem(
@@ -107,12 +124,12 @@ class DemoNotifier extends Notifier<DemoState> {
     final item = state.planFor(clientId).meals[mealIndex].items[itemIndex];
     item.food = food;
     item.amount = amount;
-    ref.notifyListeners();
+    _changed();
   }
 
   void removeItem(String clientId, int mealIndex, int itemIndex) {
     state.planFor(clientId).meals[mealIndex].items.removeAt(itemIndex);
-    ref.notifyListeners();
+    _changed();
   }
 
   void addItem(String clientId, int mealIndex) {
@@ -121,17 +138,17 @@ class DemoNotifier extends Notifier<DemoState> {
         .meals[mealIndex]
         .items
         .add(MealItem(food: '', amount: ''));
-    ref.notifyListeners();
+    _changed();
   }
 
   void setMealTime(String clientId, int mealIndex, String time) {
     state.planFor(clientId).meals[mealIndex].time = time;
-    ref.notifyListeners();
+    _changed();
   }
 
   void setKcal(String clientId, int kcal) {
     state.planFor(clientId).kcal = kcal;
-    ref.notifyListeners();
+    _changed();
   }
 }
 
@@ -139,7 +156,23 @@ final demoProvider = NotifierProvider<DemoNotifier, DemoState>(
   DemoNotifier.new,
 );
 
-final _seedClients = [
+/// Seeds are built fresh on every call: the objects are mutable and a reset
+/// that handed back the same instances would hand back the edits too.
+DemoState _seedState() => DemoState(
+  clients: _seedClients(),
+  plans: _seedPlans(),
+  appointments: _seedAppointments(),
+  weights: _seedWeights(),
+  macros: _seedMacros(),
+  reminders: ReminderSettings(
+    dayBefore: true,
+    hoursBefore: true,
+    paymentReminder: false,
+    channel: 'push',
+  ),
+);
+
+List<DemoClient> _seedClients() => [
   DemoClient(
     id: 'c1',
     name: 'Elif Aydın',
@@ -245,7 +278,7 @@ List<Meal> _standardDay() => [
   ),
 ];
 
-final _seedPlans = [
+List<DietPlan> _seedPlans() => [
   DietPlan(
     clientId: 'c1',
     day: 'Pazartesi',
@@ -290,69 +323,78 @@ final _seedPlans = [
   ),
 ];
 
-final _seedAppointments = [
-  Appointment(
-    id: 'a1',
-    clientId: 'c1',
-    at: DateTime(2026, 8, 28, 16, 30),
-    kind: AppointmentKind.online,
-    status: AppointmentStatus.planned,
-    fee: 900,
-    paid: false,
-  ),
-  Appointment(
-    id: 'a2',
-    clientId: 'c3',
-    at: DateTime(2026, 8, 29, 10, 0),
-    kind: AppointmentKind.inPerson,
-    status: AppointmentStatus.planned,
-    fee: 1200,
-    paid: false,
-  ),
-  Appointment(
-    id: 'a3',
-    clientId: 'c2',
-    at: DateTime(2026, 8, 29, 14, 0),
-    kind: AppointmentKind.online,
-    status: AppointmentStatus.reminderSent,
-    fee: 900,
-    paid: true,
-  ),
-  Appointment(
-    id: 'a4',
-    clientId: 'c4',
-    at: DateTime(2026, 8, 31, 11, 30),
-    kind: AppointmentKind.online,
-    status: AppointmentStatus.planned,
-    fee: 900,
-    paid: false,
-  ),
-  Appointment(
-    id: 'a5',
-    clientId: 'c5',
-    at: DateTime(2026, 8, 26, 15, 0),
-    kind: AppointmentKind.inPerson,
-    status: AppointmentStatus.completed,
-    fee: 1200,
-    paid: false,
-  ),
-  Appointment(
-    id: 'a6',
-    clientId: 'c1',
-    at: DateTime(2026, 8, 21, 16, 30),
-    kind: AppointmentKind.online,
-    status: AppointmentStatus.completed,
-    fee: 900,
-    paid: false,
-  ),
-];
+/// Anchored to the moment the panel is opened, not a fixed calendar date —
+/// an interview run weeks after this was written must still see a plausible
+/// mix of upcoming and past appointments instead of an empty or absurd list.
+List<Appointment> _seedAppointments() {
+  final today = DateTime.now();
+  DateTime at(int dayOffset, int hour, [int minute = 0]) =>
+      DateTime(today.year, today.month, today.day + dayOffset, hour, minute);
+
+  return [
+    Appointment(
+      id: 'a1',
+      clientId: 'c1',
+      at: at(0, 16, 30),
+      kind: AppointmentKind.online,
+      status: AppointmentStatus.planned,
+      fee: 900,
+      paid: false,
+    ),
+    Appointment(
+      id: 'a2',
+      clientId: 'c3',
+      at: at(1, 10),
+      kind: AppointmentKind.inPerson,
+      status: AppointmentStatus.planned,
+      fee: 1200,
+      paid: false,
+    ),
+    Appointment(
+      id: 'a3',
+      clientId: 'c2',
+      at: at(1, 14),
+      kind: AppointmentKind.online,
+      status: AppointmentStatus.reminderSent,
+      fee: 900,
+      paid: true,
+    ),
+    Appointment(
+      id: 'a4',
+      clientId: 'c4',
+      at: at(3, 11, 30),
+      kind: AppointmentKind.online,
+      status: AppointmentStatus.planned,
+      fee: 900,
+      paid: false,
+    ),
+    Appointment(
+      id: 'a5',
+      clientId: 'c5',
+      at: at(-2, 15),
+      kind: AppointmentKind.inPerson,
+      status: AppointmentStatus.completed,
+      fee: 1200,
+      paid: false,
+    ),
+    Appointment(
+      id: 'a6',
+      clientId: 'c1',
+      at: at(-7, 16, 30),
+      kind: AppointmentKind.online,
+      status: AppointmentStatus.completed,
+      fee: 900,
+      paid: false,
+    ),
+  ];
+}
 
 List<WeightEntry> _series(int startDay, List<double> kg) => [
   for (var i = 0; i < kg.length; i++)
     WeightEntry(DateTime(2026, 6, startDay).add(Duration(days: i * 7)), kg[i]),
 ];
 
-final _seedWeights = <String, List<WeightEntry>>{
+Map<String, List<WeightEntry>> _seedWeights() => {
   'c1': _series(2, [78.4, 77.1, 76.5, 75.8, 75.0, 74.2, 73.6, 73.1, 72.4]),
   'c2': _series(2, [64.2, 63.8, 63.9, 63.4, 63.1, 63.3, 63.0, 63.2, 63.0]),
   'c3': _series(2, [99.6, 98.8, 98.1, 97.2, 96.9, 96.0, 95.5, 95.1, 94.8]),
@@ -360,7 +402,7 @@ final _seedWeights = <String, List<WeightEntry>>{
   'c5': _series(2, [95.2, 94.1, 93.0, 92.4, 91.5, 90.8, 89.9, 89.0, 88.1]),
 };
 
-final _seedMacros = <String, Macros>{
+Map<String, Macros> _seedMacros() => {
   'c1': const Macros(proteinG: 95, carbG: 165, fatG: 55),
   'c2': const Macros(proteinG: 130, carbG: 250, fatG: 70),
   'c3': const Macros(proteinG: 110, carbG: 170, fatG: 62),
