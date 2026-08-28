@@ -681,6 +681,21 @@ bilerek yapılmadı.
     hedef danışandan, planda ise değişim sayılarından türüyor. Serbest editör
     bu döngüyü kapatamıyor çünkü satırlarında kalori verisi yok — iki model
     arasındaki farkın en somut hâli.
+98. **Onaylı plan PDF olarak dışa aktarılıyor.** Diyetisyenin bugün elle
+    yaptığı iş: danışana bir liste veriyor. `export/plan_pdf.dart` her iki
+    plan modelini de basıyor (değişim listesi sürümü referans tablosunu da
+    ekliyor, çünkü sayılar panelden uzakta tek başına işe yaramaz). PDF
+    fontları `core`'un paketlenmiş Figtree dosyalarından geliyor — gömülü
+    Helvetica'da Türkçe glif yok. `pdf` + `printing` paketleri eklendi.
+    ⚠️ **Buton yalnızca onaylı planda açık.** PDF, panelden çıkıp danışana
+    ulaşan tek nesne; §2 #1 (danışan onaylanmamış AI planı görmez) bu yüzden
+    burada da uygulanıyor, sadece taslağı gösteren arayüzde değil. Model
+    sorusundan bağımsız: hangi model kazanırsa kazansın çıktı gerekiyor.
+99. **`localStorage` anahtarındaki sürüm kaldırıldı** (`wellkit.demo.v1` →
+    `wellkit.demo`). §2.10'da bilinçli bırakılmıştı; sürüm zaten JSON'un
+    içinde ve okunamayan state atılıyor, ikinci bir sürüm ya birinciden
+    ayrışır ya da her bump'ta bir kayıt öksüz bırakırdı. Görüşmelerden önce
+    yapıldı: state'i bir kez daha sıfırlaması artık bedava.
 97. ⚠️ **Model kararı verilmedi.** `DietPlan` ve `ExchangePlan` bilerek yan yana
     duruyor. `kExchangeKcal` / `kExchangeFoods` değerleri yayımlanmış ADA
     tablolarından alınmış **örnek** değerler ve ekranda öyle etiketli — amaç

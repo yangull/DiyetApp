@@ -1,10 +1,11 @@
 # HANDOFF — pick up here
 
-> Written 28 August 2026; updated across five sessions the same day — panel
-> prototype + fonts (2nd), real Supabase auth for both apps (3rd), Mesajlar/
-> Ödemeler/video-call mockup in the interview demo (4th), and agent-skill
-> setup + a drift-detection hardening pass on the demo persistence layer (5th,
-> this one).
+> Written 28 August 2026; updated across six sessions — panel prototype +
+> fonts (2nd), real Supabase auth for both apps (3rd), Mesajlar/Ödemeler/
+> video-call mockup in the interview demo (4th), agent-skill setup + a
+> drift-detection hardening pass on the demo persistence layer (5th), and the
+> certificate_url RLS fix + structured health fields + client filtering +
+> the exchange-list editor + energy calculation + PDF export (6th, this one).
 > Read `PLANNING.md` (Turkish, the full plan) and `CLAUDE.md` first, then this.
 > Delete or rewrite this file once its contents have been acted on.
 
@@ -16,14 +17,15 @@ The product is now called **Wellkit**.
 
 **Working and verified:**
 
-- Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with two migrations applied. `supabase migration list` shows local and remote in sync. Identity schema + RLS only — no other tables.
-- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (19 tests: core 4, client 3, dietitian_panel 12).
-- **`docs/agents/*.md` + a `## Agent skills` block in `CLAUDE.md`** now exist (`mattpocock-skills` plugin's `setup-matt-pocock-skills`, 5th session): GitHub as the issue tracker, default triage labels, single-context domain docs. No `CONTEXT.md`/`docs/adr/` yet — created lazily by `/domain-modeling` when a term or decision actually needs recording.
+- Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with **three** migrations applied. `supabase migration list` shows local and remote in sync. Identity schema + RLS only — no other tables. Migration 3 closed the `certificate_url` leak (Q19): the `dietitians` table is owner-or-admin only, and `list_approved_dietitians()` is the marketplace projection.
+- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (**28** tests: core 4, client 3, dietitian_panel 21).
+- **`docs/agents/*.md` + a `## Agent skills` block in `CLAUDE.md`** now exist (`mattpocock-skills` plugin's `setup-matt-pocock-skills`, 5th session): GitHub as the issue tracker, default triage labels, single-context domain docs. **`CONTEXT.md` now exists** (6th session) with the domain glossary — değişim listesi, the eight groups, BMH and activity factors, target vs planned — and marks every term that is still a hypothesis. No `docs/adr/` yet.
 - **`demo_codec.dart`'s silent-drift risk is now partly test-enforced.** Two tests in `apps/dietitian_panel/test/demo_codec_test.dart` — an encode/decode symmetry check, and one that parses `demo_models.dart`'s actual field declarations at test time and asserts every field reaches the encoded JSON. Both were verified to actually fail on injected drift. See §7's updated trap entry — this doesn't remove the "update the codec by hand" step, it just makes forgetting loud instead of silent.
 - Design system in `packages/core` — palette B, Fraunces + Figtree, two density profiles. Every color measured against WCAG. The two font faces ship as bundled assets (`packages/core/fonts/`), not a runtime fetch.
 - **Both apps have real Supabase auth now** (PLANNING §12 steps 2–5, the whole first milestone). `packages/core/lib/src/auth/` holds the domain layer: `AuthRepository` + `ProfileRepository` interfaces, Supabase-backed implementations, in-memory fakes for tests, and `AuthGate` — the shared session/profile router. Sign up, sign in, sign out, role routing, and the reverse-app mismatch screen (§2.3 #39) all work end to end.
 - `apps/client` is no longer a placeholder: login/signup ("sen" register) → a real 2-tab home (Ana Sayfa greets by name, two non-tappable "Yakında" cards; Profil has sign-out).
 - `apps/dietitian_panel` now has **two separate entry points** — see "Run it" below. `lib/main.dart` is the real app: login/signup ("siz" register) → pending/rejected status card (no panel frame, §2.3 #52) or the approved shell (2-destination rail, honest "Henüz danışanınız yok" empty state, §2.3 #53). `lib/main_demo.dart` is the interview prototype — now **seven** tabs (Genel Bakış, Danışanlar, Randevular, **Mesajlar**, **Ödemeler**, Takip, Hatırlatmalar), fake data, `localStorage` persistence, reset button, no login. Mesajlar (in-app chat) and Ödemeler (commission ledger, rate is a placeholder — Open Question #1) were added in a fourth session so Can has something concrete to show and click through beyond auth; a "Görüşmeye başla" button on online appointments also opens a video-call mockup (no real SDK — §3 hasn't picked one). **The demo and the real panel still don't share screens** — the real approved panel is deliberately not the demo's rail.
+- **Sixth session added to the demo:** structured health fields on the client record (allergies, conditions, medications, diet type, sex, activity level — displayed, not yet editable); search + goal/status filtering on the client list; a **second plan editor built on the exchange-list model** for c1 only, with editable counts and the substitution sheet; an **energy calculation** (`demo/energy.dart`) reproducing a dietitian's own spreadsheet, shown as a card on the client page and as a target line in both editors; and **PDF export** of an approved plan from either editor.
 - Bundle id resolved: `com.wellkit.client` (Android `applicationId`/namespace, Kotlin package, iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has no bundle id — it's web-only (§2.3 #38).
 - Everything pushed to `github.com/yangull/DiyetApp` (private), `main` branch.
 
@@ -253,6 +255,11 @@ feature — gone now (commit `c47532e`).
   proximity, not enforcement, while spreading the field list across three files
   instead of two. The two tests above close the actual gap — optional fields and
   the encode side — for less code.)
+- **PDF export is gated on approval, and that gate is load-bearing.** The
+  button in `widgets/export_plan_button.dart` is disabled while a plan is an
+  AI draft. A PDF is the one artifact that leaves the panel and reaches a
+  client, so locked decision §2 #1 is enforced there as well as in the UI that
+  renders the draft. Don't "simplify" it to always-enabled.
 - **The energy formulas are pinned to a real dietitian's spreadsheet, not to a
   textbook.** `demo/energy.dart` uses the *original 1919* Harris-Benedict
   constants because that is what the sheet Can was given uses; the published
