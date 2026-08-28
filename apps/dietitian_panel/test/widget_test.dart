@@ -1,0 +1,22 @@
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:dietitian_panel/main.dart';
+
+void main() {
+  testWidgets('renders the home placeholder using the shared theme', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const DietitianPanelApp());
+
+    expect(find.text('Diyetisyen Paneli'), findsOneWidget);
+
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.theme?.colorScheme.primary, AppTheme.light.colorScheme.primary);
+    expect(
+      app.darkTheme?.colorScheme.primary,
+      AppTheme.dark.colorScheme.primary,
+    );
+  });
+}

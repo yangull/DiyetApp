@@ -4,10 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Greenfield — **no code exists yet**. The only content is `PLANNING.md` (in Turkish), the
-detailed product/technical plan. Read it at the start of every session; it is a living
-document that gets updated, not rewritten. Big decisions move into its "Kilitlenen Ürün
-Kararları" (locked decisions) section.
+`PLANNING.md` (in Turkish) is the product/technical plan. Read it at the start of every
+session; it is a living document that gets updated, not rewritten. Big decisions move into
+its "Kilitlenen Kararlar" (locked decisions) sections.
+
+Built so far: the Flutter monorepo skeleton (both apps reach a placeholder home screen) and
+the Supabase identity schema, applied to the live EU project. Not built yet: auth itself,
+and everything in Phase 1. The next slice is the repository interfaces and in-memory fakes
+in `packages/core` (PLANNING.md §12 step 2), then the auth flow.
 
 This is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an
@@ -19,7 +23,7 @@ AI-only diet plan tier.
 - All communication stays in-app (chat + embedded video) to protect commission revenue.
 - Build order: shared core → dietitian marketplace → AI-only tier.
 - No per-dietitian-type screens; one general management panel.
-- No Mac available: iOS builds go through Codemagic (cloud CI); daily development happens on Android emulator + Chrome.
+- No Mac available: iOS builds go through Codemagic (cloud CI). Daily development is web-first via `flutter run -d web-server`, opened from the Windows browser; the Android emulator arrives as an early Phase 1 slice.
 
 ## Tech stack (decided)
 
@@ -37,11 +41,38 @@ apps/dietitian_panel/  Flutter Web panel
 packages/core/         shared models, Supabase client, auth, theme
 supabase/migrations/   SQL schema versions
 supabase/functions/    Edge Functions (AI calls)
-melos.yaml             monorepo management
+pubspec.yaml           pub workspace root; Melos config lives under its `melos:` key
 ```
 
-There are no Flutter build/test commands yet. Once the monorepo exists, Melos will be the
-entry point for cross-package commands; document the actual commands here when they exist.
+## Flutter commands
+
+Flutter 3.47.2 / Dart 3.13.2 lives at `~/development/flutter` (on PATH via `~/.bashrc`).
+The repo is a **Dart pub workspace**: one `.dart_tool/` and one `pubspec.lock` at the root,
+and every package declares `resolution: workspace`.
+
+Melos 8 is a dev dependency rather than a global install, and its config lives under the
+`melos:` key in the root `pubspec.yaml` — **not** in a `melos.yaml`, which Melos 8 ignores
+when the root declares a pub workspace. Run scripts from the repo root:
+
+```bash
+dart run melos run analyze   # dart analyze --fatal-infos in every package
+dart run melos run format    # dart format . (writes files)
+dart run melos run test      # flutter test in every package that has test/
+flutter pub get              # resolve the whole workspace at once
+```
+
+Run an app from its own directory; the config file is required or `AppConfig` comes up empty:
+
+```bash
+cd apps/client   # or apps/dietitian_panel
+flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080 \
+  --dart-define-from-file=../../env/dev.json
+```
+
+Then open `http://localhost:8080` from the Windows browser. Note that `flutter devices` does
+**not** list the `web-server` device in this WSL setup even though `-d web-server` works —
+don't chase that. There is no Chrome, no Android SDK, and no Linux desktop toolchain inside
+WSL, so `flutter doctor` shows three expected failures.
 
 ## Supabase (working commands)
 

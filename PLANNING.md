@@ -3,7 +3,7 @@
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
 > **Durum:** Baseline (v0.1) — 1 günlük beyin fırtınasına dayanıyor, her şey değişebilir.
-> **Son güncelleme:** 28 Ağustos 2026 (Supabase projesi açıldı, ilk migration uygulandı)
+> **Son güncelleme:** 28 Ağustos 2026 (auth & ekran kararları, güvenlik gözden geçirmesi)
 
 ---
 
@@ -68,6 +68,23 @@ Bunlar tartışıldı ve şimdilik sabit:
 
 19. Özel (private) **GitHub reposu** açılır ve push edilir. Push öncesi Can'a sorulur.
 
+**Durum: §12 adım 1 tamamlandı (28 Ağu 2026)**
+
+- Flutter **3.47.2** / Dart **3.13.2** WSL'e kuruldu (`~/development/flutter`, PATH `~/.bashrc`'de).
+- İskelet kuruldu: `apps/client` (android+ios+web), `apps/dietitian_panel` (sadece web), `packages/core`. Org: `com.dietapp`.
+- `packages/core`: `AppConfig` (#14, #15 doc comment'i dahil) ve `AppTheme` (M3 açık/koyu, `// TODO: replace with brand color`). Her iki app de ikisini de import ediyor (#18 kanıtlandı).
+- Yeşil: `dart run melos run analyze` (3 pakette sorun yok) ve `dart run melos run test` (4 test).
+- `flutter build web --dart-define-from-file=../../env/dev.json` çalışıyor; bundle'da sadece "yapılandırma yüklendi" dalı kalıyor → dart-define değerleri derlemeye gerçekten ulaşıyor.
+- `flutter run -d web-server` 8080'de servis ediyor (HTTP 200), Windows tarayıcısından açılıyor.
+
+**Karara sadık kalınamayan iki nokta (bilinçli sapma):**
+
+- **#4 "Melos 7" yerine Melos 8.5.0 kuruldu.** Melos 7 geride kaldı; 8.5.0 Dart ^3.9.0 istiyor, elimizde 3.13.2 var. Aynı pub workspaces mekanizması.
+- **§11'deki `melos.yaml` dosyası yok.** Melos 8, kök `pubspec.yaml` bir pub workspace tanımlıyorsa `melos.yaml`'ı görmezden geliyor (`NoScriptException`); config `pubspec.yaml` içindeki `melos:` anahtarına taşındı. Script'ler de `melos` değil `dart run melos` çağırıyor (global activate yok).
+
+**Bilinen tuhaflık:** `flutter devices` bu WSL kurulumunda `web-server` cihazını listelemiyor, ama `-d web-server` çalışıyor. Zaman kaybetme.
+
+
 ---
 
 ## 2.2 Kilitlenen Teknik Kararlar — Veri & Auth Dilimi
@@ -114,6 +131,41 @@ Bunlar tartışıldı ve şimdilik sabit:
 - `env/dev.json` gerçek değerlerle dolduruldu (git'te değil). Anahtar olarak legacy `anon` JWT'si yerine yeni **publishable key** (`sb_publishable_...`) kullanılıyor; ikisi de aynı `anon` Postgres rolüne düşer, legacy anahtarlar zamanla kaldırılacak.
 - ⚠️ Yerel Docker stack hâlâ kurulu değil (§2.2 #26): `config.toml` sadece `supabase start` içindir, uzak projeyi etkilemez. Uzak auth ayarları dashboard'dan yönetilir.
 
+
+---
+
+## 2.3 Kilitlenen Kararlar — Auth & İlk Ekranlar
+
+> 28 Ağustos 2026 beyin fırtınası. Kapsam: §12 adım 2–5.
+
+**Rol ve uygulama ayrımı**
+
+37. **Rol seçimi ekranı yok.** Rol, kayıt olunan uygulamadan gelir: mobil client app her zaman `client`, web panel `role: dietitian` metadata'sı gönderir. Gerekçe: tüketici kayıt hunisinin başındaki rol sorusu dönüşümü düşürür; diyetisyen zaten masabaşında, belge yükleyerek giriyor; signup trigger'ı da zaten `dietitian` dışındaki her şeyi `client`e çeviriyor (§2.2 #32), yani güvenli varsayılan mobil taraf. ⚠️ Bu, §12 adım 4'teki "rol seçimi" ifadesini değiştirir — aynı sonuç, farklı mekanizma.
+38. Diyetisyen paneli **sadece web**; mobil diyetisyen deneyimi ertelendi.
+39. Ters durumlar gerçek ve ele alınmalı: diyetisyen mobil app'e girerse ve **danışan panele girerse** yönlendirme ekranı görür (tam ekran mesaj + çıkış). Otomatik logout yok — hata gibi görünüyor.
+40. Admin MVP'de panelde tek kartlık bir ekran görür: uygulama içi yönetim yok, onaylar Supabase dashboard'undan. Bu bir tasarım tercihi değil, §2.2 #35'in zorunlu sonucu — `authenticated` JWT'sinde `UPDATE(verification_status)` yetkisi yok, yani onay butonu **çalışamaz**.
+
+**Auth davranışı**
+
+41. Kayıt alanları: **e-posta, parola, ad soyad**.
+42. Parola minimum **8 karakter**, karmaşıklık kuralı yok. Uzunluk sembol salatasından iyidir; sonradan artırılabilir.
+43. **Parola sıfırlama bu dilimde yok.** Gerçek e-posta göndermek özel SMTP gerektiriyor (Supabase'in yerleşik SMTP'si saatte birkaç mailde sınırlı, prodüksiyon için değil). E-posta doğrulama (§2.2 #21) ile birlikte, lansman öncesi SMTP kurulunca gelir.
+44. Auth hata mesajları şimdilik **İngilizce** (Supabase'den geldiği gibi). Türkçeleştirme l10n kararıyla birlikte (Açık Soru #12).
+45. Giriş sonrası yönlendirmeyi `packages/core` içindeki bir **AuthGate/role router** yapar: `profiles.role` + diyetisyense `verification_status` okunur. Router, loading ve hata durumları kalıcı ürün kodudur.
+46. State management detayı: **Riverpod codegen YOK**, elle yazılmış provider'lar. Gerekçe: `build_runner` adımı, framework'ü yeni öğrenirken bozulacak fazladan bir parça; Riverpod da codegen'i tekrar opsiyonel yaptı.
+
+**Dil ve ton**
+
+47. **Uygulama Türkçe.** Tüm UI metinleri Türkçe.
+48. **Hitap:** client app'te samimi **"sen"** (Getir/Trendyol normu), diyetisyen panelinde resmî **"siz"**.
+49. Danışan için kullanılacak kelime **"danışan"** — "müşteri" değil. Bu doküman ikisini de kullanıyordu; bundan sonra tek terim.
+
+**Ekranlar (ilk milestone)**
+
+50. Her ekranda kural: görünen her şey **gerçek veri veya gerçek aksiyon**. Yapılmamış olan bir kez "Yakında" etiketiyle anılır, asla tıklanabilir sahte UI olarak çizilmez.
+51. Danışan ana sayfası: **2 sekmeli** bottom nav (Ana Sayfa, Profil) + gerçek isimle selamlama + iki tıklanamaz kart (diyetisyen yolu / AI yolu). Kartlar ürünün değer önerisini taşıdığı için tutuluyor; sadece selamlama gösteren bir ekran kullanıcıya hiçbir şey öğretmez. Faz 1'de kartların "Yakında" etiketi kalkar ve marketplace'e giriş noktası olurlar.
+52. Onay bekleyen diyetisyen: **panel çerçevesi olmadan** tek kart — "Başvurunuz İnceleniyor" + çalışan "Durumu Yenile" butonu. Panel kabuğunun bilinçli olarak gösterilmemesi, onayı gerçek bir kilit açma hissine dönüştürür. `rejected` durumu aynı düzende ele alınır.
+53. Onaylı diyetisyen: solda **NavigationRail**, şimdilik 2 hedef (Genel Bakış, Profil) + dürüst boş durum ("Henüz danışanınız yok…"). Faz 1'in danışan listesi tam bu bölüme gelir. Boş rail hedefleri şimdiden eklenmez.
 
 ---
 
@@ -173,12 +225,12 @@ Kişi kaydoldu
 > Amaç: Uçtan uca ÇALIŞAN en küçük akış. Cila yok.
 
 **Faz 0 — Shared Core** *(← BURADAN BAŞLIYORUZ)*
-- [ ] Monorepo iskeleti kur (aşağıdaki yapı) — İLK ADIM
+- [x] Monorepo iskeleti kur (aşağıdaki yapı) — kuruldu (§2.1 Durum)
 - [x] Supabase projesi aç (EU) + şema taslağı — açıldı, ilk migration uygulandı (§2.2 Durum)
 - [ ] Auth: e-posta + parola (Supabase Auth) — telefon/SMS ertelendi, bkz. §2.2 #20
 - [ ] Roller: `client`, `dietitian`, `admin`
 - [ ] Temel profil modelleri
-- [ ] Flutter monorepo iskeleti (customer app + dietitian panel, ortak `core` paketi)
+- [x] Flutter monorepo iskeleti (customer app + dietitian panel, ortak `core` paketi)
 
 **Faz 1 — Diyetisyen Marketplace (insan hizmeti)**
 - [ ] Diyetisyen onboarding + doğrulama (diploma/belge yükleme)
@@ -265,6 +317,38 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 16 | ~~`role` nerede duracak ve tek/değişmez mi?~~ | ✅ `profiles.role`, tek ve değişmez (§2.2 #31–32) |
 | 17 | ~~İlk migration'ın kapsamı + RLS duruşu~~ | ✅ Karar verildi (§2.2 #33–36) |
 | 18 | Diyetisyen↔danışan ilişki tablosu ve diyetisyenin sağlık verisine erişim politikası | Faz 1 — eşleşme dilimi |
+| 19 | Marketplace'te diyetisyenin hangi alanları herkese açık? Doğrulama belgeleri (`certificate_url`) nerede durmalı? | Faz 1 — ilk diyetisyen onaylanmadan ÖNCE (bkz. §2.4) |
+| 20 | Reddedilen diyetisyene verilecek destek iletişim kanalı (e-posta?) | Can bilgi verecek |
+| 21 | Diyetisyen panelinin yayın adresi / hosting | Deploy dilimi; şimdilik UI'da URL yok |
+| 22 | Hesap silme akışı (KVKK silme hakkı + Apple'ın uygulama içi hesap silme şartı) | Lansman öncesi |
+
+---
+
+## 2.4 Güvenlik Gözden Geçirmesi — Migration 1 (28 Ağu 2026)
+
+Bağımsız bir inceleme migration 1'i canlı veritabanına karşı denetledi. **Doğru yapılmış olanlar:**
+rol değişmezliğinin üç mekanizması da gerçekten yerinde (§2.2 #32); `clients` üzerinde
+diyetisyene açılan politika yok, yani §2.2 #34'ün uyardığı sağlık verisi sızıntısı tuzağına
+düşülmemiş; her `security definer` fonksiyonda `search_path = ''` var; `(select auth.uid())`
+kalıbı tutarlı kullanılmış.
+
+**Bulunan üç açık → migration 2 (`20260828140000`):**
+
+- `profiles.phone` **kolon bazında gizlenemez.** RLS satır filtreler, kolon değil; "onaylı
+  diyetisyenleri oku" politikası tüm satırı veriyordu. Telefon numarasının her kullanıcıya
+  açık olması §2 #2'ye (iletişim uygulama içinde kalır) doğrudan aykırı. Kolon kullanılmadığı
+  ve SMS ertelendiği için politika değil **kolon kaldırıldı**.
+- `authenticated` rolünde **`TRUNCATE`** yetkisi duruyordu (Supabase yeni tablolara varsayılan
+  `ALL` veriyor). **RLS `TRUNCATE`'e uygulanmaz** — tablo seviyesinde, ya hep ya hiç. PostgREST
+  `TRUNCATE` göndermediği için pratikte erişilebilir değildi, ama migration 1'in "iki katman da
+  açık" iddiası bu haliyle doğru değildi.
+- RLS yardımcı fonksiyonları **PUBLIC'e `EXECUTE`** ile açıktı: `anon`, `/rest/v1/rpc` üzerinden
+  `is_approved_dietitian(<uuid>)` çağırıp boolean alabiliyordu.
+
+⚠️ **Kapatılmayan, Faz 1'e bırakılan:** `dietitians.certificate_url` (diploma belgesi) aynı
+sebeple her giriş yapmış kullanıcıya açık. Düzeltmesi şema tasarımı gerektiriyor (herkese açık
+marketplace alanları ile özel alanları ayırmak) → Açık Soru #19. **İlk diyetisyen onaylanmadan
+önce çözülmeli.**
 
 ---
 

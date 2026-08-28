@@ -1,0 +1,28 @@
+name: dietician_app
+description: Workspace root for the Diyetisyenlik App monorepo. Holds no code itself.
+publish_to: none
+
+environment:
+  sdk: ^3.13.2
+
+workspace:
+  - apps/client
+  - apps/dietitian_panel
+  - packages/core
+
+dev_dependencies:
+  melos: ^8.5.0
+
+# Melos 8 reads its configuration from here, not from a melos.yaml, whenever the
+# root declares a pub workspace.
+melos:
+  scripts:
+    analyze:
+      run: dart run melos exec -- dart analyze --fatal-infos
+      description: Static analysis across every package.
+    format:
+      run: dart format .
+      description: Format all Dart sources in place (writes files).
+    test:
+      run: dart run melos exec --dir-exists=test -- flutter test
+      description: Run every package's tests.
