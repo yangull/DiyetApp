@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.4.2
+  supabase_flutter: ^2.17.2
   core:
     path: ../../packages/core
   # Web-only panel (locked decision §2.3 #38); used for localStorage so a

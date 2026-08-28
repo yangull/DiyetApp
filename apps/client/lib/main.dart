@@ -1,10 +1,29 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const ClientApp());
+import 'auth/auth_flow_screen.dart';
+import 'home/client_home_screen.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (!AppConfig.isConfigured) {
+    runApp(const _ConfigMissingApp());
+    return;
+  }
+
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    publishableKey: AppConfig.supabaseAnonKey,
+  );
+  runApp(const ProviderScope(child: ClientApp()));
 }
 
+/// Assumes Supabase is already initialized — `main()` only builds this once
+/// it is, so tests can wrap it in a `ProviderScope` with fake repositories
+/// and never touch the network.
 class ClientApp extends StatelessWidget {
   const ClientApp({super.key});
 
@@ -13,82 +32,36 @@ class ClientApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wellkit',
       theme: AppTheme.light(AppDensity.comfortable),
-      home: const _HomePlaceholder(),
-    );
-  }
-}
-
-class _HomePlaceholder extends StatelessWidget {
-  const _HomePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-    final density = context.density;
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Wellkit')),
-      body: Padding(
-        padding: EdgeInsets.all(density.pagePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Merhaba, Can', style: text.headlineLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Bugün nasıl ilerlemek istersin?',
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            const _PathCard(
-              title: 'Diyetisyenle çalış',
-              body: 'Sana uygun diyetisyeni seç, planınızı birlikte oluşturun.',
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const _PathCard(
-              title: 'Yapay zekâ ile ilerle',
-              body: 'Yapay zekâ destekli beslenme planı ve düzenli takip.',
-            ),
-            const Spacer(),
-            Text(
-              AppConfig.isConfigured
-                  ? 'Supabase yapılandırması yüklendi'
-                  : 'Supabase yapılandırması eksik',
-              textAlign: TextAlign.center,
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
-            ),
-          ],
-        ),
+      home: AuthGate(
+        expectedRole: UserRole.client,
+        signedOutBuilder: (context) => const AuthFlowScreen(),
+        authenticatedBuilder: (context, identity, actions) =>
+            ClientHomeScreen(profile: identity.profile, actions: actions),
       ),
     );
   }
 }
 
-class _PathCard extends StatelessWidget {
-  const _PathCard({required this.title, required this.body});
-
-  final String title;
-  final String body;
+class _ConfigMissingApp extends StatelessWidget {
+  const _ConfigMissingApp();
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: text.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              body,
-              style: text.bodyMedium?.copyWith(
-                color: context.palette.textSecondary,
-              ),
+    final theme = AppTheme.light(AppDensity.comfortable);
+    return MaterialApp(
+      title: 'Wellkit',
+      theme: theme,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Supabase yapılandırması eksik. --dart-define-from-file ile '
+              'env/dev.json kullanarak çalıştırın.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
             ),
-          ],
+          ),
         ),
       ),
     );
