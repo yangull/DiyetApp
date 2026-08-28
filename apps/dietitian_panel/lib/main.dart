@@ -41,6 +41,9 @@ class DietitianPanelApp extends StatelessWidget {
         expectedRole: UserRole.dietitian,
         signedOutBuilder: (context) => const AuthFlowScreen(),
         authenticatedBuilder: (context, identity, actions) {
+          // Safe: AuthGate only calls this once identity.profile.role ==
+          // expectedRole (dietitian), and identityProvider always populates
+          // dietitianDetail for that role (auth_providers.dart).
           final status = identity.dietitianDetail!.verificationStatus;
           if (status == VerificationStatus.approved) {
             return RealPanelShell(identity: identity, actions: actions);

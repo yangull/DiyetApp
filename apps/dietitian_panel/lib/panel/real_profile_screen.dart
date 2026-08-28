@@ -41,7 +41,10 @@ class RealProfileScreen extends StatelessWidget {
                   style: text.labelSmall?.copyWith(color: palette.textMuted),
                 ),
                 const SizedBox(height: 2),
-                Text('Onaylı', style: text.titleMedium),
+                Text(
+                  _verificationLabel(detail?.verificationStatus),
+                  style: text.titleMedium,
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   'UZMANLIK ALANLARI',
@@ -71,3 +74,13 @@ class RealProfileScreen extends StatelessWidget {
     );
   }
 }
+
+// This screen is only ever reached from RealPanelShell, which AuthGate only
+// builds for an approved dietitian — but the label is derived rather than
+// hardcoded so that stays true even if this widget is reused elsewhere later.
+String _verificationLabel(VerificationStatus? status) => switch (status) {
+  VerificationStatus.approved => 'Onaylı',
+  VerificationStatus.pending => 'İnceleniyor',
+  VerificationStatus.rejected => 'Onaylanmadı',
+  null => '—',
+};
