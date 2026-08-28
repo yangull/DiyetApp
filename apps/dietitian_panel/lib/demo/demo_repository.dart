@@ -4,6 +4,12 @@ import 'demo_codec.dart';
 import 'demo_models.dart';
 import 'demo_store.dart';
 
+/// The platform's cut of every human-dietitian session, per PLANNING.md §2
+/// #3 (commission-based revenue). Open Question #1 — the real rate is still
+/// unset — so this number is itself a conversation piece for the Ödemeler
+/// screen, not a decision.
+const kCommissionRate = 0.15;
+
 /// Local data for the discovery prototype. No Supabase, no network: the panel
 /// is driven live in front of a dietitian, and everything they change is
 /// mirrored into browser storage so a reload does not wipe the conversation.
@@ -15,6 +21,7 @@ class DemoState {
     required this.weights,
     required this.macros,
     required this.reminders,
+    required this.conversations,
   });
 
   final List<DemoClient> clients;
@@ -23,10 +30,17 @@ class DemoState {
   final Map<String, List<WeightEntry>> weights;
   final Map<String, Macros> macros;
   final ReminderSettings reminders;
+  final List<Conversation> conversations;
 
   List<Appointment> get upcoming =>
       appointments.where((a) => !a.isPast).toList()
         ..sort((a, b) => a.at.compareTo(b.at));
+
+  List<Appointment> get completed =>
+      appointments
+          .where((a) => a.isPast && a.status != AppointmentStatus.cancelled)
+          .toList()
+        ..sort((a, b) => b.at.compareTo(a.at));
 
   int get unpaidCount => appointments.where((a) => a.isPast && !a.paid).length;
 
@@ -34,12 +48,24 @@ class DemoState {
       .where((a) => a.isPast && !a.paid)
       .fold(0, (sum, a) => sum + a.fee);
 
+  int get grossEarnings => completed.fold(0, (sum, a) => sum + a.fee);
+
+  int get commissionTotal => (grossEarnings * kCommissionRate).round();
+
+  int get netEarnings => grossEarnings - commissionTotal;
+
   DemoClient clientOf(String id) => clients.firstWhere((c) => c.id == id);
 
   DietPlan planFor(String clientId) =>
       plans.firstWhere((p) => p.clientId == clientId);
 
+  Conversation conversationOf(String clientId) =>
+      conversations.firstWhere((c) => c.clientId == clientId);
+
   int get draftCount => plans.where((p) => p.isDraft).length;
+
+  int get unreadConversationCount =>
+      conversations.where((c) => c.hasUnread).length;
 }
 
 class DemoNotifier extends Notifier<DemoState> {
@@ -150,6 +176,22 @@ class DemoNotifier extends Notifier<DemoState> {
     state.planFor(clientId).kcal = kcal;
     _changed();
   }
+
+  void sendMessage(String clientId, String text) {
+    if (text.trim().isEmpty) return;
+    state
+        .conversationOf(clientId)
+        .messages
+        .add(
+          ChatMessage(
+            id: 'm${DateTime.now().microsecondsSinceEpoch}',
+            sender: MessageSender.dietitian,
+            text: text.trim(),
+            sentAt: DateTime.now(),
+          ),
+        );
+    _changed();
+  }
 }
 
 final demoProvider = NotifierProvider<DemoNotifier, DemoState>(
@@ -170,6 +212,7 @@ DemoState _seedState() => DemoState(
     paymentReminder: false,
     channel: 'push',
   ),
+  conversations: _seedConversations(),
 );
 
 List<DemoClient> _seedClients() => [
@@ -409,3 +452,64 @@ Map<String, Macros> _seedMacros() => {
   'c4': const Macros(proteinG: 88, carbG: 190, fatG: 58),
   'c5': const Macros(proteinG: 105, carbG: 195, fatG: 64),
 };
+
+/// Anchored to now like the appointments, for the same reason: a message
+/// timeline dated August 2026 would look stale in an interview run later.
+List<Conversation> _seedConversations() {
+  final now = DateTime.now();
+  DateTime ago(int hours) => now.subtract(Duration(hours: hours));
+  var counter = 0;
+  ChatMessage msg(MessageSender sender, String text, int hoursAgo) {
+    counter++;
+    return ChatMessage(
+      id: 'seed-m$counter',
+      sender: sender,
+      text: text,
+      sentAt: ago(hoursAgo),
+    );
+  }
+
+  return [
+    Conversation(
+      clientId: 'c1',
+      messages: [
+        msg(
+          MessageSender.client,
+          'Merhaba, bugünkü öğle yemeğini dışarıda yiyeceğim, mercimek '
+          'çorbası + salata olur mu?',
+          20,
+        ),
+        msg(
+          MessageSender.dietitian,
+          'Merhaba Elif, olur — yanına 1 dilim tam buğday ekmeği ekleyebilirsin.',
+          19,
+        ),
+        msg(MessageSender.client, 'Süper, teşekkürler!', 19),
+      ],
+    ),
+    Conversation(
+      clientId: 'c2',
+      messages: [
+        msg(
+          MessageSender.client,
+          'Bu akşam antrenmandan sonra çok acıktım, planın dışında bir şey '
+          'yiyebilir miyim?',
+          3,
+        ),
+      ],
+    ),
+    Conversation(clientId: 'c3', messages: []),
+    Conversation(
+      clientId: 'c4',
+      messages: [
+        msg(
+          MessageSender.dietitian,
+          'Zeynep, demir takviyeni C vitaminiyle birlikte almayı unutma.',
+          48,
+        ),
+        msg(MessageSender.client, 'Tamamdır, unutmuyorum.', 47),
+      ],
+    ),
+    Conversation(clientId: 'c5', messages: []),
+  ];
+}

@@ -6,7 +6,9 @@ import 'demo_repository.dart';
 /// Bumped whenever the shape below changes. A stored state written by an older
 /// build is discarded rather than half-read — a live interview is the worst
 /// place to debug a migration.
-const _schemaVersion = 1;
+///
+/// v2 added `conversations` (the Mesajlar screen).
+const _schemaVersion = 2;
 
 String encodeDemoState(DemoState state) => jsonEncode({
   'version': _schemaVersion,
@@ -75,6 +77,21 @@ String encodeDemoState(DemoState state) => jsonEncode({
     'paymentReminder': state.reminders.paymentReminder,
     'channel': state.reminders.channel,
   },
+  'conversations': [
+    for (final c in state.conversations)
+      {
+        'clientId': c.clientId,
+        'messages': [
+          for (final m in c.messages)
+            {
+              'id': m.id,
+              'sender': m.sender.name,
+              'text': m.text,
+              'sentAt': m.sentAt.toIso8601String(),
+            },
+        ],
+      },
+  ],
 });
 
 /// Returns null for anything unreadable — wrong version, corrupt JSON, a field
@@ -158,6 +175,21 @@ DemoState? decodeDemoState(String raw) {
         paymentReminder: json['reminders']['paymentReminder'] as bool,
         channel: json['reminders']['channel'] as String,
       ),
+      conversations: [
+        for (final c in json['conversations'] as List)
+          Conversation(
+            clientId: c['clientId'] as String,
+            messages: [
+              for (final m in c['messages'] as List)
+                ChatMessage(
+                  id: m['id'] as String,
+                  sender: MessageSender.values.byName(m['sender'] as String),
+                  text: m['text'] as String,
+                  sentAt: DateTime.parse(m['sentAt'] as String),
+                ),
+            ],
+          ),
+      ],
     );
   } catch (_) {
     return null;

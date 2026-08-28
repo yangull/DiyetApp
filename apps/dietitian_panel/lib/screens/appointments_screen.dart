@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../util/panel_date.dart';
+import 'video_call_placeholder_screen.dart';
 
 class AppointmentsScreen extends ConsumerWidget {
   const AppointmentsScreen({super.key});
@@ -167,6 +168,20 @@ class _AppointmentRow extends ConsumerWidget {
               style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             ),
           ),
+          if (!cancelled && appointment.kind == AppointmentKind.online)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        VideoCallPlaceholderScreen(clientName: client.name),
+                  ),
+                ),
+                icon: const Icon(Icons.videocam_outlined, size: 18),
+                label: const Text('Görüşmeye başla'),
+              ),
+            ),
           if (cancelled)
             Text(
               'İptal edildi',

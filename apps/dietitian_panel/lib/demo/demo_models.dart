@@ -107,6 +107,35 @@ class Macros {
   final int fatG;
 }
 
+enum MessageSender { dietitian, client }
+
+class ChatMessage {
+  ChatMessage({
+    required this.id,
+    required this.sender,
+    required this.text,
+    required this.sentAt,
+  });
+
+  final String id;
+  final MessageSender sender;
+  final String text;
+  final DateTime sentAt;
+}
+
+class Conversation {
+  Conversation({required this.clientId, required this.messages});
+
+  final String clientId;
+  final List<ChatMessage> messages;
+
+  ChatMessage? get lastMessage => messages.isEmpty ? null : messages.last;
+
+  /// The dietitian hasn't replied to the client's most recent message yet.
+  bool get hasUnread =>
+      lastMessage != null && lastMessage!.sender == MessageSender.client;
+}
+
 class ReminderSettings {
   ReminderSettings({
     required this.dayBefore,

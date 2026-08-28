@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'demo/demo_repository.dart';
 import 'screens/appointments_screen.dart';
 import 'screens/clients_screen.dart';
+import 'screens/messages_screen.dart';
 import 'screens/overview_screen.dart';
+import 'screens/payments_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/settings_screen.dart';
 
@@ -48,6 +50,16 @@ class _PanelShellState extends State<PanelShell> {
                 label: Text('Randevular'),
               ),
               NavigationRailDestination(
+                icon: Icon(Icons.chat_bubble_outline),
+                selectedIcon: Icon(Icons.chat_bubble),
+                label: Text('Mesajlar'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.payments_outlined),
+                selectedIcon: Icon(Icons.payments),
+                label: Text('Ödemeler'),
+              ),
+              NavigationRailDestination(
                 icon: Icon(Icons.insights_outlined),
                 selectedIcon: Icon(Icons.insights),
                 label: Text('Takip'),
@@ -76,6 +88,8 @@ class _PanelShellState extends State<PanelShell> {
                 OverviewScreen(onOpenClients: () => setState(() => _index = 1)),
                 const ClientsScreen(),
                 const AppointmentsScreen(),
+                const MessagesScreen(),
+                const PaymentsScreen(),
                 const ReportsScreen(),
                 const SettingsScreen(),
               ],

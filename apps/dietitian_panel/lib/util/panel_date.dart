@@ -8,3 +8,8 @@ String formatDate(DateTime d) =>
 String formatDayMonth(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}.'
     '${d.month.toString().padLeft(2, '0')}';
+
+/// HH:mm, for a message timeline where only the time of day matters.
+String formatTime(DateTime d) =>
+    '${d.hour.toString().padLeft(2, '0')}:'
+    '${d.minute.toString().padLeft(2, '0')}';

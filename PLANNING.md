@@ -517,6 +517,33 @@ sonra anlamlı biçimde inşa edilebilir.
 
 ---
 
+## 2.9 Dördüncü Seans — Demo Panelin Genişletilmesi (28 Ağustos 2026)
+
+> Can'ın isteğiyle: gerçek Faz 1 backend'i değil, **görüşme demosuna** (§2.7)
+> üç yeni fake-data ekranı eklendi — gösterilecek bir şeyin olması için,
+> şema riski almadan. Gerçek backend/entegrasyon işi hâlâ görüşmeleri
+> bekliyor (§2.8'in son notu).
+
+81. **Mesajlar** eklendi: danışan başına sohbet geçmişi + gönderme kutusu.
+    Kilitli karar §2 #2'nin (iletişim uygulama içinde kalır) somut karşılığı —
+    HANDOFF.md §3'ün en çok itiraz beklediğini işaretlediği karar burada
+    görüşmede canlı test edilebilir.
+82. **Ödemeler** eklendi: brüt kazanç → komisyon → net kazanç dökümü,
+    tamamlanan seans başına. Komisyon oranı (`kCommissionRate`, şu an %15)
+    kasıtlı olarak bir yer tutucu — Açık Soru #1 hâlâ açık, bu ekran o
+    soruyu görüşmede somutlaştırmak için var.
+83. Randevular'daki online seanslara **"Görüşmeye başla"** butonu eklendi;
+    temsili bir video görüşme ekranı açıyor. Video SDK'sı henüz seçilmedi
+    (§3), ekranın kendisi bunu açıkça söylüyor.
+84. `demo_codec.dart` şeması **v2**'ye çıktı (`conversations` eklendi).
+    `_schemaVersion` bump kuralı (HANDOFF §7) burada uygulandı.
+
+Bu seansta **değiştirilmeyenler:** gerçek Supabase şeması, `MealItem` modeli,
+`lib/main.dart`'ın (gerçek panel) auth akışı — sadece `lib/main_demo.dart`
+ve `lib/demo/` katmanı büyüdü.
+
+---
+
 ## 11. Repo Yapısı (karar: tek monorepo)
 
 En temiz yol: iki uygulama + ortak paket, tek repo. Kod tekrarı yok, tek PR'da her ikisi güncellenir.

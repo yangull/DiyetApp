@@ -15,6 +15,7 @@ void main() {
     notifier.editItem('c1', 0, 0, 'Omlet', '3 yumurta');
     notifier.markPaid('a6');
     notifier.setChannel('sms');
+    notifier.sendMessage('c2', 'Antrenman öncesi hafif bir şeyler ye.');
 
     final restored = decodeDemoState(
       encodeDemoState(container.read(demoProvider)),
@@ -28,6 +29,14 @@ void main() {
     expect(restored.appointments.firstWhere((a) => a.id == 'a6').paid, isTrue);
     expect(restored.reminders.channel, 'sms');
     expect(restored.weights['c1']!.length, 9);
+    expect(
+      restored.conversationOf('c2').lastMessage!.text,
+      'Antrenman öncesi hafif bir şeyler ye.',
+    );
+    expect(
+      restored.conversationOf('c2').lastMessage!.sender,
+      MessageSender.dietitian,
+    );
   });
 
   test('unreadable storage decodes to null instead of throwing', () {
