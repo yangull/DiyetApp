@@ -1,4 +1,4 @@
-package com.dietapp.client
+package com.wellkit.client
 
 import io.flutter.embedding.android.FlutterActivity
 
