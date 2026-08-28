@@ -12,27 +12,83 @@ class ClientApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Diyetisyenlik App',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      home: const _HomePlaceholder(title: 'Diyetisyenlik App'),
+      theme: AppTheme.light(AppDensity.comfortable),
+      home: const _HomePlaceholder(),
     );
   }
 }
 
 class _HomePlaceholder extends StatelessWidget {
-  const _HomePlaceholder({required this.title});
-
-  final String title;
+  const _HomePlaceholder();
 
   @override
   Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    final density = context.density;
+
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          AppConfig.isConfigured
-              ? 'Supabase yapılandırması yüklendi'
-              : 'Supabase yapılandırması eksik',
+      appBar: AppBar(title: const Text('Diyetisyenlik App')),
+      body: Padding(
+        padding: EdgeInsets.all(density.pagePadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Merhaba, Can', style: text.headlineLarge),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Bugün nasıl ilerlemek istersin?',
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            const _PathCard(
+              title: 'Diyetisyenle çalış',
+              body: 'Sana uygun diyetisyeni seç, planınızı birlikte oluşturun.',
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const _PathCard(
+              title: 'Yapay zekâ ile ilerle',
+              body: 'Yapay zekâ destekli beslenme planı ve düzenli takip.',
+            ),
+            const Spacer(),
+            Text(
+              AppConfig.isConfigured
+                  ? 'Supabase yapılandırması yüklendi'
+                  : 'Supabase yapılandırması eksik',
+              textAlign: TextAlign.center,
+              style: text.bodySmall?.copyWith(color: palette.textMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PathCard extends StatelessWidget {
+  const _PathCard({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: text.titleLarge),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              body,
+              style: text.bodyMedium?.copyWith(
+                color: context.palette.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
