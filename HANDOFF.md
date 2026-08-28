@@ -1,8 +1,10 @@
 # HANDOFF — pick up here
 
-> Written 28 August 2026; updated twice same day — after a second session that
-> finished the panel prototype and bundled the fonts, and a third that built
-> real Supabase auth for both apps.
+> Written 28 August 2026; updated across five sessions the same day — panel
+> prototype + fonts (2nd), real Supabase auth for both apps (3rd), Mesajlar/
+> Ödemeler/video-call mockup in the interview demo (4th), and agent-skill
+> setup + a drift-detection hardening pass on the demo persistence layer (5th,
+> this one).
 > Read `PLANNING.md` (Turkish, the full plan) and `CLAUDE.md` first, then this.
 > Delete or rewrite this file once its contents have been acted on.
 
@@ -15,7 +17,9 @@ The product is now called **Wellkit**.
 **Working and verified:**
 
 - Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with two migrations applied. `supabase migration list` shows local and remote in sync. Identity schema + RLS only — no other tables.
-- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (17 tests: core 4, client 3, dietitian_panel 10).
+- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (19 tests: core 4, client 3, dietitian_panel 12).
+- **`docs/agents/*.md` + a `## Agent skills` block in `CLAUDE.md`** now exist (`mattpocock-skills` plugin's `setup-matt-pocock-skills`, 5th session): GitHub as the issue tracker, default triage labels, single-context domain docs. No `CONTEXT.md`/`docs/adr/` yet — created lazily by `/domain-modeling` when a term or decision actually needs recording.
+- **`demo_codec.dart`'s silent-drift risk is now partly test-enforced.** Two tests in `apps/dietitian_panel/test/demo_codec_test.dart` — an encode/decode symmetry check, and one that parses `demo_models.dart`'s actual field declarations at test time and asserts every field reaches the encoded JSON. Both were verified to actually fail on injected drift. See §7's updated trap entry — this doesn't remove the "update the codec by hand" step, it just makes forgetting loud instead of silent.
 - Design system in `packages/core` — palette B, Fraunces + Figtree, two density profiles. Every color measured against WCAG. The two font faces ship as bundled assets (`packages/core/fonts/`), not a runtime fetch.
 - **Both apps have real Supabase auth now** (PLANNING §12 steps 2–5, the whole first milestone). `packages/core/lib/src/auth/` holds the domain layer: `AuthRepository` + `ProfileRepository` interfaces, Supabase-backed implementations, in-memory fakes for tests, and `AuthGate` — the shared session/profile router. Sign up, sign in, sign out, role routing, and the reverse-app mismatch screen (§2.3 #39) all work end to end.
 - `apps/client` is no longer a placeholder: login/signup ("sen" register) → a real 2-tab home (Ana Sayfa greets by name, two non-tappable "Yakında" cards; Profil has sign-out).
@@ -207,7 +211,17 @@ feature — gone now (commit `c47532e`).
   unreadable or old-version stored state is discarded, not partially read. If you
   add or change a field on any demo model, update the codec and bump the version
   in the same change, or old browser storage will silently fall back to seed data
-  (safe, but confusing to debug if you don't expect it).
+  (safe, but confusing to debug if you don't expect it). **This is now caught by a
+  test, not just this paragraph**: `demo_codec_test.dart`'s "every demo model field
+  reaches the encoded JSON" test parses `demo_models.dart` at test time and fails
+  loudly, naming the exact missing field, if you add one and forget the codec.
+  It does not catch a forgotten `_schemaVersion` bump on its own — that's still on
+  you. (Also don't bother colocating `toJson`/`fromJson` on the models to "fix"
+  this — a 5th-session review already checked: Dart's required constructor params
+  already make the compiler catch most decode-side drift, so colocation buys
+  proximity, not enforcement, while spreading the field list across three files
+  instead of two. The two tests above close the actual gap — optional fields and
+  the encode side — for less code.)
 - **`demo_store.dart` conditionally imports a web vs stub implementation** via
   `dart.library.js_interop` — this is what lets `flutter test` run on the VM
   without a browser. Don't collapse it into one file.
@@ -216,3 +230,7 @@ feature — gone now (commit `c47532e`).
   --fatal-infos` will fail the build on it.
 - **Melos config lives under the `melos:` key in the root `pubspec.yaml`**, not in a
   `melos.yaml`, and scripts must call `dart run melos`, not bare `melos`.
+- **`docs/agents/*.md` is now real config, not boilerplate.** `setup-matt-pocock-skills`
+  already ran (5th session) — don't re-run it unless you actually want to switch issue
+  trackers or reset it; re-running is safe but pointless otherwise. If a `mattpocock-skills`
+  command asks where issues/domain docs live, the answer is already written down there.

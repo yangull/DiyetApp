@@ -544,6 +544,64 @@ ve `lib/demo/` katmanı büyüdü.
 
 ---
 
+## 2.10 Beşinci Seans — Agent Skill Kurulumu ve `demo_codec.dart` Sağlamlaştırması (28 Ağustos 2026)
+
+> Kod değişikliği değil, **süreç ve test** seansı: mattpocock-skills eklentisi
+> bu repoya ilk kez bağlandı, ve §2.9'da büyüyen `lib/demo/` katmanının en
+> kırılgan köşesi (`demo_codec.dart`) yapılandırılmış bir mimari inceleme +
+> "grilling" + bağımsız ikinci görüş akışından geçirildi.
+
+85. **`docs/agents/*.md` + `CLAUDE.md`'de "## Agent skills" bölümü** eklendi
+    (`setup-matt-pocock-skills`). Issue tracker: GitHub (`yangull/DiyetApp`).
+    Triage etiketleri: varsayılanlar. Domain doküman düzeni: **tek bağlam**
+    (`packages/core`, `apps/client`, `apps/dietitian_panel` ayrı Dart
+    paketleri olsa da, danışan/diyetisyen/`AuthedIdentity` gibi domain
+    kavramları hepsine yayılıyor — pakete göre bölünmüş bir domain değil).
+    `CONTEXT.md` ve `docs/adr/` henüz yok; `/domain-modeling` ve
+    `/improve-codebase-architecture` bunları terim/karar gerçekten ortaya
+    çıktıkça tembel biçimde oluşturacak.
+86. **Mimari inceleme** (`/improve-codebase-architecture`), commit geçmişindeki
+    en sıcak alan olan `apps/dietitian_panel/lib/demo/`'ya odaklandı. Üç aday
+    bulundu; en güçlüsü `demo_codec.dart`'ın `demo_models.dart`'taki her alanı
+    elle aynalaması — hiçbir mekanizma ikisini senkron tutmuyor, `HANDOFF.md`
+    bunu zaten bir tuzak olarak işaretlemişti.
+87. **"Grilling" oturumu** beş kararı sırayla kilitledi: (a) `toJson`/`fromJson`
+    modellere taşınsın, ayrı `demo_codec.dart` dosyası kalksın; `build_runner`
+    tabanlı codegen hariç (§2.2 #46'nın zaten reddettiği gerekçeyle); (b) kapsam
+    sadece `lib/demo/`; (c) `_schemaVersion` tek global int kalsın; (d) her
+    model için elle alan-alan karşılaştıran round-trip testi; (e)
+    `demo_codec.dart` ince bir dosya olarak kalsın (sürüm kontrolü + hataya
+    dayanıklılık), model bazlı serileştirmeyi çağırsın.
+88. ⚠️ **Bağımsız bir ikinci görüş (yüksek muhakeme seviyeli ajan) (a) ve
+    (d)'yi reddetti — ve haklıydı.** Modele geçici bir zorunlu alan ekleyip
+    `dart analyze` çalıştırarak doğruladı: **decode tarafı zaten derleyici
+    tarafından zorlanıyor** (kurucular adlandırılmış zorunlu parametre
+    alıyor). Gerçek sessiz risk daha dar: **opsiyonel alanlar** ve asla tip
+    kontrolünden geçmeyen **encode tarafı** (bir `Map` literal'i). (a) hiçbir
+    ek garanti getirmiyordu, sadece aynı elle-senkron sorununu üç dosyaya
+    (model + üst-seviye `DemoState` birleştirme + `demo_repository.dart`)
+    yayıyordu — üstelik tam da §2.6'nın yeniden yazılması muhtemel dediği
+    dosyaya (`demo_models.dart`) dokunarak. (d) da aynı hastalığı üçüncü bir
+    elle-tutulan alan listesi olarak yeniden üretiyordu.
+89. **Gerçekte uygulanan (ve doğrulanan) çözüm — sıfır üretim kodu
+    değişikliği, sadece `test/demo_codec_test.dart`'a iki test:**
+    - **Simetri testi**: encode → decode → tekrar encode, birebir eşit mi.
+    - **Tamlık testi**: `demo_models.dart`'ın kaynak kodundan alan adlarını
+      **çalışma zamanında ayrıştırıp**, encode edilmiş JSON ağacında her
+      sınıfın tüm alanlarını taşıyan bir nesne olup olmadığını denetliyor.
+      İkinci bir alan listesi yazmıyor — modelin kendisini okuyor.
+    Her iki test de modele geçici bir alan eklenerek/encode'dan
+    düşürülerek gerçekten kırıldığı doğrulanmış; başarısızlık mesajı
+    doğrudan `HANDOFF.md` §7'deki tuzağı ve düzeltmeyi tarif ediyor.
+    Sonuç: `dietitian_panel` testleri **10 → 12**, toplam **19**.
+
+⚠️ **Açık kalan, kasıtlı olarak dokunulmayan:** `localStorage` anahtarı
+(`wellkit.demo.v1`) ile `_schemaVersion` (`2`) birbirini yansıtmıyor — zararsız,
+ama anahtarı değiştirmek canlı bir görüşmedeki state'i sıfırlar, bilerek
+dokunulmadı.
+
+---
+
 ## 11. Repo Yapısı (karar: tek monorepo)
 
 En temiz yol: iki uygulama + ortak paket, tek repo. Kod tekrarı yok, tek PR'da her ikisi güncellenir.
