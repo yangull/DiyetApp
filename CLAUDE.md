@@ -20,9 +20,11 @@ the repository interfaces, Supabase implementations, in-memory fakes, and the sh
 `AuthGate` router. Both apps reach a real "login → first screen" (PLANNING.md §12 steps 1–5,
 done). `apps/dietitian_panel` has a second, separate entry point, `lib/main_demo.dart` — the
 unauthenticated interview prototype with fake data, used to drive discovery interviews; don't
-confuse it with `lib/main.dart`, the real app. Not built yet: everything in Phase 1 (client
-management, the real plan editor, matching) — gated on the diet-plan-model question in
-HANDOFF.md §2.
+confuse it with `lib/main.dart`, the real app. That demo now also carries structured client
+health fields, a searchable/filterable client list, and a **second plan editor built on the
+exchange-list model** — the two editors sit side by side deliberately, because which one is
+right is the open question (HANDOFF.md §2). Not built yet: everything in Phase 1 (real client
+management, the real plan editor, matching) — still gated on that same question.
 
 **Wellkit** is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an

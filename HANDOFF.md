@@ -83,8 +83,39 @@ If you do change it, `demo_codec.dart` (the interview demo's persistence layer)
 encodes `MealItem` explicitly and must be updated in lockstep, with
 `_schemaVersion` bumped.
 
+**Since 28 Aug 2026 the hypothesis is testable rather than askable.** The demo has
+a second editor, `screens/exchange_plan_editor_screen.dart`, that builds Elif's day
+(c1 only) as exchange counts per group with a live kcal total and a substitution
+sheet in household measures. Reached from her client detail screen via "Değişim
+listesiyle dene", next to the untouched freeform editor. Show both and let the
+dietitian point at one.
+
+Two things this does **not** mean: the model is not decided — `DietPlan` and
+`ExchangePlan` both exist, deliberately, and the real one is still an open
+question. And the numbers in `kExchangeKcal` / `kExchangeFoods`
+(`demo/demo_models.dart`) are placeholders off the published ADA tables, labelled
+"örnek" on screen so a dietitian corrects them instead of trusting them. Their
+table is one of the things to collect.
+
 Sources found: multiple Turkish dietitian sites plus the ADA "Exchange Lists for
 Meal Planning" system.
+
+**A second artifact, and this one is stronger evidence.** Can was shown a
+dietitian's own energy-requirement spreadsheet: BMH per client (Harris-Benedict
+for adults, WHO/FAO brackets for children, Cunningham where lean mass is known)
+× a physical-activity factor of 1.2–1.6 = the daily calorie target. Every formula
+was reverse-engineered from the cell values and now lives in `demo/energy.dart`,
+verified against those cells in `test/energy_test.dart`.
+
+Why this matters beyond the arithmetic: **the plan's calorie target used to be a
+number the dietitian typed in, with no derivation and no relationship to the
+meals below it.** Now the target is derived from the client, and the exchange
+editor shows it next to what the plan actually adds up to. The freeform editor
+cannot do that — its rows carry no calorie data — which is the sharpest concrete
+difference between the two models, and worth watching for in the interview.
+
+⚠️ Ask where this sheet came from before treating it as settled practice. If it
+is one dietitian's, it is one dietitian's.
 
 ---
 
@@ -170,7 +201,7 @@ feature — gone now (commit `c47532e`).
 |---|---|---|
 | **Q10 — Kutay's Excel** | Nobody has seen a real diet plan | The plan editor is guesswork until then |
 | **Q3 / Q4** | Doctor referral rules; which blood values | Regulatory; riskiest unknown in the product |
-| **Q19** | Which dietitian fields are public in the marketplace | `dietitians.certificate_url` currently leaks to every signed-in user. **Must be fixed before the first dietitian is approved.** Still unresolved. |
+| ~~**Q19**~~ | ~~Which dietitian fields are public in the marketplace~~ | **Closed 28 Aug 2026, migration 3.** The base table is owner-or-admin only now; `list_approved_dietitians()` returns `user_id`, `specialties`, `bio` and nothing else. Adding a column to that function is a publication decision — treat it as one. |
 | **Q15 / SMS** | Reminders over push (free, needs app installed) vs SMS (paid, works for everyone) | The reminder features are built but the channel is unresolved. Ask dietitians. |
 | **Logo / icon** | Name is settled, visual identity is not | Store listing, app icon, favicon |
 
@@ -222,6 +253,20 @@ feature — gone now (commit `c47532e`).
   proximity, not enforcement, while spreading the field list across three files
   instead of two. The two tests above close the actual gap — optional fields and
   the encode side — for less code.)
+- **The energy formulas are pinned to a real dietitian's spreadsheet, not to a
+  textbook.** `demo/energy.dart` uses the *original 1919* Harris-Benedict
+  constants because that is what the sheet Can was given uses; the published
+  "revised" variant gives a different answer and `test/energy_test.dart` will
+  fail if someone swaps it in. That failure is the point. The sheet also had
+  WHO/FAO child brackets and the Cunningham formula, both decoded and recorded
+  in PLANNING §2.11 #95 but deliberately not implemented — children because the
+  demo has none, Cunningham because it needs lean body mass we don't measure.
+- **The exchange reference tables are `const`, not state.** `kExchangeKcal`,
+  `kExchangeFoods` and `kExchangeGroupLabels` in `demo/demo_models.dart` sit
+  outside `DemoState` on purpose: nothing edits them, so they stay out of the
+  codec and out of the completeness test. The moment a dietitian is allowed to
+  edit their own substitution list — which is a plausible interview outcome, it's
+  their professional signature — they become state and need all three.
 - **`demo_store.dart` conditionally imports a web vs stub implementation** via
   `dart.library.js_interop` — this is what lets `flutter test` run on the VM
   without a browser. Don't collapse it into one file.

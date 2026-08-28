@@ -350,7 +350,7 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 16 | ~~`role` nerede duracak ve tek/değişmez mi?~~ | ✅ `profiles.role`, tek ve değişmez (§2.2 #31–32) |
 | 17 | ~~İlk migration'ın kapsamı + RLS duruşu~~ | ✅ Karar verildi (§2.2 #33–36) |
 | 18 | Diyetisyen↔danışan ilişki tablosu ve diyetisyenin sağlık verisine erişim politikası | Faz 1 — eşleşme dilimi |
-| 19 | Marketplace'te diyetisyenin hangi alanları herkese açık? Doğrulama belgeleri (`certificate_url`) nerede durmalı? | Faz 1 — ilk diyetisyen onaylanmadan ÖNCE (bkz. §2.4) |
+| ~~19~~ | ~~Marketplace'te diyetisyenin hangi alanları herkese açık?~~ | ✅ **Kapandı** — Migration 3, §2.11 |
 | 20 | Reddedilen diyetisyene verilecek destek iletişim kanalı (e-posta?) | Can bilgi verecek |
 | 21 | Diyetisyen panelinin yayın adresi / hosting | Deploy dilimi; şimdilik UI'da URL yok |
 | 22 | Hesap silme akışı (KVKK silme hakkı + Apple'ın uygulama içi hesap silme şartı) | Lansman öncesi |
@@ -414,6 +414,8 @@ kalıbı tutarlı kullanılmış.
 sebeple her giriş yapmış kullanıcıya açık. Düzeltmesi şema tasarımı gerektiriyor (herkese açık
 marketplace alanları ile özel alanları ayırmak) → Açık Soru #19. **İlk diyetisyen onaylanmadan
 önce çözülmeli.**
+
+✅ **28 Ağustos 2026, migration 3 ile kapandı** — bkz. §2.11 #90.
 
 ---
 
@@ -599,6 +601,92 @@ ve `lib/demo/` katmanı büyüdü.
 (`wellkit.demo.v1`) ile `_schemaVersion` (`2`) birbirini yansıtmıyor — zararsız,
 ama anahtarı değiştirmek canlı bir görüşmedeki state'i sıfırlar, bilerek
 dokunulmadı.
+
+---
+
+## 2.11 Altıncı Seans — Güvenlik Düzeltmesi ve Panel Genişlemesi (28 Ağustos 2026)
+
+Yüksek muhakemeli bir ajanın panel özellik-boşluğu incelemesi, "görüşmelerin
+cevabından bağımsız olarak şimdi yapılabilir" başlığında dört madde çıkardı;
+dördü de bu seansta yapıldı. Görüşmelerin cevabına bağlı olan her şey (plan
+modeli yeniden yazımı, AI planlayıcı, şablonlar, PDF çıktısı, anamnez formu)
+bilerek yapılmadı.
+
+90. **Açık Soru #19 kapandı — migration 3
+    (`20260828200944_dietitians_public_projection.sql`).** RLS satır süzer,
+    sütun süzmez: migration 1'in "onaylıysa herkes okur" politikası, onaylı her
+    diyetisyenin **tüm satırını** — `certificate_url` dahil — giriş yapmış
+    herkese veriyordu. Çözüm iki parçalı: (a) tablo politikası
+    `own or admin`'e daraltıldı, (b) marketplace için `security definer` bir
+    fonksiyon (`list_approved_dietitians()`) eklendi; `certificate_url` bu
+    fonksiyonun **dönüş tipinde hiç yok**, süzülmüyor — yani `where` sonradan
+    gevşetilse bile sızamaz. `EXECUTE` yalnızca `authenticated`'a verildi
+    (migration 2'nin kalıbı). Uygulama kodunda takip işi yok: bugün başka bir
+    diyetisyenin satırını okuyan tek bir çağrı bile yok. ⚠️ Bu fonksiyona sütun
+    eklemek bir **yayınlama kararıdır**, refactor değil.
+91. **Danışan kaydındaki sağlık bilgisi düzyazıdan alanlara taşındı.**
+    `DemoClient`'a `sex`, `activityLevel`, `dietType`, `allergies`,
+    `chronicConditions`, `medications` eklendi; bu bilgiler daha önce tek bir
+    `note` metninin içine gömülüydü (Elif'in laktoz hassasiyeti, Ahmet'in Tip 2
+    diyabeti, Zeynep'in vejetaryenliği). `note` duruyor ama sadece gerçekten
+    serbest metin olan kısmı taşıyor — c4'te hiç kalmadı, o yüzden ekranda
+    boş "NOT" başlığı görünmesin diye koşullu render var. `dietType` bilinçli
+    olarak `String`: gerçek liste bir görüşme cevabı, enum onu öğrenmek için
+    değişmek zorunda kalırdı. **Bu seansta sadece görüntüleniyor, düzenlenmiyor**
+    — düzenleme UI'ı ayrı bir dilim. `_schemaVersion` → **3**.
+92. **Danışan listesine arama + filtre.** İsimle arama, hedefe göre açılır menü,
+    plan durumuna göre iki çip (Onay bekleyen / Onaylanan). Filtre durumu
+    widget'ın kendi `State`'inde — `DemoState`'e girmiyor, dolayısıyla codec'i ve
+    şema sürümünü ilgilendirmiyor. Alt başlıktaki sayı **filtrelenmemiş** toplamı
+    göstermeye devam ediyor: filtre bir görüntüleme işi, "kaç aktif danışanım
+    var" sorusunun cevabı değil.
+93. **Değişim listesi editörü — §2.6 hipotezini sorulabilir olmaktan çıkarıp
+    denenebilir hale getiriyor.** `ExchangePlan` / `ExchangeMeal` /
+    `ExchangeLine` modelleri ve `screens/exchange_plan_editor_screen.dart`
+    eklendi. Grilling kararları: **c1'e (Elif) özel**, ikinci bir "Değişim
+    listesiyle dene" düğmesiyle danışan detayından açılıyor (mevcut editör
+    hiç değişmedi — yan yana gösterilecekler); değişim sayıları **+/− ile canlı
+    düzenlenebilir**; **değişim listesi referans tablosu dahil** (grup başına ev
+    ölçüsüyle örnek besinler) çünkü sayılar tek başına bir diyetisyene "değişim
+    listesi" gibi görünmez. Günlük kalori **türetiliyor** (`count × grup kcal`),
+    her dokunuşta yeniden toplanıyor — mevcut editörün dekoratif makro
+    sayılarının aksine. `PlanState` yeniden kullanıldı, yani AI-taslak ve onay
+    mekaniği (§2 #1, §2.5 #57) her iki modelde de aynı. `_schemaVersion` → **4**.
+95. **Enerji ihtiyacı hesabı — bir diyetisyenin kendi Excel'inden çözüldü.**
+    Can, kalori hedefinin nasıl bulunduğunu gösteren bir hesap tablosu
+    paylaştı; formüllerin tamamı hücre değerleriyle doğrulanarak çözüldü:
+    - **Yetişkin:** Harris-Benedict (orijinal 1919 sabitleri). Tablodaki kadın
+      satırı (47 yaş, 70 kg, 158 cm → 1397,11) birebir tutuyor.
+    - **Çocuk:** WHO/FAO yaş aralıkları (erkek 0-3 `60,9×kg − 54`, 4-9
+      `22,7×kg + 495`, 10-17 `17,5×kg + 651`; kız `61×kg − 51`,
+      `22,5×kg + 499`, `12,2×kg + 746`). Altı sarı hücrenin altısı da tam
+      tutuyor. **Uygulanmadı** — demo'daki beş danışan da yetişkin; çocuk görüp
+      görmedikleri bir görüşme sorusu.
+    - **Cunningham:** `500 + 22 × yağsız vücut kütlesi`. **Uygulanmadı** —
+      yağsız kütle biyoelektrik impedans istiyor, biz sadece kilo ölçüyoruz.
+      Bu da bir görüşme sorusu (Tanita kullanıyor musunuz?).
+    - **FA (fiziksel aktivite) katsayısı:** 1,2 – 1,6, BMH ile çarpılıyor.
+    `ActivityLevel` bu yüzden **dörtten beşe** çıkarıldı: seviyeler zaten
+    katsayı seçmek için var, diyetisyenin kendi aracında beş tane.
+    `demo/energy.dart` saf fonksiyon — state yok, codec'e girmiyor, şema
+    sürümü değişmedi. `test/energy_test.dart` formülleri **tablonun kendi
+    hücrelerine** karşı doğruluyor (panel testleri 12 → 17, toplam 24).
+96. **Hesap, elle yazılan kcal alanının yerine geçmedi — yanına kondu.**
+    Danışan detayında "Enerji ihtiyacı" kartı zinciri gösteriyor
+    (BMH × katsayı = hedef), çünkü katılmayan bir diyetisyenin hangi adımın
+    yanlış olduğunu görmesi gerekir. Her iki plan editöründe hedef bir referans
+    satırı; serbest editörde alan hâlâ elle düzenlenebilir. **Diyetisyenin bu
+    sayıyı ezip geçmesi başlı başına bir sinyal** — sürekli eziyorsa formül
+    yanlış. Değişim listesi editöründe artık "planda X / hedef Y" yan yana:
+    hedef danışandan, planda ise değişim sayılarından türüyor. Serbest editör
+    bu döngüyü kapatamıyor çünkü satırlarında kalori verisi yok — iki model
+    arasındaki farkın en somut hâli.
+97. ⚠️ **Model kararı verilmedi.** `DietPlan` ve `ExchangePlan` bilerek yan yana
+    duruyor. `kExchangeKcal` / `kExchangeFoods` değerleri yayımlanmış ADA
+    tablolarından alınmış **örnek** değerler ve ekranda öyle etiketli — amaç
+    diyetisyenin onlara güvenmesi değil, düzeltmesi. Referans tabloları `const`
+    ve `DemoState` dışında: kimse düzenlemiyor. Diyetisyenin kendi değişim
+    listesini düzenlemesine izin verildiği gün state'e taşınmaları gerekecek.
 
 ---
 
