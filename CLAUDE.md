@@ -40,8 +40,28 @@ supabase/functions/    Edge Functions (AI calls)
 melos.yaml             monorepo management
 ```
 
-There are no build/test commands yet. Once the Flutter monorepo exists, Melos will be the
+There are no Flutter build/test commands yet. Once the monorepo exists, Melos will be the
 entry point for cross-package commands; document the actual commands here when they exist.
+
+## Supabase (working commands)
+
+The repo is linked to the cloud project `jpkvulcszsutacritttk` (eu-central-1). CLI v2.116
+lives at `~/.local/bin/supabase`. No local Docker stack — everything targets the cloud
+project directly.
+
+```bash
+supabase migration new <name>   # create a new timestamped SQL file
+supabase db push --dry-run      # show which migrations would apply
+supabase db push                # apply them to the EU cloud project
+supabase migration list         # compare local vs remote migration state
+```
+
+Never create or edit schema from the dashboard UI — every change is a versioned file in
+`supabase/migrations/`. `supabase/config.toml` only configures the (unused) local stack;
+remote auth settings are changed in the dashboard.
+
+Real values for `--dart-define-from-file` are in `env/dev.json` (gitignored). The key
+stored there is the **publishable** key (`sb_publishable_...`), not the legacy anon JWT.
 
 ## Working rules (from PLANNING.md §13)
 

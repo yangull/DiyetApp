@@ -3,7 +3,7 @@
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
 > **Durum:** Baseline (v0.1) — 1 günlük beyin fırtınasına dayanıyor, her şey değişebilir.
-> **Son güncelleme:** 28 Ağustos 2026 (Veri & auth dilimi karar seansı)
+> **Son güncelleme:** 28 Ağustos 2026 (Supabase projesi açıldı, ilk migration uygulandı)
 
 ---
 
@@ -106,6 +106,15 @@ Bunlar tartışıldı ve şimdilik sabit:
 35. Diyetisyen **kendini onaylayamaz**: `verification_status` kolonu `authenticated` rolüne grant edilmez; onay dashboard veya `service_role` üzerinden yapılır. Uygulama içi admin paneli geldiğinde bilinçli olarak açılır.
 36. Migration dosyası hazır: `supabase/migrations/20260828120000_init_identity_and_rls.sql` — §12 adım 3'te yazılır. İskelet diliminde `supabase/` boş kalır (§2.1 #10).
 
+**Durum: §12 adım 3 tamamlandı (28 Ağu 2026)**
+
+- Supabase projesi açıldı: `yangull's Project`, ref **`jpkvulcszsutacritttk`**, region **eu-central-1 (Frankfurt)** — KVKK gereği EU. Postgres 17.6.
+- Supabase CLI (v2.116) WSL'e kuruldu (`~/.local/bin/supabase`), hesap `supabase login` ile bağlandı, repo `supabase link` ile projeye bağlandı → `supabase/config.toml` commit'lendi.
+- İlk migration **uygulandı**: `supabase migration list` yerel ve uzak tarafta `20260828120000` gösteriyor.
+- `env/dev.json` gerçek değerlerle dolduruldu (git'te değil). Anahtar olarak legacy `anon` JWT'si yerine yeni **publishable key** (`sb_publishable_...`) kullanılıyor; ikisi de aynı `anon` Postgres rolüne düşer, legacy anahtarlar zamanla kaldırılacak.
+- ⚠️ Yerel Docker stack hâlâ kurulu değil (§2.2 #26): `config.toml` sadece `supabase start` içindir, uzak projeyi etkilemez. Uzak auth ayarları dashboard'dan yönetilir.
+
+
 ---
 
 ## 3. Teknoloji Stack'i (kararlaştırıldı)
@@ -165,7 +174,7 @@ Kişi kaydoldu
 
 **Faz 0 — Shared Core** *(← BURADAN BAŞLIYORUZ)*
 - [ ] Monorepo iskeleti kur (aşağıdaki yapı) — İLK ADIM
-- [ ] Supabase projesi aç (EU) + şema taslağı — henüz açılmadı, birlikte açılacak
+- [x] Supabase projesi aç (EU) + şema taslağı — açıldı, ilk migration uygulandı (§2.2 Durum)
 - [ ] Auth: e-posta + parola (Supabase Auth) — telefon/SMS ertelendi, bkz. §2.2 #20
 - [ ] Roller: `client`, `dietitian`, `admin`
 - [ ] Temel profil modelleri
