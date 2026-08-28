@@ -3,7 +3,7 @@
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
 > **Durum:** Baseline (v0.1) — 1 günlük beyin fırtınasına dayanıyor, her şey değişebilir.
-> **Son güncelleme:** 28 Ağustos 2026 (auth & ekran kararları, güvenlik gözden geçirmesi)
+> **Son güncelleme:** 28 Ağustos 2026 (tasarım sistemi kilitlendi, koda işlendi)
 
 ---
 
@@ -321,6 +321,38 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 20 | Reddedilen diyetisyene verilecek destek iletişim kanalı (e-posta?) | Can bilgi verecek |
 | 21 | Diyetisyen panelinin yayın adresi / hosting | Deploy dilimi; şimdilik UI'da URL yok |
 | 22 | Hesap silme akışı (KVKK silme hakkı + Apple'ın uygulama içi hesap silme şartı) | Lansman öncesi |
+| 23 | Fotoğraf kaynağı ve bütçesi. Öneri: **fotoğrafsız başla** — stok fotoğraf stok gibi görünür, YZ üretimi yemek fotoğrafı sahte gelir | Marka çalışmasıyla birlikte |
+| 24 | Mobil uygulamanın web önizlemesinde maksimum genişlik sınırı (şu an masaüstünde tam ekrana yayılıyor) | Ekran dilimi |
+
+---
+
+## 2.5 Kilitlenen Kararlar — Tasarım Sistemi
+
+> 28 Ağustos 2026. Tam doküman (canlı örnekler, ölçüm tabloları, anti-slop kuralları):
+> https://claude.ai/code/artifact/1d9436dc-cd7c-4639-a4ec-9459de2d8ea3
+
+**Renk**
+
+54. Palet **B "Serin"**: zemin `#F7F9F8`, yüzey `#FFFFFF`, marka `#18795C` (canlı zümrüt). Üç seçenek (sıcak / serin / aydınlık) yan yana üretildi, B seçildi.
+55. **Tek marka rengi kuralı.** Arayüzde tek bir marka hue'su vardır; yeşil dışındaki her renk bir anlam taşır (bekliyor / hata / YZ taslağı). Dekoratif ikinci vurgu rengi yoktur.
+56. **Ayrı `success` rengi yok.** Planlanan başarı yeşili ile marka yeşili arasındaki kontrast ölçüldüğünde **1.19:1** çıktı — insan gözüne aynı renk. Onaylı durumlar marka yeşilini kullanır.
+57. **Yapay zekâ taslağı kendi görsel durumudur:** mor `#514196` + 1.5px kesikli kenarlık + metin etiketi. Mor arayüzde **başka hiçbir yerde** kullanılmaz, böylece mor her zaman "makine üretti, onaylanmadı" demektir. Renk tek başına anlam taşımaz (§2 #1'in görsel karşılığı).
+58. Bütün değerler **ölçüldü**, tahmin edilmedi: metin için WCAG AA (4.5:1), etkileşimli sınırlar için WCAG 1.4.11 (3:1). Oranlar `app_colors.dart` içinde her token'ın yanında yazılı. **Bir değeri yeniden ölçmeden değiştirme.**
+59. Uygulama **şimdilik yalnızca açık tema**. Koyu palet ölçüldü ve dokümanda duruyor, kodda yok.
+
+**Tipografi**
+
+60. **Fraunces** (başlık) + **Figtree** (gövde/arayüz), ikisi de SIL OFL ve Google Fonts'ta. Serif **sadece** başlıklarda; gövde, tablo ve buton asla serif değil.
+61. Türkçe glif kapsaması **font dosyalarının `cmap` tablosu okunarak** doğrulandı (CSS subset beyanına güvenilmedi): 12 kritik glifin tamamı mevcut.
+62. **Syne / Satoshi düştü** (§ önceki soyut seçim): referanslarla çelişiyor ve Satoshi Google Fonts'ta değil. "Sharp geometry / hard shadows" yönü de aynı sebeple düştü.
+63. ⚠️ `google_fonts` fontları **çalışma zamanında indiriyor**. Yayın öncesi font dosyaları asset olarak paketlenmeli — `app_typography.dart` içinde TODO olarak duruyor.
+
+**Yoğunluk ve mimari**
+
+64. **Tek token seti, iki yoğunluk profili:** `AppDensity.comfortable` (client) ve `AppDensity.compact` (panel). Renkler, font aileleri ve anlamlar **asla** değişmez; sadece boşluk, yarıçap, kontrol yüksekliği ve satır yüksekliği değişir.
+65. **`ColorScheme.fromSeed` kullanılmaz.** Tek tohumdan kendi tonal rampalarını üretir ve ölçülen değerleri korumaz; `ColorScheme` her slot açıkça yazılarak kurulur.
+66. Material'da karşılığı olmayan tokenlar `AppPalette`, yoğunluk metrikleri `AppDensity` ThemeExtension'ı ile taşınır; `context.palette` / `context.density` ile okunur.
+67. Anti-slop kuralları (gradyan yok, emoji ikon yok, "✨ AI destekli" rozeti yok, karışık yarıçap yok, renk tek başına anlam taşımaz, …) yukarıdaki dokümanda 12 madde hâlinde duruyor ve ekran yazarken uyulur.
 
 ---
 
