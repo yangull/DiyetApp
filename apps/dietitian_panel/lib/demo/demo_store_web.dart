@@ -5,7 +5,11 @@ import 'package:web/web.dart' as web;
 class DemoStore {
   const DemoStore();
 
-  static const _key = 'wellkit.demo.v1';
+  /// No version in the key: `demo_codec.dart`'s `_schemaVersion` lives inside
+  /// the payload and already discards anything it cannot read. A second
+  /// version here would either drift from that one or orphan an entry per
+  /// bump.
+  static const _key = 'wellkit.demo';
 
   String? read() {
     try {
