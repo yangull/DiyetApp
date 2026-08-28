@@ -3,7 +3,7 @@
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
 > **Durum:** Baseline (v0.1) — 1 günlük beyin fırtınasına dayanıyor, her şey değişebilir.
-> **Son güncelleme:** 26 Ağustos 2026 (Faz 0 iskelet grill seansı)
+> **Son güncelleme:** 28 Ağustos 2026 (Veri & auth dilimi karar seansı)
 
 ---
 
@@ -70,6 +70,44 @@ Bunlar tartışıldı ve şimdilik sabit:
 
 ---
 
+## 2.2 Kilitlenen Teknik Kararlar — Veri & Auth Dilimi
+
+> 28 Ağustos 2026'da karara bağlandı. Kapsam: §12 adım 2–4 (mock wrapper, ilk şema, auth).
+
+**Auth ve state**
+
+20. İlk auth diliminde **sadece e-posta + parola**. Supabase telefon/SMS OTP'si ücretli bir SMS sağlayıcısı (Twilio vb.) gerektiriyor → ertelendi, muhtemelen hiç yapılmayacak. §7'deki "e-posta + telefon" bu şekilde daraltıldı.
+21. Geliştirmede e-posta doğrulama (confirmation) **kapalı** — deep-link işi bu dilime girmez.
+22. State management: **Riverpod**. Açık Soru #11 kapandı.
+23. `admin` rolü uygulama içinden oluşturulmaz; MVP'de Supabase dashboard'undan elle atanır.
+
+**Veri ve güvenlik**
+
+24. SQL tanımlayıcıları (tablo/kolon adları) **İngilizce**. §8'deki Türkçe adlar taslak kısaltmasıdır; Türkçe sadece UI metinlerinde kalır.
+25. Kilitli karar §2 #1 (onaysız AI planı müşteriye görünmez) **RLS politikasıyla** zorunlu kılınır — sadece uygulama kodunda değil. Faz 1'de `diet_plans` üzerinde uygulanır.
+26. Şema **Supabase CLI** ile yönetilir: `supabase migration new` + `supabase db push`, EU'daki bulut projesine link'li. Yerel Docker stack (`supabase start`) şimdilik kurulmaz.
+27. Şema asla dashboard UI'ından elle oluşturulmaz — her değişiklik `supabase/migrations/` altında SQL olarak versiyonlanır.
+
+**Mock wrapper (§12 adım 2)**
+
+28. `packages/core` içinde soyut repository arayüzleri (`AuthRepository` vb.) + in-memory sahte implementasyonlar. `supabase_flutter` bağımlılığı adım 3'e kadar `core`'a girmez.
+
+**Komutlar**
+
+29. `format` script'i dosyaları **yazar**; check modu (`--set-exit-if-changed`) CI kurulunca değerlendirilir.
+30. Kanonik çalıştırma komutu, app dizininden: `flutter run -d web-server --dart-define-from-file=../../env/dev.json`. Gerçek komutlar CLAUDE.md'ye işlenir.
+
+**Rol modeli ve ilk migration**
+
+31. Rol `public.profiles.role` kolonunda durur (enum: `client|dietitian|admin`). Satır, `auth.users` üzerindeki signup trigger'ı ile oluşur. Şimdilik özel JWT claim yok; politikalar tabloyu `security definer` yardımcı fonksiyonlarla okur.
+32. Rol **tek ve değişmez** — üç veritabanı mekanizmasıyla zorunlu kılınır: (a) `profiles` üzerinde `UPDATE` yetkisi sadece zararsız kolonlara verilir, `role` API üzerinden hiç güncellenemez; (b) `dietitians`/`clients` composite FK ile `profiles(id, role)`'e bağlıdır; (c) signup trigger'ı istemciden gelen rol metadata'sında sadece `dietitian`'ı kabul eder, gerisini (sahte `admin` dahil) `client`e çevirir.
+33. İlk migration kapsamı: iki enum, `profiles`, `dietitians`, `clients`, signup trigger'ı, `is_admin()` ve `is_approved_dietitian()` yardımcıları, `updated_at` trigger'ları, kolon bazlı grant'ler ve tüm RLS politikaları. Başka tablo yok.
+34. **Danışan sağlık verisine hiçbir diyetisyen erişemez.** `clients` satırını sadece sahibi ve admin okur. Diyetisyen↔danışan ilişki tablosu Faz 1'de gelene kadar politika yazmak için güvenli bir anahtar yok; erişim o zaman kendi açık politikasıyla eklenir. ⚠️ Sağlık verisini sessizce sızdıracak hata: `clients` üzerine `dietitians` tarzı "authenticated görebilir" politikası kopyalamak.
+35. Diyetisyen **kendini onaylayamaz**: `verification_status` kolonu `authenticated` rolüne grant edilmez; onay dashboard veya `service_role` üzerinden yapılır. Uygulama içi admin paneli geldiğinde bilinçli olarak açılır.
+36. Migration dosyası hazır: `supabase/migrations/20260828120000_init_identity_and_rls.sql` — §12 adım 3'te yazılır. İskelet diliminde `supabase/` boş kalır (§2.1 #10).
+
+---
+
 ## 3. Teknoloji Stack'i (kararlaştırıldı)
 
 | Katman | Seçim | Not |
@@ -128,7 +166,7 @@ Kişi kaydoldu
 **Faz 0 — Shared Core** *(← BURADAN BAŞLIYORUZ)*
 - [ ] Monorepo iskeleti kur (aşağıdaki yapı) — İLK ADIM
 - [ ] Supabase projesi aç (EU) + şema taslağı — henüz açılmadı, birlikte açılacak
-- [ ] Auth: e-posta + telefon (Supabase Auth)
+- [ ] Auth: e-posta + parola (Supabase Auth) — telefon/SMS ertelendi, bkz. §2.2 #20
 - [ ] Roller: `client`, `dietitian`, `admin`
 - [ ] Temel profil modelleri
 - [ ] Flutter monorepo iskeleti (customer app + dietitian panel, ortak `core` paketi)
@@ -210,10 +248,14 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 8 | İsim, logo, renk paleti | Daha sonra |
 | 9 | "Diyetisyenlik hocaları" iptal fikri neydi? | Can açıklayacak (arşiv) |
 | 10 | Excel diyet listesi workflow'unun (Kutay) uygulamadaki karşılığı | Kutay ile detaylandırılacak |
-| 11 | State management kütüphanesi hangisi (Riverpod / Bloc / …)? | Auth dilimi — ihtiyacı doğuran ilk kod orada |
+| 11 | ~~State management kütüphanesi hangisi?~~ | ✅ **Riverpod** (28 Ağu 2026, §2.2 #22) |
 | 12 | l10n/ARB altyapısı kurulacak mı? | Şimdilik Türkçe metinler hardcode; ikinci bir dil gerçekten gündeme gelirse (retrofit maliyeti kabul edildi) |
 | 13 | `client` app'te web hedefi kalacak mı? | Yayından önce |
 | 14 | Nihai bundle id / org tanımlayıcı (`com.dietapp` placeholder) | Marka adı belirlenince — **ilk store yüklemesinden önce** |
+| 15 | Telefon/SMS OTP hiç eklenecek mi? | Ertelendi — ücretli SMS sağlayıcı gerekiyor (§2.2 #20) |
+| 16 | ~~`role` nerede duracak ve tek/değişmez mi?~~ | ✅ `profiles.role`, tek ve değişmez (§2.2 #31–32) |
+| 17 | ~~İlk migration'ın kapsamı + RLS duruşu~~ | ✅ Karar verildi (§2.2 #33–36) |
+| 18 | Diyetisyen↔danışan ilişki tablosu ve diyetisyenin sağlık verisine erişim politikası | Faz 1 — eşleşme dilimi |
 
 ---
 
