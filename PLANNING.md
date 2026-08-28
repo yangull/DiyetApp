@@ -378,7 +378,7 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 60. **Fraunces** (başlık) + **Figtree** (gövde/arayüz), ikisi de SIL OFL ve Google Fonts'ta. Serif **sadece** başlıklarda; gövde, tablo ve buton asla serif değil.
 61. Türkçe glif kapsaması **font dosyalarının `cmap` tablosu okunarak** doğrulandı (CSS subset beyanına güvenilmedi): 12 kritik glifin tamamı mevcut.
 62. **Syne / Satoshi düştü** (§ önceki soyut seçim): referanslarla çelişiyor ve Satoshi Google Fonts'ta değil. "Sharp geometry / hard shadows" yönü de aynı sebeple düştü.
-63. ⚠️ `google_fonts` fontları **çalışma zamanında indiriyor**. Yayın öncesi font dosyaları asset olarak paketlenmeli — `app_typography.dart` içinde TODO olarak duruyor.
+63. ~~⚠️ `google_fonts` fontları çalışma zamanında indiriyor.~~ **Çözüldü (2. seans, 28 Ağustos 2026):** üç font dosyası `packages/core/fonts/` altında asset olarak paketlendi, `google_fonts` bağımlılığı kaldırıldı. Türkçe glif kapsaması dosyalar üzerinden yeniden doğrulandı; bir core testi çözülen font ailesini denetleyerek çalışma zamanı indirmesinin geri gelmediğinden emin oluyor.
 
 **Yoğunluk ve mimari**
 
@@ -414,6 +414,37 @@ kalıbı tutarlı kullanılmış.
 sebeple her giriş yapmış kullanıcıya açık. Düzeltmesi şema tasarımı gerektiriyor (herkese açık
 marketplace alanları ile özel alanları ayırmak) → Açık Soru #19. **İlk diyetisyen onaylanmadan
 önce çözülmeli.**
+
+---
+
+## 2.7 İkinci Seans — Panel Sağlamlaştırma (28 Ağustos 2026)
+
+> Aynı gün, HANDOFF.md yazıldıktan sonra. Kapsam: demo panelin güvenilirlik
+> açıkları ve kalan yer tutucu ekranlar; veri modeli **bilinçli olarak
+> değiştirilmedi** (bkz. §2.6).
+
+68. **Panel verisi artık `localStorage`'a yazılıyor.** Görüşme sırasında sayfa
+    yenilenirse diyetisyenin az önce yazdığı değişiklikler kaybolmuyordu — artık
+    kaybolmuyor. Tek bir `_changed()` metodu hem durumu kaydediyor hem
+    dinleyicileri uyarıyor; `demo_codec.dart` durumu şema sürümlü JSON'a çeviriyor,
+    okunamayan/eski veri sessizce seed veriye düşüyor (canlı bir görüşme migration
+    hatası ayıklamak için en kötü an).
+69. Rayın altına **"Demoyu sıfırla"** butonu eklendi (onay diyaloglu) — görüşmeler
+    arası sıfırlama ihtiyacının karşılığı.
+70. Danışan detayındaki **"Ölçüm geçmişi: Yakında"** kartı tamamlandı: gerçek kilo
+    grafiği, son dört ölçüm, "şu an yalnızca görüntüleniyor" notu. PLANNING §2.3
+    #50'nin gerektirdiği son yer tutucu kart buydu.
+71. `Appointment.isPast` ve randevu seed verisi **sabit 28 Ağustos 2026 tarihine**
+    kilitliydi; görüşme haftalar sonra yapılırsa "yaklaşan randevu" listesi boş ya
+    da anlamsız görünecekti. İkisi de `DateTime.now()`'a göre kuruldu.
+72. `MacroSummary`'deki ilerleme çubukları **sabit, uydurma doluluk değerleri**
+    taşıyordu (her danışan için aynı) ve var olmayan bir hedefin yüzdesi gibi
+    sunuluyordu — §2.3 #50'ye ("her şey gerçek veri veya gerçek aksiyon") doğrudan
+    aykırıydı. Kaldırıldı; rakamlar kaldı.
+
+Bu seansta **değiştirilmeyenler, bilerek:** `MealItem { food, amount }` modeli
+(§2.6'nın konusu — yalnızca bir diyetisyen görüşmesi değiştirebilir),
+`packages/core`'un tema dışı hiçbir kısmı, ve auth/Supabase'e dokunan hiçbir şey.
 
 ---
 
