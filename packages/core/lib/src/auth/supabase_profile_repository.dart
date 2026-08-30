@@ -61,4 +61,21 @@ class SupabaseProfileRepository implements ProfileRepository {
       healthNotes: row['health_notes'] as String?,
     );
   }
+
+  @override
+  Future<void> updateClientDetail({
+    required String userId,
+    String? goal,
+    String? budgetRange,
+    String? healthNotes,
+  }) async {
+    await _db
+        .from('clients')
+        .update({
+          'goal': goal,
+          'budget_range': budgetRange,
+          'health_notes': healthNotes,
+        })
+        .eq('user_id', userId);
+  }
 }

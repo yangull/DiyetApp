@@ -69,4 +69,22 @@ class FakeProfileRepository implements ProfileRepository {
     if (detail == null) throw StateError('No seeded client: $userId');
     return detail;
   }
+
+  @override
+  Future<void> updateClientDetail({
+    required String userId,
+    String? goal,
+    String? budgetRange,
+    String? healthNotes,
+  }) async {
+    if (!_clients.containsKey(userId)) {
+      throw StateError('No seeded client: $userId');
+    }
+    _clients[userId] = ClientDetail(
+      userId: userId,
+      goal: goal,
+      budgetRange: budgetRange,
+      healthNotes: healthNotes,
+    );
+  }
 }

@@ -11,4 +11,14 @@ abstract class ProfileRepository {
   Future<DietitianDetail> fetchDietitianDetail(String userId);
 
   Future<ClientDetail> fetchClientDetail(String userId);
+
+  /// Writes the three client-owned columns migration 1 grants to the owner.
+  /// Nothing else in the app writes them, so without this a client's row stays
+  /// empty forever and a matched dietitian has nothing to read.
+  Future<void> updateClientDetail({
+    required String userId,
+    String? goal,
+    String? budgetRange,
+    String? healthNotes,
+  });
 }
