@@ -38,7 +38,13 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: text.headlineMedium,
+        // The colour has to be restated here: supplying titleTextStyle at all
+        // stops foregroundColor from reaching the title, and AppTypography's
+        // styles carry no colour of their own — so the title on every pushed
+        // screen was rendering in the default, near-invisible on this ground.
+        titleTextStyle: text.headlineMedium?.copyWith(
+          color: AppColors.textPrimary,
+        ),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,

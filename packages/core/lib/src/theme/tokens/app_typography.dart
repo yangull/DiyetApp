@@ -49,6 +49,10 @@ abstract final class AppTypography {
       bodyMedium: _sans(c ? 13 : 14, c ? 18 : 20),
       bodySmall: _sans(c ? 12 : 13, c ? 16 : 18),
       labelLarge: _sans(c ? 13.5 : 15, c ? 18 : 20, FontWeight.w600),
+      // NavigationRail labels resolve to labelMedium. Leaving the slot empty
+      // did not fall back to Figtree — it fell back to Material's own default,
+      // so the panel's rail was the one piece of chrome not in our type.
+      labelMedium: _sans(c ? 12 : 13, c ? 16 : 18, FontWeight.w600),
       labelSmall: _sans(11, 16, FontWeight.w600).copyWith(letterSpacing: 0.88),
     );
   }
