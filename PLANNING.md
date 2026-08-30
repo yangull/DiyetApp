@@ -3,7 +3,7 @@
 > **Bu dosyanın amacı:** Claude Code ile geliştirmeye başlarken projenin tüm bağlamını tek yerde tutmak.
 > Yaşayan bir doküman — her seansta güncellenir, sıfırdan yazılmaz.
 > **Durum:** Baseline (v0.1) — 1 günlük beyin fırtınasına dayanıyor, her şey değişebilir.
-> **Son güncelleme:** 28 Ağustos 2026 (tasarım sistemi kilitlendi, koda işlendi)
+> **Son güncelleme:** 30 Ağustos 2026 (görüşme öncesi panel hazırlığı, §2.13)
 
 ---
 
@@ -360,6 +360,10 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 22 | Hesap silme akışı (KVKK silme hakkı + Apple'ın uygulama içi hesap silme şartı) | Lansman öncesi |
 | 23 | Fotoğraf kaynağı ve bütçesi. Öneri: **fotoğrafsız başla** — stok fotoğraf stok gibi görünür, YZ üretimi yemek fotoğrafı sahte gelir | Marka çalışmasıyla birlikte |
 | 24 | Mobil uygulamanın web önizlemesinde maksimum genişlik sınırı (şu an masaüstünde tam ekrana yayılıyor) | Ekran dilimi |
+| 25 | Triage eşikleri: kaç gün tartım yoksa, kaç saat yanıtsız mesaj varsa "geride kalıyor"? | ⚠️ Diyetisyen görüşmeleri (§2.13 #110'daki üç sabit tahmin) |
+| 26 | Anamnezde gerçekte hangi sorular soruluyor, ve hangi cevap planı değiştiriyor? | ⚠️ Diyetisyen görüşmeleri (§2.13 #111 — form uydurma) |
+| 27 | Kilo dışında hangi ölçümler, hangi cihazla, ne sıklıkla alınıyor? BİA var mı? | ⚠️ Diyetisyen görüşmeleri — cevap `energy.dart`'ın formülünü değiştirebilir (Cunningham) |
+| 28 | Seans başına mı, paket (aylık/3 aylık) satışı mı? Gelmeyen danışandan ücret alınıyor mu? | ⚠️ Diyetisyen görüşmeleri — Ödemeler, Randevular ve pazaryeri ilanının üçünü birden etkiliyor |
 
 ---
 
@@ -759,6 +763,87 @@ Plan modeli sorusuna (§2.6) hiç dokunulmadı.
      `ended` eklenecekse, `alter type ... add value` ile aynı transaction'da o
      etikete referans veren politika yazılamaz — ya iki migration'a bölünür ya
      da kolon `text` + check constraint'e çevrilir.
+
+---
+
+## 2.13 Sekizinci Seans — Görüşme Öncesi Panel Hazırlığı (30 Ağustos 2026)
+
+Görüşmeler hâlâ yapılmadı ama **tarih yaklaştı**. Bu seansın tetikleyicisi Can'ın
+paneli projeyi hiç bilmeyen bağımsız bir ajana eleştirtmesi oldu. Eleştirinin
+öncülü doğruydu, madde listesi büyük ölçüde yanlıştı — ve bu ayrımın kendisi
+bulgu oldu.
+
+108. **Eleştirinin altı "P0"undan dördü zaten yapılmıştı; ajan onları
+     göremediği için yok sandı.** Danışan kartı (`client_detail_screen.dart`),
+     iki plan editörü, AI'ın gerekçesini gösteren `AiDraftBanner`, enerji
+     hesabı — hepsi vardı. **Sebep gerçek bir hataydı:** Genel Bakış'taki
+     "İncele" düğmesi `onOpenClients` çağırıyor, yani danışan *listesine*
+     gidiyordu. Ürünün üzerine kurulduğu ekran, ana ekrandan erişilemiyordu.
+     Ders: bir ekranın var olması yeterli değil, ana ekrandan bir tıkla
+     ulaşılabilir olmalı — yoksa yok sayılıyor.
+109. **"7 günlük plan tablosu" bilerek yapılmadı.** Eleştirinin en büyük
+     talebiydi ama "besin + miktar" modelini varsayıyor; §2.6'daki değişim
+     listesi hipotezi doğruysa haftalık tablo yanlış şekil. Görüşmede
+     sorulacak, kod yazılmayacak. (Bu, tek cümlelik bir soruyu bir günlük
+     işle cevaplama tuzağının somut örneği.)
+110. **Genel Bakış'a "Dikkat gerekenler" listesi eklendi** (`demo/triage.dart`).
+     Üç sinyal: 7 gündür tartım yok, 24 saattir yanıtsız mesaj, randevuya
+     gelmedi. Üç eşik de **isimlendirilmiş sabit** ve ekranda "bu bizim
+     tahminimiz" yazıyor — amaç doğru olmak değil, diyetisyene düzelttirmek.
+     Onay bekleyen planlar bu listeye **girmiyor**: kendi satırları ve kendi
+     bekleme rozetleri var, aynı danışanın tek ekranda iki kez çıkması hata
+     gibi okunuyor.
+111. **Anamnez formu eklendi** (`intake_form_screen.dart`, "Danışan ekle").
+     Üst yarısı gerçek `DemoClient` alanları; alt yarısındaki dokuz soru
+     (öğün düzeni, su, uyku, sigara/alkol, bağırsak düzeni, ailede hastalık,
+     önceki diyetler, sevmediği besinler, tahlil) **hiçbir modelde yok** ve
+     `note`'a metin olarak yazılıyor. Bu bilerek: formu üstüne kalem
+     gezdirilsin diye yaptık. Kaydedince hesaplanan enerji hedefiyle bir AI
+     taslağı üretiliyor — "anamnezi doldurdum, plan çıktı" iddiası görüşmede
+     anlatılmak yerine gösterilebilsin diye.
+112. **Hedefe duyarlı değerlendirme** (`demo/progress.dart`). Panel eskiden
+     her kilo düşüşünü aynı gösteriyordu. Artık yön, hedef kilonun başlangıç
+     kilosuna göre konumundan çıkarılıyor (hedef *metni*nden değil — o
+     serbest metin), ve kilo koruma hedefindeki bir danışanın düşüşü
+     "hedef aralığının dışında" olarak uyarı rengiyle çıkıyor. Hedef kilosu
+     olmayan danışana (sporcu beslenmesi) **hiç yargı verilmiyor**.
+113. **Vücut ölçümleri eklendi** (`BodyMeasurement`): bel, kalça, bel/kalça
+     oranı, yağ yüzdesi, kas kütlesi, bir önceki seansa göre değişimiyle.
+     Beş danışanın üçünde var — herkeste olmaması da konuşma malzemesi.
+     Ekran metni açıkça soruyor: hangi cihaz, hangi sıklık. Yağsız vücut
+     kütlesi ölçülüyorsa `energy.dart` Cunningham'a geçebilir.
+114. **`AppointmentStatus.noShow` eklendi**, `cancelled`'dan ayrı. Gerekçe
+     çift: triage sinyalinin işaret ettiği kayıt hiçbir ekranda görünmüyordu
+     (bu yüzden "Geçmiş randevular" bölümü eklendi), ve "gelmedi" ile "iptal
+     edildi" ücrete farklı etki edebilir. Şu anki varsayım — gelmeyen seans
+     tahsil edilecekler listesine girmiyor — ekranda soru olarak yazılı.
+115. **Storage şeması v5.** `targetWeightKg`, `measurements`, her iki plan
+     tipinde `draftedAt`. Tohum veriler artık `DateTime.now()`'a bağlı:
+     kilo serileri Haziran 2026'ya sabitlenmişti ve `weight_chart.dart`
+     ekseninde **'Haz' / 'Ağu' etiketleri elle yazılıydı** — takvim ilerledikçe
+     sessizce yanlışa dönecek bir hata.
+116. **Ekran görüntüleri artık `flutter test` ile üretiliyor**
+     (`test/screenshots_test.dart`, golden dosyalar). Tarayıcı otomasyonu yok;
+     test gerçek demoyu sürüyor, sekmeleri geziyor ve 12 PNG yazıyor. Etiketli
+     olduğu için normal `melos run test` çalıştırmasında **atlanıyor** —
+     bunlar regresyon golden'ı değil, istendiğinde alınan çıktı.
+117. **Bu görüntüleme turu üç gerçek hatayı ortaya çıkardı** — hiçbiri normal
+     kullanımda görünmüyordu:
+     - `AppBarTheme.titleTextStyle` renksizdi. Bu stili vermek
+       `foregroundColor`'ın başlığa ulaşmasını engelliyor, dolayısıyla
+       **push edilen her ekranın başlığı** (danışan kartı, plan editörü,
+       anamnez formu) zeminde neredeyse görünmezdi.
+     - `AppTypography.textTheme` **`labelMedium` slotunu hiç doldurmuyordu** —
+       NavigationRail etiketlerinin kullandığı slot. Her iki uygulamanın sol
+       menüsü Figtree değil Roboto ile çiziliyordu.
+     - Anamnez formunda `_field` `Expanded` döndürüyordu; Column içine
+       doğrudan konulunca bu **çökme** demek. Flex artık `_row`'da.
+118. **Sunum artefaktı üretildi** (Claude Artifact, TR/EN seçicili): on iki
+     ekran, her birinin altında görüşmede sorulacak açık soru. Bilerek
+     "ürün tanıtımı" değil — HANDOFF §1'in "bu bir satış demosu değil"
+     kuralı burada da geçerli: cilalı bir sunum diyetisyeni düzeltmek yerine
+     beğenmeye iter. Anamnez sorularının uydurma, komisyonun yer tutucu ve
+     değişim değerlerinin örnek olduğu artefaktta açıkça yazıyor.
 
 ---
 

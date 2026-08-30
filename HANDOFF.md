@@ -1,13 +1,16 @@
 # HANDOFF — pick up here
 
-> Written 28 August 2026; updated across seven sessions — panel prototype +
+> Written 28 August 2026; updated across eight sessions — panel prototype +
 > fonts (2nd), real Supabase auth for both apps (3rd), Mesajlar/Ödemeler/
 > video-call mockup in the interview demo (4th), agent-skill setup + a
 > drift-detection hardening pass on the demo persistence layer (5th), the
 > certificate_url RLS fix + structured health fields + client filtering +
 > the exchange-list editor + energy calculation + PDF export (6th), and
 > real client management: the dietitian↔client relationship table, invite
-> by email, and the first real client list/detail (7th, 29–30 August 2026).
+> by email, and the first real client list/detail (7th, 29–30 August 2026),
+> and the pre-interview pass on the demo panel — triage list, intake form,
+> goal-aware progress, body measurements, plus a screenshot harness and the
+> three theme/layout bugs it exposed (8th, 30 August 2026).
 > Read `PLANNING.md` (Turkish, the full plan) and `CLAUDE.md` first, then this.
 > Delete or rewrite this file once its contents have been acted on.
 
@@ -20,7 +23,7 @@ The product is now called **Wellkit**.
 **Working and verified:**
 
 - Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with **four** migrations applied. `supabase migration list` shows local and remote in sync. Migration 3 closed the `certificate_url` leak (Q19): the `dietitians` table is owner-or-admin only, and `list_approved_dietitians()` is the marketplace projection. **Migration 4 (7th session) added `dietitian_client_relationships`** — the invite/accept table — and with it the first policy that lets a dietitian read a client's row, closing Q18 and delivering what §2.2 #34 promised.
-- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (**35** tests: core 4, client 7, dietitian_panel 24).
+- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (**45** tests: core 4, client 7, dietitian_panel 34, plus the 12 screenshot captures that are skipped by default).
 - **`docs/agents/*.md` + a `## Agent skills` block in `CLAUDE.md`** now exist (`mattpocock-skills` plugin's `setup-matt-pocock-skills`, 5th session): GitHub as the issue tracker, default triage labels, single-context domain docs. **`CONTEXT.md` now exists** (6th session) with the domain glossary — değişim listesi, the eight groups, BMH and activity factors, target vs planned — and marks every term that is still a hypothesis. No `docs/adr/` yet.
 - **`demo_codec.dart`'s silent-drift risk is now partly test-enforced.** Two tests in `apps/dietitian_panel/test/demo_codec_test.dart` — an encode/decode symmetry check, and one that parses `demo_models.dart`'s actual field declarations at test time and asserts every field reaches the encoded JSON. Both were verified to actually fail on injected drift. See §7's updated trap entry — this doesn't remove the "update the codec by hand" step, it just makes forgetting loud instead of silent.
 - Design system in `packages/core` — palette B, Fraunces + Figtree, two density profiles. Every color measured against WCAG. The two font faces ship as bundled assets (`packages/core/fonts/`), not a runtime fetch.
@@ -28,6 +31,26 @@ The product is now called **Wellkit**.
 - `apps/client` is no longer a placeholder: login/signup ("sen" register) → a real 2-tab home (Ana Sayfa greets by name, two non-tappable "Yakında" cards; Profil has sign-out). **7th session added:** a pending-invite card on Ana Sayfa naming the inviting dietitian, with Kabul et / Reddet, and a "Hedeflerim" form on Profil (hedef / bütçe / sağlık notu) — the only place those three columns are ever written.
 - **The real dietitian panel has a real client list now** (7th session). `RealOverviewScreen` is no longer only an empty state: it lists relationship rows (pending invites included), has a "Danışan davet et" dialog, and pushes `real_client_detail_screen.dart` for an active client. That detail screen shows only `goal` / `budget_range` / `health_notes` — the three columns `clients` actually has. Do not confuse it with the demo's much richer `client_detail_screen.dart`, which runs on fake data.
 - `apps/dietitian_panel` now has **two separate entry points** — see "Run it" below. `lib/main.dart` is the real app: login/signup ("siz" register) → pending/rejected status card (no panel frame, §2.3 #52) or the approved shell (2-destination rail, honest "Henüz danışanınız yok" empty state, §2.3 #53). `lib/main_demo.dart` is the interview prototype — now **seven** tabs (Genel Bakış, Danışanlar, Randevular, **Mesajlar**, **Ödemeler**, Takip, Hatırlatmalar), fake data, `localStorage` persistence, reset button, no login. Mesajlar (in-app chat) and Ödemeler (commission ledger, rate is a placeholder — Open Question #1) were added in a fourth session so Can has something concrete to show and click through beyond auth; a "Görüşmeye başla" button on online appointments also opens a video-call mockup (no real SDK — §3 hasn't picked one). **The demo and the real panel still don't share screens** — the real approved panel is deliberately not the demo's rail.
+- **Eighth session (30 Aug 2026) reworked the demo for the interviews.** The
+  trigger was an independent critique of the panel by an agent with no project
+  context. Its premise was right and most of its list was not — four of its six
+  "P0 missing" items already existed, and it could not see them because of a
+  real bug: Genel Bakış's "İncele" called `onOpenClients`, landing you on the
+  client *list* instead of that client's plan. **The screen the product turns on
+  was unreachable from the home screen.** What was added: a "Dikkat gerekenler"
+  triage list (`demo/triage.dart`), waiting badges on pending drafts, an
+  invented anamnez form behind "Danışan ekle" (`intake_form_screen.dart`),
+  goal-aware progress (`demo/progress.dart`), body measurements
+  (`BodyMeasurement`), and `AppointmentStatus.noShow` as distinct from
+  `cancelled`. Storage schema is **v5**. What was deliberately *not* built, and
+  why, is PLANNING §2.13 #109 and the artifact's closing section.
+- **Screens are now captured by `flutter test`, not by a browser**
+  (`test/screenshots_test.dart`). It drives the real demo, taps through the
+  rail, and writes 12 golden PNGs to `test/goldens/`. Tagged, so `melos run
+  test` skips it. Regenerate with:
+  `flutter test test/screenshots_test.dart --tags screenshots --run-skipped --update-goldens`.
+  A TR/EN presentation of those screens, one open question per screen, is
+  published as a Claude Artifact (PLANNING §2.13 #118).
 - **Sixth session added to the demo:** structured health fields on the client record (allergies, conditions, medications, diet type, sex, activity level — displayed, not yet editable); search + goal/status filtering on the client list; a **second plan editor built on the exchange-list model** for c1 only, with editable counts and the substitution sheet; an **energy calculation** (`demo/energy.dart`) reproducing a dietitian's own spreadsheet, shown as a card on the client page and as a target line in both editors; and **PDF export** of an approved plan from either editor.
 - Bundle id resolved: `com.wellkit.client` (Android `applicationId`/namespace, Kotlin package, iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has no bundle id — it's web-only (§2.3 #38).
 - Everything pushed to `github.com/yangull/DiyetApp` (private), `main` branch.
@@ -167,8 +190,20 @@ before producing anything. Still not re-run. It was to cover:
 7. Which screens to lead interviews with, and where the prototype might mislead a
    dietitian into agreeing with something that is not built
 
-**Items 1, 4, 5, 6 and 7 were never delivered.** Re-run that critique next session if
-still wanted — but the interviews themselves may answer more of it than an agent can.
+**Items 1, 4, 5, 6 and 7 were never delivered.** ✅ **Item 1 was finally run on
+30 Aug 2026** — Can commissioned it from an agent with no project context, which
+turned out to matter in both directions. Acted on in the 8th session; see
+PLANNING §2.13. Items 4, 5 and 6 are still open, but the interviews themselves
+may answer more of them than an agent can.
+
+⚠️ **The lesson from that critique is worth keeping.** A reviewer without the
+plan will demand features that are already built (it asked for a client detail
+page and a plan editor that both exist) and will demand features the plan
+deliberately defers — its top ask was a 7-day plan grid, which assumes the
+"food + amount" model that §2 exists to test. Judge such a list by "does its
+absence stop a dietitian from telling us something?", not by "would a dietitian
+want it". Its most valuable output was the premise, not the list: the demo was
+showing the reporting *around* the work rather than the work.
 
 The second session did fix one thing item 7 would have flagged: `MacroSummary`
 was drawing progress bars from hardcoded fill constants (identical for every
@@ -182,7 +217,11 @@ feature — gone now (commit `c47532e`).
 
 1. **Run the dietitian interviews.** Nothing built since changes this — Q3, Q4,
    Q10 and the exchange-list hypothesis all resolve here, and the plan editor
-   is guesswork until they do.
+   is guesswork until they do. The 8th session's additions raised four more
+   questions that only an interview closes (PLANNING §10, Q25–Q28: triage
+   thresholds, what an anamnez actually asks, which measurements and device,
+   session vs package pricing). Drive the demo live; the artifact is the
+   fallback for when Can is not in the room.
 2. **Rewrite the plan model** on what you learn. Expect exchange groups.
 3. **Build `diet_plans` and the real plan editor** once the model is known,
    into the panel's approved shell. The relationship table it hangs off now
@@ -214,6 +253,7 @@ feature — gone now (commit `c47532e`).
 | **Q3 / Q4** | Doctor referral rules; which blood values | Regulatory; riskiest unknown in the product |
 | ~~**Q19**~~ | ~~Which dietitian fields are public in the marketplace~~ | **Closed 28 Aug 2026, migration 3.** The base table is owner-or-admin only now; `list_approved_dietitians()` returns `user_id`, `specialties`, `bio` and nothing else. Adding a column to that function is a publication decision — treat it as one. |
 | ~~**Q18**~~ | ~~Dietitian↔client relationship table + the dietitian's access policy to health data~~ | **Closed 30 Aug 2026, migration 4.** `dietitian_client_relationships` + `"clients: read via active relationship"`, gated on an active row *and* a still-approved dietitian. Connection is by email invite for now; marketplace matching replaces it later, and the `origin` column is there so it can without reinterpreting old rows. |
+| **Q28 — session or package?** | Sessions vs monthly/3-month packages | Ödemeler, Randevular and the marketplace listing are all built per-session. If the market prices in packages, all three change together — cheap to ask, expensive to retrofit. |
 | **Q15 / SMS** | Reminders over push (free, needs app installed) vs SMS (paid, works for everyone) | The reminder features are built but the channel is unresolved. Ask dietitians. |
 | **Logo / icon** | Name is settled, visual identity is not | Store listing, app icon, favicon |
 
@@ -245,6 +285,32 @@ feature — gone now (commit `c47532e`).
   write, don't just drop the form.
 - **`ColorScheme.fromSeed` will silently discard the measured palette.** The theme
   sets every slot explicitly on purpose — see `packages/core/lib/src/theme/app_theme.dart`.
+- **Setting `AppBarTheme.titleTextStyle` cuts `foregroundColor` off from the
+  title.** Supplying that style at all means the title takes its colour from the
+  style, and `AppTypography`'s styles carry none — so every pushed screen's title
+  rendered near-invisible until 30 Aug 2026. If you swap that style, keep the
+  explicit `color:` on it.
+- **An unfilled `TextTheme` slot does not fall back to Figtree.** It falls back to
+  Material's own default font. `labelMedium` was empty, which is exactly the slot
+  NavigationRail uses, so both apps' rails were drawn in Roboto without anyone
+  noticing. If you add a widget that reads a slot `AppTypography.textTheme` does
+  not fill, fill it rather than assuming the family carries over.
+- **A field helper that returns `Expanded` can only ever live in a `Row`.** The
+  intake form's `_field` did, and putting one directly in a `Column` is vertical
+  flex against unbounded height — a crash, not a layout wobble. Flex belongs on
+  the row builder, not on the field.
+- **Golden captures are not regression goldens.** `test/screenshots_test.dart` is
+  tagged `screenshots` and skipped by `dart_test.yaml`, because it would fail on
+  every deliberate pixel change. Run it explicitly with `--tags screenshots
+  --run-skipped --update-goldens`. It needs `FLUTTER_ROOT` for the icon font and
+  loads Fraunces/Figtree under **`packages/core/`-prefixed** family names — the
+  bare family name loads a font nothing ever looks up, and every glyph comes out
+  as a box.
+- **Seed data must be anchored to `DateTime.now()`, not to a calendar date.**
+  Appointments and conversations already were; weights were pinned to June 2026
+  and `weight_chart.dart` had `'Haz'` / `'Ağu'` hard-coded on its axis. Both were
+  correct on the day they were written and silently wrong afterwards. The triage
+  list now reads those dates as signals, so a stale anchor is worse than cosmetic.
 - **`flutter devices` never lists the `web-server` device in this WSL setup**, but
   `-d web-server` works. Don't waste time on it.
 - **Fonts are bundled, not fetched.** `google_fonts` is gone from
