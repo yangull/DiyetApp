@@ -2,7 +2,9 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
+import '../demo/progress.dart';
 import '../widgets/weight_chart.dart';
 
 class ReportsScreen extends ConsumerWidget {
@@ -20,8 +22,10 @@ class ReportsScreen extends ConsumerWidget {
         Text('Takip ve raporlar', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Danışan başına kilo seyri. Hangi ölçümleri düzenli takip '
-          'ettiğinizi bize anlatın — bu ekran ona göre şekillenecek.',
+          'Danışan başına kilo seyri, hedef kilosuna göre değerlendirilmiş. '
+          'Kilo koruma hedefindeki bir danışanda düşüş de dikkat gerektirir; '
+          'bu ayrımı doğru mu kuruyoruz, ve hangi ölçümleri düzenli takip '
+          'ediyorsunuz?',
           style: text.bodyMedium?.copyWith(color: palette.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -43,11 +47,14 @@ class ReportsScreen extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
-                      _Delta(entries: demo.weights[client.id]!),
+                      _Delta(client: client, entries: demo.weights[client.id]!),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  WeightChart(entries: demo.weights[client.id]!),
+                  WeightChart(
+                    entries: demo.weights[client.id]!,
+                    targetKg: client.targetWeightKg,
+                  ),
                 ],
               ),
             ),
@@ -59,36 +66,45 @@ class ReportsScreen extends ConsumerWidget {
   }
 }
 
+/// The arrow says which way the scale moved; the words next to it say whether
+/// that is what this client wanted. Colour follows the verdict, not the
+/// direction — see `progress.dart`.
 class _Delta extends StatelessWidget {
-  const _Delta({required this.entries});
+  const _Delta({required this.client, required this.entries});
 
-  final List entries;
+  final DemoClient client;
+  final List<WeightEntry> entries;
 
   @override
   Widget build(BuildContext context) {
-    final first = entries.first.kg as double;
-    final last = entries.last.kg as double;
-    final delta = last - first;
-    final down = delta < 0;
+    final palette = context.palette;
+    final text = Theme.of(context).textTheme;
+    final progress = weightProgress(client, entries);
+    final color = switch (progress.verdict) {
+      ProgressVerdict.onTrack => AppColors.primary,
+      ProgressVerdict.offTrack => palette.warning,
+      ProgressVerdict.neutral => palette.textMuted,
+    };
 
     return Row(
       children: [
         Icon(
-          down ? Icons.south : Icons.north,
+          progress.isLoss ? Icons.south : Icons.north,
           size: 16,
-          color: context.palette.textSecondary,
+          color: color,
         ),
         const SizedBox(width: 4),
         Text(
-          '${delta.abs().toStringAsFixed(1)} kg',
-          style: Theme.of(context).textTheme.titleMedium
-              ?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+          '${progress.deltaKg.abs().toStringAsFixed(1)} kg',
+          style: text.titleMedium?.copyWith(
+            color: color,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
         const SizedBox(width: 6),
         Text(
-          'toplam',
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: context.palette.textMuted),
+          progress.label,
+          style: text.bodySmall?.copyWith(color: palette.textMuted),
         ),
       ],
     );

@@ -16,7 +16,9 @@ class AppointmentsScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
     final upcoming = demo.upcoming;
-    final unpaid = demo.appointments.where((a) => a.isPast && !a.paid).toList();
+    final unpaid = demo.unpaid;
+    final past = demo.appointments.where((a) => a.isPast).toList()
+      ..sort((a, b) => b.at.compareTo(a.at));
 
     return ListView(
       padding: EdgeInsets.all(context.density.pagePadding),
@@ -42,6 +44,25 @@ class AppointmentsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   child: Text(
                     'Yaklaşan randevu yok.',
+                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        Text('Geçmiş randevular', style: text.titleLarge),
+        const SizedBox(height: AppSpacing.md),
+        Card(
+          child: Column(
+            children: [
+              for (var i = 0; i < past.length; i++)
+                _PastRow(appointment: past[i], showDivider: i > 0),
+              if (past.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Text(
+                    'Geçmiş randevu yok.',
                     style: text.bodyMedium?.copyWith(color: palette.textMuted),
                   ),
                 ),
@@ -81,8 +102,9 @@ class AppointmentsScreen extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Bu ekran görüşme için hazırlanmıştır. Randevu ve ödeme takibinin '
-          'işinize ne kadar yaradığını sizden öğrenmek istiyoruz.',
+          'Gelmeyen bir danışanın seansını tahsil edilecekler arasına '
+          'koymuyoruz — bu bizim varsayımımız. Siz gelmediğinde ücret alıyor '
+          'musunuz, iptal için bir süre sınırınız var mı?',
           style: text.bodySmall?.copyWith(color: palette.textMuted),
         ),
       ],
@@ -218,6 +240,75 @@ class _AppointmentRow extends ConsumerWidget {
                   .read(demoProvider.notifier)
                   .cancelAppointment(appointment.id),
               icon: Icon(Icons.close, size: 18, color: palette.textMuted),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A no-show and a cancellation are shown as different words here because the
+/// panel now stores them as different states — and because "gelmedi" is the
+/// one a dietitian has to record themselves after the fact.
+class _PastRow extends ConsumerWidget {
+  const _PastRow({required this.appointment, required this.showDivider});
+
+  final Appointment appointment;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final demo = ref.watch(demoProvider);
+    final client = demo.clientOf(appointment.clientId);
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    final noShow = appointment.status == AppointmentStatus.noShow;
+    final cancelled = appointment.status == AppointmentStatus.cancelled;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(top: BorderSide(color: palette.borderSubtle))
+            : null,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(client.name, style: text.titleMedium),
+                Text(
+                  _when(appointment.at),
+                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              switch (appointment.status) {
+                AppointmentStatus.noShow => 'Gelmedi',
+                AppointmentStatus.cancelled => 'İptal edildi',
+                _ => 'Görüşme yapıldı',
+              },
+              style: text.bodyMedium?.copyWith(
+                color: noShow ? palette.warning : palette.textSecondary,
+              ),
+            ),
+          ),
+          if (!noShow && !cancelled)
+            TextButton.icon(
+              onPressed: () =>
+                  ref.read(demoProvider.notifier).markNoShow(appointment.id),
+              icon: const Icon(Icons.event_busy_outlined, size: 18),
+              label: const Text('Gelmedi olarak işaretle'),
             ),
         ],
       ),

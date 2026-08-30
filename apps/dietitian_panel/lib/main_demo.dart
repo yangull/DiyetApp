@@ -25,6 +25,9 @@ class DietitianPanelDemoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Wellkit Panel (Demo)',
+      // This is driven in front of dietitians and captured for screenshots;
+      // the debug ribbon in the corner is noise in both settings.
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light(AppDensity.compact),
       home: const PanelShell(),
     );

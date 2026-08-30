@@ -19,6 +19,7 @@ class DemoClient {
     required this.heightCm,
     required this.weightKg,
     required this.goal,
+    required this.targetWeightKg,
     required this.activityLevel,
     required this.dietType,
     required this.allergies,
@@ -35,6 +36,11 @@ class DemoClient {
   final int heightCm;
   double weightKg;
   final String goal;
+
+  /// Null where the goal is not a number ('Sporcu beslenmesi'). The chart
+  /// draws a target line only when there is one, which is itself a question:
+  /// do you agree a hedef kilo on every client, or only on some?
+  final double? targetWeightKg;
   final ActivityLevel activityLevel;
 
   /// Open vocabulary on purpose ('standart', 'vejetaryen', ...): the real list
@@ -72,6 +78,7 @@ class DietPlan {
     required this.day,
     required this.kcal,
     required this.state,
+    required this.draftedAt,
     required this.meals,
     this.aiNote,
   });
@@ -80,6 +87,10 @@ class DietPlan {
   final String day;
   int kcal;
   PlanState state;
+
+  /// When the AI put this draft in front of the dietitian. Only interesting
+  /// while it is still a draft: it is what "3 gündür bekliyor" counts from.
+  final DateTime draftedAt;
   final List<Meal> meals;
 
   /// Why the draft looks the way it does. Shown only while unapproved.
@@ -88,7 +99,10 @@ class DietPlan {
   bool get isDraft => state == PlanState.aiDraft;
 }
 
-enum AppointmentStatus { planned, reminderSent, completed, cancelled }
+/// `cancelled` is the dietitian calling it off; `noShow` is the client not
+/// turning up. They are separated because they almost certainly differ on
+/// payment and on the client's record — how, exactly, is an interview answer.
+enum AppointmentStatus { planned, reminderSent, completed, cancelled, noShow }
 
 enum AppointmentKind { online, inPerson }
 
@@ -119,6 +133,32 @@ class WeightEntry {
 
   final DateTime date;
   final double kg;
+}
+
+/// Everything measured at a session that is not the scale reading. Which of
+/// these a dietitian actually takes, how often, and with what device is an
+/// open question — these four are a guess put on screen so it can be
+/// corrected. Body fat and muscle mass imply a BIA/Tanita device; if that
+/// guess is right, `energy.dart` could use the Cunningham formula it
+/// currently cannot.
+class BodyMeasurement {
+  const BodyMeasurement({
+    required this.date,
+    required this.waistCm,
+    required this.hipCm,
+    required this.bodyFatPct,
+    required this.muscleMassKg,
+  });
+
+  final DateTime date;
+  final double waistCm;
+  final double hipCm;
+  final double bodyFatPct;
+  final double muscleMassKg;
+
+  /// Bel/kalça oranı — the number that carries cardiometabolic risk in a way
+  /// scale weight does not.
+  double get waistHipRatio => waistCm / hipCm;
 }
 
 /// Targets a dietitian sets, and what the current draft actually adds up to.
@@ -298,6 +338,7 @@ class ExchangePlan {
     required this.clientId,
     required this.day,
     required this.state,
+    required this.draftedAt,
     required this.meals,
     this.aiNote,
   });
@@ -305,6 +346,7 @@ class ExchangePlan {
   final String clientId;
   final String day;
   PlanState state;
+  final DateTime draftedAt;
   final List<ExchangeMeal> meals;
   final String? aiNote;
 

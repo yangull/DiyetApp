@@ -6,6 +6,7 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../widgets/status_pill.dart';
 import 'client_detail_screen.dart';
+import 'intake_form_screen.dart';
 
 class ClientsScreen extends ConsumerStatefulWidget {
   const ClientsScreen({super.key});
@@ -47,11 +48,32 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     return ListView(
       padding: EdgeInsets.all(density.pagePadding),
       children: [
-        Text('Danışanlarınız', style: text.headlineLarge),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          '${demo.clients.length} aktif · ${demo.draftCount} plan onay bekliyor',
-          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Danışanlarınız', style: text.headlineLarge),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${demo.clients.length} aktif · ${demo.draftCount} plan '
+                    'onay bekliyor',
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const IntakeFormScreen()),
+              ),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Danışan ekle'),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.xl),
         Wrap(

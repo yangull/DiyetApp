@@ -20,6 +20,7 @@ DemoClient _client({
   heightCm: heightCm,
   weightKg: weightKg,
   goal: '',
+  targetWeightKg: null,
   activityLevel: activityLevel,
   dietType: 'standart',
   allergies: const [],

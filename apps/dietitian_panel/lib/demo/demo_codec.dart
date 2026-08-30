@@ -10,7 +10,8 @@ import 'demo_repository.dart';
 /// v2 added `conversations` (the Mesajlar screen).
 /// v3 added the structured health fields on `DemoClient`.
 /// v4 added `exchangePlans` (the değişim listesi editor).
-const _schemaVersion = 4;
+/// v5 added `targetWeightKg`, `measurements`, and `draftedAt` on both plans.
+const _schemaVersion = 5;
 
 String encodeDemoState(DemoState state) => jsonEncode({
   'version': _schemaVersion,
@@ -24,6 +25,7 @@ String encodeDemoState(DemoState state) => jsonEncode({
         'heightCm': c.heightCm,
         'weightKg': c.weightKg,
         'goal': c.goal,
+        'targetWeightKg': c.targetWeightKg,
         'activityLevel': c.activityLevel.name,
         'dietType': c.dietType,
         'allergies': c.allergies,
@@ -40,6 +42,7 @@ String encodeDemoState(DemoState state) => jsonEncode({
         'day': p.day,
         'kcal': p.kcal,
         'state': p.state.name,
+        'draftedAt': p.draftedAt.toIso8601String(),
         'aiNote': p.aiNote,
         'meals': [
           for (final m in p.meals)
@@ -59,6 +62,7 @@ String encodeDemoState(DemoState state) => jsonEncode({
         'clientId': p.clientId,
         'day': p.day,
         'state': p.state.name,
+        'draftedAt': p.draftedAt.toIso8601String(),
         'aiNote': p.aiNote,
         'meals': [
           for (final m in p.meals)
@@ -89,6 +93,19 @@ String encodeDemoState(DemoState state) => jsonEncode({
     for (final e in state.weights.entries)
       e.key: [
         for (final w in e.value) {'date': w.date.toIso8601String(), 'kg': w.kg},
+      ],
+  },
+  'measurements': {
+    for (final e in state.measurements.entries)
+      e.key: [
+        for (final m in e.value)
+          {
+            'date': m.date.toIso8601String(),
+            'waistCm': m.waistCm,
+            'hipCm': m.hipCm,
+            'bodyFatPct': m.bodyFatPct,
+            'muscleMassKg': m.muscleMassKg,
+          },
       ],
   },
   'macros': {
@@ -140,6 +157,7 @@ DemoState? decodeDemoState(String raw) {
             heightCm: c['heightCm'] as int,
             weightKg: (c['weightKg'] as num).toDouble(),
             goal: c['goal'] as String,
+            targetWeightKg: (c['targetWeightKg'] as num?)?.toDouble(),
             activityLevel: ActivityLevel.values.byName(
               c['activityLevel'] as String,
             ),
@@ -160,6 +178,7 @@ DemoState? decodeDemoState(String raw) {
             day: p['day'] as String,
             kcal: p['kcal'] as int,
             state: PlanState.values.byName(p['state'] as String),
+            draftedAt: DateTime.parse(p['draftedAt'] as String),
             aiNote: p['aiNote'] as String?,
             meals: [
               for (final m in p['meals'] as List)
@@ -183,6 +202,7 @@ DemoState? decodeDemoState(String raw) {
             clientId: p['clientId'] as String,
             day: p['day'] as String,
             state: PlanState.values.byName(p['state'] as String),
+            draftedAt: DateTime.parse(p['draftedAt'] as String),
             aiNote: p['aiNote'] as String?,
             meals: [
               for (final m in p['meals'] as List)
@@ -221,6 +241,19 @@ DemoState? decodeDemoState(String raw) {
               WeightEntry(
                 DateTime.parse(w['date'] as String),
                 (w['kg'] as num).toDouble(),
+              ),
+          ],
+      },
+      measurements: {
+        for (final e in (json['measurements'] as Map<String, dynamic>).entries)
+          e.key: [
+            for (final m in e.value as List)
+              BodyMeasurement(
+                date: DateTime.parse(m['date'] as String),
+                waistCm: (m['waistCm'] as num).toDouble(),
+                hipCm: (m['hipCm'] as num).toDouble(),
+                bodyFatPct: (m['bodyFatPct'] as num).toDouble(),
+                muscleMassKg: (m['muscleMassKg'] as num).toDouble(),
               ),
           ],
       },

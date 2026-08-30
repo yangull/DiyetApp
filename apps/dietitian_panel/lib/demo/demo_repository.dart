@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'demo_codec.dart';
 import 'demo_models.dart';
 import 'demo_store.dart';
+import 'energy.dart';
 
 /// The platform's cut of every human-dietitian session, per PLANNING.md §2
 /// #3 (commission-based revenue). Open Question #1 — the real rate is still
@@ -20,6 +21,7 @@ class DemoState {
     required this.exchangePlans,
     required this.appointments,
     required this.weights,
+    required this.measurements,
     required this.macros,
     required this.reminders,
     required this.conversations,
@@ -33,6 +35,11 @@ class DemoState {
   final List<ExchangePlan> exchangePlans;
   final List<Appointment> appointments;
   final Map<String, List<WeightEntry>> weights;
+
+  /// Everything taken at a session that is not the scale. Seeded for three
+  /// clients only — not every dietitian measures every client, and the gaps
+  /// are as much a conversation piece as the readings.
+  final Map<String, List<BodyMeasurement>> measurements;
   final Map<String, Macros> macros;
   final ReminderSettings reminders;
   final List<Conversation> conversations;
@@ -42,16 +49,25 @@ class DemoState {
         ..sort((a, b) => a.at.compareTo(b.at));
 
   List<Appointment> get completed =>
-      appointments
-          .where((a) => a.isPast && a.status != AppointmentStatus.cancelled)
-          .toList()
+      appointments.where((a) => a.isPast && _billable(a)).toList()
         ..sort((a, b) => b.at.compareTo(a.at));
 
-  int get unpaidCount => appointments.where((a) => a.isPast && !a.paid).length;
+  /// Whether a session that already happened is one the dietitian earns from.
+  /// A no-show is excluded alongside a cancellation, which is a guess: whether
+  /// you charge for a no-show is Open Question territory, not a decision.
+  static bool _billable(Appointment a) =>
+      a.status != AppointmentStatus.cancelled &&
+      a.status != AppointmentStatus.noShow;
 
-  int get unpaidTotal => appointments
-      .where((a) => a.isPast && !a.paid)
-      .fold(0, (sum, a) => sum + a.fee);
+  List<Appointment> get unpaid =>
+      appointments.where((a) => a.isPast && !a.paid && _billable(a)).toList();
+
+  int get unpaidCount => unpaid.length;
+
+  int get unpaidTotal => unpaid.fold(0, (sum, a) => sum + a.fee);
+
+  List<BodyMeasurement> measurementsOf(String clientId) =>
+      measurements[clientId] ?? const [];
 
   int get grossEarnings => completed.fold(0, (sum, a) => sum + a.fee);
 
@@ -209,6 +225,42 @@ class DemoNotifier extends Notifier<DemoState> {
     _changed();
   }
 
+  /// The intake form's only job. Everything the panel needs for a client is
+  /// created here in one go — including a first AI draft, because "I filled in
+  /// the anamnez and a plan appeared" is the claim the product is making and
+  /// an interview should get to react to it rather than hear it described.
+  void addClient(DemoClient client) {
+    final kcal = targetEnergy(client);
+    state.clients.add(client);
+    state.plans.add(
+      DietPlan(
+        clientId: client.id,
+        day: 'Pazartesi',
+        kcal: kcal,
+        state: PlanState.aiDraft,
+        draftedAt: DateTime.now(),
+        aiNote:
+            'Anamnez formundaki bilgilerden üretilen ilk taslak. Hedef '
+            'enerji $kcal kcal olarak hesaplandı; öğün dağılımını ve '
+            'besinleri onaylamadan önce düzenleyebilirsiniz.',
+        meals: _standardDay(),
+      ),
+    );
+    state.weights[client.id] = [WeightEntry(DateTime.now(), client.weightKg)];
+    state.macros[client.id] = Macros(
+      proteinG: (kcal * 0.25 / 4).round(),
+      carbG: (kcal * 0.45 / 4).round(),
+      fatG: (kcal * 0.30 / 9).round(),
+    );
+    state.conversations.add(Conversation(clientId: client.id, messages: []));
+    _changed();
+  }
+
+  void markNoShow(String appointmentId) {
+    _appointment(appointmentId).status = AppointmentStatus.noShow;
+    _changed();
+  }
+
   void sendMessage(String clientId, String text) {
     if (text.trim().isEmpty) return;
     state
@@ -238,6 +290,7 @@ DemoState _seedState() => DemoState(
   exchangePlans: _seedExchangePlans(),
   appointments: _seedAppointments(),
   weights: _seedWeights(),
+  measurements: _seedMeasurements(),
   macros: _seedMacros(),
   reminders: ReminderSettings(
     dayBefore: true,
@@ -260,6 +313,7 @@ List<DemoClient> _seedClients() => [
     heightCm: 165,
     weightKg: 72.4,
     goal: 'Kilo verme',
+    targetWeightKg: 65.0,
     activityLevel: ActivityLevel.ortaAktif,
     dietType: 'standart',
     allergies: ['Laktoz'],
@@ -276,6 +330,7 @@ List<DemoClient> _seedClients() => [
     heightCm: 171,
     weightKg: 63.0,
     goal: 'Sporcu beslenmesi',
+    targetWeightKg: null,
     activityLevel: ActivityLevel.cokAktif,
     dietType: 'standart',
     allergies: [],
@@ -292,6 +347,7 @@ List<DemoClient> _seedClients() => [
     heightCm: 178,
     weightKg: 94.8,
     goal: 'Tip 2 diyabet yönetimi',
+    targetWeightKg: 85.0,
     activityLevel: ActivityLevel.sedanter,
     dietType: 'standart',
     allergies: [],
@@ -308,6 +364,7 @@ List<DemoClient> _seedClients() => [
     heightCm: 160,
     weightKg: 58.2,
     goal: 'Kilo koruma',
+    targetWeightKg: 58.0,
     activityLevel: ActivityLevel.ortaAktif,
     dietType: 'vejetaryen',
     allergies: [],
@@ -324,6 +381,7 @@ List<DemoClient> _seedClients() => [
     heightCm: 183,
     weightKg: 88.1,
     goal: 'Kilo verme',
+    targetWeightKg: 80.0,
     activityLevel: ActivityLevel.hafifAktif,
     dietType: 'standart',
     allergies: [],
@@ -342,6 +400,7 @@ List<ExchangePlan> _seedExchangePlans() => [
     clientId: 'c1',
     day: 'Pazartesi',
     state: PlanState.aiDraft,
+    draftedAt: _daysAgo(3),
     aiNote:
         'Aynı gün, değişim listesiyle kurulmuş hâli. Grup değerleri örnektir; '
         'sizin kullandığınız tabloyu öğrenmek istiyoruz.',
@@ -454,12 +513,20 @@ List<Meal> _standardDay() => [
   ),
 ];
 
+/// Draft ages are staggered so the waiting badge on Genel Bakış has a range
+/// to show rather than one value: Elif's has been sitting for three days.
+DateTime _daysAgo(int days) => DateTime.now().subtract(Duration(days: days));
+
+DateTime _hoursAgo(int hours) =>
+    DateTime.now().subtract(Duration(hours: hours));
+
 List<DietPlan> _seedPlans() => [
   DietPlan(
     clientId: 'c1',
     day: 'Pazartesi',
     kcal: 1600,
     state: PlanState.aiDraft,
+    draftedAt: _daysAgo(3),
     aiNote:
         'Laktoz hassasiyeti nedeniyle süt ürünleri laktozsuz seçildi; '
         'öğle öğünü dışarıda yenmeye uygun olacak şekilde sadeleştirildi.',
@@ -470,6 +537,7 @@ List<DietPlan> _seedPlans() => [
     day: 'Pazartesi',
     kcal: 2200,
     state: PlanState.aiDraft,
+    draftedAt: _hoursAgo(6),
     aiNote: 'Antrenman günleri için karbonhidrat öğün öncesine kaydırıldı.',
     meals: _standardDay(),
   ),
@@ -478,6 +546,7 @@ List<DietPlan> _seedPlans() => [
     day: 'Pazartesi',
     kcal: 1800,
     state: PlanState.approved,
+    draftedAt: _daysAgo(10),
     meals: _standardDay(),
   ),
   DietPlan(
@@ -485,6 +554,7 @@ List<DietPlan> _seedPlans() => [
     day: 'Pazartesi',
     kcal: 1700,
     state: PlanState.aiDraft,
+    draftedAt: _hoursAgo(26),
     aiNote:
         'Vejetaryen; protein kaynakları baklagil ve süt ürünlerinden '
         'kuruldu. Demir emilimi için C vitamini eşliği önerildi.',
@@ -495,6 +565,7 @@ List<DietPlan> _seedPlans() => [
     day: 'Pazartesi',
     kcal: 1900,
     state: PlanState.approved,
+    draftedAt: _daysAgo(12),
     meals: _standardDay(),
   ),
 ];
@@ -554,6 +625,15 @@ List<Appointment> _seedAppointments() {
       paid: false,
     ),
     Appointment(
+      id: 'a7',
+      clientId: 'c4',
+      at: at(-5, 12),
+      kind: AppointmentKind.online,
+      status: AppointmentStatus.noShow,
+      fee: 900,
+      paid: false,
+    ),
+    Appointment(
       id: 'a6',
       clientId: 'c1',
       at: at(-7, 16, 30),
@@ -565,18 +645,102 @@ List<Appointment> _seedAppointments() {
   ];
 }
 
-List<WeightEntry> _series(int startDay, List<double> kg) => [
-  for (var i = 0; i < kg.length; i++)
-    WeightEntry(DateTime(2026, 6, startDay).add(Duration(days: i * 7)), kg[i]),
-];
+/// Weekly readings ending [daysSinceLast] days ago. Anchored to today for the
+/// same reason the appointments are: a series hard-coded to June 2026 turns
+/// every chart stale, and "son tartım" is now a signal the panel acts on.
+List<WeightEntry> _series(int daysSinceLast, List<double> kg) {
+  final today = DateTime.now();
+  final last = DateTime(today.year, today.month, today.day - daysSinceLast);
+  return [
+    for (var i = 0; i < kg.length; i++)
+      WeightEntry(
+        last.subtract(Duration(days: (kg.length - 1 - i) * 7)),
+        kg[i],
+      ),
+  ];
+}
 
+// The gaps are deliberate: Ahmet and Burak have stopped weighing in, so the
+// Genel Bakış triage list has something true to point at.
 Map<String, List<WeightEntry>> _seedWeights() => {
-  'c1': _series(2, [78.4, 77.1, 76.5, 75.8, 75.0, 74.2, 73.6, 73.1, 72.4]),
-  'c2': _series(2, [64.2, 63.8, 63.9, 63.4, 63.1, 63.3, 63.0, 63.2, 63.0]),
-  'c3': _series(2, [99.6, 98.8, 98.1, 97.2, 96.9, 96.0, 95.5, 95.1, 94.8]),
-  'c4': _series(2, [59.8, 59.4, 59.1, 58.9, 58.6, 58.5, 58.3, 58.4, 58.2]),
-  'c5': _series(2, [95.2, 94.1, 93.0, 92.4, 91.5, 90.8, 89.9, 89.0, 88.1]),
+  'c1': _series(3, [78.4, 77.1, 76.5, 75.8, 75.0, 74.2, 73.6, 73.1, 72.4]),
+  'c2': _series(6, [64.2, 63.8, 63.9, 63.4, 63.1, 63.3, 63.0, 63.2, 63.0]),
+  'c3': _series(12, [99.6, 98.8, 98.1, 97.2, 96.9, 96.0, 95.5, 95.1, 94.8]),
+  'c4': _series(5, [59.8, 59.4, 59.1, 58.9, 58.6, 58.5, 58.3, 58.4, 58.2]),
+  'c5': _series(21, [95.2, 94.1, 93.0, 92.4, 91.5, 90.8, 89.9, 89.0, 88.1]),
 };
+
+/// Three clients, three readings each, roughly monthly — a guess at both the
+/// measurements and the cadence. Merve and Zeynep have none on purpose.
+Map<String, List<BodyMeasurement>> _seedMeasurements() {
+  final today = DateTime.now();
+  DateTime ago(int days) => DateTime(today.year, today.month, today.day - days);
+
+  return {
+    'c1': [
+      BodyMeasurement(
+        date: ago(66),
+        waistCm: 92.0,
+        hipCm: 108.0,
+        bodyFatPct: 36.4,
+        muscleMassKg: 46.1,
+      ),
+      BodyMeasurement(
+        date: ago(38),
+        waistCm: 88.5,
+        hipCm: 106.0,
+        bodyFatPct: 34.8,
+        muscleMassKg: 46.4,
+      ),
+      BodyMeasurement(
+        date: ago(3),
+        waistCm: 85.0,
+        hipCm: 104.5,
+        bodyFatPct: 33.1,
+        muscleMassKg: 46.8,
+      ),
+    ],
+    'c3': [
+      BodyMeasurement(
+        date: ago(70),
+        waistCm: 114.0,
+        hipCm: 112.0,
+        bodyFatPct: 32.8,
+        muscleMassKg: 62.4,
+      ),
+      BodyMeasurement(
+        date: ago(41),
+        waistCm: 111.5,
+        hipCm: 111.0,
+        bodyFatPct: 31.9,
+        muscleMassKg: 62.0,
+      ),
+      BodyMeasurement(
+        date: ago(12),
+        waistCm: 109.0,
+        hipCm: 110.0,
+        bodyFatPct: 31.2,
+        muscleMassKg: 61.7,
+      ),
+    ],
+    'c5': [
+      BodyMeasurement(
+        date: ago(56),
+        waistCm: 106.0,
+        hipCm: 105.0,
+        bodyFatPct: 29.5,
+        muscleMassKg: 60.2,
+      ),
+      BodyMeasurement(
+        date: ago(21),
+        waistCm: 101.5,
+        hipCm: 103.0,
+        bodyFatPct: 27.6,
+        muscleMassKg: 60.9,
+      ),
+    ],
+  };
+}
 
 Map<String, Macros> _seedMacros() => {
   'c1': const Macros(proteinG: 95, carbG: 165, fatG: 55),
@@ -643,6 +807,15 @@ List<Conversation> _seedConversations() {
         msg(MessageSender.client, 'Tamamdır, unutmuyorum.', 47),
       ],
     ),
-    Conversation(clientId: 'c5', messages: []),
+    Conversation(
+      clientId: 'c5',
+      messages: [
+        msg(
+          MessageSender.client,
+          'Hocam vardiyam değişti, öğün saatlerini nasıl kaydırayım?',
+          31,
+        ),
+      ],
+    ),
   ];
 }
