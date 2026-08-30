@@ -43,3 +43,8 @@ env/*.json
 # OS / WSL artifacts
 .DS_Store
 *:Zone.Identifier
+
+# Screenshot captures from test/screenshots_test.dart. Generated on demand and
+# rewritten wholesale on every recapture; regenerate rather than committing:
+#   flutter test test/screenshots_test.dart --tags screenshots --run-skipped --update-goldens
+apps/dietitian_panel/test/goldens/

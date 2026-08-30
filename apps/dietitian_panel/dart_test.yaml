@@ -1,0 +1,6 @@
+# The screenshot captures render the whole panel to PNG on demand. They are not
+# regression goldens and would fail on every deliberate pixel change, so they
+# stay out of the default run; `melos run test` and CI never see them.
+tags:
+  screenshots:
+    skip: "capture on demand: flutter test test/screenshots_test.dart --tags screenshots --update-goldens"
