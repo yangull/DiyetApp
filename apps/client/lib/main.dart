@@ -36,7 +36,7 @@ class ClientApp extends StatelessWidget {
         expectedRole: UserRole.client,
         signedOutBuilder: (context) => const AuthFlowScreen(),
         authenticatedBuilder: (context, identity, actions) =>
-            ClientHomeScreen(profile: identity.profile, actions: actions),
+            ClientHomeScreen(identity: identity, actions: actions),
       ),
     );
   }

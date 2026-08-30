@@ -66,6 +66,9 @@ void main() {
           overrides: [
             authRepositoryProvider.overrideWithValue(auth),
             profileRepositoryProvider.overrideWithValue(profiles),
+            clientRelationshipRepositoryProvider.overrideWithValue(
+              FakeClientRelationshipRepository(),
+            ),
           ],
           child: const DietitianPanelApp(),
         ),
@@ -78,6 +81,133 @@ void main() {
       expect(find.text('Henüz danışanınız yok'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'the client list shows an active client by name and a pending invite',
+    (tester) async {
+      final auth = FakeAuthRepository();
+      final profiles = FakeProfileRepository();
+      await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+      final dietitianId = auth.currentSession!.userId;
+      profiles.seedDietitian(
+        dietitianId,
+        fullName: 'Dyt. Kutay',
+        status: VerificationStatus.approved,
+      );
+
+      final relationships = FakeClientRelationshipRepository()
+        ..seedRelationship(
+          dietitianId: dietitianId,
+          invitedEmail: 'elif@example.com',
+          clientId: 'client-1',
+          status: RelationshipStatus.active,
+        )
+        ..seedClientName('client-1', 'Elif Aydın')
+        ..seedRelationship(
+          dietitianId: dietitianId,
+          invitedEmail: 'bekleyen@example.com',
+        );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(auth),
+            profileRepositoryProvider.overrideWithValue(profiles),
+            clientRelationshipRepositoryProvider.overrideWithValue(
+              relationships,
+            ),
+          ],
+          child: const DietitianPanelApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Henüz danışanınız yok'), findsNothing);
+      expect(find.text('Elif Aydın'), findsOneWidget);
+      expect(find.text('Aktif'), findsOneWidget);
+      expect(find.text('bekleyen@example.com'), findsOneWidget);
+      // The pending row names no client and cannot be opened.
+      expect(find.text('Davet bekliyor'), findsNWidgets(2));
+    },
+  );
+
+  testWidgets('another dietitian sees none of the first one\'s clients', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'ikinci@example.com', password: 'sifresifre');
+    final secondDietitianId = auth.currentSession!.userId;
+    profiles.seedDietitian(
+      secondDietitianId,
+      fullName: 'Dyt. İkinci',
+      status: VerificationStatus.approved,
+    );
+
+    // Seeded against a different dietitian entirely.
+    final relationships = FakeClientRelationshipRepository()
+      ..seedRelationship(
+        dietitianId: 'baska-diyetisyen',
+        invitedEmail: 'elif@example.com',
+        clientId: 'client-1',
+        status: RelationshipStatus.active,
+      )
+      ..seedClientName('client-1', 'Elif Aydın');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(relationships),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Elif Aydın'), findsNothing);
+    expect(find.text('Henüz danışanınız yok'), findsOneWidget);
+  });
+
+  testWidgets('inviting a client adds a pending row to the list', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    profiles.seedDietitian(
+      auth.currentSession!.userId,
+      fullName: 'Dyt. Kutay',
+      status: VerificationStatus.approved,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(
+            FakeClientRelationshipRepository(),
+          ),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Danışan davet et'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'Yeni@Example.com');
+    await tester.tap(find.text('Davet gönderin'));
+    await tester.pumpAndSettle();
+
+    // Normalized on the way in, so it matches the JWT email comparison the
+    // accept policy makes later.
+    expect(find.text('yeni@example.com'), findsOneWidget);
+    expect(find.text('Henüz danışanınız yok'), findsNothing);
+  });
 
   testWidgets('a client-role account sees the mismatch screen, not the panel', (
     tester,

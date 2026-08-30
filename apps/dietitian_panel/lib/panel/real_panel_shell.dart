@@ -5,9 +5,10 @@ import 'real_overview_screen.dart';
 import 'real_profile_screen.dart';
 
 /// The approved dietitian's actual shell (PLANNING.md §2.3 #53): only two
-/// rail destinations for now, Genel Bakış and Profil. The client list Faz 1
-/// adds goes exactly into Genel Bakış's empty state — no destinations are
-/// pre-added for features that don't exist yet.
+/// rail destinations for now, Genel Bakış and Profil. The client list lives
+/// inside Genel Bakış, and a client's detail screen is pushed over the shell
+/// rather than given its own destination — no destinations are pre-added for
+/// features that don't exist yet.
 ///
 /// This is deliberately not `PanelShell` (`lib/panel_shell.dart`), which is
 /// the five-destination interview demo running on fake data. Conflating the
