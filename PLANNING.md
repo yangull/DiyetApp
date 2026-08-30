@@ -267,8 +267,12 @@ Kişi kaydoldu
 
 **Faz 1 — Diyetisyen Marketplace (insan hizmeti)**
 - [ ] Diyetisyen onboarding + doğrulama (diploma/belge yükleme)
-- [ ] Müşteri onboarding: hedef, sağlık bilgileri, kan değerleri (opsiyonel), bütçe
+- [~] Müşteri onboarding: hedef, sağlık bilgileri, kan değerleri (opsiyonel), bütçe
+      — hedef/bütçe/sağlık notu formu var (§2.12); yapılandırılmış sağlık
+      alanları ve kan değerleri yok
 - [ ] Diyetisyen listeleme + filtreleme + seçim
+      — yerine geçici olarak **e-posta ile davet** akışı var (§2.12); marketplace
+      eşleşmesi bunun yerini alacak, tablo `origin` kolonuyla buna hazır
 - [ ] Uygulama içi chat (Supabase Realtime)
 - [ ] Diyet planı: AI taslak (Edge Function) → diyetisyen düzenler/onaylar → müşteri görür
 - [ ] iyzico ödeme + komisyon kesintisi
@@ -349,7 +353,7 @@ subscriptions    (client_id, revenuecat_ref, durum, ...)
 | 15 | Telefon/SMS OTP hiç eklenecek mi? | Ertelendi — ücretli SMS sağlayıcı gerekiyor (§2.2 #20) |
 | 16 | ~~`role` nerede duracak ve tek/değişmez mi?~~ | ✅ `profiles.role`, tek ve değişmez (§2.2 #31–32) |
 | 17 | ~~İlk migration'ın kapsamı + RLS duruşu~~ | ✅ Karar verildi (§2.2 #33–36) |
-| 18 | Diyetisyen↔danışan ilişki tablosu ve diyetisyenin sağlık verisine erişim politikası | Faz 1 — eşleşme dilimi |
+| ~~18~~ | ~~Diyetisyen↔danışan ilişki tablosu ve diyetisyenin sağlık verisine erişim politikası~~ | ✅ **Kapandı** — Migration 4, §2.12 |
 | ~~19~~ | ~~Marketplace'te diyetisyenin hangi alanları herkese açık?~~ | ✅ **Kapandı** — Migration 3, §2.11 |
 | 20 | Reddedilen diyetisyene verilecek destek iletişim kanalı (e-posta?) | Can bilgi verecek |
 | 21 | Diyetisyen panelinin yayın adresi / hosting | Deploy dilimi; şimdilik UI'da URL yok |
@@ -702,6 +706,59 @@ bilerek yapılmadı.
     diyetisyenin onlara güvenmesi değil, düzeltmesi. Referans tabloları `const`
     ve `DemoState` dışında: kimse düzenlemiyor. Diyetisyenin kendi değişim
     listesini düzenlemesine izin verildiği gün state'e taşınmaları gerekecek.
+
+---
+
+## 2.12 Yedinci Seans — Danışan Yönetimi ve İlişki Tablosu (29–30 Ağustos 2026)
+
+Görüşmeler hâlâ yapılmadı. Bu seans bilerek **görüşmelerden bağımsız** olan
+dilimi aldı: plan editörü değil, plan editörünün üstüne oturacağı ilişki.
+Plan modeli sorusuna (§2.6) hiç dokunulmadı.
+
+100. **Açık Soru #18 kapandı — migration 4
+     (`20260829102252_dietitian_client_relationships.sql`).** §2.2 #34'ün
+     söz verdiği "kendi açık politikası" yazıldı: `clients` satırını artık
+     **aktif ilişkisi olan ve hâlâ onaylı** bir diyetisyen de okuyabiliyor.
+     `is_approved_dietitian` koşulu kasıtlı — onayı sonradan kaldırılan bir
+     diyetisyen eski eşleşmelerine de erişemez.
+101. **Bağlantı modeli: e-posta ile davet.** Diyetisyen davet eder, danışan
+     kendi uygulamasından kabul veya reddeder. Marketplace eşleşmesi
+     (§7 Faz 1) daha büyük bir dilim; bu onun geçici yerine geçiyor.
+     `origin` kolonu (`dietitian_invite` | ileride `client_request`) o akış
+     geldiğinde bu satırların yeniden yorumlanmasını gerektirmesin diye var.
+102. **Davet/kabul yetkisi JWT'nin `email` claim'ine dayanıyor.** Kabul ve
+     ret politikaları `lower(invited_email) = lower(auth.jwt() ->> 'email')`
+     karşılaştırması yapıyor. ⚠️ **Bu, Supabase'de e-posta doğrulamasının
+     açık olmasına bağlı** — kapalıysa biri başkasının adresiyle kayıt olup
+     davetini üstlenebilir. Dashboard ayarı, kod değil.
+103. **Danışan adları politika ile değil, projeksiyon ile okunuyor.**
+     `list_my_clients()` (`security definer`), tıpkı `list_approved_dietitians()`
+     gibi. `profiles` üzerine düz bir SELECT politikası yazılsaydı tabloya
+     ileride eklenen **her** kolon eşleşmiş diyetisyenlere otomatik açılırdı —
+     migration 2 ve 3'ün `dietitians` üzerinde kapattığı sızıntı şekli. Ayrıca
+     liste tek çağrıda geliyor, danışan başına bir istek değil.
+104. **Danışan artık kendi verisini yazabiliyor.** `ProfileRepository`'ye
+     `updateClientDetail` eklendi ve client app'in Profil sekmesine küçük bir
+     "Hedeflerim" formu (hedef / bütçe / sağlık notu) kondu. Bunsuz panelin
+     yeni danışan detay ekranı **her gerçek kullanıcı için boş** olurdu:
+     migration 1'den beri bu üç kolonu yazan hiçbir şey yoktu. Bunu bağımsız
+     bir Opus incelemesi yakaladı, planın ilk hâlinde yoktu.
+105. **Davet kartı daveti göndereni adıyla gösteriyor**, `invited_email`'i
+     değil — o adres zaten danışanın kendi adresi. Karşı taraf kendi sağlık
+     verisine erişim izni veriyor; kimin istediği kartta yazmak zorunda
+     (KVKK açık rıza mantığı). Diyetisyenin adı kabul öncesi de okunabiliyor,
+     çünkü migration 1'in "profiles: read approved dietitians" politikası
+     yürürlükte ve davet insert'ü zaten onaylı diyetisyen şartı koşuyor.
+106. **Kapsam dışı bırakılanlar** (bilerek, eksik değil): ilişkiyi sonlandırma,
+     `clients` tablosuna demo'daki yapılandırılmış sağlık alanları (yaş, kilo,
+     aktivite, alerjiler) ve davet e-postasının **gerçekten gönderilmesi**.
+     Sonuncusu arayüzde açıkça yazıyor: davet, danışan aynı e-posta ile kayıt
+     olup uygulamayı açtığında görünüyor. Gerçek gönderim (Edge Function +
+     `inviteUserByEmail`) sonraki iş.
+107. Not: `relationship_status` enum'ı `declined`'ı **şimdi** içeriyor. İleride
+     `ended` eklenecekse, `alter type ... add value` ile aynı transaction'da o
+     etikete referans veren politika yazılamaz — ya iki migration'a bölünür ya
+     da kolon `text` + check constraint'e çevrilir.
 
 ---
 

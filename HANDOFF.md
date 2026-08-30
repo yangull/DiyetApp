@@ -1,11 +1,13 @@
 # HANDOFF — pick up here
 
-> Written 28 August 2026; updated across six sessions — panel prototype +
+> Written 28 August 2026; updated across seven sessions — panel prototype +
 > fonts (2nd), real Supabase auth for both apps (3rd), Mesajlar/Ödemeler/
 > video-call mockup in the interview demo (4th), agent-skill setup + a
-> drift-detection hardening pass on the demo persistence layer (5th), and the
+> drift-detection hardening pass on the demo persistence layer (5th), the
 > certificate_url RLS fix + structured health fields + client filtering +
-> the exchange-list editor + energy calculation + PDF export (6th, this one).
+> the exchange-list editor + energy calculation + PDF export (6th), and
+> real client management: the dietitian↔client relationship table, invite
+> by email, and the first real client list/detail (7th, 29–30 August 2026).
 > Read `PLANNING.md` (Turkish, the full plan) and `CLAUDE.md` first, then this.
 > Delete or rewrite this file once its contents have been acted on.
 
@@ -17,13 +19,14 @@ The product is now called **Wellkit**.
 
 **Working and verified:**
 
-- Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with **three** migrations applied. `supabase migration list` shows local and remote in sync. Identity schema + RLS only — no other tables. Migration 3 closed the `certificate_url` leak (Q19): the `dietitians` table is owner-or-admin only, and `list_approved_dietitians()` is the marketplace projection.
-- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (**28** tests: core 4, client 3, dietitian_panel 21).
+- Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with **four** migrations applied. `supabase migration list` shows local and remote in sync. Migration 3 closed the `certificate_url` leak (Q19): the `dietitians` table is owner-or-admin only, and `list_approved_dietitians()` is the marketplace projection. **Migration 4 (7th session) added `dietitian_client_relationships`** — the invite/accept table — and with it the first policy that lets a dietitian read a client's row, closing Q18 and delivering what §2.2 #34 promised.
+- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (**35** tests: core 4, client 7, dietitian_panel 24).
 - **`docs/agents/*.md` + a `## Agent skills` block in `CLAUDE.md`** now exist (`mattpocock-skills` plugin's `setup-matt-pocock-skills`, 5th session): GitHub as the issue tracker, default triage labels, single-context domain docs. **`CONTEXT.md` now exists** (6th session) with the domain glossary — değişim listesi, the eight groups, BMH and activity factors, target vs planned — and marks every term that is still a hypothesis. No `docs/adr/` yet.
 - **`demo_codec.dart`'s silent-drift risk is now partly test-enforced.** Two tests in `apps/dietitian_panel/test/demo_codec_test.dart` — an encode/decode symmetry check, and one that parses `demo_models.dart`'s actual field declarations at test time and asserts every field reaches the encoded JSON. Both were verified to actually fail on injected drift. See §7's updated trap entry — this doesn't remove the "update the codec by hand" step, it just makes forgetting loud instead of silent.
 - Design system in `packages/core` — palette B, Fraunces + Figtree, two density profiles. Every color measured against WCAG. The two font faces ship as bundled assets (`packages/core/fonts/`), not a runtime fetch.
 - **Both apps have real Supabase auth now** (PLANNING §12 steps 2–5, the whole first milestone). `packages/core/lib/src/auth/` holds the domain layer: `AuthRepository` + `ProfileRepository` interfaces, Supabase-backed implementations, in-memory fakes for tests, and `AuthGate` — the shared session/profile router. Sign up, sign in, sign out, role routing, and the reverse-app mismatch screen (§2.3 #39) all work end to end.
-- `apps/client` is no longer a placeholder: login/signup ("sen" register) → a real 2-tab home (Ana Sayfa greets by name, two non-tappable "Yakında" cards; Profil has sign-out).
+- `apps/client` is no longer a placeholder: login/signup ("sen" register) → a real 2-tab home (Ana Sayfa greets by name, two non-tappable "Yakında" cards; Profil has sign-out). **7th session added:** a pending-invite card on Ana Sayfa naming the inviting dietitian, with Kabul et / Reddet, and a "Hedeflerim" form on Profil (hedef / bütçe / sağlık notu) — the only place those three columns are ever written.
+- **The real dietitian panel has a real client list now** (7th session). `RealOverviewScreen` is no longer only an empty state: it lists relationship rows (pending invites included), has a "Danışan davet et" dialog, and pushes `real_client_detail_screen.dart` for an active client. That detail screen shows only `goal` / `budget_range` / `health_notes` — the three columns `clients` actually has. Do not confuse it with the demo's much richer `client_detail_screen.dart`, which runs on fake data.
 - `apps/dietitian_panel` now has **two separate entry points** — see "Run it" below. `lib/main.dart` is the real app: login/signup ("siz" register) → pending/rejected status card (no panel frame, §2.3 #52) or the approved shell (2-destination rail, honest "Henüz danışanınız yok" empty state, §2.3 #53). `lib/main_demo.dart` is the interview prototype — now **seven** tabs (Genel Bakış, Danışanlar, Randevular, **Mesajlar**, **Ödemeler**, Takip, Hatırlatmalar), fake data, `localStorage` persistence, reset button, no login. Mesajlar (in-app chat) and Ödemeler (commission ledger, rate is a placeholder — Open Question #1) were added in a fourth session so Can has something concrete to show and click through beyond auth; a "Görüşmeye başla" button on online appointments also opens a video-call mockup (no real SDK — §3 hasn't picked one). **The demo and the real panel still don't share screens** — the real approved panel is deliberately not the demo's rail.
 - **Sixth session added to the demo:** structured health fields on the client record (allergies, conditions, medications, diet type, sex, activity level — displayed, not yet editable); search + goal/status filtering on the client list; a **second plan editor built on the exchange-list model** for c1 only, with editable counts and the substitution sheet; an **energy calculation** (`demo/energy.dart`) reproducing a dietitian's own spreadsheet, shown as a card on the client page and as a target line in both editors; and **PDF export** of an approved plan from either editor.
 - Bundle id resolved: `com.wellkit.client` (Android `applicationId`/namespace, Kotlin package, iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has no bundle id — it's web-only (§2.3 #38).
@@ -179,15 +182,21 @@ feature — gone now (commit `c47532e`).
 
 1. **Run the dietitian interviews.** Nothing built since changes this — Q3, Q4,
    Q10 and the exchange-list hypothesis all resolve here, and the plan editor
-   and real client management are guesswork until they do.
+   is guesswork until they do.
 2. **Rewrite the plan model** on what you learn. Expect exchange groups.
-3. **Build Faz 1's schema and screens** once the model is known: a
-   dietitian-client relationship table, `diet_plans`, and the real plan editor
-   in `apps/dietitian_panel`'s approved shell (`lib/panel/real_panel_shell.dart`
-   currently just shows an empty state on Genel Bakış — that's where the
-   client list goes).
+3. **Build `diet_plans` and the real plan editor** once the model is known,
+   into the panel's approved shell. The relationship table it hangs off now
+   exists (migration 4), so a plan can be scoped to a real dietitian↔client
+   pair on day one — reuse `dietitian_client_relationships` as the key rather
+   than inventing a second one.
 4. **`apps/client`'s two path cards are still "Yakında".** Faz 1 turns them
    into real marketplace/AI entry points (§2.3 #51).
+5. **Follow-ups the 7th session deliberately left** (none blocking): invite
+   delivery (nothing emails the client — an Edge Function over
+   `inviteUserByEmail`), ending an active relationship, and extending
+   `clients` with the demo's structured health fields so the real detail
+   screen and energy card can match the demo's. That last one is worth doing
+   **after** the interviews, since the field list is exactly what they settle.
 
 > **Note (3rd session, 28 Aug 2026):** Can chose to build real auth (steps
 > 2–5 of PLANNING §12) now rather than wait for the interviews, since that
@@ -204,6 +213,7 @@ feature — gone now (commit `c47532e`).
 | **Q10 — Kutay's Excel** | Nobody has seen a real diet plan | The plan editor is guesswork until then |
 | **Q3 / Q4** | Doctor referral rules; which blood values | Regulatory; riskiest unknown in the product |
 | ~~**Q19**~~ | ~~Which dietitian fields are public in the marketplace~~ | **Closed 28 Aug 2026, migration 3.** The base table is owner-or-admin only now; `list_approved_dietitians()` returns `user_id`, `specialties`, `bio` and nothing else. Adding a column to that function is a publication decision — treat it as one. |
+| ~~**Q18**~~ | ~~Dietitian↔client relationship table + the dietitian's access policy to health data~~ | **Closed 30 Aug 2026, migration 4.** `dietitian_client_relationships` + `"clients: read via active relationship"`, gated on an active row *and* a still-approved dietitian. Connection is by email invite for now; marketplace matching replaces it later, and the `origin` column is there so it can without reinterpreting old rows. |
 | **Q15 / SMS** | Reminders over push (free, needs app installed) vs SMS (paid, works for everyone) | The reminder features are built but the channel is unresolved. Ask dietitians. |
 | **Logo / icon** | Name is settled, visual identity is not | Store listing, app icon, favicon |
 
@@ -215,7 +225,24 @@ feature — gone now (commit `c47532e`).
   decides whether dietitians abandon Excel.
 - **Don't copy the `dietitians` RLS policy shape onto any table holding client health
   data.** PLANNING §2.2 #34 explains why; a review already caught one leak of this
-  exact kind.
+  exact kind. Migration 4 follows the rule it sets: client *names* for the panel's
+  list come from the `security definer` `list_my_clients()` projection, **not** a
+  SELECT policy on `profiles` — a row policy there would auto-publish every column
+  the table ever grows. Adding a column to that function is a publication decision.
+- **The invite accept/decline policies trust the JWT's `email` claim**, so they are
+  only as strong as Supabase's email confirmation setting. If confirmation is ever
+  turned off in the dashboard, someone can register with another person's address
+  and claim their invite. That's a dashboard setting, not something the repo can
+  enforce — check it before trusting the flow.
+- **`relationship_status` already contains `declined`.** If you later add `ended`,
+  you cannot `alter type ... add value` and write a policy referencing the new label
+  in the same transaction — split it into two migrations, or move the column to
+  `text` + a check constraint first.
+- **The client app's "Hedeflerim" form is the only writer of `clients.goal`,
+  `budget_range` and `health_notes`.** Delete it and the panel's client detail
+  screen silently goes blank for every real user — that exact gap was caught in
+  review before it shipped. If a richer client onboarding replaces it, move the
+  write, don't just drop the form.
 - **`ColorScheme.fromSeed` will silently discard the measured palette.** The theme
   sets every slot explicitly on purpose — see `packages/core/lib/src/theme/app_theme.dart`.
 - **`flutter devices` never lists the `web-server` device in this WSL setup**, but

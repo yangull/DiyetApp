@@ -23,8 +23,13 @@ unauthenticated interview prototype with fake data, used to drive discovery inte
 confuse it with `lib/main.dart`, the real app. That demo now also carries structured client
 health fields, a searchable/filterable client list, and a **second plan editor built on the
 exchange-list model** — the two editors sit side by side deliberately, because which one is
-right is the open question (HANDOFF.md §2). Not built yet: everything in Phase 1 (real client
-management, the real plan editor, matching) — still gated on that same question.
+right is the open question (HANDOFF.md §2). **Real client management now exists too**:
+`packages/core/lib/src/relationships/` plus migration 4's `dietitian_client_relationships`
+table give a dietitian a real client list, an email-invite flow, and a client detail screen
+reading live Supabase data (`lib/panel/real_overview_screen.dart`,
+`real_client_detail_screen.dart`) — separate from, and much thinner than, the demo's
+equivalents. Not built yet: the real plan editor and marketplace matching — still gated on
+that same plan-model question.
 
 **Wellkit** is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an
