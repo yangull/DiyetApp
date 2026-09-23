@@ -89,6 +89,10 @@ change between them; only measurements do.
 | Row height | 72 | 44 |
 | Avatar | 40 | 28 |
 
+In the panel, buttons and chips are 36 tall and text fields and dropdowns 38, side by
+side on one line. Flutter's own `VisualDensity` is pinned to standard in the theme:
+`AppDensity` is the only density system.
+
 Spacing scale (`AppSpacing`): 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48.
 Navigation: the client app uses a bottom bar; the panel uses a `NavigationRail` with
 labels. Cards and app bars have no elevation; separation comes from borders and surface
@@ -129,3 +133,11 @@ instead.
 
 Turkish UI. "Sen" in the client app, "siz" in the panel; always "danışan", never
 "müşteri" (#47–#49). Auth errors stay in English until l10n (#44).
+
+- **Buttons use the short form:** "Kaydet", "Vazgeç", "İptal et", "Davet gönder", "Tekrar
+  dene". Sentences, hints and dialog text use "siz" (#120).
+- **Turkish casing and numbers.** Uppercase labels go through `trUpper` (so "tipi" becomes
+  "TİPİ", not "TIPI") and decimals through `formatDecimal` (72,4 kg, not 72.4), both in
+  the panel's `lib/util/turkish.dart`.
+- "Yapay zekâ taslağı", not "AI taslağı". No English product words ("Marketplace") in
+  UI text: the section is "Diyetisyen bul".

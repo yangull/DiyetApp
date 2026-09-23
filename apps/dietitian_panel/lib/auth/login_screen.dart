@@ -109,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Giriş yapın'),
+                          : const Text('Giriş yap'),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextButton(

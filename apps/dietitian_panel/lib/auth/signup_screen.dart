@@ -133,7 +133,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Kayıt olun'),
+                          : const Text('Kayıt ol'),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextButton(

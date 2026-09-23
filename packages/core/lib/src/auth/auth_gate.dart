@@ -5,7 +5,7 @@ import 'auth_providers.dart';
 import 'models.dart';
 
 /// What an authenticated or mismatched screen needs to act, beyond the data
-/// it was handed: refetch the identity (the "Durumu Yenile" button), or sign
+/// it was handed: refetch the identity (the "Durumu yenile" button), or sign
 /// out (every screen past the login form needs an escape hatch).
 class AuthGateActions {
   const AuthGateActions({required this.refreshIdentity, required this.signOut});

@@ -36,7 +36,7 @@ class FakeProfileRepository implements ProfileRepository {
   }
 
   /// Lets a test simulate the dietitian getting approved between two
-  /// "Durumu Yenile" presses.
+  /// "Durumu yenile" presses.
   void setVerificationStatus(String userId, VerificationStatus status) {
     final current = _dietitians[userId];
     if (current == null) throw StateError('No seeded dietitian: $userId');

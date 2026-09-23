@@ -53,6 +53,56 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
   Sex _sex = Sex.kadin;
   ActivityLevel _activity = ActivityLevel.ortaAktif;
 
+  /// Compared with the starting values rather than tracked on every
+  /// keystroke, so typing and deleting a letter does not count as a change.
+  bool get _dirty =>
+      _sex != Sex.kadin ||
+      _activity != ActivityLevel.ortaAktif ||
+      _goal.text != 'Kilo verme' ||
+      _dietType.text != 'standart' ||
+      [
+        _name,
+        _age,
+        _height,
+        _weight,
+        _targetWeight,
+        _allergies,
+        _conditions,
+        _medications,
+        _note,
+        ..._anamnesis.values,
+      ].any((c) => c.text.trim().isNotEmpty);
+
+  /// Both exits come through here, the app-bar back arrow and "Vazgeç": a
+  /// half-filled anamnez is too much work to lose to one click.
+  Future<void> _confirmLeave() async {
+    final navigator = Navigator.of(context);
+    if (!_dirty) {
+      navigator.pop();
+      return;
+    }
+    final leave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Değişiklikler kaydedilmedi'),
+        content: const Text(
+          'Çıkarsanız bu formda girdiğiniz bilgiler silinir.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Düzenlemeye dön'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sil ve çık'),
+          ),
+        ],
+      ),
+    );
+    if (leave ?? false) navigator.pop();
+  }
+
   @override
   void dispose() {
     for (final c in [
@@ -79,151 +129,157 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Yeni danışan')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(context.density.pagePadding),
-          children: [
-            Text('Temel bilgiler', style: text.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  children: [
-                    _row(
-                      [
-                        _field(_name, 'Ad soyad', required: true),
-                        _number(_age, 'Yaş', min: 10, max: 100),
-                        _dropdown<Sex>(
-                          label: 'Cinsiyet',
-                          value: _sex,
-                          entries: {Sex.kadin: 'Kadın', Sex.erkek: 'Erkek'},
-                          onChanged: (v) => setState(() => _sex = v),
-                        ),
-                      ],
-                      flex: [3, 1, 1],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _row([
-                      _number(_height, 'Boy (cm)', min: 100, max: 230),
-                      _number(_weight, 'Kilo (kg)', min: 30, max: 300),
-                      _number(
-                        _targetWeight,
-                        'Hedef kilo (kg)',
-                        min: 30,
-                        max: 300,
-                        optional: true,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmLeave();
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Yeni danışan')),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: EdgeInsets.all(context.density.pagePadding),
+            children: [
+              Text('Temel bilgiler', style: text.titleLarge),
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    children: [
+                      _row(
+                        [
+                          _field(_name, 'Ad soyad', required: true),
+                          _number(_age, 'Yaş', min: 10, max: 100),
+                          _dropdown<Sex>(
+                            label: 'Cinsiyet',
+                            value: _sex,
+                            entries: {Sex.kadin: 'Kadın', Sex.erkek: 'Erkek'},
+                            onChanged: (v) => setState(() => _sex = v),
+                          ),
+                        ],
+                        flex: [3, 1, 1],
                       ),
-                    ]),
-                    const SizedBox(height: AppSpacing.lg),
-                    _row(
-                      [
-                        _field(_goal, 'Hedef'),
-                        _dropdown<ActivityLevel>(
-                          label: 'Hareket düzeyi',
-                          value: _activity,
-                          entries: const {
-                            ActivityLevel.sedanter: 'Hareketsiz',
-                            ActivityLevel.hafifAktif: 'Az hareketli',
-                            ActivityLevel.ortaAktif: 'Orta hareketli',
-                            ActivityLevel.aktif: 'Hareketli',
-                            ActivityLevel.cokAktif: 'Çok hareketli',
-                          },
-                          onChanged: (v) => setState(() => _activity = v),
+                      const SizedBox(height: AppSpacing.lg),
+                      _row([
+                        _number(_height, 'Boy (cm)', min: 100, max: 230),
+                        _number(_weight, 'Kilo (kg)', min: 30, max: 300),
+                        _number(
+                          _targetWeight,
+                          'Hedef kilo (kg)',
+                          min: 30,
+                          max: 300,
+                          optional: true,
                         ),
-                      ],
-                      flex: [2, 2],
-                    ),
-                  ],
+                      ]),
+                      const SizedBox(height: AppSpacing.lg),
+                      _row(
+                        [
+                          _field(_goal, 'Hedef'),
+                          _dropdown<ActivityLevel>(
+                            label: 'Hareket düzeyi',
+                            value: _activity,
+                            entries: const {
+                              ActivityLevel.sedanter: 'Hareketsiz',
+                              ActivityLevel.hafifAktif: 'Az hareketli',
+                              ActivityLevel.ortaAktif: 'Orta hareketli',
+                              ActivityLevel.aktif: 'Hareketli',
+                              ActivityLevel.cokAktif: 'Çok hareketli',
+                            },
+                            onChanged: (v) => setState(() => _activity = v),
+                          ),
+                        ],
+                        flex: [2, 2],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Sağlık bilgileri', style: text.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  children: [
-                    _row(
-                      [
-                        _field(_dietType, 'Beslenme tipi'),
+              const SizedBox(height: AppSpacing.xl),
+              Text('Sağlık bilgileri', style: text.titleLarge),
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    children: [
+                      _row(
+                        [
+                          _field(_dietType, 'Beslenme tipi'),
+                          _field(
+                            _allergies,
+                            'Alerji / hassasiyet',
+                            hint: 'virgülle ayırın',
+                          ),
+                        ],
+                        flex: [1, 2],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _row([
                         _field(
-                          _allergies,
-                          'Alerji / hassasiyet',
+                          _conditions,
+                          'Kronik rahatsızlık',
                           hint: 'virgülle ayırın',
                         ),
-                      ],
-                      flex: [1, 2],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _row([
-                      _field(
-                        _conditions,
-                        'Kronik rahatsızlık',
-                        hint: 'virgülle ayırın',
-                      ),
-                      _field(
-                        _medications,
-                        'İlaç / takviye',
-                        hint: 'virgülle ayırın',
-                      ),
-                    ]),
-                  ],
+                        _field(
+                          _medications,
+                          'İlaç / takviye',
+                          hint: 'virgülle ayırın',
+                        ),
+                      ]),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Anamnez', style: text.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Bu bölümdeki sorular bizim tahminimiz — ilk görüşmede gerçekte '
-              'neleri sorduğunuzu bilmiyoruz. Sormadıklarınızı çizin, eksik '
-              'olanları söyleyin: hangi cevap planı değiştiriyorsa onu '
-              'modellemek istiyoruz.',
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  children: [
-                    for (final entry in _anamnesis.entries)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: _field(entry.value, entry.key),
-                      ),
-                    _field(_note, 'Diğer notlar', maxLines: 3),
-                  ],
+              const SizedBox(height: AppSpacing.xl),
+              Text('Anamnez', style: text.titleLarge),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Bu bölümdeki sorular bizim tahminimiz — ilk görüşmede gerçekte '
+                'neleri sorduğunuzu bilmiyoruz. Sormadıklarınızı çizin, eksik '
+                'olanları söyleyin: hangi cevap planı değiştiriyorsa onu '
+                'modellemek istiyoruz.',
+                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    children: [
+                      for (final entry in _anamnesis.entries)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _field(entry.value, entry.key),
+                        ),
+                      _field(_note, 'Diğer notlar', maxLines: 3),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Row(
-              children: [
-                FilledButton(
-                  onPressed: _save,
-                  child: const Text('Kaydet ve taslak oluştur'),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Vazgeç'),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
-              'AI taslağı hazırlanır ve onayınıza düşer.',
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xl),
+              Row(
+                children: [
+                  FilledButton(
+                    onPressed: _save,
+                    child: const Text('Kaydet ve taslak oluştur'),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  TextButton(
+                    onPressed: _confirmLeave,
+                    child: const Text('Vazgeç'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
+                'yapay zekâ taslağı hazırlanır ve onayınıza düşer.',
+                style: text.bodySmall?.copyWith(color: palette.textMuted),
+              ),
+            ],
+          ),
         ),
       ),
     );

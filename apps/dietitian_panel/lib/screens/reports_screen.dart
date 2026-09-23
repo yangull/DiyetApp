@@ -6,6 +6,7 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/progress.dart';
 import '../widgets/weight_chart.dart';
+import '../util/turkish.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -95,7 +96,7 @@ class _Delta extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${progress.deltaKg.abs().toStringAsFixed(1)} kg',
+          '${formatDecimal(progress.deltaKg.abs())} kg',
           style: text.titleMedium?.copyWith(
             color: color,
             fontFeatures: const [FontFeature.tabularFigures()],

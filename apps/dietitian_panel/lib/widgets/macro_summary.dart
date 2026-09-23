@@ -2,11 +2,15 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../demo/demo_models.dart';
+import '../util/turkish.dart';
 
 /// Four independent measures. Each shares the brand hue and takes its
 /// identity from the label rather than from four decorative colors — no
 /// progress bar here, since the plan carries no separate per-macro target to
 /// measure against yet (only the kcal figure the dietitian sets directly).
+///
+/// Sitting right above the meals, the boxes read as meal totals, but nothing
+/// here is summed from the meals. The caption and the kcal label say so.
 class MacroSummary extends StatelessWidget {
   const MacroSummary({super.key, required this.kcal, required this.macros});
 
@@ -15,12 +19,31 @@ class MacroSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Örnek makro hedefleri · öğünlerden hesaplanmaz',
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: context.palette.textMuted),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _row(),
+      ],
+    );
+  }
+
+  Widget _row() {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: _Macro(label: 'Kalori', value: '$kcal', unit: 'kcal'),
+            child: _Macro(
+              label: 'Belirlenen enerji hedefi',
+              value: '$kcal',
+              unit: 'kcal',
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -67,7 +90,7 @@ class _Macro extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              label.toUpperCase(),
+              trUpper(label),
               style: text.labelSmall?.copyWith(color: palette.textMuted),
             ),
             const SizedBox(height: AppSpacing.sm),

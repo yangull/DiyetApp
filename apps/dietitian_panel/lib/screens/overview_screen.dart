@@ -6,12 +6,21 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/triage.dart';
 import 'client_detail_screen.dart';
+import 'messages_screen.dart';
 import 'plan_editor_screen.dart';
+import '../util/turkish.dart';
 
 class OverviewScreen extends ConsumerWidget {
-  const OverviewScreen({super.key, required this.onOpenClients});
+  const OverviewScreen({
+    super.key,
+    required this.onOpenClients,
+    required this.onOpenMessages,
+    required this.onOpenAppointments,
+  });
 
   final VoidCallback onOpenClients;
+  final VoidCallback onOpenMessages;
+  final VoidCallback onOpenAppointments;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +39,12 @@ class OverviewScreen extends ConsumerWidget {
           style: text.bodyLarge?.copyWith(color: palette.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xxl),
-        _TriageCard(signals: signals, onOpenClients: onOpenClients),
+        _TriageCard(
+          signals: signals,
+          onOpenClients: onOpenClients,
+          onOpenMessages: onOpenMessages,
+          onOpenAppointments: onOpenAppointments,
+        ),
         const SizedBox(height: AppSpacing.xxl),
         Text('Sıradaki işler', style: text.titleLarge),
         const SizedBox(height: AppSpacing.md),
@@ -97,10 +111,17 @@ class OverviewScreen extends ConsumerWidget {
 /// above the counters, and the counters were pushed below the work, because
 /// "5 aktif danışan" is not a thing anyone acts on at nine in the morning.
 class _TriageCard extends StatelessWidget {
-  const _TriageCard({required this.signals, required this.onOpenClients});
+  const _TriageCard({
+    required this.signals,
+    required this.onOpenClients,
+    required this.onOpenMessages,
+    required this.onOpenAppointments,
+  });
 
   final List<TriageSignal> signals;
   final VoidCallback onOpenClients;
+  final VoidCallback onOpenMessages;
+  final VoidCallback onOpenAppointments;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +162,12 @@ class _TriageCard extends StatelessWidget {
                 ),
               )
             else
-              for (final signal in signals) _SignalRow(signal: signal),
+              for (final signal in signals)
+                _SignalRow(
+                  signal: signal,
+                  onOpenMessages: onOpenMessages,
+                  onOpenAppointments: onOpenAppointments,
+                ),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Bu liste bizim tahminimiz: 7 gündür tartılmayan, 24 saattir '
@@ -156,15 +182,47 @@ class _TriageCard extends StatelessWidget {
   }
 }
 
-class _SignalRow extends StatelessWidget {
-  const _SignalRow({required this.signal});
+/// The link does the task the reason names. It used to open the client
+/// record for every reason, and answering a message then meant going back,
+/// opening Mesajlar and finding the client again.
+class _SignalRow extends ConsumerWidget {
+  const _SignalRow({
+    required this.signal,
+    required this.onOpenMessages,
+    required this.onOpenAppointments,
+  });
 
   final TriageSignal signal;
+  final VoidCallback onOpenMessages;
+  final VoidCallback onOpenAppointments;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
+    final clientId = signal.client.id;
+
+    void openClient({bool atWeights = false}) => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ClientDetailScreen(clientId: clientId, showWeights: atWeights),
+      ),
+    );
+
+    final (taskLabel, task) = switch (signal.kind) {
+      TriageKind.unansweredMessage => (
+        'Mesajı yanıtla',
+        () {
+          ref.read(selectedConversationProvider.notifier).select(clientId);
+          onOpenMessages();
+        },
+      ),
+      TriageKind.noShow => ('Randevuları aç', onOpenAppointments),
+      TriageKind.staleWeighIn => (
+        'Ölçümleri incele',
+        () => openClient(atWeights: true),
+      ),
+    };
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -172,23 +230,40 @@ class _SignalRow extends StatelessWidget {
         children: [
           Icon(_icon(signal.kind), size: 20, color: palette.warning),
           const SizedBox(width: AppSpacing.md),
-          SizedBox(
-            width: 160,
-            child: Text(signal.client.name, style: text.titleMedium),
+          // Both halves wrap rather than overflow: two labelled actions
+          // don't fit beside the reason on a narrow window.
+          Expanded(
+            flex: 3,
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SizedBox(
+                  width: 160,
+                  child: Text(signal.client.name, style: text.titleMedium),
+                ),
+                Text(
+                  signal.detail,
+                  style: text.bodyMedium?.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
           Expanded(
-            child: Text(
-              signal.detail,
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+            flex: 2,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              children: [
+                OutlinedButton(onPressed: task, child: Text(taskLabel)),
+                TextButton(
+                  onPressed: openClient,
+                  child: const Text('Danışanı aç'),
+                ),
+              ],
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ClientDetailScreen(clientId: signal.client.id),
-              ),
-            ),
-            child: const Text('Danışanı aç'),
           ),
         ],
       ),
@@ -323,7 +398,7 @@ class _Metric extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              label.toUpperCase(),
+              trUpper(label),
               style: text.labelSmall?.copyWith(
                 color: context.palette.textMuted,
               ),

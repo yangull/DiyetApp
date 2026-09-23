@@ -30,8 +30,11 @@ class RealClientDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(fallbackName ?? 'Danışan')),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            _Message(title: 'Danışan bilgileri yüklenemedi', body: '$error'),
+        error: (_, _) => _Message(
+          title: 'Danışan bilgileri yüklenemedi',
+          body: 'Bağlantınızı kontrol edip tekrar deneyin.',
+          onRetry: () => ref.invalidate(_clientDetailProvider(clientId)),
+        ),
         data: (data) => _Detail(detail: data),
       ),
     );
@@ -118,10 +121,15 @@ class _Fact extends StatelessWidget {
 }
 
 class _Message extends StatelessWidget {
-  const _Message({required this.title, required this.body});
+  const _Message({
+    required this.title,
+    required this.body,
+    required this.onRetry,
+  });
 
   final String title;
   final String body;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -140,8 +148,13 @@ class _Message extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               body,
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            OutlinedButton(
+              onPressed: onRetry,
+              child: const Text('Tekrar dene'),
             ),
           ],
         ),

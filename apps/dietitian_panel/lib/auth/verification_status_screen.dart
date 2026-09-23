@@ -65,12 +65,12 @@ class VerificationStatusScreen extends StatelessWidget {
                     if (!rejected)
                       FilledButton(
                         onPressed: actions.refreshIdentity,
-                        child: const Text('Durumu Yenile'),
+                        child: const Text('Durumu yenile'),
                       ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed: actions.signOut,
-                      child: const Text('Çıkış yapın'),
+                      child: const Text('Çıkış yap'),
                     ),
                   ],
                 ),

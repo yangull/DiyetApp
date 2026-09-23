@@ -78,7 +78,7 @@ void main() {
   }, height: 1600);
 
   _shot('11-hatirlatmalar', (tester) async {
-    await _open(tester, 'Hatırlatmalar');
+    await _open(tester, 'Hatırlatma ayarları');
   });
 }
 

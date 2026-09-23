@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../demo/demo_models.dart';
+import '../util/turkish.dart';
 
 /// The plan as the client receives it: a sheet to carry, stick on a fridge, or
 /// read on a phone. This is the artifact a dietitian hands over today, and the
@@ -191,7 +192,7 @@ pw.Widget _figure(String label, String value) => pw.Column(
   crossAxisAlignment: pw.CrossAxisAlignment.start,
   children: [
     pw.Text(
-      label.toUpperCase(),
+      trUpper(label),
       style: const pw.TextStyle(fontSize: 7, color: _muted),
     ),
     pw.SizedBox(height: 2),

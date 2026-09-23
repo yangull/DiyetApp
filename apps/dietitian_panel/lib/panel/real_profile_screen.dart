@@ -68,7 +68,7 @@ class RealProfileScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         OutlinedButton(
           onPressed: actions.signOut,
-          child: const Text('Çıkış yapın'),
+          child: const Text('Çıkış yap'),
         ),
       ],
     );

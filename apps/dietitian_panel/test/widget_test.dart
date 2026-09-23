@@ -19,7 +19,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Giriş yapın'), findsOneWidget);
+    expect(find.text('Giriş yap'), findsOneWidget);
     expect(find.text('Hesabınız yok mu? Kayıt olun'), findsOneWidget);
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
@@ -131,6 +131,81 @@ void main() {
     },
   );
 
+  group('the real client list', () {
+    Future<FakeClientRelationshipRepository> pumpList(
+      WidgetTester tester,
+      FakeClientRelationshipRepository Function() makeRepo,
+      void Function(FakeClientRelationshipRepository, String dietitianId) seed,
+    ) async {
+      final auth = FakeAuthRepository();
+      final profiles = FakeProfileRepository();
+      await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+      final dietitianId = auth.currentSession!.userId;
+      profiles.seedDietitian(
+        dietitianId,
+        fullName: 'Dyt. Deniz',
+        status: VerificationStatus.approved,
+      );
+      final relationships = makeRepo();
+      seed(relationships, dietitianId);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          // Riverpod retries a failed provider on its own; off here so the
+          // error state is reached and the button is what retries.
+          retry: (_, _) => null,
+          overrides: [
+            authRepositoryProvider.overrideWithValue(auth),
+            profileRepositoryProvider.overrideWithValue(profiles),
+            clientRelationshipRepositoryProvider.overrideWithValue(
+              relationships,
+            ),
+          ],
+          child: const DietitianPanelApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return relationships;
+    }
+
+    testWidgets('a declined invite does not say it is waiting', (tester) async {
+      await pumpList(
+        tester,
+        FakeClientRelationshipRepository.new,
+        (repo, dietitianId) => repo.seedRelationship(
+          dietitianId: dietitianId,
+          invitedEmail: 'hayir@example.com',
+          status: RelationshipStatus.declined,
+        ),
+      );
+
+      expect(find.text('Davet reddedildi'), findsOneWidget);
+      expect(find.text('Davet bekliyor'), findsNothing);
+    });
+
+    testWidgets('a failed load explains itself in Turkish and retries', (
+      tester,
+    ) async {
+      final repo = await pumpList(
+        tester,
+        () => _FlakyRelationships(failures: 1),
+        (repo, dietitianId) => repo.seedRelationship(
+          dietitianId: dietitianId,
+          invitedEmail: 'bekleyen@example.com',
+        ),
+      );
+
+      expect(find.text('Danışan listesi yüklenemedi'), findsOneWidget);
+      expect(find.textContaining('Exception'), findsNothing);
+
+      await tester.tap(find.text('Tekrar dene'));
+      await tester.pumpAndSettle();
+
+      expect((repo as _FlakyRelationships).failures, 0);
+      expect(find.text('bekleyen@example.com'), findsOneWidget);
+    });
+  });
+
   testWidgets('another dietitian sees none of the first one\'s clients', (
     tester,
   ) async {
@@ -200,7 +275,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'Yeni@Example.com');
-    await tester.tap(find.text('Davet gönderin'));
+    await tester.tap(find.text('Davet gönder'));
     await tester.pumpAndSettle();
 
     // Normalized on the way in, so it matches the JWT email comparison the
@@ -231,4 +306,19 @@ void main() {
     expect(find.text('Bu giriş bu uygulama için değil.'), findsOneWidget);
     expect(find.text('Genel Bakış'), findsNothing);
   });
+}
+
+class _FlakyRelationships extends FakeClientRelationshipRepository {
+  _FlakyRelationships({required this.failures});
+
+  int failures;
+
+  @override
+  Future<List<ClientRelationship>> fetchForDietitian(String dietitianId) {
+    if (failures > 0) {
+      failures--;
+      return Future.error(Exception('bağlantı koptu'));
+    }
+    return super.fetchForDietitian(dietitianId);
+  }
 }

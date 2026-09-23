@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import 'real_client_detail_screen.dart';
+import '../util/turkish.dart';
 
 /// The dietitian's real client list. Two calls back this screen: the
 /// relationship rows (which include pending invites, so an invite is visible
@@ -49,7 +50,10 @@ class RealOverviewScreen extends ConsumerWidget {
           Expanded(
             child: relationships.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => _ErrorState(error: error),
+              error: (_, _) => _ErrorState(
+                onRetry: () =>
+                    ref.invalidate(dietitianClientsProvider(profile.id)),
+              ),
               data: (rows) => rows.isEmpty
                   ? const Center(
                       child: Padding(
@@ -57,15 +61,34 @@ class RealOverviewScreen extends ConsumerWidget {
                         child: _EmptyState(),
                       ),
                     )
-                  : _RelationshipTable(
-                      rows: rows,
-                      // A name lookup that is still loading shows the row
-                      // without a name rather than blocking the whole list.
-                      names: {
-                        for (final name
-                            in names.asData?.value ?? const <ClientName>[])
-                          name.clientId: name.fullName,
-                      },
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Without this, a failed name lookup looked the same
+                        // as clients who have no name: a column of dashes.
+                        if (names.hasError) ...[
+                          _NamesErrorNotice(
+                            onRetry: () => ref.invalidate(
+                              dietitianClientNamesProvider(profile.id),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                        ],
+                        Expanded(
+                          child: _RelationshipTable(
+                            rows: rows,
+                            // A name lookup that is still loading shows the
+                            // row without a name rather than blocking the
+                            // whole list.
+                            names: {
+                              for (final name
+                                  in names.asData?.value ??
+                                      const <ClientName>[])
+                                name.clientId: name.fullName,
+                            },
+                          ),
+                        ),
+                      ],
                     ),
             ),
           ),
@@ -173,11 +196,11 @@ class _InviteDialogState extends State<_InviteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Vazgeçin'),
+          child: const Text('Vazgeç'),
         ),
         FilledButton(
           onPressed: () => _submit(context),
-          child: const Text('Davet gönderin'),
+          child: const Text('Davet gönder'),
         ),
       ],
     );
@@ -242,7 +265,7 @@ class _RelationshipTable extends StatelessWidget {
     return Expanded(
       flex: flex,
       child: Text(
-        label.toUpperCase(),
+        trUpper(label),
         style: Theme.of(context).textTheme.labelSmall
             ?.copyWith(color: context.palette.textMuted),
       ),
@@ -275,7 +298,12 @@ class _RelationshipRow extends StatelessWidget {
           Expanded(
             flex: 3,
             child: Text(
-              name ?? (openable ? '—' : 'Davet bekliyor'),
+              name ??
+                  switch (row.status) {
+                    RelationshipStatus.active => '—',
+                    RelationshipStatus.pending => 'Davet bekliyor',
+                    RelationshipStatus.declined => 'Davet reddedildi',
+                  },
               style: openable
                   ? text.titleMedium
                   : text.bodyMedium?.copyWith(color: palette.textMuted),
@@ -348,10 +376,12 @@ class _RelationshipStatusPill extends StatelessWidget {
   }
 }
 
+/// The raw exception used to be printed here. A dietitian can't act on a
+/// PostgrestException; what they can do is try again.
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.error});
+  const _ErrorState({required this.onRetry});
 
-  final Object error;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -367,12 +397,40 @@ class _ErrorState extends StatelessWidget {
           Text('Danışan listesi yüklenemedi', style: text.titleLarge),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '$error',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            'Bağlantınızı kontrol edip tekrar deneyin.',
+            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: AppSpacing.lg),
+          OutlinedButton(onPressed: onRetry, child: const Text('Tekrar dene')),
         ],
       ),
+    );
+  }
+}
+
+class _NamesErrorNotice extends StatelessWidget {
+  const _NamesErrorNotice({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+
+    return Row(
+      children: [
+        Icon(Icons.error_outline, size: 18, color: palette.warning),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            'Danışan adları yüklenemedi; liste adsız gösteriliyor.',
+            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+          ),
+        ),
+        TextButton(onPressed: onRetry, child: const Text('Tekrar dene')),
+      ],
     );
   }
 }
@@ -397,8 +455,8 @@ class _EmptyState extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Bir danışanı e-posta adresiyle davet edebilirsiniz. Marketplace '
-          'açıldığında eşleşmeleriniz de burada görünecek.',
+          'Bir danışanı e-posta adresiyle davet edebilirsiniz. "Diyetisyen '
+          'bul" özelliği açıldığında eşleşmeleriniz de burada görünecek.',
           style: text.bodyMedium?.copyWith(color: palette.textSecondary),
           textAlign: TextAlign.center,
         ),

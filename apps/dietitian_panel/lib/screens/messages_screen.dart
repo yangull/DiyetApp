@@ -6,11 +6,24 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
+import '../util/turkish.dart';
 
 /// In-app messaging, per PLANNING.md P2: chat stays in the product rather than
 /// moving to WhatsApp. Its original reason (the commission) is on hold, so the
 /// rule itself is being re-asked (QUESTIONS.md C5). This screen exists so a
 /// dietitian can react to the real thing, not a description of it.
+/// Which conversation is open. Outside the screen so the overview's
+/// "Mesajı yanıtla" link can open this screen on the right client.
+final selectedConversationProvider =
+    NotifierProvider<SelectedConversation, String?>(SelectedConversation.new);
+
+class SelectedConversation extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String clientId) => state = clientId;
+}
+
 class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
 
@@ -19,12 +32,28 @@ class MessagesScreen extends ConsumerStatefulWidget {
 }
 
 class _MessagesScreenState extends ConsumerState<MessagesScreen> {
-  String? _selectedClientId;
+  /// One draft per client. A single shared controller carried text typed for
+  /// one client into the next conversation, where "Gönder" sent it to the
+  /// wrong person.
+  final _drafts = <String, TextEditingController>{};
+
+  @override
+  void dispose() {
+    for (final draft in _drafts.values) {
+      draft.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final demo = ref.watch(demoProvider);
-    final selectedId = _selectedClientId ?? demo.clients.first.id;
+    final selected = ref.watch(selectedConversationProvider);
+    // A client added during an interview disappears on reset.
+    final selectedId = demo.clients.any((c) => c.id == selected)
+        ? selected!
+        : demo.clients.first.id;
+    final draft = _drafts.putIfAbsent(selectedId, TextEditingController.new);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -42,16 +71,19 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                 width: listWidth,
                 child: Card(
                   clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  // Scrolls on its own: with 40 clients a plain Column ran
+                  // off the bottom and the later conversations were
+                  // unreachable.
+                  child: ListView(
                     children: [
                       for (final client in demo.clients)
                         _ConversationRow(
                           client: client,
                           conversation: demo.conversationOf(client.id),
                           selected: client.id == selectedId,
-                          onTap: () =>
-                              setState(() => _selectedClientId = client.id),
+                          onTap: () => ref
+                              .read(selectedConversationProvider.notifier)
+                              .select(client.id),
                         ),
                     ],
                   ),
@@ -61,7 +93,10 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
               Expanded(
                 child: Card(
                   clipBehavior: Clip.antiAlias,
-                  child: _ConversationDetail(clientId: selectedId),
+                  child: _ConversationDetail(
+                    clientId: selectedId,
+                    draft: draft,
+                  ),
                 ),
               ),
               if (showContext) ...[
@@ -247,7 +282,7 @@ class _ContextFact extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
+            trUpper(label),
             style: text.labelSmall?.copyWith(color: palette.textMuted),
           ),
           const SizedBox(height: 2),
@@ -268,37 +303,24 @@ class _ContextFact extends StatelessWidget {
   }
 }
 
-class _ConversationDetail extends ConsumerStatefulWidget {
-  const _ConversationDetail({required this.clientId});
+class _ConversationDetail extends ConsumerWidget {
+  const _ConversationDetail({required this.clientId, required this.draft});
 
   final String clientId;
+  final TextEditingController draft;
 
-  @override
-  ConsumerState<_ConversationDetail> createState() =>
-      _ConversationDetailState();
-}
-
-class _ConversationDetailState extends ConsumerState<_ConversationDetail> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _send() {
-    final text = _controller.text;
+  void _send(WidgetRef ref) {
+    final text = draft.text;
     if (text.trim().isEmpty) return;
-    ref.read(demoProvider.notifier).sendMessage(widget.clientId, text);
-    _controller.clear();
+    ref.read(demoProvider.notifier).sendMessage(clientId, text);
+    draft.clear();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final demo = ref.watch(demoProvider);
-    final client = demo.clientOf(widget.clientId);
-    final conversation = demo.conversationOf(widget.clientId);
+    final client = demo.clientOf(clientId);
+    final conversation = demo.conversationOf(clientId);
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
@@ -338,18 +360,18 @@ class _ConversationDetailState extends ConsumerState<_ConversationDetail> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: _controller,
+                  controller: draft,
                   decoration: const InputDecoration(
                     isDense: true,
                     hintText: 'Mesaj yazın…',
                   ),
-                  onSubmitted: (_) => _send(),
+                  onSubmitted: (_) => _send(ref),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               IconButton(
                 tooltip: 'Gönder',
-                onPressed: _send,
+                onPressed: () => _send(ref),
                 icon: const Icon(Icons.send_outlined),
               ),
             ],

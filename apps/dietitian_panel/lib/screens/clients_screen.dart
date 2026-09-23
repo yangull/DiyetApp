@@ -7,6 +7,7 @@ import '../demo/demo_repository.dart';
 import '../widgets/status_pill.dart';
 import 'client_detail_screen.dart';
 import 'intake_form_screen.dart';
+import '../util/turkish.dart';
 
 class ClientsScreen extends ConsumerStatefulWidget {
   const ClientsScreen({super.key});
@@ -99,16 +100,36 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                 ),
               ),
             ),
-            DropdownMenu<String?>(
-              initialSelection: _goal,
-              label: const Text('Hedef'),
+            // Not DropdownMenu: its arrow button is a fixed 48 px, which
+            // the theme can't reach, so it stood taller than the search
+            // field beside it. This one has a 24 px content floor instead,
+            // so its padding is trimmed to land on the same 38 px.
+            SizedBox(
               width: 220,
-              onSelected: (value) => setState(() => _goal = value),
-              dropdownMenuEntries: [
-                const DropdownMenuEntry(value: null, label: 'Tüm hedefler'),
-                for (final goal in goals)
-                  DropdownMenuEntry(value: goal, label: goal),
-              ],
+              child: DropdownButtonFormField<String?>(
+                initialValue: _goal,
+                isExpanded: true,
+                iconSize: 20,
+                decoration: const InputDecoration(
+                  labelText: 'Hedef',
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 7,
+                  ),
+                ),
+                onChanged: (value) => setState(() => _goal = value),
+                items: [
+                  const DropdownMenuItem(
+                    value: null,
+                    child: Text('Tüm hedefler'),
+                  ),
+                  for (final goal in goals)
+                    DropdownMenuItem(
+                      value: goal,
+                      child: Text(goal, overflow: TextOverflow.ellipsis),
+                    ),
+                ],
+              ),
             ),
             FilterChip(
               label: const Text('Onay bekleyen'),
@@ -189,7 +210,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            '${client.weightKg.toStringAsFixed(1)} kg',
+                            '${formatDecimal(client.weightKg)} kg',
                             style: text.bodyMedium?.copyWith(
                               fontFeatures: const [
                                 FontFeature.tabularFigures(),
@@ -221,7 +242,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     return Expanded(
       flex: flex,
       child: Text(
-        label.toUpperCase(),
+        trUpper(label),
         style: Theme.of(context).textTheme.labelSmall
             ?.copyWith(color: context.palette.textMuted),
       ),

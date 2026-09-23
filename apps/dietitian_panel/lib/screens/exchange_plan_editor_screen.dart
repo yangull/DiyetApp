@@ -86,7 +86,7 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         '${plan.kcal} kcal',
-                        style: text.headlineSmall?.copyWith(
+                        style: text.headlineMedium?.copyWith(
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
@@ -105,7 +105,7 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         '$target kcal',
-                        style: text.headlineSmall?.copyWith(
+                        style: text.headlineMedium?.copyWith(
                           color: palette.textSecondary,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),

@@ -21,6 +21,15 @@ class PanelShell extends StatefulWidget {
 class _PanelShellState extends State<PanelShell> {
   int _index = 0;
 
+  /// Bumped by "Sıfırla". The screens hold state of their own (filters,
+  /// message drafts, the selected goal) that resetting the repository does not
+  /// reach, so a reset remounts them: a fresh interview starts from nothing.
+  int _session = 0;
+
+  /// Settings sit after the rail's destinations in the stack, but not on the
+  /// rail itself: they are configuration, not a daily work screen.
+  static const _settingsIndex = kShowMoney ? 6 : 5;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
@@ -29,7 +38,7 @@ class _PanelShellState extends State<PanelShell> {
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: _index,
+            selectedIndex: _index == _settingsIndex ? null : _index,
             onDestinationSelected: (i) => setState(() => _index = i),
             labelType: NavigationRailLabelType.all,
             backgroundColor: palette.surfaceSubtle,
@@ -65,18 +74,31 @@ class _PanelShellState extends State<PanelShell> {
                 selectedIcon: Icon(Icons.insights),
                 label: Text('Takip'),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.notifications_none),
-                selectedIcon: Icon(Icons.notifications),
-                label: Text('Hatırlatmalar'),
-              ),
             ],
-            trailing: const Expanded(
+            trailing: Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.lg),
-                  child: _ResetDemoButton(),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _RailUtilityButton(
+                        icon: Icons.notifications_none,
+                        label: 'Hatırlatma ayarları',
+                        selected: _index == _settingsIndex,
+                        onPressed: () =>
+                            setState(() => _index = _settingsIndex),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _ResetDemoButton(
+                        onReset: () => setState(() {
+                          _session++;
+                          _index = 0;
+                        }),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -84,9 +106,14 @@ class _PanelShellState extends State<PanelShell> {
           VerticalDivider(width: 1, color: palette.borderSubtle),
           Expanded(
             child: IndexedStack(
+              key: ValueKey(_session),
               index: _index,
               children: [
-                OverviewScreen(onOpenClients: () => setState(() => _index = 1)),
+                OverviewScreen(
+                  onOpenClients: () => setState(() => _index = 1),
+                  onOpenAppointments: () => setState(() => _index = 2),
+                  onOpenMessages: () => setState(() => _index = 3),
+                ),
                 const ClientsScreen(),
                 const AppointmentsScreen(),
                 const MessagesScreen(),
@@ -102,12 +129,55 @@ class _PanelShellState extends State<PanelShell> {
   }
 }
 
+/// A rail-bottom entry for configuration, set apart from the daily screens.
+/// Called "Hatırlatmalar" on the rail, it read like a list of reminders to
+/// act on and opened switches instead.
+class _RailUtilityButton extends StatelessWidget {
+  const _RailUtilityButton({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.primary : context.palette.textSecondary;
+    return TextButton(
+      style: TextButton.styleFrom(foregroundColor: color),
+      onPressed: onPressed,
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Between interviews the panel has to go back to a known state. Everything a
 /// dietitian typed is kept until this is pressed. Icon and label, like the
 /// rail items above it: an icon alone would be a guess (docs/design-system.md,
 /// rule 12).
 class _ResetDemoButton extends ConsumerWidget {
-  const _ResetDemoButton();
+  const _ResetDemoButton({required this.onReset});
+
+  final VoidCallback onReset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -135,7 +205,11 @@ class _ResetDemoButton extends ConsumerWidget {
             ],
           ),
         );
-        if (confirmed ?? false) ref.read(demoProvider.notifier).resetDemo();
+        if (confirmed ?? false) {
+          ref.read(demoProvider.notifier).resetDemo();
+          ref.invalidate(selectedConversationProvider);
+          onReset();
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

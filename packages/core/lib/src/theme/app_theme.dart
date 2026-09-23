@@ -14,6 +14,15 @@ import 'tokens/app_typography.dart';
 abstract final class AppTheme {
   static ThemeData light(AppDensity density) {
     final text = AppTypography.textTheme(density);
+    final controlShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(density.controlRadius),
+    );
+    // Padding is derived from the input token rather than fixed, so a text
+    // field, a dropdown and a chip beside it come out the same height. A fixed
+    // 12 px made the panel's fields 44 px tall next to 36 px buttons.
+    final inputText = text.bodyLarge!;
+    final inputVertical =
+        (density.inputHeight - inputText.fontSize! * inputText.height!) / 2;
 
     return ThemeData(
       colorScheme: const ColorScheme.light(
@@ -30,6 +39,15 @@ abstract final class AppTheme {
         outlineVariant: AppColors.borderSubtle,
       ),
       scaffoldBackgroundColor: AppColors.ground,
+      // AppDensity is the density system. Left alone, Flutter adds its own
+      // on desktop (VisualDensity.compact), which took 8 px off every
+      // control: the panel's 36 px buttons rendered 28 px tall in a Windows
+      // browser. The panel is mouse-driven, so it also drops the 48 px touch
+      // padding that made chips and buttons different heights.
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: density.isCompact
+          ? MaterialTapTargetSize.shrinkWrap
+          : MaterialTapTargetSize.padded,
       textTheme: text,
       extensions: [AppPalette.light, density],
       appBarTheme: AppBarTheme(
@@ -64,24 +82,61 @@ abstract final class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           textStyle: text.labelLarge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(density.controlRadius),
-          ),
+          shape: controlShape,
+        ),
+      ),
+      // Without these, outlined and text buttons kept Material's pill shape
+      // next to the square-cornered filled button.
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size(64, density.controlHeight),
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.borderStrong),
+          textStyle: text.labelLarge,
+          shape: controlShape,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
+          minimumSize: Size(48, density.controlHeight),
           foregroundColor: AppColors.primary,
           textStyle: text.labelLarge,
+          shape: controlShape,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: controlShape,
+        side: const BorderSide(color: AppColors.borderStrong),
+        labelStyle: text.labelLarge?.copyWith(color: AppColors.textPrimary),
+        // The chip adds 2 px of its own above and below the label.
+        padding: EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical:
+              (density.inputHeight -
+                      text.labelLarge!.fontSize! * text.labelLarge!.height!) /
+                  2 -
+              2,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
+        // A non-dense field has a 48 px floor of its own, above inputHeight.
+        isDense: density.isCompact,
         constraints: BoxConstraints(minHeight: density.inputHeight),
-        contentPadding: const EdgeInsets.symmetric(
+        // Icon slots default to 48 px square, which overrode inputHeight on
+        // any field with a search icon or a dropdown arrow.
+        prefixIconConstraints: BoxConstraints(
+          minWidth: density.inputHeight,
+          minHeight: density.inputHeight,
+        ),
+        suffixIconConstraints: BoxConstraints(
+          minWidth: density.inputHeight,
+          minHeight: density.inputHeight,
+        ),
+        contentPadding: EdgeInsets.symmetric(
           horizontal: 14,
-          vertical: 12,
+          vertical: inputVertical,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(density.controlRadius),

@@ -22,7 +22,7 @@ final sessionProvider = StreamProvider<AuthSession?>(
 
 /// Fetches the profile plus whichever detail row matches its role. Keyed by
 /// user id so a fresh sign-in gets a fresh fetch; `ref.invalidate` on this
-/// (by id) is what "Durumu Yenile" calls to re-check verification status.
+/// (by id) is what "Durumu yenile" calls to re-check verification status.
 final identityProvider = FutureProvider.family<AuthedIdentity, String>((
   ref,
   userId,

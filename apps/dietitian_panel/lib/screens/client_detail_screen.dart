@@ -11,14 +11,42 @@ import '../widgets/status_pill.dart';
 import '../widgets/weight_chart.dart';
 import 'exchange_plan_editor_screen.dart';
 import 'plan_editor_screen.dart';
+import '../util/turkish.dart';
 
-class ClientDetailScreen extends ConsumerWidget {
-  const ClientDetailScreen({super.key, required this.clientId});
+class ClientDetailScreen extends ConsumerStatefulWidget {
+  const ClientDetailScreen({
+    super.key,
+    required this.clientId,
+    this.showWeights = false,
+  });
 
   final String clientId;
 
+  /// Opens scrolled to the weight card, for the overview's
+  /// "Ölçümleri incele" link.
+  final bool showWeights;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ClientDetailScreen> createState() => _ClientDetailScreenState();
+}
+
+class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
+  final _weightsKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showWeights) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final target = _weightsKey.currentContext;
+        if (target != null) Scrollable.ensureVisible(target);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clientId = widget.clientId;
     final demo = ref.watch(demoProvider);
     final client = demo.clients.firstWhere((c) => c.id == clientId);
     final plan = demo.planFor(clientId);
@@ -28,214 +56,221 @@ class ClientDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(client.name)),
-      body: ListView(
+      // Not a lazy ListView: the weight card has to be built for
+      // showWeights to scroll to it.
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(context.density.pagePadding),
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Danışan bilgileri', style: text.titleLarge),
-                  const SizedBox(height: AppSpacing.lg),
-                  Wrap(
-                    spacing: AppSpacing.x3,
-                    runSpacing: AppSpacing.lg,
-                    children: [
-                      _Fact(label: 'Yaş', value: '${client.age}'),
-                      _Fact(label: 'Boy', value: '${client.heightCm} cm'),
-                      _Fact(
-                        label: 'Güncel kilo',
-                        value: '${client.weightKg.toStringAsFixed(1)} kg',
-                      ),
-                      _Fact(label: 'Hedef', value: client.goal),
-                      _Fact(
-                        label: 'Hedef kilo',
-                        value: client.targetWeightKg == null
-                            ? '—'
-                            : '${client.targetWeightKg!.toStringAsFixed(1)} kg',
-                      ),
-                      _Fact(
-                        label: 'Başlangıç',
-                        value: formatDate(client.startedOn),
-                      ),
-                      _Fact(label: 'Cinsiyet', value: _sexLabel(client.sex)),
-                      _Fact(
-                        label: 'Hareket düzeyi',
-                        value: _activityLabel(client.activityLevel),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Divider(color: palette.borderSubtle),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text('Sağlık bilgileri', style: text.titleMedium),
-                  const SizedBox(height: AppSpacing.lg),
-                  Wrap(
-                    spacing: AppSpacing.x3,
-                    runSpacing: AppSpacing.lg,
-                    children: [
-                      _Fact(label: 'Beslenme tipi', value: client.dietType),
-                      _Fact(
-                        label: 'Alerji / hassasiyet',
-                        value: _listOrDash(client.allergies),
-                      ),
-                      _Fact(
-                        label: 'Kronik rahatsızlık',
-                        value: _listOrDash(client.chronicConditions),
-                      ),
-                      _Fact(
-                        label: 'İlaç / takviye',
-                        value: _listOrDash(client.medications),
-                      ),
-                    ],
-                  ),
-                  if (client.note.isNotEmpty) ...[
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Danışan bilgileri', style: text.titleLarge),
                     const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      'NOT',
-                      style: text.labelSmall?.copyWith(
-                        color: palette.textMuted,
-                      ),
+                    Wrap(
+                      spacing: AppSpacing.x3,
+                      runSpacing: AppSpacing.lg,
+                      children: [
+                        _Fact(label: 'Yaş', value: '${client.age}'),
+                        _Fact(label: 'Boy', value: '${client.heightCm} cm'),
+                        _Fact(
+                          label: 'Güncel kilo',
+                          value: '${formatDecimal(client.weightKg)} kg',
+                        ),
+                        _Fact(label: 'Hedef', value: client.goal),
+                        _Fact(
+                          label: 'Hedef kilo',
+                          value: client.targetWeightKg == null
+                              ? '—'
+                              : '${formatDecimal(client.targetWeightKg!)} kg',
+                        ),
+                        _Fact(
+                          label: 'Başlangıç',
+                          value: formatDate(client.startedOn),
+                        ),
+                        _Fact(label: 'Cinsiyet', value: _sexLabel(client.sex)),
+                        _Fact(
+                          label: 'Hareket düzeyi',
+                          value: _activityLabel(client.activityLevel),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: AppSpacing.lg),
+                    Divider(color: palette.borderSubtle),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text('Sağlık bilgileri', style: text.titleMedium),
+                    const SizedBox(height: AppSpacing.lg),
+                    Wrap(
+                      spacing: AppSpacing.x3,
+                      runSpacing: AppSpacing.lg,
+                      children: [
+                        _Fact(label: 'Beslenme tipi', value: client.dietType),
+                        _Fact(
+                          label: 'Alerji / hassasiyet',
+                          value: _listOrDash(client.allergies),
+                        ),
+                        _Fact(
+                          label: 'Kronik rahatsızlık',
+                          value: _listOrDash(client.chronicConditions),
+                        ),
+                        _Fact(
+                          label: 'İlaç / takviye',
+                          value: _listOrDash(client.medications),
+                        ),
+                      ],
+                    ),
+                    if (client.note.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'NOT',
+                        style: text.labelSmall?.copyWith(
+                          color: palette.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        client.note,
+                        style: text.bodyMedium?.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _EnergyCard(client: client),
+            const SizedBox(height: AppSpacing.lg),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Diyet planı', style: text.titleLarge),
+                        const SizedBox(width: AppSpacing.md),
+                        StatusPill(state: plan.state),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
-                      client.note,
+                      '${plan.day} · ${plan.kcal} kcal · ${plan.meals.length} öğün',
                       style: text.bodyMedium?.copyWith(
                         color: palette.textSecondary,
                       ),
                     ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _EnergyCard(client: client),
-          const SizedBox(height: AppSpacing.lg),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text('Diyet planı', style: text.titleLarge),
-                      const SizedBox(width: AppSpacing.md),
-                      StatusPill(state: plan.state),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    '${plan.day} · ${plan.kcal} kcal · ${plan.meals.length} öğün',
-                    style: text.bodyMedium?.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.md,
-                    children: [
-                      FilledButton(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                PlanEditorScreen(clientId: clientId),
-                          ),
-                        ),
-                        child: Text(
-                          plan.isDraft ? 'Taslağı düzenle' : 'Planı aç',
-                        ),
-                      ),
-                      // Only where an exchange-list version of the day exists.
-                      if (demo.exchangePlanFor(clientId) != null)
-                        OutlinedButton(
+                    const SizedBox(height: AppSpacing.lg),
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
+                      children: [
+                        FilledButton(
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) =>
-                                  ExchangePlanEditorScreen(clientId: clientId),
+                                  PlanEditorScreen(clientId: clientId),
                             ),
                           ),
-                          child: const Text('Değişim listesiyle dene'),
+                          child: Text(
+                            plan.isDraft ? 'Taslağı düzenle' : 'Planı aç',
+                          ),
                         ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text('Kilo takibi', style: text.titleLarge),
-                      const Spacer(),
-                      if (weights.isNotEmpty)
-                        _ProgressLabel(client: client, entries: weights),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (weights.isEmpty)
-                    Text(
-                      'Henüz ölçüm kaydı yok.',
-                      style: text.bodyMedium?.copyWith(
-                        color: palette.textMuted,
-                      ),
-                    )
-                  else ...[
-                    WeightChart(
-                      entries: weights,
-                      targetKg: client.targetWeightKg,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    for (final entry in weights.reversed.take(4))
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 96,
-                              child: Text(
-                                formatDate(entry.date),
-                                style: text.bodyMedium?.copyWith(
-                                  color: palette.textSecondary,
+                        // Only where an exchange-list version of the day exists.
+                        if (demo.exchangePlanFor(clientId) != null)
+                          OutlinedButton(
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ExchangePlanEditorScreen(
+                                  clientId: clientId,
                                 ),
                               ),
                             ),
-                            Text(
-                              '${entry.kg.toStringAsFixed(1)} kg',
-                              style: text.titleMedium?.copyWith(
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                            child: const Text('Değişim listesiyle dene'),
+                          ),
+                      ],
+                    ),
                   ],
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Ölçümleri şimdilik yalnızca görüntülüyoruz; danışan '
-                    'kendisi giriyor. Tartımı siz mi alıyorsunuz, hangi '
-                    'sıklıkla?',
-                    style: text.bodySmall?.copyWith(color: palette.textMuted),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _MeasurementsCard(measurements: demo.measurementsOf(clientId)),
-        ],
+            const SizedBox(height: AppSpacing.lg),
+            Card(
+              key: _weightsKey,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Kilo takibi', style: text.titleLarge),
+                        const Spacer(),
+                        if (weights.isNotEmpty)
+                          _ProgressLabel(client: client, entries: weights),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    if (weights.isEmpty)
+                      Text(
+                        'Henüz ölçüm kaydı yok.',
+                        style: text.bodyMedium?.copyWith(
+                          color: palette.textMuted,
+                        ),
+                      )
+                    else ...[
+                      WeightChart(
+                        entries: weights,
+                        targetKg: client.targetWeightKg,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      for (final entry in weights.reversed.take(4))
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 96,
+                                child: Text(
+                                  formatDate(entry.date),
+                                  style: text.bodyMedium?.copyWith(
+                                    color: palette.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '${formatDecimal(entry.kg)} kg',
+                                style: text.titleMedium?.copyWith(
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Ölçümleri şimdilik yalnızca görüntülüyoruz; danışan '
+                      'kendisi giriyor. Tartımı siz mi alıyorsunuz, hangi '
+                      'sıklıkla?',
+                      style: text.bodySmall?.copyWith(color: palette.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _MeasurementsCard(measurements: demo.measurementsOf(clientId)),
+          ],
+        ),
       ),
     );
   }
@@ -306,23 +341,23 @@ class _MeasurementsCard extends StatelessWidget {
                         ),
                       ),
                       _MeasurementCell(
-                        value: '${rows[i].waistCm.toStringAsFixed(1)} cm',
+                        value: '${formatDecimal(rows[i].waistCm)} cm',
                         change: _delta(rows, i, (m) => m.waistCm),
                       ),
                       _MeasurementCell(
-                        value: '${rows[i].hipCm.toStringAsFixed(1)} cm',
+                        value: '${formatDecimal(rows[i].hipCm)} cm',
                         change: _delta(rows, i, (m) => m.hipCm),
                       ),
                       _MeasurementCell(
-                        value: rows[i].waistHipRatio.toStringAsFixed(2),
+                        value: formatDecimal(rows[i].waistHipRatio, 2),
                         change: null,
                       ),
                       _MeasurementCell(
-                        value: '${rows[i].bodyFatPct.toStringAsFixed(1)} %',
+                        value: '${formatDecimal(rows[i].bodyFatPct)} %',
                         change: _delta(rows, i, (m) => m.bodyFatPct),
                       ),
                       _MeasurementCell(
-                        value: '${rows[i].muscleMassKg.toStringAsFixed(1)} kg',
+                        value: '${formatDecimal(rows[i].muscleMassKg)} kg',
                         change: _delta(rows, i, (m) => m.muscleMassKg),
                       ),
                     ],
@@ -361,7 +396,7 @@ class _MeasurementHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Expanded(
     child: Text(
-      label.toUpperCase(),
+      trUpper(label),
       style: Theme.of(context).textTheme.labelSmall
           ?.copyWith(color: context.palette.textMuted),
     ),
@@ -390,7 +425,7 @@ class _MeasurementCell extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               '${change! > 0 ? '+' : '−'}'
-              '${change!.abs().toStringAsFixed(1)}',
+              '${formatDecimal(change!.abs())}',
               style: text.bodySmall?.copyWith(color: context.palette.textMuted),
             ),
           ],
@@ -428,7 +463,7 @@ class _ProgressLabel extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${progress.deltaKg.abs().toStringAsFixed(1)} kg',
+          '${formatDecimal(progress.deltaKg.abs())} kg',
           style: text.titleMedium?.copyWith(
             color: color,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -439,7 +474,7 @@ class _ProgressLabel extends StatelessWidget {
           progress.remainingKg == null
               ? progress.label
               : '${progress.label} · hedefe '
-                    '${progress.remainingKg!.abs().toStringAsFixed(1)} kg',
+                    '${formatDecimal(progress.remainingKg!.abs())} kg',
           style: text.bodySmall?.copyWith(color: palette.textMuted),
         ),
       ],
@@ -487,7 +522,7 @@ class _EnergyCard extends StatelessWidget {
                 ),
                 _Fact(
                   label: 'Aktivite katsayısı',
-                  value: factor.toStringAsFixed(1),
+                  value: formatDecimal(factor),
                 ),
                 Text(
                   '=',
@@ -543,7 +578,7 @@ class _Fact extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
+          trUpper(label),
           style: text.labelSmall?.copyWith(color: context.palette.textMuted),
         ),
         const SizedBox(height: 2),

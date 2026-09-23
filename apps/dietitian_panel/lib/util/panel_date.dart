@@ -29,6 +29,6 @@ const _monthsShort = [
   'Ara',
 ];
 
-/// 'Ağu', for chart axes. Used where the axis used to carry a hard-coded month
-/// that quietly went stale as soon as the calendar moved past it.
-String formatMonthShort(DateTime d) => _monthsShort[d.month - 1];
+/// '4 Ağu', for chart axes: the endpoints of a date-spaced series.
+String formatDayMonthShort(DateTime d) =>
+    '${d.day} ${_monthsShort[d.month - 1]}';

@@ -18,7 +18,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.all(context.density.pagePadding),
       children: [
-        Text('Hatırlatmalar', style: text.headlineLarge),
+        Text('Hatırlatma ayarları', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
           'Danışanlarınıza otomatik gönderilecek hatırlatmaları buradan '

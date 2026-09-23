@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../demo/demo_models.dart';
 import '../util/panel_date.dart';
+import '../util/turkish.dart';
 
 /// One series, so no legend: the title names it. Recessive grid, 2px line,
 /// emphasised endpoint with a direct label — no number on every point.
@@ -97,8 +98,14 @@ class _WeightPainter extends CustomPainter {
 
     double yFor(double kg) =>
         topPad + plotH * (1 - (kg - minKg) / (maxKg - minKg));
-    Offset pointAt(int i) =>
-        Offset(leftPad + plotW * (i / (entries.length - 1)), yFor(kgs[i]));
+    // Spaced by date, not by index: a weigh-in three weeks after the last one
+    // must sit three weeks away, or the gap vanishes and the slope lies.
+    final start = entries.first.date;
+    final span = entries.last.date.difference(start).inMinutes;
+    double xFor(DateTime date) => span == 0
+        ? leftPad + plotW
+        : leftPad + plotW * date.difference(start).inMinutes / span;
+    Offset pointAt(int i) => Offset(xFor(entries[i].date), yFor(kgs[i]));
 
     final gridPaint = Paint()
       ..color = grid
@@ -113,7 +120,7 @@ class _WeightPainter extends CustomPainter {
       );
       _text(
         canvas,
-        step < 1 ? kg.toStringAsFixed(1) : kg.toStringAsFixed(0),
+        step < 1 ? formatDecimal(kg) : formatDecimal(kg, 0),
         Offset(0, y - 7),
         labelStyle,
       );
@@ -150,7 +157,7 @@ class _WeightPainter extends CustomPainter {
     canvas.drawCircle(last, 4.5, Paint()..color = line);
     _text(
       canvas,
-      '${kgs.last.toStringAsFixed(1)} kg',
+      '${formatDecimal(kgs.last)} kg',
       Offset(last.dx + 10, last.dy - 10),
       valueStyle,
     );
@@ -158,24 +165,31 @@ class _WeightPainter extends CustomPainter {
     // Read off the data rather than hard-coded, so the axis cannot go stale.
     _text(
       canvas,
-      formatMonthShort(entries.first.date),
+      formatDayMonthShort(entries.first.date),
       Offset(leftPad, size.height - 16),
       labelStyle,
     );
     _text(
       canvas,
-      formatMonthShort(entries.last.date),
-      Offset(leftPad + plotW - 20, size.height - 16),
+      formatDayMonthShort(entries.last.date),
+      Offset(leftPad + plotW, size.height - 16),
       labelStyle,
+      alignRight: true,
     );
   }
 
-  void _text(Canvas canvas, String value, Offset at, TextStyle style) {
+  void _text(
+    Canvas canvas,
+    String value,
+    Offset at,
+    TextStyle style, {
+    bool alignRight = false,
+  }) {
     final tp = TextPainter(
       text: TextSpan(text: value, style: style),
       textDirection: TextDirection.ltr,
     )..layout();
-    tp.paint(canvas, at);
+    tp.paint(canvas, alignRight ? at.translate(-tp.width, 0) : at);
   }
 
   @override
