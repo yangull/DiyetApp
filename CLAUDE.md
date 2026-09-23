@@ -134,8 +134,10 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   confirmation on (PLANNING Q29), and that is a dashboard setting.
 - `Supabase.initialize` takes `publishableKey:`, not the deprecated `anonKey:`.
   `--fatal-infos` fails the build on the latter.
-- There is one shared cloud project. Worktrees (e.g. `dietician-app-codex`) isolate files,
-  not the database: only one worktree should run `supabase db push`.
+- There is one shared cloud project. Worktrees isolate files, not the database: only this
+  `main` worktree is `supabase link`ed and runs `supabase db push`. The Codex worktree
+  (`dietician-app-codex`, branches `codex/*`) is deliberately unlinked. Its rules are in
+  `AGENTS.md`. Review a Codex branch before merging, e.g. `git diff main...codex/<topic>`.
 
 **Theme and layout**
 - `ColorScheme.fromSeed` silently discards the measured palette. Set every slot.
