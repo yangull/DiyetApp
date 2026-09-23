@@ -47,7 +47,7 @@ the default and freeform stays as an option (PLANNING P4, #121).
 lists foods and amounts as text: "yulaf ezmesi, 3 yemek kaşığı". The option kept
 alongside the default.
 
-⚠️ **Değişim listesi (exchange list)** — `ExchangePlan` / `ExchangeMeal` /
+**Değişim listesi (exchange list)** — `ExchangePlan` / `ExchangeMeal` /
 `ExchangeLine`. The Turkish form of the ADA exchange system. Instead of naming
 foods, the plan says *how many exchanges from which group at which meal*; the
 client picks the actual food from a substitution list. The default plan model,
