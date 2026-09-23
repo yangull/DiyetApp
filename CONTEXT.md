@@ -8,8 +8,8 @@ Terms marked ⚠️ are **not settled**. They come from desk research, not from 
 dietitian, and the first interviews exist to confirm or kill them. Do not treat a
 ⚠️ term as a decision.
 
-Product decisions live in `PLANNING.md` ("Kilitlenen Kararlar"). State of play and
-traps live in `HANDOFF.md`. This file only defines vocabulary.
+Product and technical decisions live in `PLANNING.md`. State of play and open
+questions live in `HANDOFF.md`; traps in `CLAUDE.md`. This file only defines vocabulary.
 
 ---
 

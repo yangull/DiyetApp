@@ -6,7 +6,7 @@ import 'panel_shell.dart';
 
 /// The interview demo: no login, straight to the five-destination rail
 /// running on fake in-memory data (see `lib/demo/`). This is what Can drives
-/// live in front of a dietitian — see HANDOFF.md §1. Run it explicitly:
+/// live in front of a dietitian (PLANNING.md §3.6). Run it explicitly:
 ///
 /// ```sh
 /// flutter run -t lib/main_demo.dart -d web-server \

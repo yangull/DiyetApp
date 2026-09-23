@@ -14,7 +14,7 @@ const kPlanWaitingWarningHours = 48;
 enum TriageKind { staleWeighIn, unansweredMessage, noShow }
 
 /// One reason a client needs attention this morning. Deliberately *not* an
-/// aggregate score: HANDOFF's own warning is that any number we invent will be
+/// aggregate score: any number we invent will be
 /// wrong, and a dietitian who distrusts the score distrusts the panel. Each
 /// signal states the raw fact it came from instead.
 class TriageSignal {

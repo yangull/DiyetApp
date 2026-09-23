@@ -7,9 +7,9 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
 
-/// In-app messaging, per locked decision §2 #2 — chat stays in the product
-/// rather than moving to WhatsApp, to protect commission revenue. HANDOFF.md
-/// §3 flags this as the decision most likely to get pushback in interviews;
+/// In-app messaging, per locked decision PLANNING.md P2 — chat stays in the product
+/// rather than moving to WhatsApp, to protect commission revenue. It is the
+/// decision most likely to get pushback in interviews;
 /// this screen exists so a dietitian can react to the real thing, not a
 /// description of it.
 class MessagesScreen extends ConsumerStatefulWidget {

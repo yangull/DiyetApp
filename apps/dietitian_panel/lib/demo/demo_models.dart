@@ -225,7 +225,7 @@ class ReminderSettings {
 // The second, competing answer to "what is a diet plan". Research says Turkish
 // dietitians do not write food + amount; they write how many exchanges from
 // which group, and the client picks the food from a substitution list, where
-// everything in a group is equivalent at its household measure. HANDOFF §2
+// everything in a group is equivalent at its household measure. PLANNING.md P4
 // calls this an unconfirmed hypothesis: this model exists to be shown to a
 // dietitian next to the freeform editor, not because the question is settled.
 // ---------------------------------------------------------------------------

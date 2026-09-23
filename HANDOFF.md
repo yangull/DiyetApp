@@ -1,381 +1,63 @@
 # HANDOFF — pick up here
 
-> Written 28 August 2026; updated across eight sessions — panel prototype +
-> fonts (2nd), real Supabase auth for both apps (3rd), Mesajlar/Ödemeler/
-> video-call mockup in the interview demo (4th), agent-skill setup + a
-> drift-detection hardening pass on the demo persistence layer (5th), the
-> certificate_url RLS fix + structured health fields + client filtering +
-> the exchange-list editor + energy calculation + PDF export (6th), and
-> real client management: the dietitian↔client relationship table, invite
-> by email, and the first real client list/detail (7th, 29–30 August 2026),
-> and the pre-interview pass on the demo panel — triage list, intake form,
-> goal-aware progress, body measurements, plus a screenshot harness and the
-> three theme/layout bugs it exposed (8th, 30 August 2026).
-> Read `PLANNING.md` (Turkish, the full plan) and `CLAUDE.md` first, then this.
-> Delete or rewrite this file once its contents have been acted on.
+> Where the project stands and what is waiting on whom. Rewrite this file (don't append)
+> at the end of a session. Decisions live in `PLANNING.md`; traps in `CLAUDE.md`
+> ("Gotchas"); vocabulary in `CONTEXT.md`. Updated 23 September 2026.
 
-The product is now called **Wellkit**.
+## Where things stand
 
----
+- Phase 0 is done: both apps have real Supabase auth, and the real panel has a client
+  list, email invites and a thin client detail screen (PLANNING §5 has the table).
+- The **interview demo** (`apps/dietitian_panel/lib/main_demo.dart`) is ready for
+  discovery interviews, and the TR/EN walkthrough artifact is its fallback:
+  https://claude.ai/code/artifact/002e0c24-01e2-4d49-a693-6261bcb414de
+- Paused on 30 Aug 2026, waiting for the dietitian interviews. On 21 Sep Codex reviewed
+  the plan (`docs/research/`); on 23 Sep the docs were restructured (this file,
+  PLANNING, CLAUDE.md).
+- Analyzer clean, all tests green, `main` pushed.
 
-## 1. Where things actually stand
+## The finding that drives the next slice
 
-**Working and verified:**
+Research says Turkish dietitians build plans with a **değişim listesi** (exchange list:
+how many exchanges from which food group at each meal) rather than food + amount.
+**Unconfirmed.** The demo shows both editors side by side so a dietitian can point at
+one (PLANNING P4). A dietitian's energy spreadsheet is the one real artifact we have
+(`demo/energy.dart`). Ask where it came from before treating it as common practice.
 
-- Supabase project `jpkvulcszsutacritttk` (eu-central-1, Frankfurt) with **four** migrations applied. `supabase migration list` shows local and remote in sync. Migration 3 closed the `certificate_url` leak (Q19): the `dietitians` table is owner-or-admin only, and `list_approved_dietitians()` is the marketplace projection. **Migration 4 (7th session) added `dietitian_client_relationships`** — the invite/accept table — and with it the first policy that lets a dietitian read a client's row, closing Q18 and delivering what §2.2 #34 promised.
-- Flutter 3.47.2 monorepo (pub workspace + Melos 8). `dart run melos run analyze` clean, `dart run melos run test` green (**45** tests: core 4, client 7, dietitian_panel 34, plus the 12 screenshot captures that are skipped by default).
-- **`docs/agents/*.md` + a `## Agent skills` block in `CLAUDE.md`** now exist (`mattpocock-skills` plugin's `setup-matt-pocock-skills`, 5th session): GitHub as the issue tracker, default triage labels, single-context domain docs. **`CONTEXT.md` now exists** (6th session) with the domain glossary — değişim listesi, the eight groups, BMH and activity factors, target vs planned — and marks every term that is still a hypothesis. No `docs/adr/` yet.
-- **`demo_codec.dart`'s silent-drift risk is now partly test-enforced.** Two tests in `apps/dietitian_panel/test/demo_codec_test.dart` — an encode/decode symmetry check, and one that parses `demo_models.dart`'s actual field declarations at test time and asserts every field reaches the encoded JSON. Both were verified to actually fail on injected drift. See §7's updated trap entry — this doesn't remove the "update the codec by hand" step, it just makes forgetting loud instead of silent.
-- Design system in `packages/core` — palette B, Fraunces + Figtree, two density profiles. Every color measured against WCAG. The two font faces ship as bundled assets (`packages/core/fonts/`), not a runtime fetch.
-- **Both apps have real Supabase auth now** (PLANNING §12 steps 2–5, the whole first milestone). `packages/core/lib/src/auth/` holds the domain layer: `AuthRepository` + `ProfileRepository` interfaces, Supabase-backed implementations, in-memory fakes for tests, and `AuthGate` — the shared session/profile router. Sign up, sign in, sign out, role routing, and the reverse-app mismatch screen (§2.3 #39) all work end to end.
-- `apps/client` is no longer a placeholder: login/signup ("sen" register) → a real 2-tab home (Ana Sayfa greets by name, two non-tappable "Yakında" cards; Profil has sign-out). **7th session added:** a pending-invite card on Ana Sayfa naming the inviting dietitian, with Kabul et / Reddet, and a "Hedeflerim" form on Profil (hedef / bütçe / sağlık notu) — the only place those three columns are ever written.
-- **The real dietitian panel has a real client list now** (7th session). `RealOverviewScreen` is no longer only an empty state: it lists relationship rows (pending invites included), has a "Danışan davet et" dialog, and pushes `real_client_detail_screen.dart` for an active client. That detail screen shows only `goal` / `budget_range` / `health_notes` — the three columns `clients` actually has. Do not confuse it with the demo's much richer `client_detail_screen.dart`, which runs on fake data.
-- `apps/dietitian_panel` now has **two separate entry points** — see "Run it" below. `lib/main.dart` is the real app: login/signup ("siz" register) → pending/rejected status card (no panel frame, §2.3 #52) or the approved shell (2-destination rail, honest "Henüz danışanınız yok" empty state, §2.3 #53). `lib/main_demo.dart` is the interview prototype — now **seven** tabs (Genel Bakış, Danışanlar, Randevular, **Mesajlar**, **Ödemeler**, Takip, Hatırlatmalar), fake data, `localStorage` persistence, reset button, no login. Mesajlar (in-app chat) and Ödemeler (commission ledger, rate is a placeholder — Open Question #1) were added in a fourth session so Can has something concrete to show and click through beyond auth; a "Görüşmeye başla" button on online appointments also opens a video-call mockup (no real SDK — §3 hasn't picked one). **The demo and the real panel still don't share screens** — the real approved panel is deliberately not the demo's rail.
-- **Eighth session (30 Aug 2026) reworked the demo for the interviews.** The
-  trigger was an independent critique of the panel by an agent with no project
-  context. Its premise was right and most of its list was not — four of its six
-  "P0 missing" items already existed, and it could not see them because of a
-  real bug: Genel Bakış's "İncele" called `onOpenClients`, landing you on the
-  client *list* instead of that client's plan. **The screen the product turns on
-  was unreachable from the home screen.** What was added: a "Dikkat gerekenler"
-  triage list (`demo/triage.dart`), waiting badges on pending drafts, an
-  invented anamnez form behind "Danışan ekle" (`intake_form_screen.dart`),
-  goal-aware progress (`demo/progress.dart`), body measurements
-  (`BodyMeasurement`), and `AppointmentStatus.noShow` as distinct from
-  `cancelled`. Storage schema is **v5**. What was deliberately *not* built, and
-  why, is PLANNING §2.13 #109 and the artifact's closing section.
-- **Screens are now captured by `flutter test`, not by a browser**
-  (`test/screenshots_test.dart`). It drives the real demo, taps through the
-  rail, and writes 12 golden PNGs to `test/goldens/`. Tagged, so `melos run
-  test` skips it. Regenerate with:
-  `flutter test test/screenshots_test.dart --tags screenshots --run-skipped --update-goldens`.
-  A TR/EN presentation of those screens, one open question per screen, is
-  published as a Claude Artifact (PLANNING §2.13 #118).
-- **Sixth session added to the demo:** structured health fields on the client record (allergies, conditions, medications, diet type, sex, activity level — displayed, not yet editable); search + goal/status filtering on the client list; a **second plan editor built on the exchange-list model** for c1 only, with editable counts and the substitution sheet; an **energy calculation** (`demo/energy.dart`) reproducing a dietitian's own spreadsheet, shown as a card on the client page and as a target line in both editors; and **PDF export** of an approved plan from either editor.
-- Bundle id resolved: `com.wellkit.client` (Android `applicationId`/namespace, Kotlin package, iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has no bundle id — it's web-only (§2.3 #38).
-- Everything pushed to `github.com/yangull/DiyetApp` (private), `main` branch.
+The plan editor and `diet_plans` stay unbuilt until this is answered. When they are
+built, key them off `dietitian_client_relationships`.
 
-**Run it:**
+## Next steps
 
-```bash
-# The real app, either one:
-cd apps/client && flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080 \
-  --dart-define-from-file=../../env/dev.json
-cd apps/dietitian_panel && flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8081 \
-  --dart-define-from-file=../../env/dev.json
+1. Get answers to the questions below, starting with 1–3.
+2. Rewrite the plan model on what the answers say, then build `diet_plans` and the real
+   editor into the approved panel.
+3. Unblocked meanwhile: CI (analyze + test), check email confirmation (Q29), a dev/prod
+   Supabase split, RLS access tests, invite email delivery, ending a relationship.
 
-# The interview demo (fake data, no login) — note the -t flag:
-cd apps/dietitian_panel && flutter run -t lib/main_demo.dart -d web-server \
-  --web-hostname 0.0.0.0 --web-port 8081 --dart-define-from-file=../../env/dev.json
-```
+## Questions for Can
 
-Signing up for real creates a live Supabase user against the `jpkvulcszsutacritttk`
-project — there is no local/staging split yet. A dietitian signup lands in
-`verification_status = 'pending'` and stays on the status card until someone
-flips it to `approved` from the Supabase dashboard (§2.2 #23, #35 — no in-app
-admin panel yet, and the `authenticated` JWT structurally cannot approve itself).
+Open decisions that block work. Answer here or in PLANNING §8, then delete the line.
 
-**What the demo prototype is for** (`main_demo.dart`, unchanged from session 2):
-Can drives it live, on his own screen, in discovery interviews with working
-Turkish dietitians. Not a sales demo. Reload-safe, works offline, resets
-cleanly between interviews.
+1. **Are the Miro "görüşme özetleri" real interviews?** Who said them, and when? If they
+   are, the "interviews haven't happened" premise is wrong. (Partner — E01.)
+2. **Do Kutay's example Excel plans / intake forms exist, and can we get anonymized
+   copies?** The plan editor is guesswork without them. (Q10, E02.)
+3. **By what date do the interviews happen?** If they slip past it, do we decide the
+   plan model without them and mark it reversible?
+4. **Next real slice: the marketplace journey or the plan editor?** The confirmed
+   promise is new clients, and the marketplace has no real code yet.
+5. **First customer journey (D01–D07):** target audience, how clients find us, which
+   dietitians and how much capacity, direct choice vs matching, what the first service
+   is, and when the client pays.
+6. **Sessions or packages (Q28)?** This affects payments, appointments and the listing
+   all at once.
+7. **WhatsApp:** competitors all use it. Does P2 (in-app only) hold for reminders and
+   lead import, or only for the consultation itself?
+8. **Separate Supabase dev project?** Right now dev signups land in the one live project.
+9. **Issue tracking:** use GitHub Issues (`/wayfinder`, `/to-questionnaire`), or keep
+   planning in markdown?
+10. **Email confirmation (Q29):** is it on in the dashboard? Invites (#102) depend on it.
 
----
-
-## 2. The finding that matters most
-
-A research pass on real dietitian software came back with one load-bearing result,
-and it invalidates part of our data model. **Still unconfirmed — nothing in any
-session since has changed this, the model was deliberately left alone.**
-
-**Turkish dietitians do not write plans as "food + amount".** They use a
-**değişim listesi** (exchange list) — the Turkish form of the ADA exchange system.
-Foods are grouped into roughly eight groups:
-
-> süt · et · nişastalı yiyecekler · kuru baklagil · A grubu sebze · B grubu sebze · meyve · yağ
-
-Every food inside a group is calorie- and macro-equivalent **at its standard
-household measure** — yemek kaşığı, çay bardağı, kibrit kutusu — not grams. A plan
-specifies *how many exchanges from which group at which meal*; the specific food is
-then chosen from a substitution list.
-
-**What this breaks:** `MealItem { food, amount }` in
-`apps/dietitian_panel/lib/demo/demo_models.dart` cannot represent it. The real
-primitive is closer to `(exchangeGroup, exchangeCount)` per meal, plus a **separate,
-reusable substitution table** shared across every plan rather than retyped per client.
-
-**Do not rewrite the model on this alone.** It is research, not a dietitian's word.
-Take it into the first interview as a hypothesis to confirm — "planı değişim
-listesiyle mi kuruyorsunuz?" — and let the answer drive the schema. But expect it.
-If you do change it, `demo_codec.dart` (the interview demo's persistence layer)
-encodes `MealItem` explicitly and must be updated in lockstep, with
-`_schemaVersion` bumped.
-
-**Since 28 Aug 2026 the hypothesis is testable rather than askable.** The demo has
-a second editor, `screens/exchange_plan_editor_screen.dart`, that builds Elif's day
-(c1 only) as exchange counts per group with a live kcal total and a substitution
-sheet in household measures. Reached from her client detail screen via "Değişim
-listesiyle dene", next to the untouched freeform editor. Show both and let the
-dietitian point at one.
-
-Two things this does **not** mean: the model is not decided — `DietPlan` and
-`ExchangePlan` both exist, deliberately, and the real one is still an open
-question. And the numbers in `kExchangeKcal` / `kExchangeFoods`
-(`demo/demo_models.dart`) are placeholders off the published ADA tables, labelled
-"örnek" on screen so a dietitian corrects them instead of trusting them. Their
-table is one of the things to collect.
-
-Sources found: multiple Turkish dietitian sites plus the ADA "Exchange Lists for
-Meal Planning" system.
-
-**A second artifact, and this one is stronger evidence.** Can was shown a
-dietitian's own energy-requirement spreadsheet: BMH per client (Harris-Benedict
-for adults, WHO/FAO brackets for children, Cunningham where lean mass is known)
-× a physical-activity factor of 1.2–1.6 = the daily calorie target. Every formula
-was reverse-engineered from the cell values and now lives in `demo/energy.dart`,
-verified against those cells in `test/energy_test.dart`.
-
-Why this matters beyond the arithmetic: **the plan's calorie target used to be a
-number the dietitian typed in, with no derivation and no relationship to the
-meals below it.** Now the target is derived from the client, and the exchange
-editor shows it next to what the plan actually adds up to. The freeform editor
-cannot do that — its rows carry no calorie data — which is the sharpest concrete
-difference between the two models, and worth watching for in the interview.
-
-⚠️ Ask where this sheet came from before treating it as settled practice. If it
-is one dietitian's, it is one dietitian's.
-
----
-
-## 3. The other research finding — and it conflicts with a locked decision
-
-**Every Turkish dietitian tool surveyed routes reminders and confirmations through
-WhatsApp.** DiyetBulut advertises WhatsApp integration directly, alongside e-Nabız
-(national health record) transmission, digital consent forms, and commission
-calculation.
-
-Our locked decision §2 #2 says **all communication stays in-app**, to protect
-commission revenue. That decision is sound for the business model, but the entire
-competitive set does the opposite because that is where danışans already are.
-
-**This is a real adoption friction point, not a hypothetical.** Ask dietitians about
-it directly in the interviews. Do not relitigate the decision without Can.
-
-Other market context: international tools (Nutrium, Practice Better, Healthie,
-Kahunas) treat client portal + mobile app, scheduling, billing, secure messaging and
-intake forms as table stakes. Notably, **none of them treats the meal-plan builder as
-solved** — Practice Better users bolt on a separate tool, Healthie de-prioritises it.
-That is a signal that the plan editor is where a product can still win.
-
-⚠️ The research agent could **not** confirm "NippyOS" as a findable product, though
-Can has seen it directly. Treat that name as unverified in writing.
-
----
-
-## 4. What was in flight when the first session ended
-
-A **critique of the panel prototype** was commissioned and died to a session limit
-before producing anything. Still not re-run. It was to cover:
-
-1. Screen-by-screen critique, judged both as a dietitian with 40 clients and as
-   software that has to ship
-2. Competitor feature comparison (partially delivered — see §3 above)
-3. What a diet plan really contains (partially delivered — see §2 above)
-4. Information architecture: what belongs in the rail at launch, and how it survives
-   chat, video, payments and the marketplace profile arriving
-5. Ranked add / remove / defer lists — including an honest assessment of whether
-   appointments and payment tracking belong in a commission marketplace at all, or
-   quietly turn this into practice-management SaaS with a different revenue model
-6. Pre-deployment gaps under KVKK
-7. Which screens to lead interviews with, and where the prototype might mislead a
-   dietitian into agreeing with something that is not built
-
-**Items 1, 4, 5, 6 and 7 were never delivered.** ✅ **Item 1 was finally run on
-30 Aug 2026** — Can commissioned it from an agent with no project context, which
-turned out to matter in both directions. Acted on in the 8th session; see
-PLANNING §2.13. Items 4, 5 and 6 are still open, but the interviews themselves
-may answer more of them than an agent can.
-
-⚠️ **The lesson from that critique is worth keeping.** A reviewer without the
-plan will demand features that are already built (it asked for a client detail
-page and a plan editor that both exist) and will demand features the plan
-deliberately defers — its top ask was a 7-day plan grid, which assumes the
-"food + amount" model that §2 exists to test. Judge such a list by "does its
-absence stop a dietitian from telling us something?", not by "would a dietitian
-want it". Its most valuable output was the premise, not the list: the demo was
-showing the reporting *around* the work rather than the work.
-
-The second session did fix one thing item 7 would have flagged: `MacroSummary`
-was drawing progress bars from hardcoded fill constants (identical for every
-client) under a caption claiming a percentage of a target that did not exist in
-the data. That was prototype dishonesty a dietitian could mistake for a real
-feature — gone now (commit `c47532e`).
-
----
-
-## 5. Next steps, in the order I would do them
-
-1. **Run the dietitian interviews.** Nothing built since changes this — Q3, Q4,
-   Q10 and the exchange-list hypothesis all resolve here, and the plan editor
-   is guesswork until they do. The 8th session's additions raised four more
-   questions that only an interview closes (PLANNING §10, Q25–Q28: triage
-   thresholds, what an anamnez actually asks, which measurements and device,
-   session vs package pricing). Drive the demo live; the artifact is the
-   fallback for when Can is not in the room.
-2. **Rewrite the plan model** on what you learn. Expect exchange groups.
-3. **Build `diet_plans` and the real plan editor** once the model is known,
-   into the panel's approved shell. The relationship table it hangs off now
-   exists (migration 4), so a plan can be scoped to a real dietitian↔client
-   pair on day one — reuse `dietitian_client_relationships` as the key rather
-   than inventing a second one.
-4. **`apps/client`'s two path cards are still "Yakında".** Faz 1 turns them
-   into real marketplace/AI entry points (§2.3 #51).
-5. **Follow-ups the 7th session deliberately left** (none blocking): invite
-   delivery (nothing emails the client — an Edge Function over
-   `inviteUserByEmail`), ending an active relationship, and extending
-   `clients` with the demo's structured health fields so the real detail
-   screen and energy card can match the demo's. That last one is worth doing
-   **after** the interviews, since the field list is exactly what they settle.
-
-> **Note (3rd session, 28 Aug 2026):** Can chose to build real auth (steps
-> 2–5 of PLANNING §12) now rather than wait for the interviews, since that
-> work doesn't depend on the plan-model question. It's done — see PLANNING
-> §2.8. What's still genuinely gated on the interviews is everything Faz 1:
-> the plan editor, client management, and the schema that supports them.
-
----
-
-## 6. Open decisions that block work
-
-| # | Decision | Why it blocks |
-|---|---|---|
-| **Q10 — Kutay's Excel** | Nobody has seen a real diet plan | The plan editor is guesswork until then |
-| **Q3 / Q4** | Doctor referral rules; which blood values | Regulatory; riskiest unknown in the product |
-| ~~**Q19**~~ | ~~Which dietitian fields are public in the marketplace~~ | **Closed 28 Aug 2026, migration 3.** The base table is owner-or-admin only now; `list_approved_dietitians()` returns `user_id`, `specialties`, `bio` and nothing else. Adding a column to that function is a publication decision — treat it as one. |
-| ~~**Q18**~~ | ~~Dietitian↔client relationship table + the dietitian's access policy to health data~~ | **Closed 30 Aug 2026, migration 4.** `dietitian_client_relationships` + `"clients: read via active relationship"`, gated on an active row *and* a still-approved dietitian. Connection is by email invite for now; marketplace matching replaces it later, and the `origin` column is there so it can without reinterpreting old rows. |
-| **Q28 — session or package?** | Sessions vs monthly/3-month packages | Ödemeler, Randevular and the marketplace listing are all built per-session. If the market prices in packages, all three change together — cheap to ask, expensive to retrofit. |
-| **Q15 / SMS** | Reminders over push (free, needs app installed) vs SMS (paid, works for everyone) | The reminder features are built but the channel is unresolved. Ask dietitians. |
-| **Logo / icon** | Name is settled, visual identity is not | Store listing, app icon, favicon |
-
----
-
-## 7. Traps for whoever picks this up
-
-- **Don't design the plan editor from imagination.** See §2. It is the screen that
-  decides whether dietitians abandon Excel.
-- **Don't copy the `dietitians` RLS policy shape onto any table holding client health
-  data.** PLANNING §2.2 #34 explains why; a review already caught one leak of this
-  exact kind. Migration 4 follows the rule it sets: client *names* for the panel's
-  list come from the `security definer` `list_my_clients()` projection, **not** a
-  SELECT policy on `profiles` — a row policy there would auto-publish every column
-  the table ever grows. Adding a column to that function is a publication decision.
-- **The invite accept/decline policies trust the JWT's `email` claim**, so they are
-  only as strong as Supabase's email confirmation setting. If confirmation is ever
-  turned off in the dashboard, someone can register with another person's address
-  and claim their invite. That's a dashboard setting, not something the repo can
-  enforce — check it before trusting the flow.
-- **`relationship_status` already contains `declined`.** If you later add `ended`,
-  you cannot `alter type ... add value` and write a policy referencing the new label
-  in the same transaction — split it into two migrations, or move the column to
-  `text` + a check constraint first.
-- **The client app's "Hedeflerim" form is the only writer of `clients.goal`,
-  `budget_range` and `health_notes`.** Delete it and the panel's client detail
-  screen silently goes blank for every real user — that exact gap was caught in
-  review before it shipped. If a richer client onboarding replaces it, move the
-  write, don't just drop the form.
-- **`ColorScheme.fromSeed` will silently discard the measured palette.** The theme
-  sets every slot explicitly on purpose — see `packages/core/lib/src/theme/app_theme.dart`.
-- **Setting `AppBarTheme.titleTextStyle` cuts `foregroundColor` off from the
-  title.** Supplying that style at all means the title takes its colour from the
-  style, and `AppTypography`'s styles carry none — so every pushed screen's title
-  rendered near-invisible until 30 Aug 2026. If you swap that style, keep the
-  explicit `color:` on it.
-- **An unfilled `TextTheme` slot does not fall back to Figtree.** It falls back to
-  Material's own default font. `labelMedium` was empty, which is exactly the slot
-  NavigationRail uses, so both apps' rails were drawn in Roboto without anyone
-  noticing. If you add a widget that reads a slot `AppTypography.textTheme` does
-  not fill, fill it rather than assuming the family carries over.
-- **A field helper that returns `Expanded` can only ever live in a `Row`.** The
-  intake form's `_field` did, and putting one directly in a `Column` is vertical
-  flex against unbounded height — a crash, not a layout wobble. Flex belongs on
-  the row builder, not on the field.
-- **Golden captures are not regression goldens.** `test/screenshots_test.dart` is
-  tagged `screenshots` and skipped by `dart_test.yaml`, because it would fail on
-  every deliberate pixel change. Run it explicitly with `--tags screenshots
-  --run-skipped --update-goldens`. It needs `FLUTTER_ROOT` for the icon font and
-  loads Fraunces/Figtree under **`packages/core/`-prefixed** family names — the
-  bare family name loads a font nothing ever looks up, and every glyph comes out
-  as a box.
-- **Seed data must be anchored to `DateTime.now()`, not to a calendar date.**
-  Appointments and conversations already were; weights were pinned to June 2026
-  and `weight_chart.dart` had `'Haz'` / `'Ağu'` hard-coded on its axis. Both were
-  correct on the day they were written and silently wrong afterwards. The triage
-  list now reads those dates as signals, so a stale anchor is worse than cosmetic.
-- **`flutter devices` never lists the `web-server` device in this WSL setup**, but
-  `-d web-server` works. Don't waste time on it.
-- **Fonts are bundled, not fetched.** `google_fonts` is gone from
-  `packages/core/pubspec.yaml`; `app_typography.dart` builds `TextStyle`s against
-  the asset families directly (`package: 'core'`). A core test asserts the
-  resolved font family to catch a regression.
-- **`apps/dietitian_panel` has two entry points that must stay separate.**
-  `lib/main.dart` (real, auth-gated) and `lib/main_demo.dart` (interview demo,
-  fake data, no login). Don't merge them, and don't wire real Supabase data
-  into `PanelShell` — that widget exists specifically to be safe to drive live
-  in front of a dietitian without a network dependency mid-conversation.
-- **`AuthGate` (in `packages/core`) decides session/loading/error/role-mismatch;
-  it deliberately does not decide which screen a `pending` vs `approved`
-  dietitian sees** — that branch lives in each app's own `authenticatedBuilder`.
-  Don't push app-specific screen logic into `AuthGate` itself.
-- **`FakeAuthRepository.sessionChanges` replays the current session to every
-  new listener** (`yield _session; yield* _controller.stream;`), matching what
-  Supabase's real `onAuthStateChange` does on subscribe. If you write a test
-  that calls `signIn()` before building the widget tree, this is why the
-  session isn't just silently lost — but if you ever "simplify" it to a bare
-  broadcast stream, every such test will start failing for a non-obvious reason.
-- **The demo panel's persistence has a schema version.** `demo_codec.dart` encodes
-  every field of `DemoState` by hand and checks `_schemaVersion` on decode; an
-  unreadable or old-version stored state is discarded, not partially read. If you
-  add or change a field on any demo model, update the codec and bump the version
-  in the same change, or old browser storage will silently fall back to seed data
-  (safe, but confusing to debug if you don't expect it). **This is now caught by a
-  test, not just this paragraph**: `demo_codec_test.dart`'s "every demo model field
-  reaches the encoded JSON" test parses `demo_models.dart` at test time and fails
-  loudly, naming the exact missing field, if you add one and forget the codec.
-  It does not catch a forgotten `_schemaVersion` bump on its own — that's still on
-  you. (Also don't bother colocating `toJson`/`fromJson` on the models to "fix"
-  this — a 5th-session review already checked: Dart's required constructor params
-  already make the compiler catch most decode-side drift, so colocation buys
-  proximity, not enforcement, while spreading the field list across three files
-  instead of two. The two tests above close the actual gap — optional fields and
-  the encode side — for less code.)
-- **PDF export is gated on approval, and that gate is load-bearing.** The
-  button in `widgets/export_plan_button.dart` is disabled while a plan is an
-  AI draft. A PDF is the one artifact that leaves the panel and reaches a
-  client, so locked decision §2 #1 is enforced there as well as in the UI that
-  renders the draft. Don't "simplify" it to always-enabled.
-- **The energy formulas are pinned to a real dietitian's spreadsheet, not to a
-  textbook.** `demo/energy.dart` uses the *original 1919* Harris-Benedict
-  constants because that is what the sheet Can was given uses; the published
-  "revised" variant gives a different answer and `test/energy_test.dart` will
-  fail if someone swaps it in. That failure is the point. The sheet also had
-  WHO/FAO child brackets and the Cunningham formula, both decoded and recorded
-  in PLANNING §2.11 #95 but deliberately not implemented — children because the
-  demo has none, Cunningham because it needs lean body mass we don't measure.
-- **The exchange reference tables are `const`, not state.** `kExchangeKcal`,
-  `kExchangeFoods` and `kExchangeGroupLabels` in `demo/demo_models.dart` sit
-  outside `DemoState` on purpose: nothing edits them, so they stay out of the
-  codec and out of the completeness test. The moment a dietitian is allowed to
-  edit their own substitution list — which is a plausible interview outcome, it's
-  their professional signature — they become state and need all three.
-- **`demo_store.dart` conditionally imports a web vs stub implementation** via
-  `dart.library.js_interop` — this is what lets `flutter test` run on the VM
-  without a browser. Don't collapse it into one file.
-- **`Supabase.initialize` takes `publishableKey:`, not `anonKey:`** — the
-  latter is deprecated in `supabase_flutter` 2.17 and `dart analyze
-  --fatal-infos` will fail the build on it.
-- **Melos config lives under the `melos:` key in the root `pubspec.yaml`**, not in a
-  `melos.yaml`, and scripts must call `dart run melos`, not bare `melos`.
-- **`docs/agents/*.md` is now real config, not boilerplate.** `setup-matt-pocock-skills`
-  already ran (5th session) — don't re-run it unless you actually want to switch issue
-  trackers or reset it; re-running is safe but pointless otherwise. If a `mattpocock-skills`
-  command asks where issues/domain docs live, the answer is already written down there.
+The full register (D01–D24, E01–E12, Miro board questions) is
+`docs/research/2026-09-21-questions-and-answers.md`.

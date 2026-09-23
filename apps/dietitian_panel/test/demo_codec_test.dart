@@ -63,7 +63,7 @@ void main() {
     expect(twice, once);
   });
 
-  // The trap recorded in HANDOFF §7: a field added to a demo model but not to
+  // The trap in CLAUDE.md "Gotchas": a field added to a demo model but not to
   // `demo_codec.dart` compiles fine and is dropped on the next reload. The
   // model source is the only place that field list exists, so the check reads
   // it rather than restating it here.

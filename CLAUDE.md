@@ -4,32 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Start here
 
-**Read `HANDOFF.md` first.** It records where the last session stopped, what was
-learned about how Turkish dietitians actually build diet plans, which decisions are
-blocking, and the traps worth avoiding.
+Read three files at the start of every session:
+
+- **`HANDOFF.md`**: where things stand, next steps, and the open questions for Can.
+- **`PLANNING.md`**: the product, locked decisions (stable IDs P1–P5 and #1–#118, which
+  code comments cite), current state, roadmap and open questions. Edit it in place when a
+  decision changes; never append session logs to it.
+- **`CONTEXT.md`**: the domain glossary (değişim listesi, BMH, danışan, …).
 
 ## Project status
 
-`PLANNING.md` (in Turkish) is the product/technical plan. Read it at the start of every
-session; it is a living document that gets updated, not rewritten. Big decisions move into
-its "Kilitlenen Kararlar" (locked decisions) sections.
+Phase 0 is done: monorepo, the Supabase identity schema, real auth in both apps
+(`packages/core/lib/src/auth/`), and real client management: migration 4's
+`dietitian_client_relationships`, `packages/core/lib/src/relationships/`, the panel's
+`lib/panel/real_overview_screen.dart` and `real_client_detail_screen.dart`.
 
-Built so far: the Flutter monorepo skeleton, the Supabase identity schema (applied to the
-live EU project), and real Supabase auth in both apps — `packages/core/lib/src/auth/` holds
-the repository interfaces, Supabase implementations, in-memory fakes, and the shared
-`AuthGate` router. Both apps reach a real "login → first screen" (PLANNING.md §12 steps 1–5,
-done). `apps/dietitian_panel` has a second, separate entry point, `lib/main_demo.dart` — the
-unauthenticated interview prototype with fake data, used to drive discovery interviews; don't
-confuse it with `lib/main.dart`, the real app. That demo now also carries structured client
-health fields, a searchable/filterable client list, and a **second plan editor built on the
-exchange-list model** — the two editors sit side by side deliberately, because which one is
-right is the open question (HANDOFF.md §2). **Real client management now exists too**:
-`packages/core/lib/src/relationships/` plus migration 4's `dietitian_client_relationships`
-table give a dietitian a real client list, an email-invite flow, and a client detail screen
-reading live Supabase data (`lib/panel/real_overview_screen.dart`,
-`real_client_detail_screen.dart`) — separate from, and much thinner than, the demo's
-equivalents. Not built yet: the real plan editor and marketplace matching — still gated on
-that same plan-model question.
+`apps/dietitian_panel` has two entry points: `lib/main.dart` (the real, auth-gated app)
+and `lib/main_demo.dart` (the unauthenticated interview prototype on fake data, with both
+plan editors side by side). Don't confuse them. Not built yet: the real plan editor,
+`diet_plans` and anything marketplace. The plan editor waits on the plan-model
+question (PLANNING P4).
 
 **Wellkit** is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an
@@ -94,7 +88,7 @@ WSL, so `flutter doctor` shows three expected failures.
 
 `apps/dietitian_panel` has a second entry point: add `-t lib/main_demo.dart` to the command
 above to run the unauthenticated interview prototype (fake data, no login) instead of the
-real auth-gated app. See HANDOFF.md §1.
+real auth-gated app.
 
 ## Supabase (working commands)
 
@@ -116,20 +110,61 @@ remote auth settings are changed in the dashboard.
 Real values for `--dart-define-from-file` are in `env/dev.json` (gitignored). The key
 stored there is the **publishable** key (`sb_publishable_...`), not the legacy anon JWT.
 
-## Working rules (from PLANNING.md §13)
+## Working rules (from PLANNING.md §10)
 
 - The Miro board (ID: `uXjVH1k8Rq8=`) is the source of truth for product decisions; on conflict, check the board or ask Can.
 - When unsure, **ask — don't assume**.
 - UI text in Turkish; code and commit messages in English.
 - Work in small, working slices — no big-bang PRs.
-- Update PLANNING.md each session.
+- Update PLANNING.md when a decision changes or a question closes, in place. Rewrite
+  HANDOFF.md at the end of a session. Session narratives go in commit messages.
 
-## First milestone (PLANNING.md §12)
+## Gotchas
 
-Scaffold the Melos monorepo → `packages/core` models + mocked Supabase wrapper → create
-the Supabase project together (EU) with the first migration → auth flow with role
-selection (`client`/`dietitian`/`admin`) → both apps reach "login → empty home screen".
-Store/Codemagic accounts come after this milestone.
+Traps that already cost time. Decisions with the same flavour (RLS projections, the PDF
+approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons.
+
+**Supabase / SQL**
+- Never add a SELECT policy on `profiles` or any client-data table to "just show a name".
+  Use a `security definer` projection function (PLANNING #90, #103).
+- `relationship_status` already has `declined`. To add `ended`, you cannot
+  `alter type ... add value` and reference the new label in the same transaction. Split
+  it into two migrations, or move the column to `text` + a check constraint.
+- Invite accept/decline trusts the JWT `email` claim. It is only safe with email
+  confirmation on (PLANNING Q29), and that is a dashboard setting.
+- `Supabase.initialize` takes `publishableKey:`, not the deprecated `anonKey:`.
+  `--fatal-infos` fails the build on the latter.
+- There is one shared cloud project. Worktrees (e.g. `dietician-app-codex`) isolate files,
+  not the database: only one worktree should run `supabase db push`.
+
+**Theme and layout**
+- `ColorScheme.fromSeed` silently discards the measured palette. Set every slot.
+- Setting `AppBarTheme.titleTextStyle` cuts `foregroundColor` off from the title. Keep an
+  explicit `color:` on that style.
+- An unfilled `TextTheme` slot falls back to Material's default font, not Figtree. Fill
+  any slot a new widget reads (NavigationRail uses `labelMedium`).
+- A field helper that returns `Expanded` can only live in a `Row`. Put flex on the row
+  builder.
+
+**Demo panel**
+- Adding or changing a field on a demo model: update `demo_codec.dart` **and** bump
+  `_schemaVersion` in the same change. `demo_codec_test.dart` catches a missing field but
+  not a missing bump.
+- `demo_store.dart` conditionally imports web vs stub via `dart.library.js_interop` so
+  `flutter test` runs on the VM. Don't collapse it into one file.
+- Seed data must be relative to `DateTime.now()`. The triage list reads dates as
+  signals, so a pinned date is a bug, not cosmetics.
+- The client app's "Hedeflerim" form is the only writer of `clients.goal`,
+  `budget_range`, `health_notes`. Move the write if you replace it.
+
+**Tests**
+- `FakeAuthRepository.sessionChanges` replays the current session to new listeners, like
+  Supabase's `onAuthStateChange`. Making it a bare broadcast stream breaks tests in
+  non-obvious ways.
+- `test/screenshots_test.dart` produces captures, not regression goldens. It is tagged and
+  skipped by default. Regenerate with
+  `flutter test test/screenshots_test.dart --tags screenshots --run-skipped --update-goldens`.
+  It needs `FLUTTER_ROOT` and loads fonts under `packages/core/`-prefixed family names.
 
 ## Agent skills
 
