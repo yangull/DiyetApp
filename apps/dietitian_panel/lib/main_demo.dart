@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'panel_shell.dart';
+import 'util/breakpoints.dart';
 
 /// The interview demo: no login, straight to the five-destination rail
 /// running on fake in-memory data (see `lib/demo/`). This is what Can drives
@@ -29,6 +30,8 @@ class DietitianPanelDemoApp extends StatelessWidget {
       // the debug ribbon in the corner is noise in both settings.
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(AppDensity.compact),
+      // Phones get the comfortable density; wide screens keep compact (#38).
+      builder: panelThemeBuilder,
       home: const PanelShell(),
     );
   }

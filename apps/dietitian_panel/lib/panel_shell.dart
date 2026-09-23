@@ -10,6 +10,7 @@ import 'screens/overview_screen.dart';
 import 'screens/payments_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/settings_screen.dart';
+import 'widgets/adaptive_nav_scaffold.dart';
 
 class PanelShell extends StatefulWidget {
   const PanelShell({super.key});
@@ -32,97 +33,95 @@ class _PanelShellState extends State<PanelShell> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
+    void reset() => setState(() {
+      _session++;
+      _index = 0;
+    });
 
-    return Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: _index == _settingsIndex ? null : _index,
-            onDestinationSelected: (i) => setState(() => _index = i),
-            labelType: NavigationRailLabelType.all,
-            backgroundColor: palette.surfaceSubtle,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: Text('Genel Bakış'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.people_outline),
-                selectedIcon: Icon(Icons.people),
-                label: Text('Danışanlar'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.event_outlined),
-                selectedIcon: Icon(Icons.event),
-                label: Text('Randevular'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.chat_bubble_outline),
-                selectedIcon: Icon(Icons.chat_bubble),
-                label: Text('Mesajlar'),
-              ),
-              if (kShowMoney)
-                NavigationRailDestination(
-                  icon: Icon(Icons.payments_outlined),
-                  selectedIcon: Icon(Icons.payments),
-                  label: Text('Ödemeler'),
-                ),
-              NavigationRailDestination(
-                icon: Icon(Icons.insights_outlined),
-                selectedIcon: Icon(Icons.insights),
-                label: Text('Takip'),
-              ),
-            ],
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _RailUtilityButton(
-                        icon: Icons.notifications_none,
-                        label: 'Hatırlatma ayarları',
-                        selected: _index == _settingsIndex,
-                        onPressed: () =>
-                            setState(() => _index = _settingsIndex),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      _ResetDemoButton(
-                        onReset: () => setState(() {
-                          _session++;
-                          _index = 0;
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+    return AdaptiveNavScaffold(
+      selectedIndex: _index == _settingsIndex ? null : _index,
+      onSelected: (i) => setState(() => _index = i),
+      destinations: const [
+        PanelDestination(
+          icon: Icons.dashboard_outlined,
+          selectedIcon: Icons.dashboard,
+          label: 'Genel Bakış',
+        ),
+        PanelDestination(
+          icon: Icons.people_outline,
+          selectedIcon: Icons.people,
+          label: 'Danışanlar',
+        ),
+        PanelDestination(
+          icon: Icons.event_outlined,
+          selectedIcon: Icons.event,
+          label: 'Randevular',
+        ),
+        PanelDestination(
+          icon: Icons.chat_bubble_outline,
+          selectedIcon: Icons.chat_bubble,
+          label: 'Mesajlar',
+        ),
+        if (kShowMoney)
+          PanelDestination(
+            icon: Icons.payments_outlined,
+            selectedIcon: Icons.payments,
+            label: 'Ödemeler',
           ),
-          VerticalDivider(width: 1, color: palette.borderSubtle),
-          Expanded(
-            child: IndexedStack(
-              key: ValueKey(_session),
-              index: _index,
+        PanelDestination(
+          icon: Icons.insights_outlined,
+          selectedIcon: Icons.insights,
+          label: 'Takip',
+        ),
+      ],
+      railTrailing: Expanded(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                OverviewScreen(
-                  onOpenClients: () => setState(() => _index = 1),
-                  onOpenAppointments: () => setState(() => _index = 2),
-                  onOpenMessages: () => setState(() => _index = 3),
+                _RailUtilityButton(
+                  icon: Icons.notifications_none,
+                  label: 'Hatırlatma ayarları',
+                  selected: _index == _settingsIndex,
+                  onPressed: () => setState(() => _index = _settingsIndex),
                 ),
-                const ClientsScreen(),
-                const AppointmentsScreen(),
-                const MessagesScreen(),
-                if (kShowMoney) const PaymentsScreen(),
-                const ReportsScreen(),
-                const SettingsScreen(),
+                const SizedBox(height: AppSpacing.md),
+                _ResetDemoButton(onReset: reset),
               ],
             ),
           ),
+        ),
+      ),
+      // A bottom bar only navigates, so on phones the two utilities sit in a
+      // slim labelled strip above the screen, and settings open as a page.
+      // A bottom bar only navigates, so on phones the demo's two utilities
+      // sit behind one labelled button above the screen.
+      phoneTopActions: [
+        TextButton.icon(
+          onPressed: () => _showDemoSheet(context, onReset: reset),
+          icon: const Icon(Icons.tune),
+          label: const Text('Demo'),
+        ),
+      ],
+      body: IndexedStack(
+        key: ValueKey(_session),
+        // On a phone, settings are a pushed page, never a stack index.
+        index: _index,
+        children: [
+          OverviewScreen(
+            onOpenClients: () => setState(() => _index = 1),
+            onOpenAppointments: () => setState(() => _index = 2),
+            onOpenMessages: () => setState(() => _index = 3),
+          ),
+          const ClientsScreen(),
+          const AppointmentsScreen(),
+          const MessagesScreen(),
+          if (kShowMoney) const PaymentsScreen(),
+          const ReportsScreen(),
+          const SettingsScreen(),
         ],
       ),
     );
@@ -184,33 +183,7 @@ class _ResetDemoButton extends ConsumerWidget {
     final muted = context.palette.textMuted;
     return TextButton(
       style: TextButton.styleFrom(foregroundColor: muted),
-      onPressed: () async {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Demoyu sıfırla'),
-            content: const Text(
-              'Bu görüşmede yapılan tüm değişiklikler silinir ve '
-              'başlangıç verileri geri gelir.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Vazgeç'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Sıfırla'),
-              ),
-            ],
-          ),
-        );
-        if (confirmed ?? false) {
-          ref.read(demoProvider.notifier).resetDemo();
-          ref.invalidate(selectedConversationProvider);
-          onReset();
-        }
-      },
+      onPressed: () => _confirmReset(context, ref, onReset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -221,4 +194,77 @@ class _ResetDemoButton extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> _confirmReset(
+  BuildContext context,
+  WidgetRef ref,
+  VoidCallback onReset,
+) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Demoyu sıfırla'),
+      content: const Text(
+        'Bu görüşmede yapılan tüm değişiklikler silinir ve '
+        'başlangıç verileri geri gelir.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Vazgeç'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Sıfırla'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed ?? false) {
+    ref.read(demoProvider.notifier).resetDemo();
+    ref.invalidate(selectedConversationProvider);
+    onReset();
+  }
+}
+
+/// The phone version of the rail's foot: reminder settings as a page, and the
+/// demo reset behind its usual confirmation.
+void _showDemoSheet(BuildContext context, {required VoidCallback onReset}) {
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => Consumer(
+      builder: (sheetContext, ref, _) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.notifications_none),
+              title: const Text('Hatırlatma ayarları'),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(title: const Text('Hatırlatma ayarları')),
+                      body: const SettingsScreen(),
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.restart_alt),
+              title: const Text('Demoyu sıfırla'),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _confirmReset(context, ref, onReset);
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

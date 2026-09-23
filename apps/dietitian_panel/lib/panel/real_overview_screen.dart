@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import 'real_client_detail_screen.dart';
 import '../util/turkish.dart';
+import '../util/breakpoints.dart';
 
 /// The dietitian's real client list. Two calls back this screen: the
 /// relationship rows (which include pending invites, so an invite is visible
@@ -23,29 +24,39 @@ class RealOverviewScreen extends ConsumerWidget {
     final density = context.density;
     final relationships = ref.watch(dietitianClientsProvider(profile.id));
     final names = ref.watch(dietitianClientNamesProvider(profile.id));
+    final inviteButton = FilledButton.icon(
+      onPressed: () => _openInviteDialog(context, ref, profile.id),
+      icon: const Icon(Icons.person_add_alt, size: 18),
+      label: const Text('Danışan davet et'),
+    );
 
     return Padding(
       padding: EdgeInsets.all(density.pagePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  'Hoş geldiniz, ${profile.fullName}',
-                  style: text.headlineLarge,
+          // On a phone the invite button goes under the greeting, full width,
+          // instead of squeezing the name into a narrow column (#38).
+          if (isPanelPhone(context)) ...[
+            Text(
+              'Hoş geldiniz, ${profile.fullName}',
+              style: text.headlineLarge,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            inviteButton,
+          ] else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Hoş geldiniz, ${profile.fullName}',
+                    style: text.headlineLarge,
+                  ),
                 ),
-              ),
-              FilledButton.icon(
-                onPressed: () => _openInviteDialog(context, ref, profile.id),
-                icon: const Icon(Icons.person_add_alt, size: 18),
-                label: const Text('Danışan davet et'),
-              ),
-            ],
-          ),
+                inviteButton,
+              ],
+            ),
           const SizedBox(height: AppSpacing.xl),
           Expanded(
             child: relationships.when(
@@ -56,7 +67,7 @@ class RealOverviewScreen extends ConsumerWidget {
               ),
               data: (rows) => rows.isEmpty
                   ? const Center(
-                      child: Padding(
+                      child: SingleChildScrollView(
                         padding: EdgeInsets.all(AppSpacing.xl),
                         child: _EmptyState(),
                       ),

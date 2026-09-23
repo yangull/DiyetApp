@@ -1,11 +1,13 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/adaptive_nav_scaffold.dart';
+
 import 'real_overview_screen.dart';
 import 'real_profile_screen.dart';
 
 /// The approved dietitian's actual shell (PLANNING.md §2.3 #53): only two
-/// rail destinations for now, Genel Bakış and Profil. The client list lives
+/// destinations (a rail on wide screens, a bottom bar on phones, #38) for now, Genel Bakış and Profil. The client list lives
 /// inside Genel Bakış, and a client's detail screen is pushed over the shell
 /// rather than given its own destination — no destinations are pre-added for
 /// features that don't exist yet.
@@ -32,42 +34,26 @@ class _RealPanelShellState extends State<RealPanelShell> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-
-    return Scaffold(
-      body: Row(
+    return AdaptiveNavScaffold(
+      selectedIndex: _index,
+      onSelected: (i) => setState(() => _index = i),
+      destinations: const [
+        PanelDestination(
+          icon: Icons.dashboard_outlined,
+          selectedIcon: Icons.dashboard,
+          label: 'Genel Bakış',
+        ),
+        PanelDestination(
+          icon: Icons.person_outline,
+          selectedIcon: Icons.person,
+          label: 'Profil',
+        ),
+      ],
+      body: IndexedStack(
+        index: _index,
         children: [
-          NavigationRail(
-            selectedIndex: _index,
-            onDestinationSelected: (i) => setState(() => _index = i),
-            labelType: NavigationRailLabelType.all,
-            backgroundColor: palette.surfaceSubtle,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: Text('Genel Bakış'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: Text('Profil'),
-              ),
-            ],
-          ),
-          VerticalDivider(width: 1, color: palette.borderSubtle),
-          Expanded(
-            child: IndexedStack(
-              index: _index,
-              children: [
-                RealOverviewScreen(profile: widget.identity.profile),
-                RealProfileScreen(
-                  identity: widget.identity,
-                  actions: widget.actions,
-                ),
-              ],
-            ),
-          ),
+          RealOverviewScreen(profile: widget.identity.profile),
+          RealProfileScreen(identity: widget.identity, actions: widget.actions),
         ],
       ),
     );

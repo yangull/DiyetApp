@@ -292,4 +292,58 @@ void main() {
       });
     }
   });
+
+  group('the demo adapts to the window width (#38)', () {
+    testWidgets('wide: a rail with the utilities at its foot', (tester) async {
+      tester.view.physicalSize = const Size(1600, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        const ProviderScope(child: DietitianPanelDemoApp()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      final context = tester.element(find.byType(NavigationRail));
+      expect(context.density.isCompact, isTrue);
+    });
+
+    testWidgets('phone: a bottom bar; settings sit behind a Demo button', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 3;
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        const ProviderScope(child: DietitianPanelDemoApp()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationRail), findsNothing);
+      final bar = find.byType(NavigationBar);
+      expect(bar, findsOneWidget);
+      expect(tester.element(bar).density.isCompact, isFalse);
+      for (final label in [
+        'Genel Bakış',
+        'Danışanlar',
+        'Randevular',
+        'Mesajlar',
+        'Takip',
+      ]) {
+        expect(
+          find.descendant(of: bar, matching: find.text(label)),
+          findsOneWidget,
+        );
+      }
+
+      await tester.tap(find.text('Demo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hatırlatma ayarları'));
+      await tester.pumpAndSettle();
+      expect(find.byType(BackButton), findsOneWidget);
+    });
+  });
 }

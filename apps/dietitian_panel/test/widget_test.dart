@@ -306,6 +306,43 @@ void main() {
     expect(find.text('Bu giriş bu uygulama için değil.'), findsOneWidget);
     expect(find.text('Genel Bakış'), findsNothing);
   });
+
+  testWidgets('on a phone the approved panel has a bottom bar, not a rail', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 3;
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    addTearDown(tester.view.reset);
+
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    profiles.seedDietitian(
+      auth.currentSession!.userId,
+      fullName: 'Dyt. Deniz',
+      status: VerificationStatus.approved,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(
+            FakeClientRelationshipRepository(),
+          ),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
+    // Touch-sized controls on phones (#38, #64).
+    final context = tester.element(find.byType(NavigationBar));
+    expect(context.density.isCompact, isFalse);
+  });
 }
 
 class _FlakyRelationships extends FakeClientRelationshipRepository {

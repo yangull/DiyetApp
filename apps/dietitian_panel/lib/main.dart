@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth/auth_flow_screen.dart';
 import 'auth/verification_status_screen.dart';
 import 'panel/real_panel_shell.dart';
+import 'util/breakpoints.dart';
 
 /// The real panel: login/signup → pending or rejected screen → the
 /// two-destination approved shell (PLANNING.md §2.3 #52–53). For the
@@ -37,6 +38,8 @@ class DietitianPanelApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wellkit Panel',
       theme: AppTheme.light(AppDensity.compact),
+      // Phones get the comfortable density; wide screens keep compact (#38).
+      builder: panelThemeBuilder,
       home: AuthGate(
         expectedRole: UserRole.dietitian,
         signedOutBuilder: (context) => const AuthFlowScreen(),
@@ -60,10 +63,10 @@ class _ConfigMissingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = AppTheme.light(AppDensity.compact);
     return MaterialApp(
       title: 'Wellkit Panel',
-      theme: theme,
+      theme: AppTheme.light(AppDensity.compact),
+      builder: panelThemeBuilder,
       home: Scaffold(
         body: Center(
           child: Padding(
@@ -72,7 +75,7 @@ class _ConfigMissingApp extends StatelessWidget {
               'Supabase yapılandırması eksik. --dart-define-from-file ile '
               'env/dev.json kullanarak çalıştırın.',
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
         ),

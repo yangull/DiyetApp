@@ -136,16 +136,26 @@ class _TriageCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('Dikkat gerekenler', style: text.titleLarge),
-                const SizedBox(width: AppSpacing.md),
-                if (signals.isNotEmpty)
-                  _Count(count: signals.length)
-                else
-                  Text(
-                    'temiz',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                // Wraps on a phone instead of pushing the button off-screen.
+                Expanded(
+                  child: Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text('Dikkat gerekenler', style: text.titleLarge),
+                      if (signals.isNotEmpty)
+                        _Count(count: signals.length)
+                      else
+                        Text(
+                          'temiz',
+                          style: text.bodyMedium?.copyWith(
+                            color: palette.textMuted,
+                          ),
+                        ),
+                    ],
                   ),
-                const Spacer(),
+                ),
                 TextButton(
                   onPressed: onOpenClients,
                   child: const Text('Tüm danışanlar'),

@@ -218,6 +218,11 @@ C2). Each ID names the interview question it came from.
   comfortable density (touch-sized controls), wide screens the compact one (#64).
   **Two store apps:** the client app and a separate dietitian app; the app you sign up
   in still sets your role (#37).
+  **Built 23 Sep 2026 (redesign slice 4):** below **600 dp** wide both entry points use a
+  bottom bar and the comfortable density; from 600 dp up, the rail and compact density
+  (`lib/util/breakpoints.dart`, `lib/widgets/adaptive_nav_scaffold.dart`). The demo's reminder
+  settings and reset sit behind a labelled "Demo" button on phones. Tablets (600 dp+) get
+  the compact layout for now. Individual screens are made phone-friendly in slice 5.
 - **#39** Wrong-app sign-ins (dietitian in the client app, client in the panel) get a
   full-screen message + sign-out. No automatic logout.
 - **#40** Admin sees a single card in MVP; approvals happen in the dashboard (a consequence of #35).
