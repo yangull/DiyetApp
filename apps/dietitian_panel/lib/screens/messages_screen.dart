@@ -7,6 +7,7 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
 import '../util/turkish.dart';
+import '../util/breakpoints.dart';
 
 /// In-app messaging, per PLANNING.md P2: chat stays in the product rather than
 /// moving to WhatsApp, for one record of care, quality control and KVKK. This
@@ -54,6 +55,53 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         ? selected!
         : demo.clients.first.id;
     final draft = _drafts.putIfAbsent(selectedId, TextEditingController.new);
+
+    // On a phone there is room for one column: the conversation list, and a
+    // tap opens the thread as its own page (#38). Drafts stay per client.
+    if (isPanelPhone(context)) {
+      return ListView(
+        padding: EdgeInsets.all(context.density.pagePadding),
+        children: [
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                for (final client in demo.clients)
+                  _ConversationRow(
+                    client: client,
+                    conversation: demo.conversationOf(client.id),
+                    selected: false,
+                    onTap: () {
+                      ref
+                          .read(selectedConversationProvider.notifier)
+                          .select(client.id);
+                      final threadDraft = _drafts.putIfAbsent(
+                        client.id,
+                        TextEditingController.new,
+                      );
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => Scaffold(
+                            appBar: AppBar(title: Text(client.name)),
+                            body: SafeArea(
+                              top: false,
+                              child: _ConversationDetail(
+                                clientId: client.id,
+                                draft: threadDraft,
+                                showName: false,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -304,10 +352,17 @@ class _ContextFact extends StatelessWidget {
 }
 
 class _ConversationDetail extends ConsumerWidget {
-  const _ConversationDetail({required this.clientId, required this.draft});
+  const _ConversationDetail({
+    required this.clientId,
+    required this.draft,
+    this.showName = true,
+  });
 
   final String clientId;
   final TextEditingController draft;
+
+  /// False on a phone, where the page's app bar already names the client.
+  final bool showName;
 
   void _send(WidgetRef ref) {
     final text = draft.text;
@@ -327,13 +382,14 @@ class _ConversationDetail extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: palette.borderSubtle)),
+        if (showName)
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: palette.borderSubtle)),
+            ),
+            child: Text(client.name, style: text.titleLarge),
           ),
-          child: Text(client.name, style: text.titleLarge),
-        ),
         Expanded(
           child: conversation.messages.isEmpty
               ? Center(

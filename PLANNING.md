@@ -223,8 +223,12 @@ C2). Each ID names the interview question it came from.
   (`lib/util/breakpoints.dart`, `lib/widgets/adaptive_nav_scaffold.dart`). The demo's reminder
   settings and reset sit behind a labelled "Demo" button on phones. Tablets (600 dp+) get
   the compact layout for now. Slice 5a (same day) stacked the real client list and the demo's
-  triage rows on phones; the demo's other screens are slice 5b. Layouts are tested at 360
-  and 412 dp with text scale 1.0, 1.3 and 2.0.
+  triage rows on phones; slice 5b did the demo's other screens: stacked Danışanlar rows,
+  Randevular rows that stack below 720 px (this also fixed their overflow below ~900 px on
+  the web), Mesajlar as list → thread page, wrapping headers in Takip and the client
+  record, and a sideways-scrolling measurement table. Every demo tab, a client record and
+  a thread are tested at 360 and 412 dp with text scale 1.0, 1.3 and 2.0
+  (`test/phone_layout_test.dart`).
 - **#39** Wrong-app sign-ins (dietitian in the client app, client in the panel) get a
   full-screen message + sign-out. No automatic logout.
 - **#40** Admin sees a single card in MVP; approvals happen in the dashboard (a consequence of #35).

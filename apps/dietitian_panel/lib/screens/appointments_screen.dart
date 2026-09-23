@@ -145,6 +145,111 @@ class _AppointmentRow extends ConsumerWidget {
     final cancelled = appointment.status == AppointmentStatus.cancelled;
     final reminded = appointment.status == AppointmentStatus.reminderSent;
 
+    final kindIcon = Icon(
+      appointment.kind == AppointmentKind.online
+          ? Icons.videocam_outlined
+          : Icons.person_outline,
+      size: 20,
+      color: palette.textMuted,
+    );
+    final kindLabel = Text(
+      appointment.kind == AppointmentKind.online
+          ? 'Görüntülü görüşme'
+          : 'Yüz yüze',
+      style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+    );
+    final who = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          client.name,
+          style: text.titleMedium?.copyWith(
+            decoration: cancelled ? TextDecoration.lineThrough : null,
+            color: cancelled ? palette.textMuted : null,
+          ),
+        ),
+        Text(
+          _when(appointment.at),
+          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        ),
+      ],
+    );
+    final actions = <Widget>[
+      if (!cancelled && appointment.kind == AppointmentKind.online)
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.sm),
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    VideoCallPlaceholderScreen(clientName: client.name),
+              ),
+            ),
+            icon: const Icon(Icons.videocam_outlined, size: 18),
+            label: const Text('Görüşmeye başla'),
+          ),
+        ),
+      if (cancelled)
+        Text(
+          'İptal edildi',
+          style: text.bodyMedium?.copyWith(color: palette.textMuted),
+        )
+      else if (reminded)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check, size: 16, color: AppColors.primary),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Hatırlatma gönderildi',
+                style: text.bodyMedium?.copyWith(color: AppColors.primary),
+              ),
+            ),
+          ],
+        )
+      else
+        TextButton.icon(
+          onPressed: () {
+            ref.read(demoProvider.notifier).sendReminder(appointment.id);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${client.name} için hatırlatma gönderildi.'),
+              ),
+            );
+          },
+          icon: const Icon(Icons.notifications_none, size: 18),
+          label: const Text('Hatırlatma gönder'),
+        ),
+      if (!cancelled)
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: palette.textMuted),
+          onPressed: () async {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Randevuyu iptal et'),
+                content: Text('${client.name} ile randevu iptal edilecek.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Vazgeç'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('İptal et'),
+                  ),
+                ],
+              ),
+            );
+            if (confirmed ?? false) {
+              ref.read(demoProvider.notifier).cancelAppointment(appointment.id);
+            }
+          },
+          child: const Text('İptal et'),
+        ),
+    ];
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -155,117 +260,50 @@ class _AppointmentRow extends ConsumerWidget {
             ? Border(top: BorderSide(color: palette.borderSubtle))
             : null,
       ),
-      child: Row(
-        children: [
-          Icon(
-            appointment.kind == AppointmentKind.online
-                ? Icons.videocam_outlined
-                : Icons.person_outline,
-            size: 20,
-            color: palette.textMuted,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            flex: 3,
-            child: Column(
+      // Below ~720 px the actions go under the name instead of beside it;
+      // in one line they overflowed any window narrower than about 900 px.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 720) {
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  client.name,
-                  style: text.titleMedium?.copyWith(
-                    decoration: cancelled ? TextDecoration.lineThrough : null,
-                    color: cancelled ? palette.textMuted : null,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    kindIcon,
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [who, kindLabel],
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  _when(appointment.at),
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                const SizedBox(height: AppSpacing.sm),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: actions,
+                  ),
                 ),
               ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              appointment.kind == AppointmentKind.online
-                  ? 'Görüntülü görüşme'
-                  : 'Yüz yüze',
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-            ),
-          ),
-          if (!cancelled && appointment.kind == AppointmentKind.online)
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.sm),
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        VideoCallPlaceholderScreen(clientName: client.name),
-                  ),
-                ),
-                icon: const Icon(Icons.videocam_outlined, size: 18),
-                label: const Text('Görüşmeye başla'),
-              ),
-            ),
-          if (cancelled)
-            Text(
-              'İptal edildi',
-              style: text.bodyMedium?.copyWith(color: palette.textMuted),
-            )
-          else if (reminded)
-            Row(
-              children: [
-                Icon(Icons.check, size: 16, color: AppColors.primary),
-                const SizedBox(width: 6),
-                Text(
-                  'Hatırlatma gönderildi',
-                  style: text.bodyMedium?.copyWith(color: AppColors.primary),
-                ),
-              ],
-            )
-          else
-            TextButton.icon(
-              onPressed: () {
-                ref.read(demoProvider.notifier).sendReminder(appointment.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${client.name} için hatırlatma gönderildi.'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.notifications_none, size: 18),
-              label: const Text('Hatırlatma gönder'),
-            ),
-          if (!cancelled)
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: palette.textMuted),
-              onPressed: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Randevuyu iptal et'),
-                    content: Text('${client.name} ile randevu iptal edilecek.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Vazgeç'),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('İptal et'),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirmed ?? false) {
-                  ref
-                      .read(demoProvider.notifier)
-                      .cancelAppointment(appointment.id);
-                }
-              },
-              child: const Text('İptal et'),
-            ),
-        ],
+            );
+          }
+          return Row(
+            children: [
+              kindIcon,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(flex: 3, child: who),
+              Expanded(flex: 2, child: kindLabel),
+              ...actions,
+            ],
+          );
+        },
       ),
     );
   }

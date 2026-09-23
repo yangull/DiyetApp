@@ -8,6 +8,7 @@ import '../widgets/status_pill.dart';
 import 'client_detail_screen.dart';
 import 'intake_form_screen.dart';
 import '../util/turkish.dart';
+import '../util/breakpoints.dart';
 
 class ClientsScreen extends ConsumerStatefulWidget {
   const ClientsScreen({super.key});
@@ -46,36 +47,41 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           client,
     ];
 
+    final phone = isPanelPhone(context);
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Danışanlarınız', style: text.headlineLarge),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          '${demo.clients.length} aktif · ${demo.draftCount} plan '
+          'onay bekliyor',
+          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+        ),
+      ],
+    );
+    final addButton = FilledButton.icon(
+      onPressed: () => Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const IntakeFormScreen())),
+      icon: const Icon(Icons.add, size: 18),
+      label: const Text('Danışan ekle'),
+    );
+
     return ListView(
       padding: EdgeInsets.all(density.pagePadding),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Danışanlarınız', style: text.headlineLarge),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '${demo.clients.length} aktif · ${demo.draftCount} plan '
-                    'onay bekliyor',
-                    style: text.bodyMedium?.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const IntakeFormScreen()),
-              ),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Danışan ekle'),
-            ),
-          ],
-        ),
+        // On a phone the button sits under the heading at full width.
+        if (phone) ...[
+          heading,
+          const SizedBox(height: AppSpacing.lg),
+          addButton,
+        ] else
+          Row(
+            children: [
+              Expanded(child: heading),
+              addButton,
+            ],
+          ),
         const SizedBox(height: AppSpacing.xl),
         Wrap(
           spacing: AppSpacing.md,
@@ -149,24 +155,27 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         Card(
           child: Column(
             children: [
-              Container(
-                height: density.rowHeight,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: palette.surfaceSubtle,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(density.cardRadius),
+              if (!phone)
+                Container(
+                  height: density.rowHeight,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
+                  decoration: BoxDecoration(
+                    color: palette.surfaceSubtle,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(density.cardRadius),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      _head(context, 'Danışan', flex: 3),
+                      _head(context, 'Hedef', flex: 3),
+                      _head(context, 'Kilo', flex: 2),
+                      _head(context, 'Plan durumu', flex: 3),
+                    ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    _head(context, 'Danışan', flex: 3),
-                    _head(context, 'Hedef', flex: 3),
-                    _head(context, 'Kilo', flex: 2),
-                    _head(context, 'Plan durumu', flex: 3),
-                  ],
-                ),
-              ),
               if (clients.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.xl),
@@ -182,54 +191,62 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                       builder: (_) => ClientDetailScreen(clientId: client.id),
                     ),
                   ),
-                  child: Container(
-                    height: density.rowHeight,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: palette.borderSubtle),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Text(client.name, style: text.titleMedium),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            client.goal,
-                            style: text.bodyMedium?.copyWith(
-                              color: palette.textSecondary,
+                  child: phone
+                      ? _PhoneClientRow(
+                          client: client,
+                          state: demo.planFor(client.id).state,
+                        )
+                      : Container(
+                          height: density.rowHeight,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.lg,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: palette.borderSubtle),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            '${formatDecimal(client.weightKg)} kg',
-                            style: text.bodyMedium?.copyWith(
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  client.name,
+                                  style: text.titleMedium,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  client.goal,
+                                  style: text.bodyMedium?.copyWith(
+                                    color: palette.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  '${formatDecimal(client.weightKg)} kg',
+                                  style: text.bodyMedium?.copyWith(
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: StatusPill(
+                                    state: demo.planFor(client.id).state,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: StatusPill(
-                              state: demo.planFor(client.id).state,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
             ],
           ),
@@ -245,6 +262,53 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         trUpper(label),
         style: Theme.of(context).textTheme.labelSmall
             ?.copyWith(color: context.palette.textMuted),
+      ),
+    );
+  }
+}
+
+/// A client on a phone (#128 on a narrow screen): name and plan status on the
+/// first line, goal and weight under it. The row grows with its text.
+class _PhoneClientRow extends StatelessWidget {
+  const _PhoneClientRow({required this.client, required this.state});
+
+  final DemoClient client;
+  final PlanState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    return Container(
+      constraints: BoxConstraints(minHeight: context.density.rowHeight),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: palette.borderSubtle)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(client.name, style: text.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  '${client.goal} · ${formatDecimal(client.weightKg)} kg',
+                  style: text.bodyMedium?.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                StatusPill(state: state),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: palette.textMuted),
+        ],
       ),
     );
   }

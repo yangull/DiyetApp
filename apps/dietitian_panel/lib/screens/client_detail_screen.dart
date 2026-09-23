@@ -152,10 +152,12 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text('Diyet planı', style: text.titleLarge),
-                        const SizedBox(width: AppSpacing.md),
                         StatusPill(state: plan.state),
                       ],
                     ),
@@ -208,10 +210,14 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    // Apart on one line when it fits, stacked when it doesn't.
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.xs,
                       children: [
                         Text('Kilo takibi', style: text.titleLarge),
-                        const Spacer(),
                         if (weights.isNotEmpty)
                           _ProgressLabel(client: client, entries: weights),
                       ],
@@ -244,12 +250,14 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                                   ),
                                 ),
                               ),
-                              Text(
-                                '${formatDecimal(entry.kg)} kg',
-                                style: text.titleMedium?.copyWith(
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
+                              Flexible(
+                                child: Text(
+                                  '${formatDecimal(entry.kg)} kg',
+                                  style: text.titleMedium?.copyWith(
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
@@ -297,10 +305,13 @@ class _MeasurementsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.xs,
               children: [
                 Text('Vücut ölçümleri', style: text.titleLarge),
-                const Spacer(),
                 if (rows.isNotEmpty)
                   Text(
                     '${rows.length} ölçüm',
@@ -314,56 +325,62 @@ class _MeasurementsCard extends StatelessWidget {
                 'Bu danışan için kilo dışında ölçüm kaydı yok.',
                 style: text.bodyMedium?.copyWith(color: palette.textMuted),
               )
-            else ...[
-              Row(
+            else
+              // Six columns do not fit a phone: the table keeps its width and
+              // scrolls sideways instead of squeezing the numbers.
+              _WideTable(
+                minWidth: 620,
                 children: [
-                  const SizedBox(width: 96),
-                  _MeasurementHead(label: 'Bel'),
-                  _MeasurementHead(label: 'Kalça'),
-                  _MeasurementHead(label: 'Bel/kalça'),
-                  _MeasurementHead(label: 'Yağ %'),
-                  _MeasurementHead(label: 'Kas kütlesi'),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              for (var i = 0; i < rows.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Row(
+                  Row(
                     children: [
-                      SizedBox(
-                        width: 96,
-                        child: Text(
-                          formatDate(rows[i].date),
-                          style: text.bodyMedium?.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      ),
-                      _MeasurementCell(
-                        value: '${formatDecimal(rows[i].waistCm)} cm',
-                        change: _delta(rows, i, (m) => m.waistCm),
-                      ),
-                      _MeasurementCell(
-                        value: '${formatDecimal(rows[i].hipCm)} cm',
-                        change: _delta(rows, i, (m) => m.hipCm),
-                      ),
-                      _MeasurementCell(
-                        value: formatDecimal(rows[i].waistHipRatio, 2),
-                        change: null,
-                      ),
-                      _MeasurementCell(
-                        value: '${formatDecimal(rows[i].bodyFatPct)} %',
-                        change: _delta(rows, i, (m) => m.bodyFatPct),
-                      ),
-                      _MeasurementCell(
-                        value: '${formatDecimal(rows[i].muscleMassKg)} kg',
-                        change: _delta(rows, i, (m) => m.muscleMassKg),
-                      ),
+                      const SizedBox(width: 96),
+                      _MeasurementHead(label: 'Bel'),
+                      _MeasurementHead(label: 'Kalça'),
+                      _MeasurementHead(label: 'Bel/kalça'),
+                      _MeasurementHead(label: 'Yağ %'),
+                      _MeasurementHead(label: 'Kas kütlesi'),
                     ],
                   ),
-                ),
-            ],
+                  const SizedBox(height: AppSpacing.sm),
+                  for (var i = 0; i < rows.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 96,
+                            child: Text(
+                              formatDate(rows[i].date),
+                              style: text.bodyMedium?.copyWith(
+                                color: palette.textSecondary,
+                              ),
+                            ),
+                          ),
+                          _MeasurementCell(
+                            value: '${formatDecimal(rows[i].waistCm)} cm',
+                            change: _delta(rows, i, (m) => m.waistCm),
+                          ),
+                          _MeasurementCell(
+                            value: '${formatDecimal(rows[i].hipCm)} cm',
+                            change: _delta(rows, i, (m) => m.hipCm),
+                          ),
+                          _MeasurementCell(
+                            value: formatDecimal(rows[i].waistHipRatio, 2),
+                            change: null,
+                          ),
+                          _MeasurementCell(
+                            value: '${formatDecimal(rows[i].bodyFatPct)} %',
+                            change: _delta(rows, i, (m) => m.bodyFatPct),
+                          ),
+                          _MeasurementCell(
+                            value: '${formatDecimal(rows[i].muscleMassKg)} kg',
+                            change: _delta(rows, i, (m) => m.muscleMassKg),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Bu dört ölçüm bizim tahminimiz ve yağ / kas değerleri bir '
@@ -413,7 +430,9 @@ class _MeasurementCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Expanded(
-      child: Row(
+      child: Wrap(
+        spacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.end,
         children: [
           Text(
             value,
@@ -422,7 +441,6 @@ class _MeasurementCell extends StatelessWidget {
             ),
           ),
           if (change != null && change != 0) ...[
-            const SizedBox(width: 6),
             Text(
               '${change! > 0 ? '+' : '−'}'
               '${formatDecimal(change!.abs())}',
@@ -455,6 +473,7 @@ class _ProgressLabel extends StatelessWidget {
     };
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           progress.isLoss ? Icons.south : Icons.north,
@@ -470,12 +489,14 @@ class _ProgressLabel extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text(
-          progress.remainingKg == null
-              ? progress.label
-              : '${progress.label} · hedefe '
-                    '${formatDecimal(progress.remainingKg!.abs())} kg',
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        Flexible(
+          child: Text(
+            progress.remainingKg == null
+                ? progress.label
+                : '${progress.label} · hedefe '
+                      '${formatDecimal(progress.remainingKg!.abs())} kg',
+            style: text.bodySmall?.copyWith(color: palette.textMuted),
+          ),
         ),
       ],
     );
@@ -589,6 +610,32 @@ class _Fact extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A table that needs [minWidth] to read: full width when there is room,
+/// sideways scrolling when there is not.
+class _WideTable extends StatelessWidget {
+  const _WideTable({required this.minWidth, required this.children});
+
+  final double minWidth;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final table = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        );
+        if (constraints.maxWidth >= minWidth) return table;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(width: minWidth, child: table),
+        );
+      },
     );
   }
 }

@@ -37,17 +37,19 @@ class ReportsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  // Wraps rather than overflows on a phone or at large text.
+                  Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(client.name, style: text.titleLarge),
-                      const SizedBox(width: AppSpacing.md),
                       Text(
                         client.goal,
                         style: text.bodyMedium?.copyWith(
                           color: palette.textMuted,
                         ),
                       ),
-                      const Spacer(),
                       _Delta(client: client, entries: demo.weights[client.id]!),
                     ],
                   ),
@@ -88,6 +90,7 @@ class _Delta extends StatelessWidget {
     };
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           progress.isLoss ? Icons.south : Icons.north,
@@ -103,9 +106,11 @@ class _Delta extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text(
-          progress.label,
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        Flexible(
+          child: Text(
+            progress.label,
+            style: text.bodySmall?.copyWith(color: palette.textMuted),
+          ),
         ),
       ],
     );
