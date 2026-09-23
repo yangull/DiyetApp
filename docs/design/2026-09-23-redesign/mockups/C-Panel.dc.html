@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>C · Panel, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;font-family:'Figtree',sans-serif;color:#111814}
+.card{background:#F2F5F3;border-radius:16px;padding:14px}
+.h{font-size:15px;line-height:20px;font-weight:700}
+.sub{font-size:13px;line-height:18px;color:#4A5550}
+.big{font-size:30px;line-height:34px;font-weight:800;font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:12px;height:68px;border-top:1px solid #E3E8E5}
+.av{width:40px;height:40px;border-radius:20px;background:#F2F5F3;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.warn{font-size:13px;color:#8A5A0B;font-weight:600}
+.sec{font-size:17px;font-weight:800;margin-top:4px}
+.ni{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:#4A5550;width:70px}
+</style>
+</helmet>
+<div style="width: 390px; height: 900px; box-sizing: border-box; background: #FFFFFF; position: relative; overflow: hidden">
+<div style="padding: 24px 20px 0; display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -.5px">Genel Bakış</h1>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div class="card"><div class="big">3</div><div class="sub">plan onay bekliyor</div></div>
+<div class="card"><div class="big">2</div><div class="sub">randevu bugün</div></div>
+<div class="card"><div class="big" style="color: #8A5A0B">4</div><div class="sub">danışan dikkat istiyor</div></div>
+</div>
+
+<div class="sec">Dikkat gerekenler</div>
+<div>
+<div class="row" style="border-top: 0"><div class="av">EA</div><div style="flex-grow: 1"><div class="h">Elif Aydın</div><div class="warn">7 gündür tartı yok</div></div><div class="sub">Tartı</div></div>
+<div class="row"><div class="av">MK</div><div style="flex-grow: 1"><div class="h">Mert Kaya</div><div class="warn">Mesajı 26 saattir yanıtsız</div></div><div class="sub">Mesaj</div></div>
+<div class="row"><div class="av">ZA</div><div style="flex-grow: 1"><div class="h">Zeynep Arslan</div><div class="warn">Dünkü randevuya gelmedi</div></div><div class="sub">Randevu</div></div>
+</div>
+
+<div class="sec">Onay bekleyen planlar</div>
+<div style="border: 1.5px dashed #514196; border-radius: 16px; background: #F4F2FA; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="align-self: flex-start; font-size: 11.5px; font-weight: 700; color: #514196; border: 1px solid #514196; background: #fff; border-radius: 999px; padding: 3px 10px">Yapay zekâ taslağı · onay bekliyor</div>
+<div class="h">Burak Şahin · 28 Eylül haftası</div>
+<div class="sub">1.650 kcal hedef, planda 1.610 · alerji kontrolü temiz</div>
+<button type="button" style="height: 46px; border: 1.5px solid #111814; border-radius: 23px; background: #fff; color: #111814; font: 700 15px Figtree, sans-serif">Taslağı incele</button>
+</div>
+</div>
+
+<nav aria-label="Ana gezinme" style="position: absolute; left: 0; right: 0; bottom: 0; height: 78px; background: #fff; border-top: 1px solid #E3E8E5; display: flex; justify-content: space-around; align-items: center">
+<div class="ni" style="color: #18795C"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4z"></path></svg>Genel Bakış</div>
+<div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 19c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 010 7M18 14c2 .7 3.2 2.3 3.8 5"></path></svg>Danışanlar</div>
+<div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>Randevular</div>
+<div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Mesajlar</div>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

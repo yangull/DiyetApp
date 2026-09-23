@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>A · Bugün</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;font-family:'Figtree',sans-serif;color:#16211D}
+.lbl{font-size:11px;line-height:16px;font-weight:600;letter-spacing:.88px;color:#5F6B64}
+.card{background:#fff;border:1px solid #DAE4E0;border-radius:14px}
+.row{display:flex;align-items:center;gap:12px;padding:0 16px;height:60px;border-top:1px solid #DAE4E0}
+.row.first{border-top:0}
+.chk{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.t{font-size:12px;color:#5F6B64;width:38px;font-variant-numeric:tabular-nums}
+.nm{font-size:15px;line-height:20px;font-weight:600}
+.sub{font-size:13px;line-height:18px;color:#46534D}
+.nav{position:absolute;left:0;right:0;bottom:0;height:80px;background:#fff;border-top:1px solid #DAE4E0;display:flex;justify-content:space-around;align-items:center}
+.ni{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#46534D;width:64px}
+.pill{width:56px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center}
+.btn{height:40px;padding:0 16px;border:0;border-radius:10px;background:#18795C;color:#fff;font:600 14px 'Figtree',sans-serif;align-self:flex-start;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 900px; box-sizing: border-box; background: #F7F9F8; position: relative; overflow: hidden">
+<div style="padding: 24px 20px 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: flex-start; justify-content: space-between">
+<div>
+<div class="lbl">ÇARŞAMBA, 23 EYLÜL</div>
+<h1 style="margin: 4px 0 0; font-family: Fraunces, serif; font-weight: 600; font-size: 28px; line-height: 34px">Merhaba, Can</h1>
+</div>
+<button type="button" aria-label="Profil" style="width: 40px; height: 40px; border-radius: 20px; border: 0; background: #18795C; color: #fff; font: 600 14px Figtree, sans-serif">CA</button>
+</div>
+
+<div style="background: #E3F0EA; border-radius: 14px; padding: 18px 20px; display: flex; gap: 20px; align-items: center">
+<div style="position: relative; width: 104px; height: 104px; flex-shrink: 0">
+<svg width="104" height="104" viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="#C4DFD2" stroke-width="10"></circle><circle cx="52" cy="52" r="44" fill="none" stroke="#18795C" stroke-width="10" stroke-linecap="round" stroke-dasharray="166 277" transform="rotate(-90 52 52)"></circle></svg>
+<div style="position: absolute; top: 0; left: 0; width: 104px; height: 104px; display: flex; flex-direction: column; align-items: center; justify-content: center">
+<div style="font-family: Fraunces, serif; font-weight: 600; font-size: 30px; line-height: 32px">3/5</div>
+<div style="font-size: 12px; color: #46534D">öğün</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+<div style="font-weight: 600; font-size: 16px">Bugünkü planın</div>
+<div class="sub">Sıradaki: <b style="color: #16211D">Öğle · 12:30</b><br>et 2 · nişastalı 2 · sebze serbest</div>
+<button type="button" class="btn">Öğüne bak</button>
+</div>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div class="lbl">BUGÜNÜN ÖĞÜNLERİ</div>
+<div style="font-size: 13px; font-weight: 600; color: #18795C">Haftanın planı</div>
+</div>
+<div class="card">
+<div class="row first">
+<div class="chk" style="background: #18795C"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<div class="t">08:00</div>
+<div style="min-width: 0"><div class="nm">Kahvaltı</div><div class="sub">süt 1 · nişastalı 2 · yağ 1</div></div>
+</div>
+<div class="row">
+<div class="chk" style="background: #18795C"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<div class="t">10:30</div>
+<div><div class="nm">Ara öğün</div><div class="sub">meyve 1</div></div>
+</div>
+<div class="row" style="background: #F2F8F5">
+<div class="chk" style="border: 2px solid #18795C"></div>
+<div class="t" style="color: #16211D; font-weight: 600">12:30</div>
+<div style="flex-grow: 1"><div class="nm">Öğle</div><div class="sub">et 2 · nişastalı 2 · sebze serbest</div></div>
+<div style="font-size: 11px; font-weight: 600; color: #18795C; border: 1px solid #18795C; border-radius: 999px; padding: 2px 8px">Sıradaki</div>
+</div>
+<div class="row">
+<div class="chk" style="border: 2px solid #7E8C86"></div>
+<div class="t">19:30</div>
+<div><div class="nm">Akşam</div><div class="sub">et 2 · nişastalı 1 · sebze 1 · yağ 1</div></div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div class="card" style="padding: 14px 16px">
+<div class="lbl">KİLO</div>
+<div style="font-family: Fraunces, serif; font-weight: 600; font-size: 24px; line-height: 30px; margin-top: 4px">72,4 kg</div>
+<div class="sub">Hedef 68 · bu ay −1,2</div>
+</div>
+<div class="card" style="padding: 14px 16px">
+<div class="lbl">RANDEVU</div>
+<div style="font-family: Fraunces, serif; font-weight: 600; font-size: 24px; line-height: 30px; margin-top: 4px">Per 14:00</div>
+<div class="sub">Görüntülü görüşme</div>
+</div>
+</div>
+
+<div class="card" style="padding: 14px 16px; display: flex; gap: 12px">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E3F0EA; color: #135F49; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">AY</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 13px; color: #5F6B64"><b style="color: #16211D">Dyt. Ayşe Yılmaz</b> · 2 sa önce</div>
+<div style="font-size: 14px; line-height: 20px">Dünkü tartın harika. Bu hafta akşam ara öğününü atlamamaya çalış.</div>
+<div style="font-size: 13px; font-weight: 600; color: #18795C">Yanıtla</div>
+</div>
+</div>
+</div>
+
+<nav class="nav" aria-label="Ana gezinme">
+<div class="ni" style="color: #16211D"><div class="pill" style="background: #E3F0EA; color: #18795C"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4z"></path></svg></div>Bugün</div>
+<div class="ni"><div class="pill"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg></div>Planım</div>
+<div class="ni"><div class="pill"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"></path></svg></div>İlerleme</div>
+<div class="ni"><div class="pill"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg></div>Mesajlar</div>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -42,14 +42,22 @@ and PLANNING.md.
 
 ## Next steps
 
-1. **Next session: plan the UI redesign (Can, 23 Sep).** On a real phone the client app
-   reads as dull and not alive. Plan mode, no code until Can approves the plan. Inputs:
-   `docs/design-system.md` (its 14 rules and palette are the current contract; change them
-   only by Can's decision, recorded there and in PLANNING #54–#67), Can's design
-   references (promised since 28 Aug; ask for them), and the emulator for looking at real
-   screens. The plan should say which sections each app's screens need, what "alive"
-   means within the rules, and the order of slices. The mobile panel layout (below)
-   should follow the redesign, not precede it.
+1. **The "Sıcak" redesign (planned 23 Sep evening, not coded yet).** Can picked
+   direction B, Lifesum-like (PLANNING #131), per-meal logging (P7), weigh-ins by both
+   sides (P8), and delegated the rule changes (#132, new rule 15: "must not look
+   AI-coded"). Target values: `docs/design-system.md` "Redesign Sıcak". Mockups and
+   before-screenshots: `docs/design/2026-09-23-redesign/`. An outside design review
+   (Codex + a Claude subagent) runs before slice 1. Slice order:
+   1. theme tokens in `core` (warm ground, hero, highlight, group colours, radii, nav bar);
+   2. client **Bugün** with only the states real data supports today (Başlangıç steps,
+      invite card, AI "Yakında"), plus the "sen" fix (step 3 below);
+   3. client **Profil**: summary sections, Hedeflerim on its own edit screen (#104);
+   4. the **mobile panel shell** (step 2 below), both entry points;
+   5. mobile panel screens: Genel Bakış, Danışanlar rows (#128), client detail tabs;
+   6. data features that bring Bugün to life, each planned on its own: `diet_plans` +
+      Planım, meal logs (P7), weigh-ins (P8), chat.
+   Open questions from it: C20 (group illustrations), C21 (plan editing on phones), C22
+   (streak rule).
 2. **The mobile panel layout** (#38): bottom bar and stacked screens below a width
    breakpoint, comfortable density on phones. Codex's inventory of what assumes desktop
    is in `docs/research/2026-09-23-decisions-review.md` (compact density hard-coded in the

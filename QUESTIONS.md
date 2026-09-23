@@ -52,6 +52,10 @@ Delete this section once Can has looked at it again (after the next talk with Ka
 | C18, C19 | UI review fixes, button wording | As recommended; short button labels | #119, #120 |
 | new | Panel bundle id | `com.wellkit.panel` | PLANNING §3.1 |
 | new | WSL ↔ emulator bridge | Mirrored WSL networking | PLANNING #3 |
+| new | Redesign direction | "Sıcak" (option B, Lifesum-like) | PLANNING #131, design-system.md |
+| new | Design rule changes for it | Delegated to Claude: "must not look AI-coded" | PLANNING #132, design-system.md rule 15 |
+| new | Do clients mark meals as eaten? | Yes, one tap per meal, time recorded | PLANNING P7 |
+| new | Who enters weigh-ins? | Both: the client in the app, the dietitian adds measurements | PLANNING P8 |
 
 ---
 
@@ -71,7 +75,7 @@ is deferred, now PLANNING P6) and I9 (Kutay's Excel dropped).
 | I6 | **Client flow:** sign up → choose the dietitian or AI path → ~~enter blood values/tests~~ (superseded 23 Sep: no blood-test section, files can be attached, #125) → set a budget → dietitian or AI plan | PLANNING §1 | |
 | I7 | **Dietitian types to serve:** sports, lipedema, diabetes, GLP-1 injection users, bariatric | PLANNING §1 | |
 | I8 | **Blood tests:** ~~clients upload them~~ superseded 23 Sep: no blood-test section, any file can be attached (#125). Still open: dietitians can't diagnose; do some actions need a doctor-approved document? (C12) | PLANNING #125 | |
-| I10 | **Meal-time notifications** matter to dietitians ("what time it was eaten") | PLANNING §1 | |
+| I10 | **Meal-time notifications** matter to dietitians ("what time it was eaten"). 23 Sep: clients now log each meal with its time (P7); notifications still unconfirmed. | PLANNING §1, P7 | |
 | I11 | **An AI chatbot** answers client questions without the dietitian (Phase 2) | PLANNING §1, roadmap | |
 | I12 | **Diet styles** to learn and support: Mediterranean, intermittent fasting, low-carb | not in PLANNING, only here | |
 | I13 | **Sports PT is suspended** | roadmap Phase 3+ | |
@@ -171,6 +175,26 @@ _Was: Q20._
 ### C17. Separate Supabase dev project?
 Today every dev signup lands in the one live project. A second project is free on the
 Supabase free tier.
+>
+
+### C20. Illustrations for the eight exchange groups?
+Lifesum feels alive largely through food images; we keep "no stock photos". One
+consistent illustration set (an icon per group: süt, et, nişastalı, …) would add warmth
+without faking photos. Commission one, use an open-licence set, or stay text-only?
+_Blocks: design-system rule 9's illustration exception. Until then, group chips are text._
+>
+
+### C21. How much plan editing on a phone?
+The panel runs on phones (#38). Editing a full weekly exchange plan on a small screen is
+hard. Proposal: on phones the dietitian reviews, approves and makes small edits (a count,
+a note); full weekly editing stays on tablet and web. Agree?
+_Blocks: the mobile plan screen (redesign slice 5 onward)._
+>
+
+### C22. What counts as "a day on plan" for the streak?
+The client's streak (P7) needs a rule: every meal marked eaten, or most of them (e.g. 4 of
+5)? And does the dietitian see the streak?
+_Blocks: the streak card on the client's Bugün screen._
 >
 
 ---

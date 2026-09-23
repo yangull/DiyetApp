@@ -4,8 +4,8 @@
 > open. Not a session log — history lives in git (`git log -p PLANNING.md`).
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
-> **Decision IDs are stable.** Product decisions are P1–P6; technical decisions keep
-> their original numbers (#1–#130). Code comments cite them as `PLANNING.md #N` (older
+> **Decision IDs are stable.** Product decisions are P1–P8; technical decisions keep
+> their original numbers (#1–#132). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
 > Last restructured: 23 September 2026.
@@ -63,6 +63,14 @@ with a way to reopen it.
   directly, outside Wellkit (bank transfer or a Turkish payment app). Wellkit takes no
   commission and runs no payments until the money model is decided; every money question
   is parked (QUESTIONS.md §5). P2 was kept with new reasons.
+- **P7** **Clients mark meals as eaten, one tap per meal** (Can, 23 Sep 2026, while
+  planning the redesign). The time is recorded, which is what dietitians asked for (I10).
+  It feeds the client's day (progress ring, week strip, streak) and the dietitian's
+  view. Per exchange group was the more detailed option, rejected as too much tapping.
+  Table sketch: `meal_logs` (§7).
+- **P8** **Weigh-ins are entered by both sides** (Can, 23 Sep 2026): the client logs their
+  weight in the app, and the dietitian can add measurements. Which measurements is still
+  DT8.
 
 ### 2.1 What the dietitian interviews said
 
@@ -244,8 +252,10 @@ Full reference, including type scale, density numbers and the design rules:
 **`docs/design-system.md`** (the source; the 28 Aug artifact is history).
 
 - **#54** Palette **B "Serin"**: background `#F7F9F8`, surface `#FFFFFF`, brand `#18795C`.
+  The ground becomes warm `#F6F1E8` with the "Sıcak" redesign (#131); the brand green stays.
 - **#55** **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
-  draft); no decorative second accent.
+  draft); no decorative second accent. Since #132 two colour kinds are added with fixed
+  meanings: `highlight` (progress, achievement) and one colour per exchange group.
 - **#56** **No separate `success` colour** — it measured 1.19:1 against brand green. Approved
   states use brand green.
 - **#57** **An AI draft has its own visual state:** violet `#514196` + 1.5px dashed border + a
@@ -265,9 +275,22 @@ Full reference, including type scale, density numbers and the design rules:
   explicitly.
 - **#66** Non-Material tokens travel as `AppPalette` / `AppDensity` ThemeExtensions
   (`context.palette`, `context.density`).
-- **#67** The design rules in `docs/design-system.md` apply to every screen (14 since 23 Sep
+- **#67** The design rules in `docs/design-system.md` apply to every screen (15 since 23 Sep
   2026: no gradients, no emoji icons, no "✨ AI" badges, no mixed radii, labelled and
-  confirmed actions, no money while P6 holds, …).
+  confirmed actions, no money while P6 holds, nothing that looks AI-generated, …).
+- **#131** **Redesign direction "Sıcak"** (Can, 23 Sep 2026, after calling the client app
+  dull on a phone; option B of three on the mockup canvas
+  https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn). Close to Lifesum: warm ground, a
+  flat green hero block carrying the day's number, colour per exchange group, a floating
+  bottom bar. Applies to the client app and the panel on phones; the panel on wide
+  screens takes the same colours and keeps its tables. Target values:
+  `docs/design-system.md` "Redesign Sıcak", not coded yet.
+- **#132** **Design rules relaxed for "Sıcak"**, delegated by Can to Claude on 23 Sep 2026
+  with one condition: it must not look like an AI-coded frontend (new rule 15). Changed:
+  flat hero blocks (rule 1), one centred hero number (6), a shadow on floating elements
+  only (8), rings and bars fill once on arrival (12), `highlight` and group colours
+  (#55). Kept: no gradients, no stock photos (illustrations are C20), only real data (4,
+  5).
 
 ### 3.6 The interview demo
 
@@ -370,6 +393,7 @@ profile models, both apps at "login → first screen".
       structured health fields don't. No blood-test section (#125)
 - [ ] File attachments on the shared record, from client and dietitian (#125)
 - [ ] "Diyetisyen bul": dietitian listing + filtering + selection — email invite stands in for now (#101)
+- [ ] Client marks meals as eaten (P7) and logs weight; dietitian adds measurements (P8)
 - [ ] In-app chat (Supabase Realtime)
 - [ ] Diet plan: AI draft (Edge Function) → dietitian edits/approves → client sees it
 - [ ] ~~iyzico payment + commission~~ — deferred (P6); clients pay dietitians directly
@@ -396,7 +420,8 @@ sketch to be designed when its slice arrives:
 ```
 attachments    (relationship_id, uploaded_by, file_url, created_at)  -- any file, no blood-test fields (#125)
 diet_plans     (relationship_id, source: ai|dietitian, state: draft|approved, content)
-meal_logs      (plan_id, meal, time, eaten)
+meal_logs      (plan_id, meal, time, eaten)                          -- P7, one tap per meal
+measurements   (client_id, taken_by: client|dietitian, kind, value, taken_at)  -- P8
 conversations  (client_id, dietitian_id | ai)
 messages       (conversation_id, sender, body)
 appointments   (client_id, dietitian_id, time, video_room_id, status)

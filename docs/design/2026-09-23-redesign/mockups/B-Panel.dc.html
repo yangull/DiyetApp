@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>B · Panel, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;font-family:'Figtree',sans-serif;color:#1F2A24}
+.lbl{font-size:11px;line-height:16px;font-weight:700;letter-spacing:.88px;color:#6A6254}
+.card{background:#fff;border-radius:18px}
+.row{display:flex;align-items:center;gap:12px;padding:0 14px;height:72px;border-top:1px solid #F1EADF}
+.row.first{border-top:0}
+.av{width:42px;height:42px;border-radius:21px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nm{font-size:15px;line-height:20px;font-weight:700}
+.tag{display:inline-block;margin-top:3px;font-size:12px;font-weight:700;color:#8A5A0B;background:#FBEFD5;border-radius:999px;padding:2px 9px}
+.sub{font-size:13px;line-height:18px;color:#4F5A52}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#5A5348;width:70px}
+</style>
+</helmet>
+<div style="width: 390px; height: 900px; box-sizing: border-box; background: #F6F1E8; position: relative; overflow: hidden">
+<div style="background: #18795C; color: #fff; border-radius: 0 0 28px 28px; padding: 24px 20px 22px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<div style="font-size: 11px; font-weight: 700; letter-spacing: .88px; color: #E4F2EC">ÇARŞAMBA, 23 EYLÜL</div>
+<h1 style="margin: 4px 0 0; font-family: Fraunces, serif; font-weight: 600; font-size: 26px; line-height: 32px">Günaydın, Ayşe Hanım</h1>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="background: #135F49; border-radius: 16px; padding: 12px"><div style="font-family: Fraunces, serif; font-weight: 600; font-size: 30px; line-height: 34px">3</div><div style="font-size: 12px; color: #E4F2EC">plan onay bekliyor</div></div>
+<div style="background: #135F49; border-radius: 16px; padding: 12px"><div style="font-family: Fraunces, serif; font-weight: 600; font-size: 30px; line-height: 34px">2</div><div style="font-size: 12px; color: #E4F2EC">randevu bugün</div></div>
+<div style="background: #FBEFD5; color: #8A5A0B; border-radius: 16px; padding: 12px"><div style="font-family: Fraunces, serif; font-weight: 600; font-size: 30px; line-height: 34px">4</div><div style="font-size: 12px">danışan dikkat istiyor</div></div>
+</div>
+</div>
+
+<div style="padding: 16px 16px 0; display: flex; flex-direction: column; gap: 12px">
+<div class="lbl">DİKKAT GEREKENLER</div>
+<div class="card">
+<div class="row first"><div class="av" style="background: #F9E3C8; color: #7A4A12">EA</div><div style="flex-grow: 1"><div class="nm">Elif Aydın</div><span class="tag">7 gündür tartı yok</span></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6A6254" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="row"><div class="av" style="background: #DCE8F7; color: #2B5EA8">MK</div><div style="flex-grow: 1"><div class="nm">Mert Kaya</div><span class="tag">Mesajı 26 saattir yanıtsız</span></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6A6254" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="row"><div class="av" style="background: #E1EFDC; color: #2F6A22">ZA</div><div style="flex-grow: 1"><div class="nm">Zeynep Arslan</div><span class="tag">Dünkü randevuya gelmedi</span></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6A6254" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></div>
+</div>
+
+<div class="lbl">ONAY BEKLEYEN PLANLAR</div>
+<div style="border: 1.5px dashed #514196; border-radius: 18px; background: #F4F2FA; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="align-self: flex-start; font-size: 11.5px; font-weight: 700; color: #514196; border: 1px solid #514196; background: #fff; border-radius: 999px; padding: 3px 10px">Yapay zekâ taslağı · onay bekliyor</div>
+<div class="nm">Burak Şahin · 28 Eylül haftası</div>
+<div class="sub">1.650 kcal hedef, planda 1.610 · alerji kontrolü temiz</div>
+<button type="button" style="height: 46px; border: 0; border-radius: 14px; background: #fff; color: #1F2A24; font: 700 15px Figtree, sans-serif; box-shadow: inset 0 0 0 1px #7E8C86">Taslağı incele</button>
+</div>
+</div>
+
+<nav aria-label="Ana gezinme" style="position: absolute; left: 16px; right: 16px; bottom: 16px; height: 68px; background: #fff; border-radius: 34px; box-shadow: 0 6px 24px rgba(31,42,36,.14); display: flex; justify-content: space-around; align-items: center">
+<div class="ni" style="color: #18795C"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4z"></path></svg>Genel Bakış</div>
+<div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 19c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 010 7M18 14c2 .7 3.2 2.3 3.8 5"></path></svg>Danışanlar</div>
+<div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>Randevular</div>
+<div class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Mesajlar</div>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
