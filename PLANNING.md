@@ -24,21 +24,18 @@ Can, 21 Sep 2026). Managing existing clients is a supporting capability.
 
 **Revenue (draft):** commission on dietitian–client matches (rate open, Q1); a monthly
 subscription for the AI-only tier (price open, Q2); later B2B (catering, meal cards,
-corporate).
+corporate). Awaiting confirmation (QUESTIONS.md §0 I5); C1 asks whether there is any
+commission at launch.
 
-**Client flow (from the Miro USER FLOW, not yet validated):** sign up → choose a path
-(dietitian or AI) → enter blood values / tests → set a budget → either work one-on-one
-with a chosen dietitian (commission) or get an AI plan with regular follow-up
-(subscription). Catering later; sports PT is suspended.
-
-**Dietitian side (from Miro):** plans are built in Excel today (Kutay's workflow);
-dietitian types include sports, lipedema, diabetes, GLP-1 users, bariatric — but one
-general panel serves them all (P5). An AI chatbot for client questions and meal-time
-notifications are wanted. Blood-test review may need a doctor-approved document (Q3).
+**Awaiting Can's confirmation** (QUESTIONS.md §0): the client flow (I6), the dietitian
+types to serve (I7), blood-test handling (I8), Kutay's Excel as the reference (I9),
+meal-time notifications (I10), the AI chatbot (I11) and "cheap and accessible" (I15).
 
 ---
 
 ## 2. Locked product decisions
+
+P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 
 - **P1** **AI drafts, the dietitian approves.** On the human-service side a client never sees
   an AI plan no dietitian has approved.
@@ -78,17 +75,19 @@ notifications are wanted. Blood-test review may need a doctor-approved document 
 - **#15** The publishable key is public by design; **Row Level Security** is what protects
   data; the `service_role` key never appears client-side.
 - **#18** Both apps import theme and config from `core`.
-- **#19** Private GitHub repo `yangull/DiyetApp`. Ask Can before pushing.
+- **#19** Private GitHub repo `yangull/DiyetApp`. It was public by mistake until 23 Sep 2026;
+  no secrets were ever committed. Ask Can before pushing.
 - **Bundle id:** `com.wellkit.client` (Android applicationId/namespace, Kotlin package,
   iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has none — web only.
 - **No Mac:** iOS builds go through **Codemagic** (cloud CI).
-- **Agent skills** (#85): mattpocock-skills configured — GitHub Issues as tracker,
-  default triage labels, single-context domain docs (`CONTEXT.md`, `docs/adr/`).
+- **Agent skills** (#85): mattpocock-skills configured. **GitHub Issues is the tracker**
+  (confirmed 23 Sep 2026); triage and `wayfinder:*` labels exist on the repo. Domain
+  docs are single-context (`CONTEXT.md`, `docs/adr/`).
 
 ### 3.2 Data and security
 
 - **#20** **Email + password only.** Phone/SMS OTP needs a paid SMS provider — deferred (Q15).
-- **#21** Email confirmation is **off in development**. ⚠️ Conflicts with #102 — see Q29.
+- **#21** Email confirmation is **off in development**. ⚠️ Conflicts with #102 — see QUESTIONS.md X1.
 - **#22** State management: **Riverpod**, hand-written providers, **no codegen** (#46).
 - **#23** The `admin` role is never created in-app; it is assigned in the Supabase dashboard.
 - **#24** SQL identifiers are **English**; Turkish only in UI text.
@@ -130,7 +129,7 @@ notifications are wanted. Blood-test review may need a doctor-approved document 
   (`dietitian_invite`, later `client_request`) exists so old rows need no
   reinterpretation.
 - **#102** Accept/decline policies compare `invited_email` to the **JWT `email` claim**. This is
-  only safe while email confirmation is on (Q29).
+  only safe while email confirmation is on (QUESTIONS.md X1).
 - **#103** Client names reach the panel through `list_my_clients()`, not a SELECT policy on
   `profiles` (#90).
 - **#104** The client app's "Hedeflerim" form (goal / budget / health note) is the **only
@@ -279,7 +278,7 @@ is built to be corrected, not admired.
 | Interview demo | 7 tabs on fake data: overview + triage, clients, appointments, messages, payments, tracking, reminders; both plan editors, energy card, PDF export, anamnez form, measurements. |
 | Marketplace | **Nothing real yet** — no public profile, listing, request/accept flow or payment. |
 | Plan editor, `diet_plans` | Not built — waits on the plan-model question (P4). |
-| Interviews | Status unclear: Miro has an "interview summaries" cluster, but whether those are real interviews is unknown (see HANDOFF). |
+| Interviews | Unknown — QUESTIONS.md C3. |
 
 ---
 
@@ -301,7 +300,7 @@ profile models, both apps at "login → first screen".
 **Phase 2 — AI-only tier:** subscription (RevenueCat + IAP), AI plan generation + follow-up,
 AI chatbot.
 
-**Phase 3+ — later, don't touch:** catering, meal cards, B2B, sports PT, WhatsApp/Instagram
+**Phase 3+ — later, don't touch (awaiting confirmation, QUESTIONS.md §0 I13–I14):** catering, meal cards, B2B, sports PT, WhatsApp/Instagram
 integration (only in a commission-protecting form).
 
 **Release prerequisites** (not scheduled yet): Apple Developer ($99/yr) and Google Play
@@ -333,38 +332,10 @@ subscriptions  (client_id, revenuecat_ref, status)
 
 ## 8. Open questions
 
-Numbers kept from earlier versions. The fuller register — founder decisions D01–D24,
-evidence checks E01–E12, Miro board questions — is
-`docs/research/2026-09-21-questions-and-answers.md`.
-
-| # | Question | Resolved by |
-|---|---|---|
-| 1 | Commission rate? (demo uses a 15% placeholder) | Dietitians + competitor analysis |
-| 2 | AI subscription price? | Market test |
-| 3 | When is a doctor's referral/approval required for blood-test review? ⚠️ regulatory | Dietitians + professional/legal advice |
-| 4 | Which blood values to ask for? | Dietitians |
-| 5 | Which video SDK? | Technical POC |
-| 6 | Is sports PT in scope? | Suspended |
-| 7 | WhatsApp/Instagram: automated integration or none? | Commission protection first |
-| 8 | Logo and icon (name and palette are settled) | Brand work |
-| 9 | What was the cancelled "dietitian teachers" idea? | Can (archive) |
-| 10 | How does Kutay's Excel workflow become the app? | Kutay / example files |
-| 12 | l10n/ARB? Turkish hardcoded until a second language is real | When needed |
-| 13 | Does the client app keep its web target? | Before release |
-| 15 | Phone/SMS OTP for login, ever? | Deferred (paid provider) |
-| 20 | Support contact for rejected dietitians | Can |
-| 21 | Panel hosting / public URL | Deploy slice |
-| 22 | Account deletion flow (KVKK + Apple requirement) | Before launch |
-| 23 | Photo source and budget — suggestion: start photo-free | Brand work |
-| 24 | Max width of the client app's web preview | Screen slice |
-| 25 | Triage thresholds (days without weigh-in, hours unanswered) | Dietitians |
-| 26 | Which anamnez questions are really asked, and which change the plan? | Dietitians |
-| 27 | Which measurements, device, frequency? BIA? (may switch energy to Cunningham) | Dietitians |
-| 28 | Per session or packages (monthly / 3-month)? Are no-shows charged? Affects payments, appointments and the listing together | Dietitians |
-| 29 | Is email confirmation on in the live project? #102 depends on it; #21 says it is off | Check the dashboard |
-
-Closed and removed: 11 (Riverpod, #22), 14 (bundle id), 16 (#31–32), 17 (#33),
-18 (#100, migration 4), 19 (#90, migration 3).
+All open questions live in **`QUESTIONS.md`**, grouped by who answers them (Can,
+Kadir, dietitians, checks, parked). The `Q<n>` numbers cited in this file appear there
+as "Was: Q<n>" tags. When a question is answered, its decision is recorded in this file
+and the question is removed from QUESTIONS.md.
 
 ---
 
@@ -378,7 +349,6 @@ supabase/migrations/   SQL schema versions
 supabase/functions/    Edge Functions (AI calls) — empty so far
 env/                   dev.example.json committed; dev.json gitignored
 docs/agents/           mattpocock-skills config
-docs/research/         research and review notes
 pubspec.yaml           pub workspace root; Melos config under `melos:`
 ```
 
@@ -386,8 +356,9 @@ pubspec.yaml           pub workspace root; Melos config under `melos:`
 
 ## 10. Working rules
 
-- The **Miro board** (`uXjVH1k8Rq8=`) is the source of truth for product decisions; on a
-  conflict, check the board or ask Can.
+- **Can is the source of truth for product decisions.** On a conflict or an unclear point,
+  ask Can and record the question in `QUESTIONS.md`. The old Miro board is not a source:
+  don't read or cite it.
 - When unsure, **ask — don't assume.**
 - UI text in Turkish; code, commit messages and docs in English.
 - Update this file **when a decision changes or a question closes** — edit the relevant

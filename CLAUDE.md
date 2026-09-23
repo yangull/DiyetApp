@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Start here
 
-Read three files at the start of every session:
+Read these files at the start of every session:
 
-- **`HANDOFF.md`**: where things stand, next steps, and the open questions for Can.
+- **`HANDOFF.md`**: where things stand, next steps, and the most blocking questions.
 - **`PLANNING.md`**: the product, locked decisions (stable IDs P1–P5 and #1–#118, which
-  code comments cite), current state, roadmap and open questions. Edit it in place when a
+  code comments cite), current state and roadmap. Edit it in place when a
   decision changes; never append session logs to it.
 - **`CONTEXT.md`**: the domain glossary (değişim listesi, BMH, danışan, …).
+- **`QUESTIONS.md`**: the only list of open questions. Add new ones there, never anywhere else.
 
 ## Project status
 
@@ -112,7 +113,7 @@ stored there is the **publishable** key (`sb_publishable_...`), not the legacy a
 
 ## Working rules (from PLANNING.md §10)
 
-- The Miro board (ID: `uXjVH1k8Rq8=`) is the source of truth for product decisions; on conflict, check the board or ask Can.
+- **Can is the source of truth for product decisions.** On a conflict or an unclear point, ask Can and record the question in `QUESTIONS.md`. The old Miro board is not a source: don't read or cite it, even though a Miro tool may be connected.
 - When unsure, **ask — don't assume**.
 - UI text in Turkish; code and commit messages in English.
 - Work in small, working slices — no big-bang PRs.
@@ -131,7 +132,7 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `alter type ... add value` and reference the new label in the same transaction. Split
   it into two migrations, or move the column to `text` + a check constraint.
 - Invite accept/decline trusts the JWT `email` claim. It is only safe with email
-  confirmation on (PLANNING Q29), and that is a dashboard setting.
+  confirmation on (QUESTIONS.md X1), and that is a dashboard setting.
 - `Supabase.initialize` takes `publishableKey:`, not the deprecated `anonKey:`.
   `--fatal-infos` fails the build on the latter.
 - There is one shared cloud project. Worktrees isolate files, not the database: only this

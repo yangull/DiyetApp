@@ -9,11 +9,13 @@ Before anything else, read these files in the repo root:
 
 1. `CLAUDE.md`: commands, conventions, locked decisions, **Gotchas**. Its rules apply
    to you too, except the Claude-specific tooling (skills, artifacts).
-2. `HANDOFF.md`: current state, next steps, open questions for Can.
+2. `HANDOFF.md`: current state, next steps, the most blocking questions.
 3. `PLANNING.md`: the product, locked decisions (stable IDs P1–P5, #1–#118), roadmap.
 4. `CONTEXT.md`: the domain glossary. Use its terms.
+5. `QUESTIONS.md`: the only list of open questions. Add new ones there, never in a new file.
 
-Locked decisions are not reopened without asking Can. If you disagree with one, say
+Can is the only source for product decisions; the old Miro board is not a source, so
+don't read or cite it. Locked decisions are not reopened without asking Can. If you disagree with one, say
 so in your answer; don't change code or docs to route around it.
 
 ## Where you work
