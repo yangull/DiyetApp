@@ -190,6 +190,16 @@ a note); full weekly editing stays on tablet and web. Agree?
 _Blocks: the mobile plan screen (redesign slice 5 onward)._
 >
 
+### C23. What does "more hooky" mean for the client app?
+Can (24 Sep 2026): the client app should feel different from the panel: modern, "hooky",
+the client choosing everything simply and openly. Sade (#133) was chosen for the client
+app too, and streaks were dropped for eating-disorder risk (P7). Which is it:
+(1) visual, Sade is too plain on the client side (more colour, motion, imagery);
+(2) interaction, the client picks things themselves (foods from the exchange list, the
+dietitian, goals) with simple choices instead of forms; (3) both?
+_Blocks: the next client-app design session._
+>
+
 ---
 
 ## 2. Kadir (partner)

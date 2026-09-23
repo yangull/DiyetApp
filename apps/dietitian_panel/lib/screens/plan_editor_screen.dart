@@ -102,10 +102,12 @@ class _MealCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(meal.name, style: text.titleLarge),
-                const SizedBox(width: AppSpacing.md),
                 SizedBox(
                   width: 96,
                   child: TextFormField(
@@ -115,12 +117,6 @@ class _MealCard extends ConsumerWidget {
                     onChanged: (v) =>
                         notifier.setMealTime(clientId, mealIndex, v),
                   ),
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () => notifier.addItem(clientId, mealIndex),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Besin ekle'),
                 ),
               ],
             ),
@@ -181,6 +177,13 @@ class _MealCard extends ConsumerWidget {
                   ],
                 ),
               ),
+            // Below the rows, where the new row appears; the header has no
+            // room for it on a phone.
+            TextButton.icon(
+              onPressed: () => notifier.addItem(clientId, mealIndex),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Besin ekle'),
+            ),
           ],
         ),
       ),

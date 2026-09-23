@@ -1,6 +1,9 @@
 import 'package:dietitian_panel/main_demo.dart';
+import 'package:dietitian_panel/screens/client_detail_screen.dart';
 import 'package:dietitian_panel/screens/clients_screen.dart';
+import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
+import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,6 +83,69 @@ void main() {
         expect(find.byType(BackButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
       });
+
+      for (final (button, editor, lastText) in [
+        (
+          'Taslağı düzenle',
+          PlanEditorScreen,
+          'Bu ekran görüşme için hazırlanmış',
+        ),
+        (
+          'Değişim listesiyle dene',
+          ExchangePlanEditorScreen,
+          'Bu ekran bir deneme',
+        ),
+      ]) {
+        testWidgets('the $editor fits a $width dp phone at $scale×', (
+          tester,
+        ) async {
+          await pumpPhone(tester, width, scale);
+          await openTab(tester, 'Danışanlar');
+          final client = find.descendant(
+            of: find.byType(ClientsScreen),
+            matching: find.text('Elif Aydın'),
+          );
+          await tester.scrollUntilVisible(
+            client,
+            300,
+            scrollable: find
+                .descendant(
+                  of: find.byType(ClientsScreen),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(client);
+          await tester.pumpAndSettle();
+          final open = find.text(button);
+          await tester.scrollUntilVisible(
+            open,
+            300,
+            scrollable: find
+                .descendant(
+                  of: find.byType(ClientDetailScreen),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(open);
+          await tester.pumpAndSettle();
+          // Scrolling to the footer builds every meal card on the way.
+          await tester.scrollUntilVisible(
+            find.textContaining(lastText),
+            300,
+            scrollable: find
+                .descendant(
+                  of: find.byType(editor),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
+          await tester.pumpAndSettle();
+        });
+      }
 
       for (final tab in ['Danışanlar', 'Randevular', 'Mesajlar', 'Takip']) {
         testWidgets('$tab fits a $width dp phone at $scale×', (tester) async {

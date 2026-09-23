@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../demo/demo_models.dart';
+import '../util/breakpoints.dart';
 import 'ai_draft_banner.dart';
 import 'status_pill.dart';
 
@@ -84,16 +85,22 @@ class PlanEditorLayout extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= kPlanEditorWideBreakpoint;
+        // A phone's app bar has no room for the title and the pill. The
+        // draft banner already says "onay bekliyor", so only "Onaylı" needs
+        // a place at the top of the page.
+        final phone = isPanelPhone(context);
 
         return Scaffold(
           appBar: AppBar(
             title: Text(title),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.lg),
-                child: Center(child: StatusPill(state: state)),
-              ),
-            ],
+            actions: phone
+                ? null
+                : [
+                    Padding(
+                      padding: const EdgeInsets.only(right: AppSpacing.lg),
+                      child: Center(child: StatusPill(state: state)),
+                    ),
+                  ],
           ),
           body: wide
               ? Row(
@@ -128,6 +135,13 @@ class PlanEditorLayout extends StatelessWidget {
               : ListView(
                   padding: EdgeInsets.all(padding),
                   children: [
+                    if (phone && !_isDraft) ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: StatusPill(state: state),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
                     ..._panel(context, withApprove: false),
                     const SizedBox(height: AppSpacing.xl),
                     ..._work(),

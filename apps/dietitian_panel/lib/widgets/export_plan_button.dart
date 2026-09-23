@@ -53,7 +53,10 @@ class _ExportPlanButtonState extends State<ExportPlanButton> {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Row(
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         OutlinedButton.icon(
           onPressed: widget.enabled && !_busy ? _export : null,
@@ -66,13 +69,10 @@ class _ExportPlanButtonState extends State<ExportPlanButton> {
               : const Icon(Icons.picture_as_pdf_outlined, size: 18),
           label: const Text('PDF olarak ver'),
         ),
-        const SizedBox(width: AppSpacing.md),
         if (!widget.enabled)
-          Flexible(
-            child: Text(
-              'Plan onaylanmadan danışana verilemez.',
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
-            ),
+          Text(
+            'Plan onaylanmadan danışana verilemez.',
+            style: text.bodySmall?.copyWith(color: palette.textMuted),
           ),
       ],
     );

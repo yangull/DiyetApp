@@ -158,15 +158,22 @@ class _MealCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Text(meal.name, style: text.titleLarge),
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  meal.time,
-                  style: text.bodyMedium?.copyWith(
-                    color: palette.textSecondary,
+                Expanded(
+                  child: Wrap(
+                    spacing: AppSpacing.md,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(meal.name, style: text.titleLarge),
+                      Text(
+                        meal.time,
+                        style: text.bodyMedium?.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: AppSpacing.md),
                 Text(
                   '${meal.kcal} kcal',
                   style: text.bodyMedium?.copyWith(
