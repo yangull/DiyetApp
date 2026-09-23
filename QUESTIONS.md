@@ -50,6 +50,8 @@ Delete this section once Can has looked at it again (after the next talk with Ka
 | DT1, DT15, DT16, DT17 | Tools, pull, objections, company clients | Excel/Word + WhatsApp; editor + AI, tracking, appointments all pull; no objection to moving clients; company clients differ in pricing and bulk registration | #130 |
 | DT8 | Measurements | Not answered; placeholder default (weight, waist, hip; fat % and muscle optional) so work isn't blocked | PLANNING §2.1 |
 | C18, C19 | UI review fixes, button wording | As recommended; short button labels | #119, #120 |
+| new | Panel bundle id | `com.wellkit.panel` | PLANNING §3.1 |
+| new | WSL ↔ emulator bridge | Mirrored WSL networking | PLANNING #3 |
 
 ---
 
@@ -214,9 +216,6 @@ DT11–DT14, DT16, DT17, part of DT3 and most of DT1 and DT15. Still open, same 
 
 ## 4. Checks — not questions
 
-- **X1. Is email confirmation on in the live Supabase project?** (Can: Dashboard →
-  Authentication → Sign In / Providers → Email, about 1 minute.) Invites (#102) depend
-  on it. _Was: Q29._
 - **X2.** Video SDK proof of concept, once the video scope is clear. _Was: Q5._
 - **X3.** KVKK and legal review of the real data flows (consent, retention, deletion, AI
   provider, and what an employer may see under B2B), and the account-deletion flow. Before

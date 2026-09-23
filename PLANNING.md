@@ -106,8 +106,11 @@ C2). Each ID names the interview question it came from.
 - **#1** Flutter stable installed inside WSL2; no FVM yet (Codemagic pins its own version).
 - **#2** Daily development is **web-first**: `flutter run -d web-server`, opened from the
   Windows browser.
-- **#3** The Android emulator + adb bridge on Windows is an **early Phase 1 slice** — Chrome
-  hides mobile-specific problems.
+- **#3** **Android emulator: done (23 Sep 2026).** Chrome hides mobile-specific problems, so
+  apps are also checked on an emulator. The emulator runs on **Windows** (Android Studio,
+  Pixel 8a, API 37, 16 KB pages); Flutter builds in **WSL** with its own JDK 21 and Android
+  SDK. WSL uses **mirrored networking** (`networkingMode=mirrored` in the Windows
+  `.wslconfig`), so WSL's `adb` reaches the emulator on `localhost` with no manual bridge.
 - **#4** Dart **pub workspace** + **Melos 8**. Melos config lives under the `melos:` key in the
   root `pubspec.yaml` (Melos 8 ignores `melos.yaml` in a pub workspace); scripts run as
   `dart run melos`.
@@ -126,8 +129,8 @@ C2). Each ID names the interview question it came from.
 - **#19** Private GitHub repo `yangull/DiyetApp`. It was public by mistake until 23 Sep 2026;
   no secrets were ever committed. Ask Can before pushing.
 - **Bundle id:** `com.wellkit.client` (Android applicationId/namespace, Kotlin package,
-  iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has none yet; it needs its own before its
-  first store build (#38).
+  iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel is **`com.wellkit.panel`** (Can,
+  23 Sep 2026; its `android/` and `ios/` runners were generated with it, #38).
 - **No Mac:** iOS builds go through **Codemagic** (cloud CI).
 - **Agent skills** (#85): mattpocock-skills configured. **GitHub Issues is the tracker**
   (confirmed 23 Sep 2026); triage and `wayfinder:*` labels exist on the repo. Domain
@@ -136,7 +139,9 @@ C2). Each ID names the interview question it came from.
 ### 3.2 Data and security
 
 - **#20** **Email + password only.** Phone/SMS OTP needs a paid SMS provider — deferred (Q15).
-- **#21** Email confirmation is **off in development**. ⚠️ Conflicts with #102 — see QUESTIONS.md X1.
+- **#21** **Email confirmation is on** (Can, 23 Sep 2026; it was off in development). #102
+  depends on it. Without custom SMTP, Supabase only emails members of the Supabase org, so
+  test signups need a real team address; custom SMTP arrives with password reset (#43).
 - **#22** State management: **Riverpod**, hand-written providers, **no codegen** (#46).
 - **#23** The `admin` role is never created in-app; it is assigned in the Supabase dashboard.
 - **#24** SQL identifiers are **English**; Turkish only in UI text.
@@ -178,7 +183,7 @@ C2). Each ID names the interview question it came from.
   (`dietitian_invite`, later `client_request`) exists so old rows need no
   reinterpretation.
 - **#102** Accept/decline policies compare `invited_email` to the **JWT `email` claim**. This is
-  only safe while email confirmation is on (QUESTIONS.md X1).
+  only safe while email confirmation is on (#21).
 - **#103** Client names reach the panel through `list_my_clients()`, not a SELECT policy on
   `profiles` (#90).
 - **#104** The client app's "Hedeflerim" form (goal / budget / health note) is the **only
@@ -341,9 +346,9 @@ is built to be corrected, not admired.
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green. No CI yet. |
+| Monorepo, tooling | Done. Analyzer clean, all tests green. No CI yet. Both apps build and run on the Android emulator (#3). |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
-| Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. No password reset, no email sending. |
+| Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
 | Client app | Login → 2-tab home, pending-invite card (accept/decline), "Hedeflerim" form. |
 | Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). |
 | Interview demo | 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |

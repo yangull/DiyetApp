@@ -38,7 +38,7 @@ AI-only diet plan tier.
 - No money in the app at launch: clients pay dietitians directly; commission, packages and payouts are decided later (PLANNING P6).
 - Build order: shared core → dietitian marketplace → AI-only tier.
 - No per-dietitian-type screens; one general management panel.
-- No Mac available: iOS builds go through Codemagic (cloud CI). Daily development is web-first via `flutter run -d web-server`, opened from the Windows browser; the Android emulator arrives as an early Phase 1 slice.
+- No Mac available: iOS builds go through Codemagic (cloud CI). Daily development is web-first via `flutter run -d web-server`, opened from the Windows browser; the Android emulator (on Windows) checks the mobile layout.
 
 ## Tech stack (decided)
 
@@ -86,8 +86,23 @@ flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080 \
 
 Then open `http://localhost:8080` from the Windows browser. Note that `flutter devices` does
 **not** list the `web-server` device in this WSL setup even though `-d web-server` works —
-don't chase that. There is no Chrome, no Android SDK, and no Linux desktop toolchain inside
-WSL, so `flutter doctor` shows three expected failures.
+don't chase that. There is no Chrome and no Linux desktop toolchain inside WSL, so
+`flutter doctor` shows those two as expected failures, plus an "Android license status
+unknown" that is cosmetic (the new `sdkmanager` output confuses it; licences are accepted).
+
+**Android emulator (PLANNING #3).** Can starts the emulator on Windows (Android Studio →
+Device Manager → ▶). WSL has its own JDK 21 (`~/development/jdk`) and Android SDK
+(`~/Android/Sdk`), set in `~/.bashrc`, and sees the emulator through mirrored networking:
+
+```bash
+adb devices                  # should list emulator-5554
+cd apps/client               # or apps/dietitian_panel
+flutter run -d emulator-5554 --dart-define-from-file=../../env/dev.json
+```
+
+The first build after a WSL restart takes several minutes (Gradle starts cold). Screenshot
+the emulator with `adb exec-out screencap -p > shot.png`. Bundle ids: `com.wellkit.client`
+and `com.wellkit.panel`.
 
 `apps/dietitian_panel` has a second entry point: add `-t lib/main_demo.dart` to the command
 above to run the unauthenticated interview prototype (fake data, no login) instead of the
@@ -150,7 +165,9 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `alter type ... add value` and reference the new label in the same transaction. Split
   it into two migrations, or move the column to `text` + a check constraint.
 - Invite accept/decline trusts the JWT `email` claim. It is only safe with email
-  confirmation on (QUESTIONS.md X1), and that is a dashboard setting.
+  confirmation on (PLANNING #21, on since 23 Sep 2026), and that is a dashboard setting.
+- With confirmation on and no custom SMTP, Supabase only emails members of the Supabase
+  org. A test signup with a made-up address never gets confirmed.
 - `Supabase.initialize` takes `publishableKey:`, not the deprecated `anonKey:`.
   `--fatal-infos` fails the build on the latter.
 - There is one shared cloud project. Worktrees isolate files, not the database: only this
