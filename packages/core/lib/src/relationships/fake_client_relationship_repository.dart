@@ -96,6 +96,15 @@ class FakeClientRelationshipRepository implements ClientRelationshipRepository {
   }
 
   @override
+  Future<List<ClientRelationship>> fetchMyActiveRelationships() async {
+    final me = currentUserId;
+    if (me == null) return const [];
+    return _relationships
+        .where((r) => r.status == RelationshipStatus.active && r.clientId == me)
+        .toList();
+  }
+
+  @override
   Future<void> acceptInvite(String relationshipId) async =>
       _replace(relationshipId, RelationshipStatus.active, currentUserId);
 

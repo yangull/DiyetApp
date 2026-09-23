@@ -25,6 +25,10 @@ abstract class ClientRelationshipRepository {
   /// Pending invites addressed to the signed-in user's email.
   Future<List<ClientRelationship>> fetchPendingInvitesForMe();
 
+  /// The signed-in client's active relationships: the dietitians they work
+  /// with. RLS already limits the rows to the caller's own.
+  Future<List<ClientRelationship>> fetchMyActiveRelationships();
+
   Future<void> acceptInvite(String relationshipId);
 
   Future<void> declineInvite(String relationshipId);

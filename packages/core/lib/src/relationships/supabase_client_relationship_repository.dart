@@ -73,6 +73,17 @@ class SupabaseClientRelationshipRepository
   }
 
   @override
+  Future<List<ClientRelationship>> fetchMyActiveRelationships() async {
+    final rows = await _db
+        .from('dietitian_client_relationships')
+        .select(_columns)
+        .eq('status', RelationshipStatus.active.name)
+        .eq('client_id', _db.auth.currentUser!.id)
+        .order('created_at');
+    return rows.map(_toRelationship).toList();
+  }
+
+  @override
   Future<void> acceptInvite(String relationshipId) async {
     await _db
         .from('dietitian_client_relationships')

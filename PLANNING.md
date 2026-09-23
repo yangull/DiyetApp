@@ -242,8 +242,12 @@ C2). Each ID names the interview question it came from.
 - **#49** The word is **"danışan"**, never "müşteri".
 - **#50** **Everything visible is real data or a real action.** Unbuilt things are named once
   with a "Yakında" label, never drawn as clickable fake UI.
-- **#51** Client home: 2 tabs (Ana Sayfa, Profil), greeting by name, two non-tappable path cards
-  (dietitian / AI). In Phase 1 they become the marketplace and AI entry points.
+- **#51** Client home: 2 tabs (**Bugün**, Profil). Since the "Sıcak" redesign (#131, slice 2,
+  23 Sep 2026) Bugün opens on a green hero with the greeting and three real steps (goals →
+  dietitian → first plan, derived from saved data; the plan step says "yakında"), then a
+  pending invite, the goal row (one tap target into Profil), the connected dietitian, and
+  one quiet "Yakında" note for Diyetisyen bul and the AI tier. More tabs arrive when their
+  features ship for everyone.
 - **#52** A pending dietitian sees one card **without the panel frame** ("Başvurunuz
   İnceleniyor" + a working "Durumu yenile"). `rejected` uses the same layout.
 - **#53** An approved dietitian gets a **NavigationRail** on wide screens (a bottom bar on

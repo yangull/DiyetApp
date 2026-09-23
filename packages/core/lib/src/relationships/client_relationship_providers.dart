@@ -33,3 +33,11 @@ final pendingInvitesProvider = FutureProvider<List<ClientRelationship>>((ref) {
       .watch(clientRelationshipRepositoryProvider)
       .fetchPendingInvitesForMe();
 });
+
+final myActiveRelationshipsProvider = FutureProvider<List<ClientRelationship>>((
+  ref,
+) {
+  return ref
+      .watch(clientRelationshipRepositoryProvider)
+      .fetchMyActiveRelationships();
+});
