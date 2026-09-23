@@ -5,7 +5,7 @@
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
 > **Decision IDs are stable.** Product decisions are P1–P5; technical decisions keep
-> their original numbers (#1–#118). Code comments cite them as `PLANNING.md #N` (older
+> their original numbers (#1–#130). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
 > Last restructured: 23 September 2026.
@@ -43,20 +43,54 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 
 - **P1** **AI drafts, the dietitian approves.** On the human-service side a client never sees
   an AI plan no dietitian has approved.
-- **P2** **All communication stays in-app** (chat + embedded video). Original reason:
-  leaving to WhatsApp/Instagram risks the commission, which P6 has removed for now
-  (QUESTIONS.md C5). ⚠️ Every Turkish competitor uses WhatsApp
-  for reminders — a real adoption friction to raise in interviews; do not change
-  without Can.
+- **P2** **All communication stays in-app** (chat + embedded video). Confirmed by Can on
+  23 Sep 2026 without the commission (was C5): the reasons now are one record of the
+  client's care, quality control, KVKK (health data stays in the EU project, not on
+  WhatsApp) and the reporting B2B needs. ⚠️ Every Turkish competitor uses WhatsApp for
+  reminders — a real adoption friction to watch in interviews.
 - **P3** **Build order:** shared core → dietitian marketplace → AI-only tier.
-- **P4** **The diet-plan model is not decided.** Freeform (`DietPlan`: food + amount) and
-  exchange list (`ExchangePlan`: group + count) both exist in the demo on purpose
-  (#93, #97). Research says Turkish dietitians use exchange lists; unconfirmed.
+- **P4** **The exchange list is the default plan model; freeform stays as an option**
+  (Can, 23 Sep 2026, was C1: "Değişim listesi (sonra değişebilir), iki seçenekte
+  kalsın"). Both editors exist in the demo (#93, #97). Reversible if the interviews
+  (DT2) disagree. `diet_plans` and the real plan editor are unblocked.
 - **P5** **No per-dietitian-type screens.** One general management panel; fields may vary.
 - **P6** **No money in the app at launch** (Can, 23 Sep 2026). Clients pay their dietitian
   directly, outside Wellkit (bank transfer or a Turkish payment app). Wellkit takes no
   commission and runs no payments until the money model is decided; every money question
-  is parked (QUESTIONS.md §5). ⚠️ This removes P2's original reason; see QUESTIONS.md C5.
+  is parked (QUESTIONS.md §5). P2 was kept with new reasons.
+
+### 2.1 What the dietitian interviews said
+
+Interviews happened before 23 Sep 2026; Can relayed the answers that day (QUESTIONS.md
+C2). Each ID names the interview question it came from.
+
+- **#121** **Both plan models are used, depending on the client** (DT2), which confirms P4:
+  the exchange list is the default and freeform stays.
+- **#122** **One standard exchange table**, shipped by Wellkit, not one per dietitian (DT3).
+  Which published table, and its values, is still to name; today's `kExchangeKcal` holds
+  example ADA values (#97).
+- **#123** **Plans are weekly and mostly copied** from a template or an earlier plan (DT4,
+  DT5). Old plans are archived; the client sees only the current one. The real editor
+  needs "start from a template / last week", not just a blank page.
+- **#124** **Energy formulas in use:** Harris-Benedict (the default, #95), Mifflin-St Jeor,
+  Cunningham (with a BIA device) and WHO/FAO for children (DT6). The last three are to
+  be added as choices.
+- **#125** **No blood-test section** (Can, for KVKK reasons). Instead, **the client and the
+  dietitian can both attach any file** to the shared record (DT9). Files are health data:
+  a private bucket in the EU project, readable only through the relationship.
+- **#126** **Before approving an AI draft the dietitian sees** why it chose what it did,
+  its totals against the client's target, and a check that allergies, illnesses and
+  medications were respected (DT12). Extends P1.
+- **#127** **Reminders are app push notifications only**, no SMS (DT13).
+- **#128** **The client list needs** plan status, last contact or weigh-in, next
+  appointment, and goal and weight (DT11).
+- **#129** **Ratings: stars only, no comments at launch** (DT14; matches Can's note in C8).
+- **#130** Dietitians use **Excel/Word and WhatsApp** today (DT1), have **no objection to
+  moving existing clients** into the app (DT16), and are drawn by the plan editor with
+  AI drafts, client tracking, and appointments with reminders (DT15). Company clients
+  differ in **pricing and in how they register**: B2B needs bulk enrolment (DT17, C4).
+- **Default until DT8 is answered:** measurements are weight, waist and hip, with fat %
+  and muscle mass as optional BIA fields (today's demo card). Reversible.
 
 ---
 
@@ -76,7 +110,7 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 - **#6** Lints: `flutter_lints`, shared from the workspace root.
 - **#7** `apps/client` targets android, ios, web. **Web is for development only**; whether it
   ships is Q13. RevenueCat/IAP and the video SDK may not work on web.
-- **#8** `apps/dietitian_panel` is **web only** (#38).
+- **#8** `apps/dietitian_panel` targets **web, iOS and Android** (#38).
 - **#9** `packages/core` is the shared package: models, auth, Supabase client, theme.
 - **#11** Package names: `client`, `dietitian_panel`, `core`.
 - **#14** Typed `AppConfig` reads compile-time values via `--dart-define-from-file`. Real values
@@ -152,7 +186,12 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 
 - **#37** **No role-selection screen.** The role comes from the app used to sign up: the mobile
   app always creates `client`; the web panel sends `role: dietitian`.
-- **#38** The dietitian panel is **web only**; a mobile dietitian experience is deferred.
+- **#38** **The dietitian panel runs on web, phones and tablets** (Can, 23 Sep 2026; it was
+  web only). One Flutter codebase with layouts by width: wide screens keep the rail and
+  tables, phones get a bottom bar and stacked screens. Default: phones use the
+  comfortable density (touch-sized controls), wide screens the compact one (#64).
+  **Two store apps:** the client app and a separate dietitian app; the app you sign up
+  in still sets your role (#37).
 - **#39** Wrong-app sign-ins (dietitian in the client app, client in the panel) get a
   full-screen message + sign-out. No automatic logout.
 - **#40** Admin sees a single card in MVP; approvals happen in the dashboard (a consequence of #35).
@@ -172,13 +211,15 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
   `ProviderScope(overrides: …)`.
 - **#47** **The app is in Turkish.** All UI text.
 - **#48** Register: informal **"sen"** in the client app, formal **"siz"** in the panel.
+- **#120** **Buttons use the short form** ("Kaydet", "Vazgeç", "İptal et", "Giriş yap"), as
+  most Turkish apps do; sentences in the panel stay in "siz" (Can, 23 Sep 2026, was C19).
 - **#49** The word is **"danışan"**, never "müşteri".
 - **#50** **Everything visible is real data or a real action.** Unbuilt things are named once
   with a "Yakında" label, never drawn as clickable fake UI.
 - **#51** Client home: 2 tabs (Ana Sayfa, Profil), greeting by name, two non-tappable path cards
   (dietitian / AI). In Phase 1 they become the marketplace and AI entry points.
 - **#52** A pending dietitian sees one card **without the panel frame** ("Başvurunuz
-  İnceleniyor" + a working "Durumu Yenile"). `rejected` uses the same layout.
+  İnceleniyor" + a working "Durumu yenile"). `rejected` uses the same layout.
 - **#53** An approved dietitian gets a **NavigationRail** with only destinations that have real
   content (today: Genel Bakış with the client list, and Profil). No empty rail
   destinations in advance.
@@ -227,7 +268,8 @@ is built to be corrected, not admired.
 - **#68** Demo state persists to `localStorage` through `demo_codec.dart`, with a schema
   version inside the JSON (key `wellkit.demo`, no version in the key, #99). Unreadable
   or old-version state falls back to seed data rather than being partially read. A
-  reset button sits under the rail.
+  reset button sits under the rail; it also remounts the demo screens, so their own state
+  (filters, message drafts, the open conversation) goes too.
 - **#71** Seed data is anchored to `DateTime.now()`, never to a calendar date.
 - **#89** Codec drift is caught by **tests, not codegen or colocated `toJson`**: a symmetry test
   and a completeness test that parses `demo_models.dart` at test time. (A review showed
@@ -260,6 +302,14 @@ is built to be corrected, not admired.
 - **#114** `noShow` is distinct from `cancelled`; a no-show is currently not billed (Q28).
 - **#118** The TR/EN panel walkthrough artifact is framed as a draft to argue with; invented,
   placeholder and example values are labelled as such.
+- **#119** **The UI review (`docs/research/2026-09-23-ui-review.md`) is worked in order**
+  (Can, 23 Sep 2026, was C18). Done 23 Sep: its nine bugs plus #8 (triage links open the
+  task), #11 (weight chart spaced by date) and #15 (reminder settings moved off the
+  rail). Next: #10, together with putting both plan editors in the same layout so
+  dietitians compare the model, not the page. After the interviews: #12 (compact Takip).
+  When the real client list grows: #9 (search and filter). Codex's follow-up
+  (`docs/research/2026-09-23-c18-c19-follow-up-review.md`) found two reset gaps, fixed
+  the same day (#68).
 
 ---
 
@@ -268,7 +318,7 @@ is built to be corrected, not admired.
 | Layer | Choice | Note |
 |---|---|---|
 | Client app | Flutter (iOS + Android) | |
-| Dietitian panel | Flutter Web | Shared `core` package |
+| Dietitian panel | Flutter (web, iOS, Android) | Shared `core` package; its own store app |
 | Backend | Supabase, EU (eu-central-1) | Auth, Postgres, Storage, Realtime. EU for KVKK — EU hosting alone is not KVKK compliance |
 | AI calls | Supabase Edge Functions | LLM keys never in the client |
 | Payment, human service | **None at launch (P6)** | Clients pay dietitians directly. iyzico was the earlier choice for a commission marketplace; revisit with the money model |
@@ -286,7 +336,7 @@ is built to be corrected, not admired.
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. No password reset, no email sending. |
 | Client app | Login → 2-tab home, pending-invite card (accept/decline), "Hedeflerim" form. |
 | Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). |
-| Interview demo | 7 tabs on fake data: overview + triage, clients, appointments, messages, payments, tracking, reminders; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
+| Interview demo | 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
 | Brand | Name and palette settled. **Logo: placeholder "W" mark** until one is designed with Claude later. |
 | Plan editor, `diet_plans` | Not built — waits on the plan-model question (P4). |
@@ -355,7 +405,7 @@ and the question is removed from QUESTIONS.md.
 
 ```
 apps/client/           Flutter client app (android + ios + web*)  *web for development
-apps/dietitian_panel/  Flutter Web panel — lib/main.dart (real), lib/main_demo.dart (demo)
+apps/dietitian_panel/  Flutter panel (web + iOS + Android) — lib/main.dart (real), lib/main_demo.dart (demo)
 packages/core/         shared models, Supabase client, auth, theme, fonts
 supabase/migrations/   SQL schema versions
 supabase/functions/    Edge Functions (AI calls) — empty so far

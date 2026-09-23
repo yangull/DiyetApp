@@ -34,7 +34,7 @@ AI-only diet plan tier.
 ## Locked decisions (do not relitigate without asking Can)
 
 - AI drafts diet plans, the dietitian approves; clients never see unapproved AI plans (on the human-service side).
-- All communication stays in-app (chat + embedded video). Its original reason, protecting the commission, is on hold: see the next line and QUESTIONS.md C5.
+- All communication stays in-app (chat + embedded video), for records, quality control, KVKK and B2B reporting (PLANNING P2); protecting a commission is no longer the reason.
 - No money in the app at launch: clients pay dietitians directly; commission, packages and payouts are decided later (PLANNING P6).
 - Build order: shared core → dietitian marketplace → AI-only tier.
 - No per-dietitian-type screens; one general management panel.
@@ -42,7 +42,7 @@ AI-only diet plan tier.
 
 ## Tech stack (decided)
 
-- **Flutter** for the client app (iOS + Android) and **Flutter Web** for the dietitian panel, sharing a `core` package in a single **Melos** monorepo.
+- **Flutter** for the client app (iOS + Android) and for the dietitian panel (web, iOS and Android, a separate store app; PLANNING #38), sharing a `core` package in a single **Melos** monorepo.
 - **Supabase (EU region)** for auth, Postgres, storage, realtime. EU region is deliberate: the app holds personal health data and must be **KVKK**-compliant.
 - **Supabase Edge Functions** for all LLM calls — API keys never live in the client.
 - Payments: **none for human dietitian services at launch** (clients pay dietitians directly, PLANNING P6; iyzico was the earlier plan). **RevenueCat + in-app purchase** for the later AI subscription tier (Apple/Google requirement).
@@ -52,7 +52,7 @@ AI-only diet plan tier.
 
 ```
 apps/client/           Flutter customer app (iOS + Android)
-apps/dietitian_panel/  Flutter Web panel
+apps/dietitian_panel/  Flutter panel (web + iOS + Android)
 packages/core/         shared models, Supabase client, auth, theme
 supabase/migrations/   SQL schema versions
 supabase/functions/    Edge Functions (AI calls)
@@ -166,6 +166,14 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   any slot a new widget reads (NavigationRail uses `labelMedium`).
 - A field helper that returns `Expanded` can only live in a `Row`. Put flex on the row
   builder.
+- Flutter shrinks every control by 8 px on desktop (`VisualDensity.compact`), so a web
+  build in a Windows browser differs from `flutter test` (Android defaults). The theme
+  pins `VisualDensity.standard`; measure control sizes with
+  `debugDefaultTargetPlatformOverride = TargetPlatform.windows`.
+- `DropdownMenu` ignores the input theme's height (its arrow is a fixed 48 px button). Use
+  `DropdownButtonFormField`.
+- Dart's `toUpperCase()` turns "tipi" into "TIPI". Use `trUpper` / `formatDecimal` in
+  the panel's `lib/util/turkish.dart`.
 
 **Demo panel**
 - All money UI (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is gated by

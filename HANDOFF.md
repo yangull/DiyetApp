@@ -25,8 +25,14 @@
     buttons now follow rule 13: reset is labelled, cancelling an appointment is labelled
     and asks for confirmation, and the video mockup's dead buttons are disabled.
   - Codex reviewed the panel UI: `docs/research/2026-09-23-ui-review.md`, 15 findings,
-    all verified against the code. The fix plan is QUESTIONS.md C18.
-- Analyzer clean, all tests green, `main` pushed.
+    all verified against the code. Fixed the same day: the nine bugs plus #8, #11, #15
+    (PLANNING #119), and buttons now use the short form (#120).
+- **Later on 23 Sep:** the UI review fixes shipped (PLANNING #119, #120), plus two reset
+  gaps from Codex's follow-up review. Can decided: exchange list is the default plan
+  model (P4), in-app-only stays with new reasons (P2), **the panel ships on web, phones
+  and tablets as its own store app** (#38), next slice is the mobile panel layout. Most
+  interview answers are filed in PLANNING §2.1 (#121–#130).
+- Analyzer clean, all tests green.
 
 ## Pages (Claude artifacts)
 
@@ -44,20 +50,22 @@ and PLANNING.md.
 
 ## Next steps
 
-1. **Next build: the UI review fixes (QUESTIONS.md C18).** Waiting for Can's OK on the
-   recommendation: group A (nine bugs) plus #8, #11 and #15, as one slice; then #10
-   together with putting both plan editors in the same layout. Settle C19 (button
-   wording) in the same go.
-2. **Can:** answer QUESTIONS.md §0 (keep / change / drop for I1–I16), then C1–C5: plan
-   model, interview date, next slice, B2B timing, whether "everything in-app" holds.
+1. **Next build: UI review #10 (PLANNING #119).** Put both plan editors in the same
+   layout (narrower working column, energy/status/approve kept in view) so dietitians
+   compare the model, not the page. Design it for phone widths too (#38).
+2. **Then: the mobile panel layout (Can, 23 Sep, was C3).** The panel now ships on web,
+   phones and tablets as its own store app (#38). Start with the real panel (client list,
+   invites, detail): a bottom bar and stacked screens below a width breakpoint, the
+   comfortable density on phones. Needs the Android emulator slice (#3) to check it.
 3. **Can:** turn on email confirmation in Supabase (X1, about 1 minute). Invites depend
    on it.
 4. **Can + Kadir:** give Kadir edit access to the interview guide (Share menu) and ask
    K1–K3, K2 first (is the intake form athletes-only?).
-5. **Interviews:** run them with the demo (`flutter run -t lib/main_demo.dart …`, see
-   CLAUDE.md) and the guide (DT1–DT17). Afterwards: "read the guide notes".
-6. **Build, once C1/C3 are answered:** the "Diyetisyen bul" journey or the real plan
+5. **Can:** the rest of the interview answers (DT1, DT7, DT8, DT10, DT15), then §0
+   (I1–I16), C4 (B2B timing and bulk enrolment) and C8 (listing order).
+6. **Update the interview guide artifact** to match QUESTIONS.md §3 (most DTs closed).
+7. **Build after the mobile layout:** the "Diyetisyen bul" journey or the real plan
    editor on `diet_plans`, keyed off `dietitian_client_relationships`.
-7. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev project
+8. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev project
    (C17), RLS access tests, invite email delivery, ending a relationship, Randevular rows
    overflowing below ~900 px width.

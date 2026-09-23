@@ -26,7 +26,7 @@ is deferred, now PLANNING P6) and I9 (Kutay's Excel dropped).
 | # | Decision in force | Where it lives now | Your verdict |
 |---|---|---|---|
 | I1 | **AI drafts, the dietitian approves;** a client never sees an unapproved AI plan | PLANNING P1, #25, #98 | |
-| I2 | **All communication stays in-app** (chat + embedded video); external links only as an emergency backup. See C5: its reason was the commission. | PLANNING P2; Mesajlar screen | |
+| I2 | **All communication stays in-app** (chat + embedded video); external links only as an emergency backup. Confirmed 23 Sep 2026 with new reasons (records, quality control, KVKK, B2B). | PLANNING P2; Mesajlar screen | ✅ |
 | I3 | **Build order:** shared core → dietitian marketplace → AI-only tier | PLANNING P3, roadmap | |
 | I4 | **One general panel,** no separate screens per dietitian type | PLANNING P5 | |
 | I6 | **Client flow:** sign up → choose the dietitian or AI path → enter blood values/tests → set a budget → dietitian or AI plan | PLANNING §1 | |
@@ -47,26 +47,6 @@ is deferred, now PLANNING P6) and I9 (Kutay's Excel dropped).
 Product decisions nobody else can make. The most blocking come first. Money questions
 (commission, packages, pricing, payouts) are parked until later (§5, PLANNING P6).
 
-### C1. Plan model: confirm "exchange list first, freeform kept as an option"
-Your note: **"Değişim listesi (sonra değişebilir), iki seçenekte kalsın."** Is that a
-decision (PLANNING P4 becomes "exchange list is the default, freeform is kept"), or does
-it wait for the dietitian interviews (DT2)?
-_Was: P4, Q10, q1. Blocks: `diet_plans`, the real plan editor._
->
-
-### C2. Have any dietitian interviews happened? If not, by what date?
-If that date passes without them, do we build on the current beliefs (§3) and mark them
-reversible?
-_Blocks: everything in §3._
->
-
-### C3. Next real slice: the marketplace journey or the plan editor?
-The promise is new clients, and no marketplace code exists yet (no public profile, no
-"Diyetisyen bul" section, no request/accept flow). If C1 is confirmed, the editor is
-unblocked too.
-_Blocks: the next build session._
->
-
 ### C4. B2B is the main plan: when does it enter the roadmap?
 You said clients will come mainly through corporate deals, plus our own digital ads.
 Today B2B sits in Phase 3+ (I14), after the marketplace and the AI tier. If it is the
@@ -75,14 +55,8 @@ and a rule for what the employer may see (health data is KVKK special-category d
 likely nothing per person). Does the pilot start with one company, or with individual
 clients first?
 _Blocks: roadmap order (P3), the first release's scope._
->
-
-### C5. Everything in-app (P2): does it still hold without a commission?
-P2 exists to stop dietitians and clients leaving for WhatsApp, which protects the
-commission. At launch there is no commission and clients pay dietitians directly (P6).
-Keep in-app-only for another reason (records, quality control, KVKK, B2B reporting), or
-relax it?
-_Was: P2, I2._
+Interviews (DT17): company clients differ in pricing and in how they register; B2B needs
+bulk enrolment of employees.
 >
 
 ### C6. What does a new client's first week look like?
@@ -99,10 +73,9 @@ usual load is 30–40.)
 _Blocks: the marketplace flow._
 >
 
-### C8. Ratings and reviews at launch
-Your note: **"sadece puanlama olsun yorum yok, tartışılacak, sonradan eklenebilir yeterli
-diyetisyen olunca."** Ratings only at launch and comments later, or nothing until there
-are enough dietitians? What orders the listing?
+### C8. What orders the "Diyetisyen bul" listing?
+Ratings are stars only, no comments, at launch (PLANNING #129). What decides who is
+listed first: rating, distance, specialty, availability, a random rotation?
 _Was: q22._
 >
 
@@ -156,27 +129,6 @@ dietitian see?
 _Was: Q20._
 >
 
-### C18. Which UI review fixes do we build?
-Codex's review (`docs/research/2026-09-23-ui-review.md`, 15 findings, all verified
-against the code on 23 Sep) is split in three. Claude's recommendation: build group A
-and #8, #11, #15 now; #10 next, together with putting both plan editors in the same
-layout so dietitians compare the model, not the page; #12 after the interviews; #9 when
-the real client list grows.
-- **A, bugs:** #1 message drafts follow you between clients, #2 conversation list doesn't
-  scroll, #3 exchange-editor totals use an undefined font slot, #4 freeform macro boxes
-  look calculated, #5 intake form discards input without asking, #6 declined invites say
-  "Davet bekliyor", #7 raw errors with no retry in the real panel, #13 pill vs square
-  buttons, #14 Turkish casing/decimals/wording.
-- **B, design:** #8 triage links open the task, #11 weight chart spaces points by date,
-  #15 "Hatırlatmalar" becomes "Hatırlatma ayarları", #10 editor layout, #12 compact Takip.
->
-
-### C19. Button wording
-Proposal: buttons use the short form ("Kaydet", "Vazgeç", "İptal et"), as most Turkish
-apps do; every sentence in the panel uses "siz". Today the real panel says "Vazgeçin"
-and the demo says "Vazgeç". Once decided, it goes into `docs/design-system.md`.
->
-
 ### C17. Separate Supabase dev project?
 Today every dev signup lands in the one live project. A second project is free on the
 Supabase free tier.
@@ -211,30 +163,14 @@ Answered by Can on 23 Sep and removed from the interview: how dietitians find cl
 capacity (no limit, usually 30–40), where they chat today (not needed), first contact
 (online), and sessions vs packages (a money question, parked).
 
-**Before the demo**
-- DT1. Which tools do you use today (appointments, messages, plans), and which admin task takes the most time?
+Answered on 23 Sep 2026 (Can relayed the interviews; now PLANNING §2.1): DT2–DT6, DT9,
+DT11–DT14, DT16, DT17 and most of DT1 and DT15. Still open, same numbers:
 
-**How a plan is built** (ask them to show a real one)
-- DT2. **Critical.** Exchange list or food + amount? Belief: exchange list.
-- DT3. **Critical.** Own group table and units, or a ready-made table? Where do the kcal values come from?
-- DT4. How long does a plan take; how much is copy-paste? Belief: mostly copy-paste.
-- DT5. **Critical.** Daily, weekly or monthly; are old plans kept; should the client see them? Belief: weekly, ready-made plans, client can't see old ones.
-- DT6. Besides Harris-Benedict, which energy formulas do you use, and when? (Ours is Harris-Benedict × activity factor; others can be added.)
+- DT1. Which admin task takes the most time? (Tools today: Excel/Word and WhatsApp.)
 - DT7. **Critical.** Looking at an intake form: which questions really change the plan, what is missing, what is useless? (Show `docs/reference/anamnez-ornek-2021.jpg`.)
-- DT8. Which measurements, device, frequency, BIA; who weighs the client?
-- DT9. **Critical.** What happens with blood tests; which values; when is a doctor's referral required?
-
-**During the demo** (on the named screen)
+- DT8. Which measurements, device, frequency, BIA; who weighs the client? (Default in use: weight, waist, hip; fat % and muscle optional.)
 - DT10. Genel Bakış: what do you check first on Monday; when is a client "falling behind"?
-- DT11. Danışanlar: with 40 clients, which column is essential?
-- DT12. **Critical.** AI taslağı: what must you see before signing an AI draft; what would make you never use it? Belief: a good feature.
-- DT13. Hatırlatmalar: are app notifications enough, or is SMS required?
-
-**After the demo**
-- DT14. Would you like clients to rate you? How should an unfair rating be contested; who should rank first in the list?
-- DT15. Which screen would make you switch, and what is still missing?
-- DT16. Biggest objection to telling existing clients to install the app?
-- DT17. Would you take on employees who come through a company deal? How are they different from clients you find yourself? _(new, for C4)_
+- DT15. What is still missing?
 
 ---
 
