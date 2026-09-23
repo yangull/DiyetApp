@@ -46,4 +46,4 @@ All open questions now live in **`QUESTIONS.md`**, and only there. The most bloc
 2. **C2: confirm "exchange list first, freeform kept"**, which unblocks the plan editor.
 3. **C3 and C4: the interview date, and whether the next slice is the marketplace or the
    editor.**
-4. **Send §2 to Kadir** (`/to-questionnaire`), starting with Kutay's Excel (K1).
+4. **Send Kadir the guide's Kadir tab** (https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB#kadir); he answers K1–K9 there, starting with Kutay's Excel (K1).

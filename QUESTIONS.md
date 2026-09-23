@@ -154,122 +154,67 @@ Supabase free tier.
 
 ## 2. Kadir (partner)
 
-Business and market questions, plus everything you marked "kadire at". Candidate for one
-`/to-questionnaire` document to send him.
+Business and market questions, plus everything you marked "kadire at". The same list
+(K1–K9, in Turkish) is in the interview-guide artifact, where Kadir can answer directly:
+https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB#kadir
 
-### K1. Kutay's Excel plans: when do they arrive?
-Your note: **"bu gelecek."** Anonymized example plans plus the intake form. Also: who is
-Kutay, and what is his specialty?
-_Was: Q10, q2._
->
-
-### K2. Package pricing: what exactly is sold?
-Your note: **"aylık ya da 3 aylık ancak sabit konulamaz, fiyat pazarlığı, min fiyat;
-şirketlerle anlaşma ayrı karar"**. What is in a package (appointments, messages,
-revisions)? Who sets the price? What is the minimum price? Are prices public? What are
-the rules for no-shows, cancellation and leaving halfway?
-_Was: Q28, q8._
->
-
-### K3. How will the first clients find us?
-Your note: **"dijital pazar."** Which channels, what budget, who owns it, by when? Who is
-the first target audience?
-_Was: q12._
->
-
-### K4. Which dietitians for the pilot, and when are the interviews?
-How many, their capacity, and who talks to them. Your belief: **"kaliteliyse 30–40
-sınır, ama bizim sıkımızda çok değil."**
-_Was: q14._
->
-
-### K5. Cost analysis and competitor prices
-What launch and running costs to expect, and what competitors charge.
->
-
-### K6. Payouts and installments
-When do dietitians get paid, and does faster payout cost more? Are installments offered,
-and who bears their cost?
->
-
-### K7. Anamnez form: get a real one
-Your note: **"bunu WP'den atıyor, Kadir'e at"** — dietitians send it over WhatsApp.
-_Was: Q26, q6._
->
-
-### K8. Measurements, device, frequency, BIA
-_Was: Q27, q7. (You marked it "Kadir'e at".)_
->
-
-### K9. Triage thresholds: days without a weigh-in, hours unanswered
-_Was: Q25, q5. (You marked it "Kadir'e at".)_
->
-
-### K10. The most painful admin task
-_Was: q18. (You marked it "Kadir'e at".)_
->
-
-### K11. Logo and icon
-The name and palette are settled; the visual identity is not.
-_Was: Q8, Q23._
->
+- **K1. When do Kutay's Excel plans arrive?** Anonymized example plans plus the intake
+  form. Who is Kutay, and what is his specialty? Your note: "bu gelecek". _Was: Q10, q2._
+- **K2. What exactly is sold — what is in a package?** Appointments, messages,
+  revisions; who sets the price; the minimum price; whether prices are public; rules for
+  no-shows, cancellation and leaving halfway. Your note: "aylık ya da 3 aylık ancak sabit
+  konulamaz, fiyat pazarlığı, min fiyat; şirketlerle anlaşma ayrı karar". _Was: Q28, q8._
+- **K3. How will the first clients find us?** Channels, budget, owner, date; the first
+  target audience. Your note: "dijital pazar". _Was: q12._
+- **K4. Which dietitians for the pilot, and when are the interviews?** How many, which
+  specialties, who runs them, when.
+- **K5. Cost analysis and competitor prices.**
+- **K6. When do dietitians get paid?** Does faster payout cost more? Installments, and who
+  bears their cost?
+- **K7. Can you send a real anamnez form?** Your note: "WP'den atıyor". _Was: Q26, q6._
+- **K8. Do you already know these, or do we ask dietitians?** Measurements and device
+  (DT13), falling-behind thresholds (DT15), the most painful admin task (DT4).
+  _Was: Q25, Q27, q5, q7, q18._
+- **K9. Logo and icon.** _Was: Q8, Q23._
 
 ---
 
 ## 3. Dietitians — interview questions
 
-Merged from the interview-guide artifact (q1–q22). Asked in Turkish, so written in
-Turkish. **Belief:** marks what Can currently thinks, for the interview to confirm or
-correct.
+Asked in interview order. The Turkish wording, the reason for each, and Can's current
+belief live in the interview-guide artifact, which records notes per interviewee:
+https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB. **Critical** means the plan editor
+or the payment flow can't be built without the answer.
 
-**Must ask**
+**Before the demo: how do you work today**
+- DT1. How do you find new clients, and what does one cost you? _(q12)_
+- DT2. How many active clients at once, and what limits you? Belief: 30–40. _(q14)_
+- DT3. Where do you talk to clients now; what would make you leave WhatsApp? _(q9)_
+- DT4. Which tools besides Excel; which admin task takes the most time? Belief: payment by IBAN. _(q13, q18)_
+- DT5. How does first contact happen: in person, video, no live meeting? Belief: limited contact. _(q15)_
+- DT6. **Critical.** Sessions or packages; what's in a package; leavers; no-show fees? _(q8, Q28)_
 
-- **DT1.** Planı nasıl kuruyorsunuz — değişim listesiyle mi, besin + miktar yazarak mı?
-  Ekranınızda gerçek bir planı gösterebilir misiniz? _Belief: değişim listesi. Was: q1._
-- **DT2.** Kendi grup tablonuz, kendi ölçü birimleriniz var mı? Kalori değerleriniz
-  bizimkilerle uyuşuyor mu?
-- **DT3.** Planlar günlük mü, haftalık mı, aylık mı? Eski planlar saklanıyor mu, danışan
-  eskisine bakabilmeli mi? _Belief: haftalık, hazır planlar var, danışan eskiyi göremiyor.
-  Was: q17._
-- **DT4.** Bir plan ne kadar sürede hazırlanıyor, ne kadarı önceki planlardan
-  kopyala-yapıştır? _Belief: kopyala-yapıştır. Was: q16._
-- **DT5.** Anamnezde gerçekte neler soruluyor, hangi cevap planı değiştiriyor?
-  _Was: q6, Q26._
-- **DT6.** Kilo dışında hangi ölçümler, hangi cihazla, ne sıklıkla? BİA var mı?
-  _Was: q7, Q27._
-- **DT7.** Kan tahlili geldiğinde ne yapıyorsunuz, hangi değerlere bakıyorsunuz, ne zaman
-  hekim yönlendirmesi şart? _Was: q3–q4, Q3–Q4._
-- **DT8.** Pazartesi sabahı ilk neye bakıyorsunuz? Geride kalan danışanı nasıl
-  anlıyorsunuz, kaç gün / kaç saat? Proaktif bir "bu danışanı kaybediyorsunuz" uyarısı
-  işe yarar mı? _Was: q5, Q25._
-- **DT9.** Bir AI taslak hazırlasa, adınızı koymadan önce ne görmeniz gerekir? Neyi
-  görürseniz hiç kullanmazsınız? _Belief: iyi bir özellik. Was: q21._
-- **DT10.** Tek seans mı, paket mi satıyorsunuz? Pakette ne var, yarıda bırakan danışanla
-  ne oluyor, gelmeyenden ücret alınıyor mu? _Was: q8, Q28._
+**How a plan is built** (ask them to show a real one)
+- DT7. **Critical.** Exchange list or food + amount? Belief: exchange list. _(q1)_
+- DT8. **Critical.** Own group table and units, or a ready-made table? Where do kcal values come from?
+- DT9. How long does a plan take; how much is copy-paste? Belief: mostly copy-paste. _(q16)_
+- DT10. **Critical.** Daily, weekly or monthly; are old plans kept; should the client see them? Belief: weekly, ready-made plans, client can't see old ones. _(q17)_
+- DT11. Which energy formula? (panel uses Harris-Benedict × activity factor)
+- DT12. **Critical.** What does the anamnez really ask; which answers change the plan? _(q6, Q26)_
+- DT13. Which measurements, device, frequency, BIA; who weighs the client? _(q7, Q27)_
+- DT14. **Critical.** What happens with blood tests; which values; when is a doctor's referral required? _(q3–q4, Q3–Q4)_
 
-**Ask if there is time**
-
-- **DT11.** Yeni danışanı şu an nasıl buluyorsunuz, bir danışan size neye mal oluyor?
-  _Was: q12._
-- **DT12.** Danışanlarla şu an nerede konuşuyorsunuz? WhatsApp'ı bırakmanız için ne
-  olmalı? _Was: q9._
-- **DT13.** Excel dışında hangi araçları kullanıyorsunuz (randevu, ödeme, yazışma)?
-  _Belief: ödeme IBAN ile. Was: q13._
-- **DT14.** İlk görüşme yüz yüze mi, görüntülü mü, canlı görüşme olmadan mı başlıyor?
-  _Belief: limitli iletişim. Was: q15._
-- **DT15.** Aynı anda kaç aktif danışan, sizi ne sınırlıyor? _Belief: 30–40. Was: q14._
-- **DT16.** En çok vaktinizi alan idari iş hangisi? _Was: q18._
-- **DT17.** Mevcut danışanlarınıza "bu uygulamayı indirin" demenin en büyük çekincesi ne?
-  Excel/Word şablonlarınızı biz aktarsak kararınız değişir mi? _Was: q20._
-- **DT18.** Platform ödemeyi alıp komisyonu kesip size aktarsa ilk tepkiniz ne? Komisyon
-  mu, sabit abonelik mi daha adil? _Rephrase after C1. Was: q11._
-- **DT19.** Puanlamaya sıcak bakıyor musunuz? Haksız puana itiraz nasıl olmalı? Listede
-  kim üstte çıkmalı? _Was: q22._
+**During the demo** (on the named screen)
+- DT15. Genel Bakış: what do you check first on Monday; when is a client "falling behind"? _(q5, Q25)_
+- DT16. Danışanlar: with 40 clients, which column is essential?
+- DT17. **Critical.** AI taslağı: what must you see before signing an AI draft; what would make you never use it? Belief: a good feature. _(q21)_
+- DT18. Hatırlatmalar: are app notifications enough, or is SMS required? _(Q15)_
+- DT19. Ödemeler: reaction to payments going through the platform; what would you need to see? Ask the commission part after C1. _(q11)_
+- DT20. Pazaryeri: ratings, disputes, who ranks first? _(q22)_
 
 **After the demo**
-
-- **DT20.** Gösterdiğim ekranlardan hangisi sizi mevcut düzeninizden vazgeçirir, hangisi
-  eksik? _Your note: ask after the demo. Was: q19._
+- DT21. Which screen would make you switch, and what is still missing? _(q19)_
+- DT22. Biggest objection to telling existing clients to install the app; would our importing your templates change it? _(q20)_
 
 ---
 
