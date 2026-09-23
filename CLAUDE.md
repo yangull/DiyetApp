@@ -11,6 +11,7 @@ Read these files at the start of every session:
   code comments cite), current state and roadmap. Edit it in place when a
   decision changes; never append session logs to it.
 - **`CONTEXT.md`**: the domain glossary (değişim listesi, BMH, danışan, …).
+- **`docs/design-system.md`**: colours, type, density and the design rules. Read it before touching UI.
 - **`QUESTIONS.md`**: the only list of open questions. Add new ones there, never anywhere else.
 
 ## Project status

@@ -238,12 +238,33 @@ class _AppointmentRow extends ConsumerWidget {
               label: const Text('Hatırlatma gönder'),
             ),
           if (!cancelled)
-            IconButton(
-              tooltip: 'Randevuyu iptal et',
-              onPressed: () => ref
-                  .read(demoProvider.notifier)
-                  .cancelAppointment(appointment.id),
-              icon: Icon(Icons.close, size: 18, color: palette.textMuted),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: palette.textMuted),
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Randevuyu iptal et'),
+                    content: Text('${client.name} ile randevu iptal edilecek.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Vazgeç'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('İptal et'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed ?? false) {
+                  ref
+                      .read(demoProvider.notifier)
+                      .cancelAppointment(appointment.id);
+                }
+              },
+              child: const Text('İptal et'),
             ),
         ],
       ),

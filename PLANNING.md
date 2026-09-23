@@ -187,8 +187,8 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 
 ### 3.5 Design system
 
-Full document with live samples and measurements:
-https://claude.ai/code/artifact/1d9436dc-cd7c-4639-a4ec-9459de2d8ea3
+Full reference, including type scale, density numbers and the design rules:
+**`docs/design-system.md`** (the source; the 28 Aug artifact is history).
 
 - **#54** Palette **B "Serin"**: background `#F7F9F8`, surface `#FFFFFF`, brand `#18795C`.
 - **#55** **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
@@ -211,8 +211,9 @@ https://claude.ai/code/artifact/1d9436dc-cd7c-4639-a4ec-9459de2d8ea3
   explicitly.
 - **#66** Non-Material tokens travel as `AppPalette` / `AppDensity` ThemeExtensions
   (`context.palette`, `context.density`).
-- **#67** The 12 anti-slop rules in the design document apply to every screen (no gradients,
-  no emoji icons, no "✨ AI" badges, no mixed radii, …).
+- **#67** The design rules in `docs/design-system.md` apply to every screen (14 since 23 Sep
+  2026: no gradients, no emoji icons, no "✨ AI" badges, no mixed radii, labelled and
+  confirmed actions, no money while P6 holds, …).
 
 ### 3.6 The interview demo
 

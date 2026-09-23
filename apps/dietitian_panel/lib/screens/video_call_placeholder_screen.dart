@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Stands in for the embedded video call — PLANNING.md §3 hasn't picked an
@@ -102,13 +103,23 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _CallControl(icon: Icons.mic_none, onPressed: () {}),
+                  // Mic and camera are drawn disabled: there is no call to
+                  // mute yet, and a live-looking button that does nothing is
+                  // exactly the fake UI PLANNING #50 rules out.
+                  const _CallControl(
+                    icon: Icons.mic_none,
+                    tooltip: 'Mikrofon — video henüz bağlı değil',
+                  ),
                   const SizedBox(width: 16),
-                  _CallControl(icon: Icons.videocam_outlined, onPressed: () {}),
+                  const _CallControl(
+                    icon: Icons.videocam_outlined,
+                    tooltip: 'Kamera — video henüz bağlı değil',
+                  ),
                   const SizedBox(width: 16),
                   _CallControl(
                     icon: Icons.call_end,
-                    background: const Color(0xFFA32017),
+                    tooltip: 'Görüşmeyi bitir',
+                    background: AppColors.error,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -124,21 +135,25 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
 class _CallControl extends StatelessWidget {
   const _CallControl({
     required this.icon,
-    required this.onPressed,
+    required this.tooltip,
+    this.onPressed,
     this.background = Colors.white24,
   });
 
   final IconData icon;
-  final VoidCallback onPressed;
+  final String tooltip;
+  final VoidCallback? onPressed;
   final Color background;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: tooltip,
       onPressed: onPressed,
       icon: Icon(icon, color: Colors.white),
       style: IconButton.styleFrom(
         backgroundColor: background,
+        disabledBackgroundColor: Colors.white12,
         padding: const EdgeInsets.all(16),
       ),
     );

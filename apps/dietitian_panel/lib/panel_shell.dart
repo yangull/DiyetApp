@@ -103,15 +103,17 @@ class _PanelShellState extends State<PanelShell> {
 }
 
 /// Between interviews the panel has to go back to a known state. Everything a
-/// dietitian typed is kept until this is pressed.
+/// dietitian typed is kept until this is pressed. Icon and label, like the
+/// rail items above it: an icon alone would be a guess (docs/design-system.md,
+/// rule 12).
 class _ResetDemoButton extends ConsumerWidget {
   const _ResetDemoButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      tooltip: 'Demoyu sıfırla',
-      icon: Icon(Icons.restart_alt, color: context.palette.textMuted),
+    final muted = context.palette.textMuted;
+    return TextButton(
+      style: TextButton.styleFrom(foregroundColor: muted),
       onPressed: () async {
         final confirmed = await showDialog<bool>(
           context: context,
@@ -135,6 +137,14 @@ class _ResetDemoButton extends ConsumerWidget {
         );
         if (confirmed ?? false) ref.read(demoProvider.notifier).resetDemo();
       },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.restart_alt),
+          const SizedBox(height: AppSpacing.xs),
+          Text('Sıfırla', style: Theme.of(context).textTheme.labelMedium),
+        ],
+      ),
     );
   }
 }

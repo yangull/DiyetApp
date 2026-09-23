@@ -12,7 +12,8 @@ Before anything else, read these files in the repo root:
 2. `HANDOFF.md`: current state, next steps, the most blocking questions.
 3. `PLANNING.md`: the product, locked decisions (stable IDs P1–P5, #1–#118), roadmap.
 4. `CONTEXT.md`: the domain glossary. Use its terms.
-5. `QUESTIONS.md`: the only list of open questions. Add new ones there, never in a new file.
+5. `docs/design-system.md`: colours, type, density and design rules, for any UI work or review.
+6. `QUESTIONS.md`: the only list of open questions. Add new ones there, never in a new file.
 
 Can is the only source for product decisions; the old Miro board is not a source, so
 don't read or cite it. Locked decisions are not reopened without asking Can. If you disagree with one, say

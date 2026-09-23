@@ -7,11 +7,10 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
 
-/// In-app messaging, per locked decision PLANNING.md P2 — chat stays in the product
-/// rather than moving to WhatsApp, to protect commission revenue. It is the
-/// decision most likely to get pushback in interviews;
-/// this screen exists so a dietitian can react to the real thing, not a
-/// description of it.
+/// In-app messaging, per PLANNING.md P2: chat stays in the product rather than
+/// moving to WhatsApp. Its original reason (the commission) is on hold, so the
+/// rule itself is being re-asked (QUESTIONS.md C5). This screen exists so a
+/// dietitian can react to the real thing, not a description of it.
 class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
 
@@ -349,6 +348,7 @@ class _ConversationDetailState extends ConsumerState<_ConversationDetail> {
               ),
               const SizedBox(width: AppSpacing.sm),
               IconButton(
+                tooltip: 'Gönder',
                 onPressed: _send,
                 icon: const Icon(Icons.send_outlined),
               ),
