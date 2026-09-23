@@ -6,7 +6,9 @@ import 'app_density.dart';
 /// both were verified at the cmap level to carry all twelve Turkish glyphs
 /// (ı İ ğ Ğ ş Ş ç Ç ö Ö ü Ü).
 ///
-/// The serif is for headings only — never body text, tables or buttons.
+/// The serif is for headings only — never body text, tables, buttons or
+/// numbers. The bundled Fraunces has no tabular digits, so a number set in it
+/// shifts sideways as it changes ("7/12" → "10/12"); numbers use [figures].
 ///
 /// The files ship as assets in `packages/core/fonts` (latin + latin-ext
 /// subsets, licences alongside them). Nothing is fetched at runtime, so the
@@ -36,6 +38,14 @@ abstract final class AppTypography {
     height: lineHeight / size,
     fontWeight: weight,
   );
+
+  /// Every number the user reads as data: counts, kcal, kg, times (#132).
+  /// Figtree 700 with tabular figures, so digits keep their width.
+  static TextStyle figures(double size, double lineHeight) => _sans(
+    size,
+    lineHeight,
+    FontWeight.w700,
+  ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
 
   static TextTheme textTheme(AppDensity density) {
     final c = density.isCompact;

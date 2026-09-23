@@ -30,3 +30,5 @@ flutter:
           weight: 400
         - asset: fonts/Figtree-SemiBold.ttf
           weight: 600
+        - asset: fonts/Figtree-Bold.ttf
+          weight: 700

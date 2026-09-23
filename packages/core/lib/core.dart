@@ -18,5 +18,6 @@ export 'src/relationships/supabase_client_relationship_repository.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/tokens/app_colors.dart';
 export 'src/theme/tokens/app_density.dart';
+export 'src/theme/tokens/app_motion.dart';
 export 'src/theme/tokens/app_spacing.dart';
 export 'src/theme/tokens/app_typography.dart';

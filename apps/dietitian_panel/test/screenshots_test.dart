@@ -136,7 +136,11 @@ Future<void> _loadFonts() async {
   const dir = '../../packages/core/fonts';
   const faces = {
     'Fraunces': ['Fraunces-SemiBold.ttf'],
-    'Figtree': ['Figtree-Regular.ttf', 'Figtree-SemiBold.ttf'],
+    'Figtree': [
+      'Figtree-Regular.ttf',
+      'Figtree-SemiBold.ttf',
+      'Figtree-Bold.ttf',
+    ],
   };
 
   for (final entry in faces.entries) {
