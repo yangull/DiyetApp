@@ -343,6 +343,67 @@ void main() {
     final context = tester.element(find.byType(NavigationBar));
     expect(context.density.isCompact, isFalse);
   });
+
+  for (final width in [360.0, 412.0]) {
+    for (final scale in [1.0, 1.3, 2.0]) {
+      testWidgets('the client list stacks on a $width dp phone at $scale×', (
+        tester,
+      ) async {
+        tester.view.devicePixelRatio = 3;
+        tester.view.physicalSize = Size(width * 3, 740 * 3);
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+        final auth = FakeAuthRepository();
+        final profiles = FakeProfileRepository();
+        await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+        final dietitianId = auth.currentSession!.userId;
+        profiles.seedDietitian(
+          dietitianId,
+          fullName: 'Dyt. Deniz Karaoğlanoğlu',
+          status: VerificationStatus.approved,
+        );
+        final relationships = FakeClientRelationshipRepository()
+          ..seedRelationship(
+            dietitianId: dietitianId,
+            invitedEmail: 'elif.aydin.uzun.adres@example.com',
+            clientId: 'client-1',
+            status: RelationshipStatus.active,
+          )
+          ..seedClientName('client-1', 'Elif Aydın')
+          ..seedRelationship(
+            dietitianId: dietitianId,
+            invitedEmail: 'bekleyen@example.com',
+          );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authRepositoryProvider.overrideWithValue(auth),
+              profileRepositoryProvider.overrideWithValue(profiles),
+              clientRelationshipRepositoryProvider.overrideWithValue(
+                relationships,
+              ),
+            ],
+            child: const DietitianPanelApp(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // No column headings on a phone; every fact is on its own row. At
+        // large text the list starts below the fold, so scroll to it.
+        expect(find.text('E-POSTA'), findsNothing);
+        await tester.scrollUntilVisible(
+          find.text('elif.aydin.uzun.adres@example.com'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text('Elif Aydın'), findsOneWidget);
+        expect(find.text('elif.aydin.uzun.adres@example.com'), findsOneWidget);
+      });
+    }
+  }
 }
 
 class _FlakyRelationships extends FakeClientRelationshipRepository {

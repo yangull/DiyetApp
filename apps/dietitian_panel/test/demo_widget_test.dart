@@ -346,4 +346,27 @@ void main() {
       expect(find.byType(BackButton), findsOneWidget);
     });
   });
+
+  for (final width in [360.0, 412.0]) {
+    for (final scale in [1.0, 1.3, 2.0]) {
+      testWidgets('Genel Bakış fits a $width dp phone at $scale×', (
+        tester,
+      ) async {
+        tester.view.devicePixelRatio = 3;
+        tester.view.physicalSize = Size(width * 3, 740 * 3);
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+        await tester.pumpWidget(
+          const ProviderScope(child: DietitianPanelDemoApp()),
+        );
+        await tester.pumpAndSettle();
+
+        // A RenderFlex overflow fails the test on its own.
+        expect(find.text('Dikkat gerekenler'), findsOneWidget);
+        expect(find.text('Danışanı aç'), findsWidgets);
+      });
+    }
+  }
 }

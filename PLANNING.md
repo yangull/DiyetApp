@@ -222,7 +222,9 @@ C2). Each ID names the interview question it came from.
   bottom bar and the comfortable density; from 600 dp up, the rail and compact density
   (`lib/util/breakpoints.dart`, `lib/widgets/adaptive_nav_scaffold.dart`). The demo's reminder
   settings and reset sit behind a labelled "Demo" button on phones. Tablets (600 dp+) get
-  the compact layout for now. Individual screens are made phone-friendly in slice 5.
+  the compact layout for now. Slice 5a (same day) stacked the real client list and the demo's
+  triage rows on phones; the demo's other screens are slice 5b. Layouts are tested at 360
+  and 412 dp with text scale 1.0, 1.3 and 2.0.
 - **#39** Wrong-app sign-ins (dietitian in the client app, client in the panel) get a
   full-screen message + sign-out. No automatic logout.
 - **#40** Admin sees a single card in MVP; approvals happen in the dashboard (a consequence of #35).

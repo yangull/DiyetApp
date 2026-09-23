@@ -8,6 +8,7 @@ import '../demo/triage.dart';
 import 'client_detail_screen.dart';
 import 'messages_screen.dart';
 import 'plan_editor_screen.dart';
+import '../util/breakpoints.dart';
 import '../util/turkish.dart';
 
 class OverviewScreen extends ConsumerWidget {
@@ -134,34 +135,7 @@ class _TriageCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                // Wraps on a phone instead of pushing the button off-screen.
-                Expanded(
-                  child: Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.xs,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text('Dikkat gerekenler', style: text.titleLarge),
-                      if (signals.isNotEmpty)
-                        _Count(count: signals.length)
-                      else
-                        Text(
-                          'temiz',
-                          style: text.bodyMedium?.copyWith(
-                            color: palette.textMuted,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: onOpenClients,
-                  child: const Text('Tüm danışanlar'),
-                ),
-              ],
-            ),
+            _TriageHeader(signals: signals, onOpenClients: onOpenClients),
             const SizedBox(height: AppSpacing.md),
             if (signals.isEmpty)
               Padding(
@@ -234,6 +208,62 @@ class _SignalRow extends ConsumerWidget {
       ),
     };
 
+    final taskButton = OutlinedButton(onPressed: task, child: Text(taskLabel));
+    final openButton = TextButton(
+      onPressed: openClient,
+      child: const Text('Danışanı aç'),
+    );
+
+    if (isPanelPhone(context)) {
+      // On a phone the reason gets the full width and the two actions sit
+      // under it, instead of both halves wrapping a word per line.
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Icon(
+                    _icon(signal.kind),
+                    size: 20,
+                    color: palette.warning,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(signal.client.name, style: text.titleMedium),
+                      Text(
+                        signal.detail,
+                        style: text.bodyMedium?.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [taskButton, openButton],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
@@ -266,13 +296,7 @@ class _SignalRow extends ConsumerWidget {
               alignment: WrapAlignment.end,
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.xs,
-              children: [
-                OutlinedButton(onPressed: task, child: Text(taskLabel)),
-                TextButton(
-                  onPressed: openClient,
-                  child: const Text('Danışanı aç'),
-                ),
-              ],
+              children: [taskButton, openButton],
             ),
           ),
         ],
@@ -426,6 +450,49 @@ class _Metric extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Title, count and "Tüm danışanlar". On a phone all three wrap as one group,
+/// so large text never pushes the button off-screen.
+class _TriageHeader extends StatelessWidget {
+  const _TriageHeader({required this.signals, required this.onOpenClients});
+
+  final List<TriageSignal> signals;
+  final VoidCallback onOpenClients;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    final title = Text('Dikkat gerekenler', style: text.titleLarge);
+    final count = signals.isNotEmpty
+        ? _Count(count: signals.length)
+        : Text(
+            'temiz',
+            style: text.bodyMedium?.copyWith(color: palette.textMuted),
+          );
+    final button = TextButton(
+      onPressed: onOpenClients,
+      child: const Text('Tüm danışanlar'),
+    );
+
+    if (isPanelPhone(context)) {
+      return Wrap(
+        spacing: AppSpacing.md,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [title, count, button],
+      );
+    }
+    return Row(
+      children: [
+        title,
+        const SizedBox(width: AppSpacing.md),
+        count,
+        const Spacer(),
+        button,
+      ],
     );
   }
 }

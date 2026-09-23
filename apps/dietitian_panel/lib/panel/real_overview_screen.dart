@@ -30,79 +30,82 @@ class RealOverviewScreen extends ConsumerWidget {
       label: const Text('Danışan davet et'),
     );
 
+    final greeting = Text(
+      'Hoş geldiniz, ${profile.fullName}',
+      style: text.headlineLarge,
+    );
+    Widget states({required bool scrollable}) => relationships.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => _ErrorState(
+        onRetry: () => ref.invalidate(dietitianClientsProvider(profile.id)),
+      ),
+      data: (rows) {
+        if (rows.isEmpty) {
+          const empty = Padding(
+            padding: EdgeInsets.all(AppSpacing.xl),
+            child: _EmptyState(),
+          );
+          return scrollable
+              ? const Center(child: SingleChildScrollView(child: empty))
+              : empty;
+        }
+        final table = _RelationshipTable(
+          rows: rows,
+          scrollable: scrollable,
+          // A name lookup that is still loading shows the row without a
+          // name rather than blocking the whole list.
+          names: {
+            for (final name in names.asData?.value ?? const <ClientName>[])
+              name.clientId: name.fullName,
+          },
+        );
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Without this, a failed name lookup looked the same as clients
+            // who have no name: a column of dashes.
+            if (names.hasError) ...[
+              _NamesErrorNotice(
+                onRetry: () =>
+                    ref.invalidate(dietitianClientNamesProvider(profile.id)),
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            if (scrollable) Expanded(child: table) else table,
+          ],
+        );
+      },
+    );
+
+    // On a phone the whole page scrolls as one: the greeting, the invite
+    // button under it at full width, then the list (#38).
+    if (isPanelPhone(context)) {
+      return ListView(
+        padding: EdgeInsets.all(density.pagePadding),
+        children: [
+          greeting,
+          const SizedBox(height: AppSpacing.lg),
+          inviteButton,
+          const SizedBox(height: AppSpacing.xl),
+          states(scrollable: false),
+        ],
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.all(density.pagePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // On a phone the invite button goes under the greeting, full width,
-          // instead of squeezing the name into a narrow column (#38).
-          if (isPanelPhone(context)) ...[
-            Text(
-              'Hoş geldiniz, ${profile.fullName}',
-              style: text.headlineLarge,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            inviteButton,
-          ] else
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Hoş geldiniz, ${profile.fullName}',
-                    style: text.headlineLarge,
-                  ),
-                ),
-                inviteButton,
-              ],
-            ),
-          const SizedBox(height: AppSpacing.xl),
-          Expanded(
-            child: relationships.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => _ErrorState(
-                onRetry: () =>
-                    ref.invalidate(dietitianClientsProvider(profile.id)),
-              ),
-              data: (rows) => rows.isEmpty
-                  ? const Center(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.all(AppSpacing.xl),
-                        child: _EmptyState(),
-                      ),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Without this, a failed name lookup looked the same
-                        // as clients who have no name: a column of dashes.
-                        if (names.hasError) ...[
-                          _NamesErrorNotice(
-                            onRetry: () => ref.invalidate(
-                              dietitianClientNamesProvider(profile.id),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                        ],
-                        Expanded(
-                          child: _RelationshipTable(
-                            rows: rows,
-                            // A name lookup that is still loading shows the
-                            // row without a name rather than blocking the
-                            // whole list.
-                            names: {
-                              for (final name
-                                  in names.asData?.value ??
-                                      const <ClientName>[])
-                                name.clientId: name.fullName,
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: greeting),
+              inviteButton,
+            ],
           ),
+          const SizedBox(height: AppSpacing.xl),
+          Expanded(child: states(scrollable: true)),
         ],
       ),
     );
@@ -225,10 +228,17 @@ class _InviteDialogState extends State<_InviteDialog> {
 }
 
 class _RelationshipTable extends StatelessWidget {
-  const _RelationshipTable({required this.rows, required this.names});
+  const _RelationshipTable({
+    required this.rows,
+    required this.names,
+    required this.scrollable,
+  });
 
   final List<ClientRelationship> rows;
   final Map<String, String> names;
+
+  /// False when the page around it already scrolls (the phone layout).
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
@@ -236,11 +246,13 @@ class _RelationshipTable extends StatelessWidget {
     final palette = context.palette;
     final density = context.density;
 
-    return ListView(
-      children: [
-        Card(
-          child: Column(
-            children: [
+    final children = [
+      Card(
+        child: Column(
+          children: [
+            // Column headings only mean something when the columns line up;
+            // on a phone each row stacks its own labelled facts.
+            if (!isPanelPhone(context))
               Container(
                 height: density.rowHeight,
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -258,18 +270,23 @@ class _RelationshipTable extends StatelessWidget {
                   ],
                 ),
               ),
-              for (final row in rows)
-                _RelationshipRow(row: row, name: names[row.clientId]),
-            ],
-          ),
+            for (final row in rows)
+              _RelationshipRow(row: row, name: names[row.clientId]),
+          ],
         ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          'Bekleyen davetler, danışan kabul edene kadar açılamaz.',
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
-        ),
-      ],
-    );
+      ),
+      const SizedBox(height: AppSpacing.md),
+      Text(
+        'Bekleyen davetler, danışan kabul edene kadar açılamaz.',
+        style: text.bodySmall?.copyWith(color: palette.textMuted),
+      ),
+    ];
+    return scrollable
+        ? ListView(children: children)
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          );
   }
 
   Widget _head(BuildContext context, String label, {required int flex}) {
@@ -298,45 +315,81 @@ class _RelationshipRow extends StatelessWidget {
     // Only an accepted relationship has a client row to open.
     final openable = row.isActive && row.clientId != null;
 
-    final content = Container(
-      height: density.rowHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: palette.borderSubtle)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              name ??
-                  switch (row.status) {
-                    RelationshipStatus.active => '—',
-                    RelationshipStatus.pending => 'Davet bekliyor',
-                    RelationshipStatus.declined => 'Davet reddedildi',
-                  },
-              style: openable
-                  ? text.titleMedium
-                  : text.bodyMedium?.copyWith(color: palette.textMuted),
+    final label =
+        name ??
+        switch (row.status) {
+          RelationshipStatus.active => '—',
+          RelationshipStatus.pending => 'Davet bekliyor',
+          RelationshipStatus.declined => 'Davet reddedildi',
+        };
+    final labelStyle = openable
+        ? text.titleMedium
+        : text.bodyMedium?.copyWith(color: palette.textMuted);
+
+    final Widget content;
+    if (isPanelPhone(context)) {
+      // Stacked: the row grows with its text instead of clipping a long name
+      // or address at a fixed height.
+      content = Container(
+        constraints: BoxConstraints(minHeight: density.rowHeight),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: palette.borderSubtle)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: labelStyle),
+                  const SizedBox(height: 2),
+                  Text(
+                    row.invitedEmail,
+                    style: text.bodySmall?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _RelationshipStatusPill(status: row.status),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Text(
-              row.invitedEmail,
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+            if (openable) Icon(Icons.chevron_right, color: palette.textMuted),
+          ],
+        ),
+      );
+    } else {
+      content = Container(
+        height: density.rowHeight,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: palette.borderSubtle)),
+        ),
+        child: Row(
+          children: [
+            Expanded(flex: 3, child: Text(label, style: labelStyle)),
+            Expanded(
+              flex: 4,
+              child: Text(
+                row.invitedEmail,
+                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+              ),
             ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _RelationshipStatusPill(status: row.status),
+            Expanded(
+              flex: 3,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _RelationshipStatusPill(status: row.status),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
 
     if (!openable) return content;
     return InkWell(
