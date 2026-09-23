@@ -58,33 +58,12 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
-        Text('Gönderim kanalı', style: text.titleLarge),
-        const SizedBox(height: AppSpacing.md),
-        Card(
-          child: RadioGroup<String>(
-            groupValue: r.channel,
-            onChanged: (v) => notifier.setChannel(v!),
-            child: Column(
-              children: [
-                const RadioListTile<String>(
-                  value: 'push',
-                  title: Text('Uygulama bildirimi'),
-                  subtitle: Text(
-                    'Ücretsiz. Danışanın uygulamayı yüklemiş olması gerekir.',
-                  ),
-                ),
-                Divider(height: 1, color: palette.borderSubtle),
-                const RadioListTile<String>(
-                  value: 'sms',
-                  title: Text('SMS'),
-                  subtitle: Text(
-                    'Uygulama gerekmez, ancak mesaj başına ücretlidir.',
-                  ),
-                ),
-              ],
-            ),
-          ),
+        const SizedBox(height: AppSpacing.lg),
+        // Push only, no SMS channel to choose: PLANNING.md #127.
+        Text(
+          'Hatırlatmalar uygulama bildirimi olarak gönderilir; SMS '
+          'kullanılmaz.',
+          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(

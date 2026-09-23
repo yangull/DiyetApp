@@ -39,7 +39,7 @@ Delete this section once Can has looked at it again (after the next talk with Ka
 | new | One store app or two? | Two: client app and dietitian app | PLANNING #38 |
 | C2 | Interviews held? | Yes; answers relayed the same day | PLANNING §2.1 |
 | DT2 | Exchange list or food + amount? | Both, depending on the client | #121 |
-| DT3 | Group table | One standard table | #122 |
+| DT3 | Group table | One standard table (which table and values is still open, §3) | #122 |
 | DT4, DT5 | Plan rhythm | Weekly, mostly copied; old plans hidden from the client | #123 |
 | DT6 | Energy formulas | Harris-Benedict, Mifflin-St Jeor, Cunningham, WHO/FAO (Can ticked "Harris-Benedict only" together with the other three; read as "all four in use") | #124 |
 | DT9 | Blood tests | No blood-test section (KVKK); client and dietitian can both attach any file | #125 |
@@ -66,9 +66,9 @@ is deferred, now PLANNING P6) and I9 (Kutay's Excel dropped).
 | I2 | **All communication stays in-app** (chat + embedded video); external links only as an emergency backup. Confirmed 23 Sep 2026 with new reasons (records, quality control, KVKK, B2B). | PLANNING P2; Mesajlar screen | ✅ |
 | I3 | **Build order:** shared core → dietitian marketplace → AI-only tier | PLANNING P3, roadmap | |
 | I4 | **One general panel,** no separate screens per dietitian type | PLANNING P5 | |
-| I6 | **Client flow:** sign up → choose the dietitian or AI path → enter blood values/tests → set a budget → dietitian or AI plan | PLANNING §1 | |
+| I6 | **Client flow:** sign up → choose the dietitian or AI path → ~~enter blood values/tests~~ (superseded 23 Sep: no blood-test section, files can be attached, #125) → set a budget → dietitian or AI plan | PLANNING §1 | |
 | I7 | **Dietitian types to serve:** sports, lipedema, diabetes, GLP-1 injection users, bariatric | PLANNING §1 | |
-| I8 | **Blood tests:** clients upload them; dietitians can't diagnose; some actions need a doctor-approved document | PLANNING §1, `blood_tests.doctor_approval_doc` in §7 | |
+| I8 | **Blood tests:** ~~clients upload them~~ superseded 23 Sep: no blood-test section, any file can be attached (#125). Still open: dietitians can't diagnose; do some actions need a doctor-approved document? (C12) | PLANNING #125 | |
 | I10 | **Meal-time notifications** matter to dietitians ("what time it was eaten") | PLANNING §1 | |
 | I11 | **An AI chatbot** answers client questions without the dietitian (Phase 2) | PLANNING §1, roadmap | |
 | I12 | **Diet styles** to learn and support: Mediterranean, intermittent fasting, low-carb | not in PLANNING, only here | |
@@ -200,9 +200,10 @@ Answered by Can on 23 Sep and removed from the interview: how dietitians find cl
 capacity (no limit, usually 30–40), where they chat today (not needed), first contact
 (online), and sessions vs packages (a money question, parked).
 
-Answered on 23 Sep 2026 (Can relayed the interviews; now PLANNING §2.1): DT2–DT6, DT9,
-DT11–DT14, DT16, DT17 and most of DT1 and DT15. Still open, same numbers:
+Answered on 23 Sep 2026 (Can relayed the interviews; now PLANNING §2.1): DT2, DT4–DT6, DT9,
+DT11–DT14, DT16, DT17, part of DT3 and most of DT1 and DT15. Still open, same numbers:
 
+- DT3. **Critical.** Which published exchange table (source, edition) and which kcal values per group? One shared table is decided (#122); today's values are ADA examples.
 - DT1. Which admin task takes the most time? (Tools today: Excel/Word and WhatsApp.)
 - DT7. **Critical.** Looking at an intake form: which questions really change the plan, what is missing, what is useless? (Show `docs/reference/anamnez-ornek-2021.jpg`.)
 - DT8. Which measurements, device, frequency, BIA; who weighs the client? (Default in use: weight, waist, hip; fat % and muscle optional.)

@@ -57,6 +57,9 @@ and PLANNING.md.
    phones and tablets as its own store app (#38). Start with the real panel (client list,
    invites, detail): a bottom bar and stacked screens below a width breakpoint, the
    comfortable density on phones. Needs the Android emulator slice (#3) to check it.
+   Codex's inventory of what still assumes desktop (compact density hard-coded in
+   `main.dart`, rail-only shells, no `android/`/`ios/` runners or panel bundle id) is in
+   `docs/research/2026-09-23-decisions-review.md`.
 3. **Can:** turn on email confirmation in Supabase (X1, about 1 minute). Invites depend
    on it.
 4. **Can + Kadir:** give Kadir edit access to the interview guide (Share menu) and ask

@@ -56,7 +56,7 @@ Fraunces (headings only) + Figtree (everything else), bundled in `packages/core/
 never fetched at runtime (#60, #63). All twelve Turkish glyphs are verified in the font
 files. Serif never appears in body text, tables or buttons.
 
-| Slot | Face | Client app (comfortable) | Panel (compact) |
+| Slot | Face | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
 |---|---|---|---|
 | displaySmall | Fraunces 600 | 34 / 40 | 34 / 40 |
 | headlineLarge | Fraunces 600 | 27 / 34 | 22 / 28 |
@@ -79,7 +79,7 @@ back to Material's font, not Figtree.
 One token set, two profiles (`AppDensity`, #64). Colours, fonts and meanings never
 change between them; only measurements do.
 
-| Metric | Client app | Panel |
+| Metric | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
 |---|---|---|
 | Page padding | 20 | 24 |
 | Card radius | 14 | 10 |
@@ -89,7 +89,7 @@ change between them; only measurements do.
 | Row height | 72 | 44 |
 | Avatar | 40 | 28 |
 
-In the panel, buttons and chips are 36 tall and text fields and dropdowns 38, side by
+In the compact profile, buttons and chips are 36 tall and text fields and dropdowns 38, side by
 side on one line. Flutter's own `VisualDensity` is pinned to standard in the theme:
 `AppDensity` is the only density system.
 

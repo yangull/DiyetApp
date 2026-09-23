@@ -34,22 +34,24 @@ the marketplace's front door. Not built yet.
 
 ## Diet plans
 
-**Diyet planı (diet plan).** A day of eating a dietitian gives a client. The
-central artifact of the product, and the screen that decides whether dietitians
-abandon Excel.
+**Diyet planı (diet plan).** What a dietitian gives a client to eat: in the real
+product a **week**, usually started from a template or last week's plan (PLANNING
+#123); the demo shows a single day. The central artifact of the product, and the
+screen that decides whether dietitians abandon Excel.
 
-There are currently **two competing models of what a plan is**, both implemented
-in the interview demo, side by side, on purpose:
+There are **two models of what a plan is**, both in the interview demo. The
+interviews said dietitians use both, depending on the client: the exchange list is
+the default and freeform stays as an option (PLANNING P4, #121).
 
 **Serbest plan (freeform plan)** — `DietPlan` / `Meal` / `MealItem`. Each meal
-lists foods and amounts as text: "yulaf ezmesi, 3 yemek kaşığı". What the first
-prototype assumed. Simple, and probably wrong.
+lists foods and amounts as text: "yulaf ezmesi, 3 yemek kaşığı". The option kept
+alongside the default.
 
 ⚠️ **Değişim listesi (exchange list)** — `ExchangePlan` / `ExchangeMeal` /
 `ExchangeLine`. The Turkish form of the ADA exchange system. Instead of naming
 foods, the plan says *how many exchanges from which group at which meal*; the
-client picks the actual food from a substitution list. Research says this is how
-Turkish dietitians actually work. Unconfirmed.
+client picks the actual food from a substitution list. The default plan model,
+confirmed in the interviews.
 
 ⚠️ **Değişim grubu (exchange group).** One of eight food groups: süt, et,
 nişastalı yiyecekler, kuru baklagil, A grubu sebze, B grubu sebze, meyve, yağ.
@@ -61,9 +63,9 @@ measures** — yemek kaşığı, çay bardağı, kibrit kutusu, "1 köfte kadar"
 grams. A plan line is a group plus a count: "öğle: et 2, nişastalı 2".
 
 ⚠️ **Değişim listesi tablosu (substitution table).** The group → example foods
-mapping, at household measures. Shared across every plan rather than retyped per
-client. Plausibly a dietitian's own professional asset, which would make it
-per-dietitian editable data rather than a shared constant.
+mapping, at household measures. **One standard table shared by every dietitian**
+(PLANNING #122), not per-dietitian data. Which published table and values is still
+open (QUESTIONS DT3); the demo's values are labelled examples.
 
 ---
 
@@ -83,8 +85,8 @@ approved it". Colour never carries the meaning alone.
 **Onay (approval).** The dietitian's act of accepting a draft. The gate the whole
 human-service side turns on: **a client never sees an unapproved AI plan**,
 enforced in row-level security, not just in the UI. `PlanState` is `aiDraft` or
-`approved`, and both plan models above reuse it, so the mechanic is identical
-whichever model wins.
+`approved`, and both plan models above reuse it, so the mechanic is identical in
+either editor.
 
 ---
 
@@ -98,7 +100,8 @@ original 1919 constants, because that's what the dietitian's spreadsheet uses.
 
 **Cunningham.** An alternative BMH formula, `500 + 22 × lean body mass`. Not
 implemented: lean mass needs a body-fat or bioimpedance reading the app doesn't
-collect. Which formula a given dietitian uses is an open question.
+collect. Dietitians use it alongside Harris-Benedict, Mifflin-St Jeor and WHO/FAO
+(PLANNING #124); the three are to be added as choices.
 
 **FA — fiziksel aktivite faktörü (physical activity factor).** A multiplier from
 1.2 (hareketsiz) to 1.6 (çok hareketli), one per `ActivityLevel`. BMH × FA is the

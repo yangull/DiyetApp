@@ -83,7 +83,7 @@ void main() {
 }
 
 /// Wide enough that the Mesajlar context panel is shown (it drops below 980)
-/// and the client table does not wrap — this is a desktop web panel.
+/// and the client table does not wrap — a laptop-sized interview capture.
 const _width = 1600.0;
 
 void _shot(

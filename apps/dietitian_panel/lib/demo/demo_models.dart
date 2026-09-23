@@ -208,26 +208,21 @@ class ReminderSettings {
     required this.dayBefore,
     required this.hoursBefore,
     required this.paymentReminder,
-    required this.channel,
   });
 
   bool dayBefore;
   bool hoursBefore;
   bool paymentReminder;
-
-  /// 'push' costs nothing; 'sms' needs a paid provider.
-  String channel;
 }
 
 // ---------------------------------------------------------------------------
 // Exchange lists (değişim listesi)
 //
-// The second, competing answer to "what is a diet plan". Research says Turkish
-// dietitians do not write food + amount; they write how many exchanges from
-// which group, and the client picks the food from a substitution list, where
-// everything in a group is equivalent at its household measure. PLANNING.md P4
-// calls this an unconfirmed hypothesis: this model exists to be shown to a
-// dietitian next to the freeform editor, not because the question is settled.
+// The default answer to "what is a diet plan" (PLANNING.md P4): how many
+// exchanges from which group, with the client picking the food from a
+// substitution list, where everything in a group is equivalent at its household
+// measure. The freeform editor stays as an option. The demo keeps one day and
+// example values; the real editor is weekly on one shared table (#122, #123).
 // ---------------------------------------------------------------------------
 
 enum ExchangeGroup { sut, et, nisasta, baklagil, sebzeA, sebzeB, meyve, yag }

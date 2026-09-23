@@ -160,11 +160,6 @@ class DemoNotifier extends Notifier<DemoState> {
     _changed();
   }
 
-  void setChannel(String channel) {
-    state.reminders.channel = channel;
-    _changed();
-  }
-
   Appointment _appointment(String id) =>
       state.appointments.firstWhere((a) => a.id == id);
 
@@ -300,7 +295,6 @@ DemoState _seedState() => DemoState(
     dayBefore: true,
     hoursBefore: true,
     paymentReminder: false,
-    channel: 'push',
   ),
   conversations: _seedConversations(),
 );

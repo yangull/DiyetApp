@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum AppDensityProfile { comfortable, compact }
 
-/// Metrics that differ between the client app and the dietitian panel.
+/// Metrics that differ between touch layouts and dense wide-screen layouts.
 ///
 /// Colors, font families and semantic meanings deliberately do NOT live here:
 /// they are identical on both sides, and that is what makes the two apps read
@@ -20,7 +20,7 @@ class AppDensity extends ThemeExtension<AppDensity> {
     required this.avatarSize,
   });
 
-  /// Client mobile app.
+  /// Touch layouts: the client app, and the dietitian panel on phones.
   static const comfortable = AppDensity(
     profile: AppDensityProfile.comfortable,
     pagePadding: 20,
@@ -32,7 +32,8 @@ class AppDensity extends ThemeExtension<AppDensity> {
     avatarSize: 40,
   );
 
-  /// Dietitian web panel, where a screenful of clients matters more than air.
+  /// The dietitian panel on wide screens, where a screenful of clients matters
+  /// more than air.
   static const compact = AppDensity(
     profile: AppDensityProfile.compact,
     pagePadding: 24,

@@ -17,7 +17,6 @@ void main() {
     notifier.approve('c1');
     notifier.editItem('c1', 0, 0, 'Omlet', '3 yumurta');
     notifier.markPaid('a6');
-    notifier.setChannel('sms');
     notifier.sendMessage('c2', 'Antrenman öncesi hafif bir şeyler ye.');
 
     final restored = decodeDemoState(
@@ -30,7 +29,6 @@ void main() {
     expect(plan.meals.first.items.first.food, 'Omlet');
     expect(plan.meals.first.items.first.amount, '3 yumurta');
     expect(restored.appointments.firstWhere((a) => a.id == 'a6').paid, isTrue);
-    expect(restored.reminders.channel, 'sms');
     expect(restored.weights['c1']!.length, 9);
     expect(
       restored.conversationOf('c2').lastMessage!.text,

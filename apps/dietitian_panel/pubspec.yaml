@@ -1,5 +1,5 @@
 name: dietitian_panel
-description: Diyetisyenlik App dietitian management panel (Flutter Web only).
+description: Wellkit dietitian panel (web, iOS and Android; PLANNING.md #38).
 publish_to: none
 version: 1.0.0+1
 resolution: workspace
@@ -15,8 +15,8 @@ dependencies:
   supabase_flutter: ^2.17.2
   core:
     path: ../../packages/core
-  # Web-only panel (locked decision §2.3 #38); used for localStorage so a
-  # reload cannot wipe an interview.
+  # Used only by the browser demo's localStorage store (demo_store_web.dart),
+  # so a reload cannot wipe an interview.
   web: ^1.1.1
   pdf: ^3.13.0
   printing: ^5.15.0

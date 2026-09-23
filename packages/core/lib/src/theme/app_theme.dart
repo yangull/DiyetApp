@@ -42,8 +42,8 @@ abstract final class AppTheme {
       // AppDensity is the density system. Left alone, Flutter adds its own
       // on desktop (VisualDensity.compact), which took 8 px off every
       // control: the panel's 36 px buttons rendered 28 px tall in a Windows
-      // browser. The panel is mouse-driven, so it also drops the 48 px touch
-      // padding that made chips and buttons different heights.
+      // browser. The compact profile is for wide, mouse-driven layouts, so it
+      // also drops the 48 px touch padding; phones use comfortable and keep it.
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: density.isCompact
           ? MaterialTapTargetSize.shrinkWrap

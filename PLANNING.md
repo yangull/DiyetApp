@@ -4,7 +4,7 @@
 > open. Not a session log — history lives in git (`git log -p PLANNING.md`).
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
-> **Decision IDs are stable.** Product decisions are P1–P5; technical decisions keep
+> **Decision IDs are stable.** Product decisions are P1–P6; technical decisions keep
 > their original numbers (#1–#130). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
@@ -39,7 +39,7 @@ chatbot (I11) and "cheap and accessible" (I15).
 
 ## 2. Locked product decisions
 
-P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
+P1, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1, I3, I4); P2 was confirmed on 23 Sep.
 
 Everything dated 23 Sep 2026 in this file is Can's first answer after speaking with
 Kadir and is **open to correction**: QUESTIONS.md "Answered on 23 Sep" lists each one
@@ -50,7 +50,8 @@ with a way to reopen it.
 - **P2** **All communication stays in-app** (chat + embedded video). Confirmed by Can on
   23 Sep 2026 without the commission (was C5): the reasons now are one record of the
   client's care, quality control, KVKK (health data stays in the EU project, not on
-  WhatsApp) and the reporting B2B needs. ⚠️ Every Turkish competitor uses WhatsApp for
+  WhatsApp) and the reporting B2B needs. External links only as an emergency backup
+  (inherited with I2; Can confirmed I2 as a whole). ⚠️ Every Turkish competitor uses WhatsApp for
   reminders — a real adoption friction to watch in interviews.
 - **P3** **Build order:** shared core → dietitian marketplace → AI-only tier.
 - **P4** **The exchange list is the default plan model; freeform stays as an option**
@@ -189,8 +190,9 @@ C2). Each ID names the interview question it came from.
 
 ### 3.4 Auth and screens
 
-- **#37** **No role-selection screen.** The role comes from the app used to sign up: the mobile
-  app always creates `client`; the web panel sends `role: dietitian`.
+- **#37** **No role-selection screen.** The role comes from the app used to sign up: the
+  client app always creates `client`; the dietitian app sends `role: dietitian` on every
+  platform (web, iOS, Android; #38).
 - **#38** **The dietitian panel runs on web, phones and tablets** (Can, 23 Sep 2026; it was
   web only). One Flutter codebase with layouts by width: wide screens keep the rail and
   tables, phones get a bottom bar and stacked screens. Default: phones use the
@@ -225,8 +227,8 @@ C2). Each ID names the interview question it came from.
   (dietitian / AI). In Phase 1 they become the marketplace and AI entry points.
 - **#52** A pending dietitian sees one card **without the panel frame** ("Başvurunuz
   İnceleniyor" + a working "Durumu yenile"). `rejected` uses the same layout.
-- **#53** An approved dietitian gets a **NavigationRail** with only destinations that have real
-  content (today: Genel Bakış with the client list, and Profil). No empty rail
+- **#53** An approved dietitian gets a **NavigationRail** on wide screens (a bottom bar on
+  phones, #38) with only destinations that have real content (today: Genel Bakış with the client list, and Profil). No empty rail
   destinations in advance.
 - **#108** A screen that exists but cannot be reached in one click from the home screen is
   effectively missing — reachability is part of done.
@@ -251,8 +253,9 @@ Full reference, including type scale, density numbers and the design rules:
 - **#61** Turkish glyph coverage verified from the font files' `cmap` tables.
 - **#63** Fonts are **bundled assets** in `packages/core/fonts/`; no `google_fonts` runtime fetch.
   A core test asserts the resolved family.
-- **#64** One token set, two density profiles: `AppDensity.comfortable` (client),
-  `AppDensity.compact` (panel). Only spacing, radius, control and line height differ.
+- **#64** One token set, two density profiles: `AppDensity.comfortable` (the client app, and
+  the panel on phones) and `AppDensity.compact` (the panel on wide screens; #38). Only
+  spacing, radius, control and line height differ.
 - **#65** **No `ColorScheme.fromSeed`** — it discards the measured palette. Every slot is set
   explicitly.
 - **#66** Non-Material tokens travel as `AppPalette` / `AppDensity` ThemeExtensions
@@ -356,8 +359,9 @@ profile models, both apps at "login → first screen".
 
 **Phase 1 — Dietitian marketplace (human service)**
 - [ ] Dietitian onboarding + verification (diploma/document upload)
-- [~] Client onboarding: goal, health info, optional blood values, budget — goal/budget/
-      health-note form exists; structured health fields and blood values don't
+- [~] Client onboarding: goal, health info, budget — goal/budget/health-note form exists;
+      structured health fields don't. No blood-test section (#125)
+- [ ] File attachments on the shared record, from client and dietitian (#125)
 - [ ] "Diyetisyen bul": dietitian listing + filtering + selection — email invite stands in for now (#101)
 - [ ] In-app chat (Supabase Realtime)
 - [ ] Diet plan: AI draft (Edge Function) → dietitian edits/approves → client sees it
@@ -383,7 +387,7 @@ Built: `profiles`, `dietitians`, `clients`, `dietitian_client_relationships`. Th
 sketch to be designed when its slice arrives:
 
 ```
-blood_tests    (client_id, file_url, values_json, doctor_approval_doc?)
+attachments    (relationship_id, uploaded_by, file_url, created_at)  -- any file, no blood-test fields (#125)
 diet_plans     (relationship_id, source: ai|dietitian, state: draft|approved, content)
 meal_logs      (plan_id, meal, time, eaten)
 conversations  (client_id, dietitian_id | ai)

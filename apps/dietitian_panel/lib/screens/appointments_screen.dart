@@ -26,9 +26,8 @@ class AppointmentsScreen extends ConsumerWidget {
         Text('Randevular', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          '${upcoming.length} yaklaşan randevu · hatırlatmalar '
-          '${demo.reminders.channel == 'sms' ? 'SMS' : 'uygulama bildirimi'} '
-          'ile gönderiliyor',
+          '${upcoming.length} yaklaşan randevu · hatırlatmalar uygulama '
+          'bildirimiyle gönderiliyor',
           style: text.bodyMedium?.copyWith(color: palette.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xl),

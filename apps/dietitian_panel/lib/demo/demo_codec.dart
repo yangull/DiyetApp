@@ -11,7 +11,7 @@ import 'demo_repository.dart';
 /// v3 added the structured health fields on `DemoClient`.
 /// v4 added `exchangePlans` (the değişim listesi editor).
 /// v5 added `targetWeightKg`, `measurements`, and `draftedAt` on both plans.
-const _schemaVersion = 5;
+const _schemaVersion = 6;
 
 String encodeDemoState(DemoState state) => jsonEncode({
   'version': _schemaVersion,
@@ -120,7 +120,6 @@ String encodeDemoState(DemoState state) => jsonEncode({
     'dayBefore': state.reminders.dayBefore,
     'hoursBefore': state.reminders.hoursBefore,
     'paymentReminder': state.reminders.paymentReminder,
-    'channel': state.reminders.channel,
   },
   'conversations': [
     for (final c in state.conversations)
@@ -269,7 +268,6 @@ DemoState? decodeDemoState(String raw) {
         dayBefore: json['reminders']['dayBefore'] as bool,
         hoursBefore: json['reminders']['hoursBefore'] as bool,
         paymentReminder: json['reminders']['paymentReminder'] as bool,
-        channel: json['reminders']['channel'] as String,
       ),
       conversations: [
         for (final c in json['conversations'] as List)

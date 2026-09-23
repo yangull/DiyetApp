@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Read these files at the start of every session:
 
 - **`HANDOFF.md`**: where things stand, next steps, and the most blocking questions.
-- **`PLANNING.md`**: the product, locked decisions (stable IDs P1–P5 and #1–#118, which
+- **`PLANNING.md`**: the product, locked decisions (stable IDs P1–P6 and #1–#130, which
   code comments cite), current state and roadmap. Edit it in place when a
   decision changes; never append session logs to it.
 - **`CONTEXT.md`**: the domain glossary (değişim listesi, BMH, danışan, …).
@@ -24,8 +24,8 @@ Phase 0 is done: monorepo, the Supabase identity schema, real auth in both apps
 `apps/dietitian_panel` has two entry points: `lib/main.dart` (the real, auth-gated app)
 and `lib/main_demo.dart` (the unauthenticated interview prototype on fake data, with both
 plan editors side by side). Don't confuse them. Not built yet: the real plan editor,
-`diet_plans` and anything marketplace. The plan editor waits on the plan-model
-question (PLANNING P4).
+`diet_plans` and anything marketplace. The plan model is decided (PLANNING P4, #121–#123):
+exchange list by default with freeform kept, weekly plans, one shared exchange table.
 
 **Wellkit** is a two-sided dietitian marketplace app for the Turkish market: dietitians get a
 management panel + marketplace visibility; clients get affordable dietitian access or an
