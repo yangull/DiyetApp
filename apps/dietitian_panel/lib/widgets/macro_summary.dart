@@ -33,40 +33,38 @@ class MacroSummary extends StatelessWidget {
     );
   }
 
+  /// Four across when there is room, two by two in the plan editor's side
+  /// panel.
   Widget _row() {
-    return IntrinsicHeight(
+    final boxes = [
+      _Macro(label: 'Belirlenen enerji hedefi', value: '$kcal', unit: 'kcal'),
+      _Macro(label: 'Protein', value: '${macros.proteinG}', unit: 'g'),
+      _Macro(label: 'Karbonhidrat', value: '${macros.carbG}', unit: 'g'),
+      _Macro(label: 'Yağ', value: '${macros.fatG}', unit: 'g'),
+    ];
+
+    Widget line(List<_Macro> items) => IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _Macro(
-              label: 'Belirlenen enerji hedefi',
-              value: '$kcal',
-              unit: 'kcal',
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: _Macro(
-              label: 'Protein',
-              value: '${macros.proteinG}',
-              unit: 'g',
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: _Macro(
-              label: 'Karbonhidrat',
-              value: '${macros.carbG}',
-              unit: 'g',
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: _Macro(label: 'Yağ', value: '${macros.fatG}', unit: 'g'),
-          ),
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const SizedBox(width: AppSpacing.md),
+            Expanded(child: items[i]),
+          ],
         ],
       ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth >= 560
+          ? line(boxes)
+          : Column(
+              children: [
+                line(boxes.sublist(0, 2)),
+                const SizedBox(height: AppSpacing.md),
+                line(boxes.sublist(2)),
+              ],
+            ),
     );
   }
 }
@@ -94,22 +92,21 @@ class _Macro extends StatelessWidget {
               style: text.labelSmall?.copyWith(color: palette.textMuted),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  value,
-                  style: text.headlineMedium?.copyWith(
-                    fontFeatures: const [FontFeature.tabularFigures()],
+            // One text run so a narrow box wraps the unit instead of
+            // overflowing.
+            Text.rich(
+              TextSpan(
+                text: value,
+                style: text.headlineMedium?.copyWith(
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+                children: [
+                  TextSpan(
+                    text: ' $unit',
+                    style: text.bodySmall?.copyWith(color: palette.textMuted),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  unit,
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

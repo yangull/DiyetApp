@@ -4,16 +4,46 @@ import 'package:flutter/material.dart';
 /// The visual treatment reserved for AI-written, not-yet-approved content.
 /// Violet appears nowhere else in the app, and the dashed edge means the state
 /// survives for anyone who cannot separate the hues.
+///
+/// Without [onApprove] the button is left out: on a narrow screen it lives in
+/// the plan editor's pinned bottom bar instead, and two would be one too many.
 class AiDraftBanner extends StatelessWidget {
-  const AiDraftBanner({super.key, required this.note, required this.onApprove});
+  const AiDraftBanner({super.key, required this.note, this.onApprove});
 
   final String note;
-  final VoidCallback onApprove;
+  final VoidCallback? onApprove;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final violet = context.palette.aiDraft;
+
+    final label = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: violet, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            'Yapay zekâ taslağı · onay bekliyor',
+            style: text.bodyMedium?.copyWith(
+              color: violet,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+    final approve = onApprove == null
+        ? null
+        : FilledButton(
+            onPressed: onApprove,
+            child: const Text('Onayla ve danışana gönder'),
+          );
 
     return DottedBorderBox(
       color: violet,
@@ -22,30 +52,27 @@ class AiDraftBanner extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: violet,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  'Yapay zekâ taslağı · onay bekliyor',
-                  style: text.bodyMedium?.copyWith(
-                    color: violet,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                FilledButton(
-                  onPressed: onApprove,
-                  child: const Text('Onayla ve danışana gönder'),
-                ),
-              ],
+            // Side by side when there is room; stacked in the plan editor's
+            // side panel.
+            LayoutBuilder(
+              builder: (context, constraints) =>
+                  approve == null || constraints.maxWidth < 420
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        label,
+                        if (approve != null) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          approve,
+                        ],
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(child: label),
+                        approve,
+                      ],
+                    ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(

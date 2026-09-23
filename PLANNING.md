@@ -313,8 +313,10 @@ is built to be corrected, not admired.
 - **#119** **The UI review (`docs/research/2026-09-23-ui-review.md`) is worked in order**
   (Can, 23 Sep 2026, was C18). Done 23 Sep: its nine bugs plus #8 (triage links open the
   task), #11 (weight chart spaced by date) and #15 (reminder settings moved off the
-  rail). Next: #10, together with putting both plan editors in the same layout so
-  dietitians compare the model, not the page. After the interviews: #12 (compact Takip).
+  rail). Also done 23 Sep: #10, both plan editors share `PlanEditorLayout`
+  (`lib/widgets/plan_editor_layout.dart`): meals in a column capped at 760 px, status,
+  energy, approve and PDF in a side panel from 1100 px up, and a pinned bottom bar with
+  the approve button below that. After the interviews: #12 (compact Takip).
   When the real client list grows: #9 (search and filter). Codex's follow-up
   (`docs/research/2026-09-23-c18-c19-follow-up-review.md`) found two reset gaps, fixed
   the same day (#68).

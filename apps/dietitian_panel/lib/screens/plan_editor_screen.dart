@@ -6,9 +6,8 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../export/plan_pdf.dart';
 import '../widgets/export_plan_button.dart';
-import '../widgets/ai_draft_banner.dart';
 import '../widgets/macro_summary.dart';
-import '../widgets/status_pill.dart';
+import '../widgets/plan_editor_layout.dart';
 
 /// The screen this whole product turns on: the AI draft a dietitian edits and
 /// approves. Rows are real text fields so the plan can be changed live during
@@ -26,85 +25,59 @@ class PlanEditorScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${client.name} · ${plan.day}'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.lg),
-            child: Center(child: StatusPill(state: plan.state)),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: EdgeInsets.all(context.density.pagePadding),
+    final target = targetEnergy(client);
+
+    return PlanEditorLayout(
+      title: '${client.name} · ${plan.day}',
+      state: plan.state,
+      aiNote: plan.aiNote ?? '',
+      onApprove: () => ref.read(demoProvider.notifier).approve(clientId),
+      plannedKcal: plan.kcal,
+      targetKcal: target,
+      energy: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (plan.isDraft) ...[
-            AiDraftBanner(
-              note: plan.aiNote ?? '',
-              onApprove: () {
-                ref.read(demoProvider.notifier).approve(clientId);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Plan onaylandı ve danışana gönderildi.'),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-          Row(
-            children: [
-              Text('Günlük hedef', style: text.titleLarge),
-              const SizedBox(width: AppSpacing.lg),
-              SizedBox(
-                width: 120,
-                child: TextFormField(
-                  initialValue: '${plan.kcal}',
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(suffixText: 'kcal'),
-                  onChanged: (v) => ref
-                      .read(demoProvider.notifier)
-                      .setKcal(clientId, int.tryParse(v) ?? plan.kcal),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              // The computed number sits beside the field rather than in it:
-              // whether a dietitian overrides it is itself the thing to learn.
-              Flexible(
-                child: Text(
-                  'Hesaplanan: ${targetEnergy(client)} kcal',
-                  style: text.bodyMedium?.copyWith(color: palette.textMuted),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ExportPlanButton(
-            enabled: !plan.isDraft,
-            filename: '${client.name} - ${plan.day}',
-            build: () => buildPlanPdf(
-              client: client,
-              plan: plan,
-              targetKcal: targetEnergy(client),
+          Text('Günlük hedef', style: text.titleMedium),
+          const SizedBox(height: AppSpacing.sm),
+          SizedBox(
+            width: 120,
+            child: TextFormField(
+              initialValue: '${plan.kcal}',
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(suffixText: 'kcal'),
+              onChanged: (v) => ref
+                  .read(demoProvider.notifier)
+                  .setKcal(clientId, int.tryParse(v) ?? plan.kcal),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          MacroSummary(kcal: plan.kcal, macros: demo.macros[clientId]!),
-          const SizedBox(height: AppSpacing.xl),
-          for (var m = 0; m < plan.meals.length; m++) ...[
-            _MealCard(clientId: clientId, mealIndex: m),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
+          // The computed number sits beside the field rather than in it:
+          // whether a dietitian overrides it is itself the thing to learn.
           Text(
-            'Bu ekran görüşme için hazırlanmış bir taslaktır. Bir diyet '
-            'listesinde gerçekte hangi alanların bulunması gerektiğini '
-            'sizden öğrenmek istiyoruz.',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            'Hesaplanan: $target kcal',
+            style: text.bodyMedium?.copyWith(color: palette.textMuted),
           ),
         ],
       ),
+      export: ExportPlanButton(
+        enabled: !plan.isDraft,
+        filename: '${client.name} - ${plan.day}',
+        build: () =>
+            buildPlanPdf(client: client, plan: plan, targetKcal: target),
+      ),
+      summary: MacroSummary(kcal: plan.kcal, macros: demo.macros[clientId]!),
+      meals: [
+        for (var m = 0; m < plan.meals.length; m++)
+          _MealCard(clientId: clientId, mealIndex: m),
+      ],
+      footer: [
+        Text(
+          'Bu ekran görüşme için hazırlanmış bir taslaktır. Bir diyet '
+          'listesinde gerçekte hangi alanların bulunması gerektiğini '
+          'sizden öğrenmek istiyoruz.',
+          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        ),
+      ],
     );
   }
 }

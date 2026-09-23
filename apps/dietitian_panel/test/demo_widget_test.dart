@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:dietitian_panel/demo/demo_models.dart';
 import 'package:dietitian_panel/demo/demo_repository.dart';
 import 'package:dietitian_panel/main_demo.dart';
+import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
+import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -237,5 +239,57 @@ void main() {
 
       expect(find.text('Yarım kalan not'), findsNothing);
     });
+  });
+
+  group('both plan editors keep approval in reach', () {
+    Future<void> pumpEditor(WidgetTester tester, Widget editor, Size size) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      return tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.light(AppDensity.compact),
+            home: editor,
+          ),
+        ),
+      );
+    }
+
+    final editors = {
+      'freeform': const PlanEditorScreen(clientId: 'c1'),
+      'exchange list': const ExchangePlanEditorScreen(clientId: 'c1'),
+    };
+
+    for (final entry in editors.entries) {
+      testWidgets('${entry.key}: wide, after scrolling to the last meal', (
+        tester,
+      ) async {
+        await pumpEditor(tester, entry.value, const Size(1600, 1000));
+        await tester.pumpAndSettle();
+
+        await tester.drag(find.byType(ListView).first, const Offset(0, -5000));
+        await tester.pumpAndSettle();
+
+        final approve = find.text('Onayla ve danışana gönder');
+        expect(approve, findsOneWidget);
+        await tester.tap(approve);
+        await tester.pumpAndSettle();
+
+        expect(approve, findsNothing);
+        expect(find.text('Plan onaylandı ve danışana gönderildi.'), findsOne);
+      });
+
+      testWidgets('${entry.key}: narrow, a pinned bar carries the approval', (
+        tester,
+      ) async {
+        await pumpEditor(tester, entry.value, const Size(420, 900));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('hedef'), findsWidgets);
+        expect(find.text('Onayla ve danışana gönder'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

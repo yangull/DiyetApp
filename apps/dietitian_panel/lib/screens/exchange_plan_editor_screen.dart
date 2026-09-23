@@ -6,9 +6,8 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../export/plan_pdf.dart';
-import '../widgets/ai_draft_banner.dart';
 import '../widgets/export_plan_button.dart';
-import '../widgets/status_pill.dart';
+import '../widgets/plan_editor_layout.dart';
 
 /// The same plan as [PlanEditorScreen], built the way the research says Turkish
 /// dietitians actually build one: exchange counts per group, with the food
@@ -42,115 +41,89 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${client.name} · Değişim listesi'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.lg),
-            child: Center(child: StatusPill(state: plan.state)),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: EdgeInsets.all(context.density.pagePadding),
+    return PlanEditorLayout(
+      title: '${client.name} · Değişim listesi',
+      state: plan.state,
+      aiNote: plan.aiNote ?? '',
+      onApprove: () =>
+          ref.read(demoProvider.notifier).approveExchangePlan(clientId),
+      plannedKcal: plan.kcal,
+      targetKcal: target,
+      energy: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (plan.isDraft) ...[
-            AiDraftBanner(
-              note: plan.aiNote ?? '',
-              onApprove: () {
-                ref.read(demoProvider.notifier).approveExchangePlan(clientId);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Plan onaylandı ve danışana gönderildi.'),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'PLANDA',
-                        style: text.labelSmall?.copyWith(
-                          color: palette.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${plan.kcal} kcal',
-                        style: text.headlineMedium?.copyWith(
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: AppSpacing.x3),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'HEDEF',
-                        style: text.labelSmall?.copyWith(
-                          color: palette.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$target kcal',
-                        style: text.headlineMedium?.copyWith(
-                          color: palette.textSecondary,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: AppSpacing.x3),
-                  Expanded(
-                    child: Text(
-                      '$difference — plandaki toplam değişim sayılarından, '
-                      'hedef ise danışanın yaş, cinsiyet, boy ve kilosundan '
-                      'hesaplanıyor. Grup kalorileri örnek değerlerdir.',
-                      style: text.bodySmall?.copyWith(color: palette.textMuted),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          Wrap(
+            spacing: AppSpacing.x3,
+            runSpacing: AppSpacing.md,
+            children: [
+              _Figure(label: 'PLANDA', value: '${plan.kcal} kcal'),
+              _Figure(label: 'HEDEF', value: '$target kcal', muted: true),
+            ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          ExportPlanButton(
-            enabled: !plan.isDraft,
-            filename: '${client.name} - değişim listesi',
-            build: () => buildExchangePlanPdf(
-              client: client,
-              plan: plan,
-              targetKcal: target,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          for (var m = 0; m < plan.meals.length; m++) ...[
-            _MealCard(clientId: clientId, mealIndex: m),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-          const _SubstitutionSheet(),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
+          Text(difference, style: text.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            'Bu ekran bir deneme: planı besin ve miktar yazarak mı, yoksa '
-            'değişim listesiyle mi kuruyorsunuz? Gruplar, ölçüler ve kalori '
-            'değerleri örnektir — sizin kullandığınız tabloyu öğrenmek '
-            'istiyoruz.',
+            'Plan, toplam değişim sayılarından; hedef, danışanın yaş, '
+            'cinsiyet, boy ve kilosundan hesaplanıyor. Grup kalorileri '
+            'örnek değerlerdir.',
             style: text.bodySmall?.copyWith(color: palette.textMuted),
           ),
         ],
       ),
+      export: ExportPlanButton(
+        enabled: !plan.isDraft,
+        filename: '${client.name} - değişim listesi',
+        build: () => buildExchangePlanPdf(
+          client: client,
+          plan: plan,
+          targetKcal: target,
+        ),
+      ),
+      meals: [
+        for (var m = 0; m < plan.meals.length; m++)
+          _MealCard(clientId: clientId, mealIndex: m),
+      ],
+      footer: [
+        const _SubstitutionSheet(),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          'Bu ekran bir deneme: planı besin ve miktar yazarak mı, yoksa '
+          'değişim listesiyle mi kuruyorsunuz? Gruplar, ölçüler ve kalori '
+          'değerleri örnektir — sizin kullandığınız tabloyu öğrenmek '
+          'istiyoruz.',
+          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        ),
+      ],
+    );
+  }
+}
+
+class _Figure extends StatelessWidget {
+  const _Figure({required this.label, required this.value, this.muted = false});
+
+  final String label;
+  final String value;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: text.labelSmall?.copyWith(color: palette.textMuted)),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: text.headlineMedium?.copyWith(
+            color: muted ? palette.textSecondary : null,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
     );
   }
 }
