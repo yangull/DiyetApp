@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('no money is shown while PLANNING P6 holds', (tester) async {
-    // A desktop-sized window: the panel is web-only and Randevular's rows
+    // A desktop-sized window: the demo is shown on a laptop and Randevular's rows
     // overflow at the test default of 800 px.
     tester.view.physicalSize = const Size(1600, 1000);
     tester.view.devicePixelRatio = 1;

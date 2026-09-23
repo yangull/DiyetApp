@@ -16,6 +16,43 @@ artifact, where Can wrote notes on 23 Sep 2026.
 
 ---
 
+## Answered on 23 Sep 2026 — open to correction
+
+Can answered these after speaking with Kadir. They are recorded as decisions so work can
+move, but none is final: if one turns out wrong, tell Claude or Codex which row. The row
+then moves back to its section as an open question, and the PLANNING entry is reverted.
+Delete this section once Can has looked at it again (after the next talk with Kadir).
+
+| Was | Question | Can's answer | Recorded in |
+|---|---|---|---|
+| I5 | Money in the app at launch? | No: clients pay dietitians directly, no commission | PLANNING P6 |
+| I9 | Keep Kutay's Excel as a source? | Dropped | — |
+| — | Default energy formula | Harris-Benedict × activity factor | PLANNING #95 |
+| — | Where do clients come from? | Mainly B2B deals, plus Wellkit's ads and dietitians' own clients | PLANNING §1 |
+| — | Clients per dietitian | No limit; usually 30–40 | PLANNING §1 |
+| — | How clients find a dietitian | A "Diyetisyen bul" section in the app | PLANNING §1, roadmap |
+| — | Logo | Placeholder "W" until designed | PLANNING §5 |
+| C1 | Plan model | Exchange list by default, freeform kept ("sonra değişebilir") | PLANNING P4 |
+| C5 | In-app only without a commission? | Keep it, for records, quality control, KVKK and B2B | PLANNING P2 |
+| C3 | Next slice | The mobile panel layout, after UI review #10 | HANDOFF |
+| new | Where does the panel run? | Web, phones and tablets | PLANNING #38 |
+| new | One store app or two? | Two: client app and dietitian app | PLANNING #38 |
+| C2 | Interviews held? | Yes; answers relayed the same day | PLANNING §2.1 |
+| DT2 | Exchange list or food + amount? | Both, depending on the client | #121 |
+| DT3 | Group table | One standard table | #122 |
+| DT4, DT5 | Plan rhythm | Weekly, mostly copied; old plans hidden from the client | #123 |
+| DT6 | Energy formulas | Harris-Benedict, Mifflin-St Jeor, Cunningham, WHO/FAO (Can ticked "Harris-Benedict only" together with the other three; read as "all four in use") | #124 |
+| DT9 | Blood tests | No blood-test section (KVKK); client and dietitian can both attach any file | #125 |
+| DT12 | Before approving an AI draft | Its reasoning, totals vs target, a health-flag check | #126 |
+| DT13 | Reminders | App notifications only, no SMS | #127 |
+| DT11 | Essential list columns | Plan status, last contact or weigh-in, next appointment, goal and weight | #128 |
+| DT14 | Ratings | Stars only, no comments at launch | #129 |
+| DT1, DT15, DT16, DT17 | Tools, pull, objections, company clients | Excel/Word + WhatsApp; editor + AI, tracking, appointments all pull; no objection to moving clients; company clients differ in pricing and bulk registration | #130 |
+| DT8 | Measurements | Not answered; placeholder default (weight, waist, hip; fat % and muscle optional) so work isn't blocked | PLANNING §2.1 |
+| C18, C19 | UI review fixes, button wording | As recommended; short button labels | #119, #120 |
+
+---
+
 ## 0. Inherited decisions — confirm or correct
 
 These came from the old board, not from a conversation with Can, and still shape the
@@ -38,7 +75,7 @@ is deferred, now PLANNING P6) and I9 (Kutay's Excel dropped).
 | I13 | **Sports PT is suspended** | roadmap Phase 3+ | |
 | I14 | **Later phases:** catering packages, meal-card integration, B2B corporate sales, WhatsApp/Instagram integration. B2B is now the main acquisition plan, see C4. | PLANNING §1, roadmap Phase 3+ | |
 | I15 | **Value to clients:** "cheap and accessible" dietitian service | PLANNING §1 | |
-| I16 | **Tech stack:** Flutter + Flutter Web, Supabase EU, LLM calls via Edge Functions, IAP + RevenueCat for the AI tier, an embedded video SDK. Already built on, so only flag it if something is wrong. | PLANNING §4, the code | |
+| I16 | **Tech stack:** Flutter (client app on iOS/Android; panel on web, iOS and Android since 23 Sep, #38), Supabase EU, LLM calls via Edge Functions, IAP + RevenueCat for the AI tier, an embedded video SDK. Already built on, so only flag it if something is wrong. | PLANNING §4, the code | |
 
 ---
 

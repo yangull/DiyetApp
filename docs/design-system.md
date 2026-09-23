@@ -95,7 +95,9 @@ side on one line. Flutter's own `VisualDensity` is pinned to standard in the the
 
 Spacing scale (`AppSpacing`): 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48.
 Navigation: the client app uses a bottom bar; the panel uses a `NavigationRail` with
-labels. Cards and app bars have no elevation; separation comes from borders and surface
+labels on wide screens and a bottom bar on phones. The panel runs on web, phones and
+tablets (PLANNING #38): wide screens use the compact density, phones the comfortable
+one, so touch targets stay large. Cards and app bars have no elevation; separation comes from borders and surface
 tone.
 
 ## Rules

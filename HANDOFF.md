@@ -63,7 +63,9 @@ and PLANNING.md.
    K1–K3, K2 first (is the intake form athletes-only?).
 5. **Can:** the rest of the interview answers (DT1, DT7, DT8, DT10, DT15), then §0
    (I1–I16), C4 (B2B timing and bulk enrolment) and C8 (listing order).
-6. **Update the interview guide artifact** to match QUESTIONS.md §3 (most DTs closed).
+6. **Can:** re-check QUESTIONS.md "Answered on 23 Sep" after the next talk with Kadir;
+   anything wrong goes back to an open question. The panel tour's shared link shows a
+   pinned older version: re-pin it from its Share menu if viewers should see the update.
 7. **Build after the mobile layout:** the "Diyetisyen bul" journey or the real plan
    editor on `diet_plans`, keyed off `dietitian_client_relationships`.
 8. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev project

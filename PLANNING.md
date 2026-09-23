@@ -41,6 +41,10 @@ chatbot (I11) and "cheap and accessible" (I15).
 
 P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 
+Everything dated 23 Sep 2026 in this file is Can's first answer after speaking with
+Kadir and is **open to correction**: QUESTIONS.md "Answered on 23 Sep" lists each one
+with a way to reopen it.
+
 - **P1** **AI drafts, the dietitian approves.** On the human-service side a client never sees
   an AI plan no dietitian has approved.
 - **P2** **All communication stays in-app** (chat + embedded video). Confirmed by Can on
@@ -121,7 +125,8 @@ C2). Each ID names the interview question it came from.
 - **#19** Private GitHub repo `yangull/DiyetApp`. It was public by mistake until 23 Sep 2026;
   no secrets were ever committed. Ask Can before pushing.
 - **Bundle id:** `com.wellkit.client` (Android applicationId/namespace, Kotlin package,
-  iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has none — web only.
+  iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel has none yet; it needs its own before its
+  first store build (#38).
 - **No Mac:** iOS builds go through **Codemagic** (cloud CI).
 - **Agent skills** (#85): mattpocock-skills configured. **GitHub Issues is the tracker**
   (confirmed 23 Sep 2026); triage and `wayfinder:*` labels exist on the repo. Domain
@@ -289,8 +294,8 @@ is built to be corrected, not admired.
   dietitian constantly overriding it is a signal the formula is wrong.
 - **#98** **PDF export only for approved plans.** The PDF is the one artifact that leaves the
   panel for a client, so P1 is enforced there too.
-- **#109** **No 7-day plan grid** before the plan-model question is answered — it assumes the
-  food + amount model.
+- **#109** **No 7-day plan grid in the demo.** The grid assumed the food + amount model; the
+  real editor is weekly and exchange-list first (P4, #123) and gets its own layout.
 - **#110** Triage ("Dikkat gerekenler"): 7 days without a weigh-in, 24 h unanswered message, a
   no-show. Thresholds are named constants labelled on screen as our guess (Q25).
 - **#111** The anamnez form's lower nine questions are **invented** and stored as text in
@@ -339,8 +344,8 @@ is built to be corrected, not admired.
 | Interview demo | 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
 | Brand | Name and palette settled. **Logo: placeholder "W" mark** until one is designed with Claude later. |
-| Plan editor, `diet_plans` | Not built — waits on the plan-model question (P4). |
-| Interviews | Unknown — QUESTIONS.md C3. |
+| Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123). |
+| Interviews | Held; most answers in §2.1, five questions still open (QUESTIONS.md §3). |
 
 ---
 

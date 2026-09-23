@@ -1,7 +1,7 @@
 /// Where the prototype's state survives a page reload.
 ///
-/// The panel is web only (locked decision §2.3 #38), so the real implementation
-/// is `localStorage`. The stub keeps `flutter test` compiling on the VM, where
+/// The interview demo runs in a browser, so the real implementation is
+/// `localStorage`; elsewhere the demo simply starts from seed data. The stub keeps `flutter test` compiling on the VM, where
 /// `dart:js_interop` does not exist.
 library;
 

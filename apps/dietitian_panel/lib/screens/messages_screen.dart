@@ -9,9 +9,9 @@ import '../util/panel_date.dart';
 import '../util/turkish.dart';
 
 /// In-app messaging, per PLANNING.md P2: chat stays in the product rather than
-/// moving to WhatsApp. Its original reason (the commission) is on hold, so the
-/// rule itself is being re-asked (QUESTIONS.md C5). This screen exists so a
-/// dietitian can react to the real thing, not a description of it.
+/// moving to WhatsApp, for one record of care, quality control and KVKK. This
+/// screen exists so a dietitian can react to the real thing, not a
+/// description of it.
 /// Which conversation is open. Outside the screen so the overview's
 /// "Mesajı yanıtla" link can open this screen on the right client.
 final selectedConversationProvider =
