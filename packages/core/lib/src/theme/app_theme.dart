@@ -99,8 +99,10 @@ abstract final class AppTheme {
           ),
         ),
       ),
+      // The rail is the bottom bar turned on its side: white, no pill.
       navigationRailTheme: NavigationRailThemeData(
-        indicatorColor: AppColors.surface,
+        backgroundColor: AppColors.surface,
+        indicatorColor: Colors.transparent,
         selectedIconTheme: const IconThemeData(color: AppColors.textPrimary),
         unselectedIconTheme: const IconThemeData(color: AppColors.textMuted),
         selectedLabelTextStyle: text.labelMedium?.copyWith(

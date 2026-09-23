@@ -95,8 +95,6 @@ class _PanelShellState extends State<PanelShell> {
           ),
         ),
       ),
-      // A bottom bar only navigates, so on phones the two utilities sit in a
-      // slim labelled strip above the screen, and settings open as a page.
       // A bottom bar only navigates, so on phones the demo's two utilities
       // sit behind one labelled button above the screen.
       phoneTopActions: [
@@ -146,7 +144,8 @@ class _RailUtilityButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : context.palette.textSecondary;
+    // Like a rail destination: black and bold when selected, grey otherwise.
+    final color = selected ? AppColors.textPrimary : context.palette.textMuted;
     return TextButton(
       style: TextButton.styleFrom(foregroundColor: color),
       onPressed: onPressed,
@@ -160,7 +159,8 @@ class _RailUtilityButton extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelMedium,
+              style: Theme.of(context).textTheme.labelMedium
+                  ?.copyWith(fontWeight: selected ? FontWeight.w700 : null),
             ),
           ],
         ),

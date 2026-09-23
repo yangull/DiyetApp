@@ -46,8 +46,6 @@ class AdaptiveNavScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-
     if (isPanelPhone(context)) {
       final actions = phoneTopActions;
       return Scaffold(
@@ -55,9 +53,10 @@ class AdaptiveNavScaffold extends StatelessWidget {
           bottom: false,
           child: Column(
             children: [
+              // On the ground, not a band of its own: a grey strip holding one
+              // button read as a second app bar.
               if (actions != null && actions.isNotEmpty)
-                Container(
-                  color: palette.surfaceSubtle,
+                Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
                   ),
@@ -94,7 +93,6 @@ class AdaptiveNavScaffold extends StatelessWidget {
               selectedIndex: selectedIndex,
               onDestinationSelected: onSelected,
               labelType: NavigationRailLabelType.all,
-              backgroundColor: palette.surfaceSubtle,
               destinations: [
                 for (final d in destinations)
                   NavigationRailDestination(
@@ -105,7 +103,6 @@ class AdaptiveNavScaffold extends StatelessWidget {
               ],
               trailing: railTrailing,
             ),
-            VerticalDivider(width: 1, color: palette.borderSubtle),
             Expanded(child: body),
           ],
         ),
