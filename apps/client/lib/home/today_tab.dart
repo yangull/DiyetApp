@@ -3,38 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The client's goal, goal budget and health note, fetched fresh so the Bugün
-/// steps follow a save in Hedeflerim without a new sign-in. Invalidate after
-/// writing them.
-final clientDetailProvider = FutureProvider.family<ClientDetail, String>((
-  ref,
-  userId,
-) {
-  return ref.watch(profileRepositoryProvider).fetchClientDetail(userId);
-});
-
-/// A dietitian's name, readable to the client because migration 1's
-/// "profiles: read approved dietitians" policy is still in force.
-final _dietitianProvider = FutureProvider.family<AppProfile, String>((
-  ref,
-  dietitianId,
-) {
-  return ref.watch(profileRepositoryProvider).fetchProfile(dietitianId);
-});
+import 'client_widgets.dart';
+import 'goals_edit_screen.dart';
 
 /// Bugün, the client's first tab ("Sıcak", PLANNING #131). Until plans exist
 /// it shows only what is real: the goal, a pending invite, the connected
 /// dietitian, and one quiet "Yakında" note (rules 4 and 5). The hero's three
 /// steps are derived from saved data, never from a flag.
 class TodayTab extends ConsumerWidget {
-  const TodayTab({
-    super.key,
-    required this.identity,
-    required this.onOpenGoals,
-  });
+  const TodayTab({super.key, required this.identity});
 
   final AuthedIdentity identity;
-  final VoidCallback onOpenGoals;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -81,10 +60,17 @@ class TodayTab extends ConsumerWidget {
                   _InviteCard(invite: invite),
                   const SizedBox(height: AppSpacing.md),
                 ],
-                _GoalRow(goal: hasGoal ? goal : null, onTap: onOpenGoals),
+                _GoalRow(
+                  goal: hasGoal ? goal : null,
+                  onTap: () => GoalsEditScreen.open(
+                    context,
+                    userId: profile.id,
+                    detail: detail,
+                  ),
+                ),
                 for (final relationship in dietitians) ...[
                   const SizedBox(height: AppSpacing.md),
-                  _DietitianRow(dietitianId: relationship.dietitianId),
+                  DietitianRow(dietitianId: relationship.dietitianId),
                 ],
                 const SizedBox(height: AppSpacing.x3),
                 const _ComingSoon(),
@@ -99,15 +85,6 @@ class TodayTab extends ConsumerWidget {
 
 String _firstName(String fullName) =>
     fullName.trim().isEmpty ? 'Danışan' : fullName.trim().split(' ').first;
-
-String _initials(String? fullName) {
-  final parts = (fullName ?? '').trim().split(RegExp(r'\s+'))
-    ..removeWhere((p) => p.isEmpty || p.endsWith('.'));
-  if (parts.isEmpty) return '';
-  final first = parts.first.characters.first;
-  final last = parts.length > 1 ? parts.last.characters.first : '';
-  return (first + last).toUpperCase();
-}
 
 const _days = [
   'PAZARTESİ',
@@ -293,32 +270,6 @@ class _Steps extends StatelessWidget {
   }
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name});
-
-  final String? name;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final size = context.density.avatarSize + 4;
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: palette.surfaceSubtle,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        _initials(name),
-        style: Theme.of(context).textTheme.titleMedium
-            ?.copyWith(color: palette.textSecondary),
-      ),
-    );
-  }
-}
-
 class _InviteCard extends ConsumerWidget {
   const _InviteCard({required this.invite});
 
@@ -332,7 +283,7 @@ class _InviteCard extends ConsumerWidget {
     // card asks them to grant a stranger access to their health data. Who is
     // asking has to be on the card (PLANNING #105).
     final name = ref
-        .watch(_dietitianProvider(invite.dietitianId))
+        .watch(dietitianProfileProvider(invite.dietitianId))
         .asData
         ?.value
         .fullName;
@@ -345,7 +296,7 @@ class _InviteCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                _Avatar(name: name),
+                PersonAvatar(name: name),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -466,55 +417,6 @@ class _GoalRow extends StatelessWidget {
                 Icon(Icons.chevron_right, color: palette.textMuted),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DietitianRow extends ConsumerWidget {
-  const _DietitianRow({required this.dietitianId});
-
-  final String dietitianId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-    final density = context.density;
-    final name = ref
-        .watch(_dietitianProvider(dietitianId))
-        .asData
-        ?.value
-        .fullName;
-
-    return Card(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: density.rowHeight),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              _Avatar(name: name),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Diyetisyenin',
-                      style: text.bodySmall?.copyWith(color: palette.textMuted),
-                    ),
-                    Text(name ?? '', style: text.titleMedium),
-                  ],
-                ),
-              ),
-            ],
           ),
         ),
       ),

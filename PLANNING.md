@@ -246,8 +246,11 @@ C2). Each ID names the interview question it came from.
   23 Sep 2026) Bugün opens on a green hero with the greeting and three real steps (goals →
   dietitian → first plan, derived from saved data; the plan step says "yakında"), then a
   pending invite, the goal row (one tap target into Profil), the connected dietitian, and
-  one quiet "Yakında" note for Diyetisyen bul and the AI tier. More tabs arrive when their
-  features ship for everyone.
+  one quiet "Yakında" note for Diyetisyen bul and the AI tier. **Profil** (slice 3) is a
+  summary, not a form: the name, the three Hedeflerim answers, the connected dietitian, a
+  "Yakında" note for files (#125), and a quiet "Çıkış yap" at the bottom. Hedeflerim is
+  edited on its own screen (`goals_edit_screen.dart`, still the only writer, #104). More
+  tabs arrive when their features ship for everyone.
 - **#52** A pending dietitian sees one card **without the panel frame** ("Başvurunuz
   İnceleniyor" + a working "Durumu yenile"). `rejected` uses the same layout.
 - **#53** An approved dietitian gets a **NavigationRail** on wide screens (a bottom bar on

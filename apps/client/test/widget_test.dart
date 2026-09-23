@@ -205,6 +205,11 @@ void main() {
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
+    // Profil is a summary; editing opens its own screen.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Yazılmadı'), findsNWidgets(3));
+    await tester.tap(find.text('Düzenle'));
+    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.widgetWithText(TextField, 'Hedefim'),
@@ -225,6 +230,11 @@ void main() {
     // Left blank, so it stays null rather than becoming an empty string.
     expect(saved.budgetRange, isNull);
 
+    // Back on Profil, the summary shows what was saved.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Laktoz intoleransı'), findsOneWidget);
+    expect(find.text('Yazılmadı'), findsOneWidget);
+
     // Bugün follows the save without a new sign-in.
     await tester.tap(find.text('Bugün'));
     await tester.pumpAndSettle();
@@ -232,7 +242,7 @@ void main() {
     expect(_steps(1), findsOneWidget);
   });
 
-  testWidgets('the goal row is one tap target that opens Profil', (
+  testWidgets('the goal row is one tap target that opens the goals editor', (
     tester,
   ) async {
     final auth = FakeAuthRepository();
@@ -258,12 +268,13 @@ void main() {
     expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
     await tester.tap(row);
     await tester.pumpAndSettle();
-    expect(find.text('Hedeflerim'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Hedeflerim'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Hedefim'), findsOneWidget);
   });
 
   for (final width in [360.0, 412.0]) {
     for (final scale in [1.0, 1.3, 2.0]) {
-      testWidgets('Bugün lays out at $width dp with text scale $scale', (
+      testWidgets('Bugün and Profil lay out at $width dp, text scale $scale', (
         tester,
       ) async {
         tester.view.devicePixelRatio = 3;
@@ -303,6 +314,11 @@ void main() {
 
         // A RenderFlex overflow fails the test on its own.
         expect(find.text('Merhaba, Elif'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.text('Profil'));
+        await tester.pumpAndSettle();
+        expect(find.text('HEDEFLERİN'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }
