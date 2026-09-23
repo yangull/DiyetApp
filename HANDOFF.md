@@ -3,7 +3,7 @@
 > Where the project stands and what is waiting on whom. Rewrite this file (don't append)
 > at the end of a session. Decisions live in `PLANNING.md`; open questions in
 > `QUESTIONS.md`; traps in `CLAUDE.md` ("Gotchas"); vocabulary in `CONTEXT.md`.
-> Updated 23 September 2026 (late evening).
+> Updated 24 September 2026 (just after midnight).
 
 ## Where things stand
 
@@ -37,6 +37,16 @@
     the top row ("Sonuç") of the mockup canvas.
   - Can's own test account now has the goal "Kilo vermek" (saved while testing on the
     emulator); clear it in Profil if unwanted.
+- **Same night, "Sade" (#133), the current look:** on the phone Sıcak had too many colours to feel premium.
+  Using a MyFitnessPal screenshot as the reference, Can chose: keep our green as the only
+  accent, all bold sans (no Fraunces), light-grey ground with white borderless cards, no
+  group colours, no green hero or yellow highlight. Coded in one slice: tokens, theme
+  (neutral bottom bar with a black selected item), and Bugün rebuilt as a greeting + one
+  "Başlangıç" card (progress bar, black ticks, pale-green "Yaz/Düzenle" pills). The panel
+  follows through the theme. Screenshots: `docs/design/2026-09-23-redesign/sade/` and
+  `C:\Users\jhana\Pictures\Wellkit redesign 23 Sep\sade\`. Tests: core 8, client 14,
+  panel 98. On the emulator both apps are installed as "client" and "panel" (swipe up
+  for the app list); both are the Sade build.
 
 ## Pages (Claude artifacts)
 
@@ -55,20 +65,32 @@ and PLANNING.md.
 
 ## Next steps
 
-1. **Can: look at the result** on the emulator or in the screenshots above, and say what
-   still feels flat. Bugün is sparse on purpose: it only shows real data, and plans,
-   meal logs, weigh-ins and messages don't exist yet.
-2. **The data features that bring Bugün to life** (redesign step 6), each planned on its
-   own before code: `diet_plans` + the client's Planım tab and the hero's meal count;
-   meal logs (P7) with the weekly count; weigh-ins (P8); chat. Keyed off
-   `dietitian_client_relationships`. P9 (hide numbers per client) lands with the first of
-   them. When the third client tab ships, build the floating bottom bar from the spec.
-3. **Can answers** C20 (illustrations for the eight groups) and C21 (how much plan
-   editing on a phone); C21 blocks the panel's phone plan screen.
-4. **Small follow-ups:** the demo's Danışanlar filters take a lot of room on a phone (one
-   "Filtrele" button would do); the real panel on a phone was checked by tests only, not
-   on the emulator (needs a dietitian login); tablets (600 dp+) use the compact layout
-   without touch padding for now; the panel tour artifact shows the old colours.
+1. **Next session: bring the panel fully into "Sade" (Can, 24 Sep).** The panel only
+   took Sade through the theme; its screens still carry Serin/Sıcak-era details. Plan it
+   as small slices, checked on the emulator (`-t lib/main_demo.dart`) at phone and wide
+   sizes:
+   - Genel Bakış: the triage task buttons become the pale-green pills Bugün uses
+     ("Düzenle"); the header gets the same "date + bold greeting" pattern; consider the
+     slim header with tappable counts from the Sıcak spec.
+   - Danışanlar: one "Filtrele" button instead of four filter controls on a phone; status
+     pills in the Sade style (text + tint, fewest colours).
+   - Client detail, plan editors, Randevular, Mesajlar, Takip: remove leftover borders and
+     extra colours; check every screen against rule 15's checklist ("count the colours").
+   - The real panel (`lib/main.dart`) on the emulator: needs an approved dietitian
+     account (sign up in the panel app, approve in the Supabase dashboard; #35).
+   - App names on the phone are the Flutter defaults "client" and "panel": set
+     `android:label` (and the iOS display name) to e.g. "Wellkit" and "Wellkit Panel".
+2. **The data features that bring Bugün to life**, each planned on its own before code:
+   `diet_plans` + the client's Planım tab and a meal count on Bugün; meal logs (P7) with
+   the weekly count; weigh-ins (P8); chat. Keyed off `dietitian_client_relationships`.
+   P9 (hide numbers per client) lands with the first of them.
+3. **Can answers** C21 (how much plan editing on a phone); it blocks the panel's phone
+   plan screen.
+4. **Small follow-ups:** tablets (600 dp+) use the compact layout without touch padding;
+   the panel tour artifact and the canvas's "Sonuç" row show older colours;
+   `Fraunces-SemiBold.ttf` can be deleted once Sade is settled; Codex's code review of
+   the redesign was cut short by its usage limit: rerun it (prompt in the 23 Sep chat,
+   scope `git diff b0776e8..HEAD`).
 5. **Can + Kadir:** give Kadir edit access to the interview guide (Share menu) and ask
    K1–K3, K2 first (is the intake form athletes-only?).
 6. **Can:** the rest of the interview answers (DT1, DT7, DT8, DT10, DT15), then §0

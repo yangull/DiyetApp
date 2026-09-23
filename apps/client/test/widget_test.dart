@@ -55,10 +55,7 @@ void main() {
 
     expect(find.text('Merhaba, Elif'), findsOneWidget);
     expect(_steps(0), findsOneWidget);
-    expect(
-      find.text('Henüz yazmadın. Diyetisyenin buradan başlar.'),
-      findsOneWidget,
-    );
+    expect(find.text('Diyetisyenin buradan başlar.'), findsOneWidget);
     // Unbuilt paths are named once, as text, never as buttons (rule 4).
     expect(find.text('YAKINDA'), findsOneWidget);
     expect(find.widgetWithText(InkWell, 'Diyetisyen bul'), findsNothing);
@@ -135,7 +132,6 @@ void main() {
     expect(relationships.byId('rel-a').status, RelationshipStatus.active);
     expect(relationships.byId('rel-a').clientId, clientId);
     // The accepted dietitian now shows as the client's, and step 2 is done.
-    expect(find.text('Diyetisyenin'), findsOneWidget);
     expect(find.text('Dyt. Deniz'), findsOneWidget);
     expect(_steps(1), findsOneWidget);
   });
@@ -242,9 +238,7 @@ void main() {
     expect(_steps(1), findsOneWidget);
   });
 
-  testWidgets('the goal row is one tap target that opens the goals editor', (
-    tester,
-  ) async {
+  testWidgets('the goal step button opens the goals editor', (tester) async {
     final auth = FakeAuthRepository();
     final profiles = FakeProfileRepository();
     await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
@@ -264,9 +258,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final row = find.widgetWithText(InkWell, 'Hedeflerin');
-    expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
-    await tester.tap(row);
+    final button = find.widgetWithText(FilledButton, 'Yaz');
+    // The pill looks 40 tall; its tap target is padded to 48.
+    expect(tester.getSize(button).height, greaterThanOrEqualTo(48));
+    await tester.tap(button);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Hedeflerim'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'Hedefim'), findsOneWidget);

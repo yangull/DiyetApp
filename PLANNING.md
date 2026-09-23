@@ -5,7 +5,7 @@
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
 > **Decision IDs are stable.** Product decisions are P1–P9; technical decisions keep
-> their original numbers (#1–#132). Code comments cite them as `PLANNING.md #N` (older
+> their original numbers (#1–#133). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
 > Last restructured: 23 September 2026.
@@ -275,11 +275,12 @@ C2). Each ID names the interview question it came from.
 Full reference, including type scale, density numbers and the design rules:
 **`docs/design-system.md`** (the source; the 28 Aug artifact is history).
 
-- **#54** Palette **B "Serin"**: background `#F7F9F8`, surface `#FFFFFF`, brand `#18795C`.
-  The ground becomes warm `#F6F1E8` with the "Sıcak" redesign (#131); the brand green stays.
+- **#54** Brand green `#18795C`, surface `#FFFFFF`. Ground since #133: neutral light grey
+  `#F2F4F3` (was cool `#F7F9F8` in palette "Serin", then warm `#F6F1E8` in "Sıcak").
 - **#55** **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
-  draft); no decorative second accent. Since #132 two colour kinds are added with fixed
-  meanings: `highlight` (progress, achievement) and one colour per exchange group.
+  draft); no decorative second accent, no colour per category (#133 removed the group
+  colours and the yellow highlight Sıcak had added). The one tinted fill is `primaryTint`
+  behind a secondary action.
 - **#56** **No separate `success` colour** — it measured 1.19:1 against brand green. Approved
   states use brand green.
 - **#57** **An AI draft has its own visual state:** violet `#514196` + 1.5px dashed border + a
@@ -288,8 +289,9 @@ Full reference, including type scale, density numbers and the design rules:
   Ratios are written next to each token in `app_colors.dart`. **Don't change a value
   without re-measuring.**
 - **#59** **Light theme only** for now; the dark palette is measured and documented, not coded.
-- **#60** **Fraunces** (headings only) + **Figtree** (body, UI, tables, buttons). Since #132
-  every number is Figtree 700 with tabular figures; `Figtree-Bold.ttf` joins the bundle.
+- **#60** **Figtree only** since #133 (Can, 23 Sep 2026): bold headings, regular body, every
+  number Figtree 700 with tabular figures. Fraunces (the old heading serif) is still
+  bundled but unused.
 - **#61** Turkish glyph coverage verified from the font files' `cmap` tables.
 - **#63** Fonts are **bundled assets** in `packages/core/fonts/`; no `google_fonts` runtime fetch.
   A core test asserts the resolved family.
@@ -303,7 +305,16 @@ Full reference, including type scale, density numbers and the design rules:
 - **#67** The design rules in `docs/design-system.md` apply to every screen (15 since 23 Sep
   2026: no gradients, no emoji icons, no "✨ AI" badges, no mixed radii, labelled and
   confirmed actions, no money while P6 holds, nothing that looks AI-generated, …).
-- **#131** **Redesign direction "Sıcak"** (Can, 23 Sep 2026, after calling the client app
+- **#133** **Direction "Sade" replaces Sıcak's colour** (Can, late 23 Sep 2026, after seeing
+  Sıcak on the phone: "too many variations of colour, doesn't look clean and premium";
+  reference: MyFitnessPal's current app). Neutral light-grey ground, white borderless
+  cards, Figtree only (bold headings), black ticks and selected navigation, and the brand
+  green only for actions, progress and "approved". Dropped: the cream ground, the green
+  hero block, the yellow highlight, the eight group colours. Can chose each point: keep
+  our green (not MyFitnessPal's blue), all sans, grey + white cards, no group colours.
+  Everything else from #131/#132 (numbers, touch targets, motion, week count, P9, tab bar
+  only navigates) stands. Spec: `docs/design-system.md`.
+- **#131** **Redesign direction "Sıcak"**, colour superseded by #133 the same night (Can, 23 Sep 2026, after calling the client app
   dull on a phone; option B of three on the mockup canvas
   https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn). Close to Lifesum: warm ground, a
   flat green hero block carrying the day's number, colour per exchange group, a floating
@@ -399,14 +410,14 @@ is built to be corrected, not admired.
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green (core 9, client 14, panel 98). No CI yet. Both apps build and run on the Android emulator (#3). |
+| Monorepo, tooling | Done. Analyzer clean, all tests green (core 8, client 14, panel 98). No CI yet. Both apps build and run on the Android emulator (#3). |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
-| Client app | "Sıcak" design (#131). Login → Bugün (green hero, three real steps, invite card, goal row, connected dietitian, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |
+| Client app | "Sade" design (#133). Login → Bugün (date and greeting, any invite first, a white Başlangıç card with a progress bar and three real steps, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |
 | Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). Phone layout below 600 dp: bottom bar, comfortable density, stacked client rows (#38). |
-| Interview demo | Warm palette; below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
+| Interview demo | Sade palette; below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
-| Brand | Name and palette settled ("Sıcak", 23 Sep 2026). **Logo: placeholder "W" mark** until one is designed with Claude later. |
+| Brand | Name and palette settled ("Sade", 23 Sep 2026). **Logo: placeholder "W" mark** until one is designed with Claude later. |
 | Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123). |
 | Interviews | Held; most answers in §2.1, five questions still open (QUESTIONS.md §3). |
 

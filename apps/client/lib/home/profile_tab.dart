@@ -33,8 +33,8 @@ class ProfileTab extends ConsumerWidget {
       children: [
         Row(
           children: [
-            // On the ground the subtle fill nearly vanishes (1.05:1), so this
-            // one sits on white.
+            // On the grey ground the subtle fill nearly vanishes, so this one
+            // sits on white, like the cards.
             PersonAvatar(name: name, size: 64, background: AppColors.surface),
             const SizedBox(width: AppSpacing.lg),
             Expanded(

@@ -28,20 +28,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Bugün's green hero runs under the status bar; Profil keeps the inset.
-      body: _tab == 0
-          ? TodayTab(identity: widget.identity)
-          // Bugün sets light status-bar icons for its green hero; Profil sits
-          // on the light ground and has to set them back to dark.
-          : AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle.dark,
-              child: SafeArea(
-                child: ProfileTab(
-                  identity: widget.identity,
-                  actions: widget.actions,
-                ),
-              ),
-            ),
+      // Both tabs sit on the light ground, so the status bar keeps dark icons.
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: SafeArea(
+          child: _tab == 0
+              ? TodayTab(identity: widget.identity)
+              : ProfileTab(identity: widget.identity, actions: widget.actions),
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),

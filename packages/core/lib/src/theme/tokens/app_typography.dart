@@ -2,30 +2,21 @@ import 'package:flutter/material.dart';
 
 import 'app_density.dart';
 
-/// Fraunces for headings, Figtree for everything else. Both are SIL OFL and
-/// both were verified at the cmap level to carry all twelve Turkish glyphs
-/// (ı İ ğ Ğ ş Ş ç Ç ö Ö ü Ü).
-///
-/// The serif is for headings only — never body text, tables, buttons or
-/// numbers. The bundled Fraunces has no tabular digits, so a number set in it
-/// shifts sideways as it changes ("7/12" → "10/12"); numbers use [figures].
+/// One family, Figtree, for everything ("Sade", PLANNING #133): headings in
+/// bold, body in regular, numbers in bold with tabular figures ([figures]).
+/// It was verified at the cmap level to carry all twelve Turkish glyphs
+/// (ı İ ğ Ğ ş Ş ç Ç ö Ö ü Ü). Fraunces is still bundled but no longer used.
 ///
 /// The files ship as assets in `packages/core/fonts` (latin + latin-ext
 /// subsets, licences alongside them). Nothing is fetched at runtime, so the
 /// panel renders identically offline and there is no first-load flash.
 abstract final class AppTypography {
-  static const _serifFamily = 'Fraunces';
   static const _sansFamily = 'Figtree';
   static const _package = 'core';
 
-  static TextStyle _serif(double size, double lineHeight) => TextStyle(
-    fontFamily: _serifFamily,
-    package: _package,
-    fontSize: size,
-    height: lineHeight / size,
-    fontWeight: FontWeight.w600,
-    letterSpacing: -0.2,
-  );
+  /// Headings: bold and slightly tight, the way large sans type reads best.
+  static TextStyle _heading(double size, double lineHeight) =>
+      _sans(size, lineHeight, FontWeight.w700).copyWith(letterSpacing: -0.3);
 
   static TextStyle _sans(
     double size,
@@ -50,9 +41,9 @@ abstract final class AppTypography {
   static TextTheme textTheme(AppDensity density) {
     final c = density.isCompact;
     return TextTheme(
-      displaySmall: _serif(34, 40),
-      headlineLarge: _serif(c ? 22 : 27, c ? 28 : 34),
-      headlineMedium: _serif(c ? 18 : 22, c ? 24 : 28),
+      displaySmall: _heading(32, 38),
+      headlineLarge: _heading(c ? 22 : 28, c ? 28 : 34),
+      headlineMedium: _heading(c ? 18 : 22, c ? 24 : 28),
       titleLarge: _sans(c ? 16 : 18, c ? 22 : 24, FontWeight.w600),
       titleMedium: _sans(c ? 14 : 16, c ? 20 : 24, FontWeight.w600),
       bodyLarge: _sans(c ? 14 : 16, c ? 20 : 24),

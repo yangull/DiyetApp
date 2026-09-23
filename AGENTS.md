@@ -10,7 +10,7 @@ Before anything else, read these files in the repo root:
 1. `CLAUDE.md`: commands, conventions, locked decisions, **Gotchas**. Its rules apply
    to you too, except the Claude-specific tooling (skills, artifacts).
 2. `HANDOFF.md`: current state, next steps, the most blocking questions.
-3. `PLANNING.md`: the product, locked decisions (stable IDs P1–P9, #1–#132), roadmap.
+3. `PLANNING.md`: the product, locked decisions (stable IDs P1–P9, #1–#133), roadmap.
 4. `CONTEXT.md`: the domain glossary. Use its terms.
 5. `docs/design-system.md`: colours, type, density and design rules, for any UI work or review.
 6. `QUESTIONS.md`: the only list of open questions. Add new ones there, never in a new file.

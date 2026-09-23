@@ -58,9 +58,6 @@ class PersonAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: background ?? palette.surfaceSubtle,
         shape: BoxShape.circle,
-        border: background == null
-            ? null
-            : Border.all(color: palette.borderSubtle),
       ),
       child: Text(
         initialsOf(name),

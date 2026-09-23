@@ -45,10 +45,11 @@ void main() {
     expect(compact.extension<AppDensity>()!.isCompact, isTrue);
   });
 
-  test('typography uses the bundled font assets, never a runtime fetch', () {
+  test('one bundled family, Figtree, with bold headings (#133)', () {
     final text = AppTheme.light(AppDensity.comfortable).textTheme;
 
-    expect(text.headlineLarge!.fontFamily, 'packages/core/Fraunces');
+    expect(text.headlineLarge!.fontFamily, 'packages/core/Figtree');
+    expect(text.headlineLarge!.fontWeight, FontWeight.w700);
     expect(text.bodyMedium!.fontFamily, 'packages/core/Figtree');
   });
 
@@ -78,26 +79,10 @@ void main() {
       atLeast(AppColors.warning, AppColors.warningTint, 4.5, 'warning/tint');
     });
 
-    test('the hero block keeps its text readable and its ring visible', () {
-      atLeast(AppColors.onPrimary, AppColors.hero, 4.5, 'white on hero');
-      atLeast(AppColors.onHeroSecondary, AppColors.hero, 4.5, 'secondary');
-      atLeast(AppColors.onHighlight, AppColors.highlight, 4.5, 'on highlight');
-      atLeast(AppColors.highlight, AppColors.hero, 3, 'highlight on hero');
-      atLeast(AppColors.highlight, AppColors.heroTrack, 3, 'arc vs track');
+    test('the one tinted fill keeps its text readable', () {
+      atLeast(AppColors.primaryHover, AppColors.primaryTint, 4.5, 'on tint');
+      atLeast(AppColors.primary, AppColors.surfaceSubtle, 3, 'bar on track');
     });
-
-    test(
-      'exchange-group colours read on white, on their track and as chips',
-      () {
-        expect(ExchangeGroupColors.all, hasLength(8));
-        for (final g in ExchangeGroupColors.all) {
-          atLeast(g.bar, AppColors.surface, 3, 'bar on white');
-          atLeast(g.bar, AppColors.surfaceSubtle, 3, 'bar on its track');
-          atLeast(g.chipText, g.chipTint, 4.5, 'chip text');
-          expect(g.bar, isNot(AppColors.aiDraft));
-        }
-      },
-    );
   });
 
   test('numbers use Figtree Bold with tabular figures', () {

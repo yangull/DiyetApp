@@ -1,15 +1,15 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'client_widgets.dart';
 import 'goals_edit_screen.dart';
 
-/// Bugün, the client's first tab ("Sıcak", PLANNING #131). Until plans exist
-/// it shows only what is real: the goal, a pending invite, the connected
-/// dietitian, and one quiet "Yakında" note (rules 4 and 5). The hero's three
-/// steps are derived from saved data, never from a flag.
+/// Bugün, the client's first tab ("Sade", PLANNING #133): black type on a
+/// light-grey ground, white cards, and the brand green only where the client
+/// can act or sees progress. Until plans exist it shows only what is real:
+/// the goal, a pending invite, the connected dietitian, and one quiet
+/// "Yakında" note (rules 4 and 5). The steps come from saved data.
 class TodayTab extends ConsumerWidget {
   const TodayTab({super.key, required this.identity});
 
@@ -17,6 +17,8 @@ class TodayTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
     final density = context.density;
     final profile = identity.profile;
     final detail =
@@ -33,52 +35,40 @@ class TodayTab extends ConsumerWidget {
 
     final goal = detail?.goal?.trim() ?? '';
     final hasGoal = goal.isNotEmpty;
-    final hasDietitian = dietitians.isNotEmpty;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: ListView(
-        padding: EdgeInsets.only(bottom: density.pagePadding),
-        children: [
-          _Hero(
-            firstName: _firstName(profile.fullName),
-            hasGoal: hasGoal,
-            hasDietitian: hasDietitian,
-            hasInvite: invites.isNotEmpty,
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              density.pagePadding,
-              AppSpacing.xl,
-              density.pagePadding,
-              0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final invite in invites) ...[
-                  _InviteCard(invite: invite),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-                _GoalRow(
-                  goal: hasGoal ? goal : null,
-                  onTap: () => GoalsEditScreen.open(
-                    context,
-                    userId: profile.id,
-                    detail: detail,
-                  ),
-                ),
-                for (final relationship in dietitians) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  DietitianRow(dietitianId: relationship.dietitianId),
-                ],
-                const SizedBox(height: AppSpacing.x3),
-                const _ComingSoon(),
-              ],
-            ),
-          ),
-        ],
+    return ListView(
+      padding: EdgeInsets.fromLTRB(
+        density.pagePadding,
+        AppSpacing.xxl,
+        density.pagePadding,
+        density.pagePadding,
       ),
+      children: [
+        Text(
+          _todayLabel(DateTime.now()),
+          style: text.bodyMedium?.copyWith(color: palette.textMuted),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Merhaba, ${_firstName(profile.fullName)}',
+          style: text.headlineLarge,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        // An invite waits on the client, so it comes before the checklist.
+        for (final invite in invites) ...[
+          _InviteCard(invite: invite),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        _StartCard(
+          goal: hasGoal ? goal : null,
+          dietitianId: dietitians.isEmpty ? null : dietitians.first.dietitianId,
+          hasInvite: invites.isNotEmpty,
+          onEditGoals: () =>
+              GoalsEditScreen.open(context, userId: profile.id, detail: detail),
+        ),
+        const SizedBox(height: AppSpacing.x3),
+        const _ComingSoon(),
+      ],
     );
   }
 }
@@ -87,185 +77,271 @@ String _firstName(String fullName) =>
     fullName.trim().isEmpty ? 'Danışan' : fullName.trim().split(' ').first;
 
 const _days = [
-  'PAZARTESİ',
-  'SALI',
-  'ÇARŞAMBA',
-  'PERŞEMBE',
-  'CUMA',
-  'CUMARTESİ',
-  'PAZAR',
+  'Pazartesi',
+  'Salı',
+  'Çarşamba',
+  'Perşembe',
+  'Cuma',
+  'Cumartesi',
+  'Pazar',
 ];
 const _months = [
-  'OCAK',
-  'ŞUBAT',
-  'MART',
-  'NİSAN',
-  'MAYIS',
-  'HAZİRAN',
-  'TEMMUZ',
-  'AĞUSTOS',
-  'EYLÜL',
-  'EKİM',
-  'KASIM',
-  'ARALIK',
+  'Ocak',
+  'Şubat',
+  'Mart',
+  'Nisan',
+  'Mayıs',
+  'Haziran',
+  'Temmuz',
+  'Ağustos',
+  'Eylül',
+  'Ekim',
+  'Kasım',
+  'Aralık',
 ];
 
 String _todayLabel(DateTime d) =>
     '${_days[d.weekday - 1]}, ${d.day} ${_months[d.month - 1]}';
 
-class _Hero extends StatelessWidget {
-  const _Hero({
-    required this.firstName,
-    required this.hasGoal,
-    required this.hasDietitian,
+/// Three real steps in order (rule 11): goals, a dietitian, the first plan.
+/// The count and bar are the screen's one number; the first plan cannot be
+/// delivered yet, so its row says so.
+class _StartCard extends StatelessWidget {
+  const _StartCard({
+    required this.goal,
+    required this.dietitianId,
     required this.hasInvite,
+    required this.onEditGoals,
   });
 
-  final String firstName;
-  final bool hasGoal;
-  final bool hasDietitian;
+  final String? goal;
+  final String? dietitianId;
   final bool hasInvite;
+  final VoidCallback onEditGoals;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    final density = context.density;
-    final top = MediaQuery.paddingOf(context).top;
+    final done = [goal != null, dietitianId != null, false];
+    final count = done.where((d) => d).length;
 
-    final String nextStep;
-    if (!hasGoal) {
-      nextStep = 'Önce hedeflerini yaz; diyetisyenin buradan başlar.';
-    } else if (!hasDietitian && hasInvite) {
-      nextStep = 'Bir davetin var. Aşağıdan yanıtlayabilirsin.';
-    } else if (!hasDietitian) {
-      nextStep = 'Sıradaki adım: bir diyetisyene bağlanmak.';
-    } else {
-      nextStep =
-          'Diyetisyenine bağlısın. Planın hazır olunca burada görünecek.';
-    }
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        density.pagePadding,
-        top + AppSpacing.xxl,
-        density.pagePadding,
-        AppSpacing.xxl,
-      ),
-      decoration: BoxDecoration(
-        color: palette.hero,
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(density.heroRadius),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.sm,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _todayLabel(DateTime.now()),
-            style: text.labelSmall?.copyWith(color: palette.onHeroSecondary),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Merhaba, $firstName',
-            style: text.headlineLarge?.copyWith(color: AppColors.onPrimary),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            nextStep,
-            style: text.bodyLarge?.copyWith(color: palette.onHeroSecondary),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _Steps(done: [hasGoal, hasDietitian, false]),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              label: 'Başlangıç: 3 adımdan $count tamamlandı',
+              excludeSemantics: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Expanded(
+                        child: Text('Başlangıç', style: text.titleMedium),
+                      ),
+                      Text('$count', style: AppTypography.figures(22, 28)),
+                      Text(
+                        ' / 3',
+                        style: AppTypography.figures(
+                          15,
+                          20,
+                        ).copyWith(color: palette.textMuted),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _ProgressBar(value: count / 3),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _StepRow(
+              done: done[0],
+              title: 'Hedeflerin',
+              subtitle: goal ?? 'Diyetisyenin buradan başlar.',
+              trailing: _TintButton(
+                label: goal == null ? 'Yaz' : 'Düzenle',
+                onPressed: onEditGoals,
+              ),
+            ),
+            _StepRow(
+              done: done[1],
+              title: 'Diyetisyenin',
+              subtitleWidget: dietitianId == null
+                  ? null
+                  : _DietitianName(dietitianId: dietitianId!),
+              subtitle: hasInvite
+                  ? 'Bir davetin var, yukarıda.'
+                  : 'Bir diyetisyen seni davet ettiğinde burada görünür.',
+            ),
+            _StepRow(
+              done: done[2],
+              title: 'İlk planın',
+              subtitle: 'Diyetisyenin onayladığında burada görünür.',
+              trailing: Text(
+                'Yakında',
+                style: text.bodySmall?.copyWith(color: palette.textMuted),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Three real steps, in order (rule 11): goals, a dietitian, the first plan.
-/// The first plan cannot be delivered yet, so its step says so.
-class _Steps extends StatelessWidget {
-  const _Steps({required this.done});
+/// A thick, rounded bar: grey track, green fill. It moves only when the value
+/// changes, never because the screen opened (design rule 12).
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.value});
 
-  final List<bool> done;
+  final double value;
 
-  static const _labels = ['Hedefler', 'Diyetisyen', 'İlk plan · yakında'];
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: SizedBox(
+        height: 8,
+        child: TweenAnimationBuilder<double>(
+          // No begin: the first build shows the value as it is.
+          tween: Tween<double>(end: value),
+          duration: AppMotion.of(context, AppMotion.change),
+          curve: AppMotion.curve,
+          builder: (context, v, _) => LinearProgressIndicator(
+            value: v,
+            backgroundColor: palette.surfaceSubtle,
+            color: AppColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StepRow extends StatelessWidget {
+  const _StepRow({
+    required this.done,
+    required this.title,
+    required this.subtitle,
+    this.subtitleWidget,
+    this.trailing,
+  });
+
+  final bool done;
+  final String title;
+  final String subtitle;
+  final Widget? subtitleWidget;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    final current = done.indexWhere((d) => !d);
-    final count = done.where((d) => d).length;
-
-    Widget dot(int i) {
-      if (done[i]) {
-        return Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: palette.highlight,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.check, size: 18, color: palette.onHighlight),
-        );
-      }
-      final isCurrent = i == current && i < 2;
-      final color = isCurrent ? AppColors.onPrimary : palette.onHeroSecondary;
-      return Container(
-        width: 32,
-        height: 32,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: color, width: 2),
-        ),
-        child: Text(
-          '${i + 1}',
-          style: AppTypography.figures(14, 18).copyWith(color: color),
-        ),
-      );
-    }
-
-    Widget line(int i) => Expanded(
-      child: Container(
-        height: 3,
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-        decoration: BoxDecoration(
-          color: done[i] ? palette.highlight : palette.heroTrack,
-          borderRadius: BorderRadius.circular(2),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 64),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            // Black when done, an empty ring when not: colour is not the
+            // signal, the tick is (rule 10).
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: done ? AppColors.textPrimary : null,
+                border: done
+                    ? null
+                    : Border.all(color: palette.borderStrong, width: 1.5),
+              ),
+              child: done
+                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  : null,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title, style: text.titleMedium),
+                  subtitleWidget ??
+                      Text(
+                        subtitle,
+                        style: text.bodyMedium?.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                ],
+              ),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              trailing!,
+            ],
+          ],
         ),
       ),
     );
+  }
+}
 
-    return Semantics(
-      label: 'Başlangıç: 3 adımdan $count tamamlandı',
-      excludeSemantics: true,
-      child: Column(
-        children: [
-          Row(children: [dot(0), line(0), dot(1), line(1), dot(2)]),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              for (var i = 0; i < 3; i++)
-                Expanded(
-                  child: Text(
-                    _labels[i],
-                    textAlign: switch (i) {
-                      0 => TextAlign.start,
-                      1 => TextAlign.center,
-                      _ => TextAlign.end,
-                    },
-                    style: text.bodySmall?.copyWith(
-                      color: palette.onHeroSecondary,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
+class _DietitianName extends ConsumerWidget {
+  const _DietitianName({required this.dietitianId});
+
+  final String dietitianId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final name = ref
+        .watch(dietitianProfileProvider(dietitianId))
+        .asData
+        ?.value
+        .fullName;
+    return Text(
+      name ?? '',
+      style: Theme.of(context).textTheme.bodyMedium
+          ?.copyWith(color: context.palette.textSecondary),
+    );
+  }
+}
+
+/// The accent as a pale fill with green text, for a secondary action in a
+/// row (like "Düzenle"). Its tap target is still at least 48 tall.
+class _TintButton extends StatelessWidget {
+  const _TintButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: palette.primaryTint,
+        foregroundColor: palette.primaryHover,
+        minimumSize: const Size(64, 40),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        tapTargetSize: MaterialTapTargetSize.padded,
+        shape: const StadiumBorder(),
       ),
+      onPressed: onPressed,
+      child: Text(label),
     );
   }
 }
@@ -335,7 +411,7 @@ class _InviteCard extends ConsumerWidget {
                   child: FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: palette.surfaceSubtle,
-                      foregroundColor: palette.primaryHover,
+                      foregroundColor: AppColors.textPrimary,
                     ),
                     onPressed: () => _respond(context, ref, accept: false),
                     child: const Text('Reddet'),
@@ -369,58 +445,6 @@ class _InviteCard extends ConsumerWidget {
         const SnackBar(content: Text('İşlem tamamlanamadı. Tekrar dene.')),
       );
     }
-  }
-}
-
-/// The whole row is the tap target (at least 48 tall), not a small link.
-class _GoalRow extends StatelessWidget {
-  const _GoalRow({required this.goal, required this.onTap});
-
-  final String? goal;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-    final density = context.density;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: density.rowHeight),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Hedeflerin', style: text.titleMedium),
-                      const SizedBox(height: 2),
-                      Text(
-                        goal ?? 'Henüz yazmadın. Diyetisyenin buradan başlar.',
-                        style: text.bodyMedium?.copyWith(
-                          color: palette.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Icon(Icons.chevron_right, color: palette.textMuted),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

@@ -60,6 +60,8 @@ Delete this section once Can has looked at it again (after the next talk with Ka
 | new | Hero number | Meals ("3/5 öğün"), not inferred exchanges | PLANNING P7 |
 | new | Hide numbers for a client? | Yes: the dietitian turns off week count, weight chart, kcal per client | PLANNING P9 |
 | new | When do rings animate? | Only when the value changes, not on every open | PLANNING #132, design-system rule 12 |
+| new | Too many colours? | Yes: direction "Sade" (MyFitnessPal-like), keep our green, all sans, grey + white cards, no group colours | PLANNING #133 |
+| C20 | Illustrations for the food groups | Dropped with the group colours in Sade; reopen if food imagery is wanted | PLANNING #133 |
 
 ---
 
@@ -179,13 +181,6 @@ _Was: Q20._
 ### C17. Separate Supabase dev project?
 Today every dev signup lands in the one live project. A second project is free on the
 Supabase free tier.
->
-
-### C20. Illustrations for the eight exchange groups?
-Lifesum feels alive largely through food images; we keep "no stock photos". One
-consistent illustration set (an icon per group: süt, et, nişastalı, …) would add warmth
-without faking photos. Commission one, use an open-licence set, or stay text-only?
-_Blocks: design-system rule 9's illustration exception. Until then, group chips are text._
 >
 
 ### C21. How much plan editing on a phone?

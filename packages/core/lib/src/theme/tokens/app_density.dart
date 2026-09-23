@@ -13,7 +13,6 @@ class AppDensity extends ThemeExtension<AppDensity> {
     required this.profile,
     required this.pagePadding,
     required this.cardRadius,
-    required this.heroRadius,
     required this.controlRadius,
     required this.controlHeight,
     required this.inputHeight,
@@ -25,8 +24,7 @@ class AppDensity extends ThemeExtension<AppDensity> {
   static const comfortable = AppDensity(
     profile: AppDensityProfile.comfortable,
     pagePadding: 20,
-    cardRadius: 18,
-    heroRadius: 28,
+    cardRadius: 20,
     controlRadius: 14,
     controlHeight: 48,
     inputHeight: 52,
@@ -40,7 +38,6 @@ class AppDensity extends ThemeExtension<AppDensity> {
     profile: AppDensityProfile.compact,
     pagePadding: 24,
     cardRadius: 10,
-    heroRadius: 10,
     controlRadius: 8,
     controlHeight: 36,
     inputHeight: 38,
@@ -51,10 +48,6 @@ class AppDensity extends ThemeExtension<AppDensity> {
   final AppDensityProfile profile;
   final double pagePadding;
   final double cardRadius;
-
-  /// Bottom corners of the green hero block (#131). Compact layouts have no
-  /// hero, so there it matches [cardRadius].
-  final double heroRadius;
   final double controlRadius;
   final double controlHeight;
   final double inputHeight;
@@ -68,7 +61,6 @@ class AppDensity extends ThemeExtension<AppDensity> {
     AppDensityProfile? profile,
     double? pagePadding,
     double? cardRadius,
-    double? heroRadius,
     double? controlRadius,
     double? controlHeight,
     double? inputHeight,
@@ -79,7 +71,6 @@ class AppDensity extends ThemeExtension<AppDensity> {
       profile: profile ?? this.profile,
       pagePadding: pagePadding ?? this.pagePadding,
       cardRadius: cardRadius ?? this.cardRadius,
-      heroRadius: heroRadius ?? this.heroRadius,
       controlRadius: controlRadius ?? this.controlRadius,
       controlHeight: controlHeight ?? this.controlHeight,
       inputHeight: inputHeight ?? this.inputHeight,

@@ -68,9 +68,47 @@ abstract final class AppTheme {
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
+        // No border: white on the grey ground is the separation ("Sade",
+        // #133). Dividers inside a card still use borderSubtle.
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(density.cardRadius),
-          side: const BorderSide(color: AppColors.borderSubtle),
+        ),
+      ),
+      // One accent, and not on navigation: the selected item is black and
+      // bold, the rest grey, with no coloured pill behind the icon.
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: Colors.transparent,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? AppColors.textPrimary
+                : AppColors.textMuted,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => text.labelMedium?.copyWith(
+            color: states.contains(WidgetState.selected)
+                ? AppColors.textPrimary
+                : AppColors.textMuted,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w600,
+          ),
+        ),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        indicatorColor: AppColors.surface,
+        selectedIconTheme: const IconThemeData(color: AppColors.textPrimary),
+        unselectedIconTheme: const IconThemeData(color: AppColors.textMuted),
+        selectedLabelTextStyle: text.labelMedium?.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelTextStyle: text.labelMedium?.copyWith(
+          color: AppColors.textMuted,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
