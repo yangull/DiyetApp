@@ -56,6 +56,10 @@ Delete this section once Can has looked at it again (after the next talk with Ka
 | new | Design rule changes for it | Delegated to Claude: "must not look AI-coded" | PLANNING #132, design-system.md rule 15 |
 | new | Do clients mark meals as eaten? | Yes, one tap per meal, time recorded | PLANNING P7 |
 | new | Who enters weigh-ins? | Both: the client in the app, the dietitian adds measurements | PLANNING P8 |
+| C22 | Streak rule | No consecutive streak: "Bu hafta 5/7 gün", resets weekly, client can hide it | PLANNING P7 |
+| new | Hero number | Meals ("3/5 öğün"), not inferred exchanges | PLANNING P7 |
+| new | Hide numbers for a client? | Yes: the dietitian turns off week count, weight chart, kcal per client | PLANNING P9 |
+| new | When do rings animate? | Only when the value changes, not on every open | PLANNING #132, design-system rule 12 |
 
 ---
 
@@ -189,12 +193,6 @@ The panel runs on phones (#38). Editing a full weekly exchange plan on a small s
 hard. Proposal: on phones the dietitian reviews, approves and makes small edits (a count,
 a note); full weekly editing stays on tablet and web. Agree?
 _Blocks: the mobile plan screen (redesign slice 5 onward)._
->
-
-### C22. What counts as "a day on plan" for the streak?
-The client's streak (P7) needs a rule: every meal marked eaten, or most of them (e.g. 4 of
-5)? And does the dietitian see the streak?
-_Blocks: the streak card on the client's Bugün screen._
 >
 
 ---

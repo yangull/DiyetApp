@@ -4,7 +4,7 @@
 > open. Not a session log — history lives in git (`git log -p PLANNING.md`).
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
-> **Decision IDs are stable.** Product decisions are P1–P8; technical decisions keep
+> **Decision IDs are stable.** Product decisions are P1–P9; technical decisions keep
 > their original numbers (#1–#132). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
@@ -67,10 +67,16 @@ with a way to reopen it.
   planning the redesign). The time is recorded, which is what dietitians asked for (I10).
   It feeds the client's day (progress ring, week strip, streak) and the dietitian's
   view. Per exchange group was the more detailed option, rejected as too much tapping.
-  Table sketch: `meal_logs` (§7).
+  Table sketch: `meal_logs` (§7). The client's hero therefore counts **meals** ("3/5
+  öğün"), never inferred exchanges. There is **no consecutive-day streak**: a weekly count
+  ("Bu hafta 5/7 gün") that starts again each Monday, which the client can hide (Can,
+  23 Sep 2026, was C22; both design reviews cited eating-disorder risk from streaks).
 - **P8** **Weigh-ins are entered by both sides** (Can, 23 Sep 2026): the client logs their
   weight in the app, and the dietitian can add measurements. Which measurements is still
   DT8.
+- **P9** **The dietitian can hide numbers from one client** (Can, 23 Sep 2026): the week
+  count, the weight chart and kcal can be turned off per client, e.g. for an
+  eating-disorder history. Kcal is off for clients by default.
 
 ### 2.1 What the dietitian interviews said
 
@@ -264,7 +270,8 @@ Full reference, including type scale, density numbers and the design rules:
   Ratios are written next to each token in `app_colors.dart`. **Don't change a value
   without re-measuring.**
 - **#59** **Light theme only** for now; the dark palette is measured and documented, not coded.
-- **#60** **Fraunces** (headings only) + **Figtree** (body, UI, tables, buttons).
+- **#60** **Fraunces** (headings only) + **Figtree** (body, UI, tables, buttons). Since #132
+  every number is Figtree 700 with tabular figures; `Figtree-Bold.ttf` joins the bundle.
 - **#61** Turkish glyph coverage verified from the font files' `cmap` tables.
 - **#63** Fonts are **bundled assets** in `packages/core/fonts/`; no `google_fonts` runtime fetch.
   A core test asserts the resolved family.
@@ -288,9 +295,14 @@ Full reference, including type scale, density numbers and the design rules:
 - **#132** **Design rules relaxed for "Sıcak"**, delegated by Can to Claude on 23 Sep 2026
   with one condition: it must not look like an AI-coded frontend (new rule 15). Changed:
   flat hero blocks (rule 1), one centred hero number (6), a shadow on floating elements
-  only (8), rings and bars fill once on arrival (12), `highlight` and group colours
-  (#55). Kept: no gradients, no stock photos (illustrations are C20), only real data (4,
-  5).
+  only (8), rings and bars animate when their value changes, not on every open (12, Can's
+  choice), `highlight` and group colours (#55), and rule 15 as a checklist. Kept: no
+  gradients, no stock photos (illustrations are C20), only real data (4, 5). Corrected
+  the same day by two outside reviews (`docs/research/2026-09-23-sicak-redesign-review-*.md`):
+  numbers in Figtree Bold with tabular figures (Fraunces only for greetings and titles),
+  group colours only for groups, touch targets 48+, no action button in the tab bar, a
+  slim header on the panel's phone layout, and AI-draft cards that show what was checked
+  rather than a verdict (#126).
 
 ### 3.6 The interview demo
 

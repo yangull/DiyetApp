@@ -14,63 +14,108 @@ blue-grey. A neutral, cool, light ground; exactly one brand colour, a vivid emer
 Every other colour means something. The client app is calm; the dietitian panel is
 dense enough to replace Excel. One token set, two densities.
 
-## Redesign "Sıcak" (decided 23 Sep 2026, not coded yet)
+## Redesign "Sıcak" (decided 23 Sep 2026, being coded)
 
 Can saw the client app on a phone, called it dull and lifeless, and picked direction
 **"Sıcak"** (option B on the mockup canvas,
-https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn), closest to Lifesum: a green hero
-block with one big number, colour for the exchange groups, a floating bottom bar. It
-applies to the client app and the panel on phones; the panel on wide screens takes the
-same colours and keeps its dense tables (PLANNING #131). The rule changes it needed
-were delegated to Claude with one condition: **it must not look like an AI-coded
-frontend** (#132).
+https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn; copies and before-screenshots in
+`docs/design/2026-09-23-redesign/`), closest to Lifesum: a green hero block with one
+big number, colour for the exchange groups, a floating bottom bar. It applies to the
+client app and the panel on phones; the panel on wide screens takes the same colours
+and keeps its dense tables (PLANNING #131). The rule changes it needed were delegated
+to Claude with one condition: **it must not look like an AI-coded frontend** (#132,
+rule 15). Two outside reviews (Codex and a Claude subagent,
+`docs/research/2026-09-23-sicak-redesign-review-*.md`) refined it the same day; the
+values below include their verified corrections.
 
 What makes it alive is mostly **daily data** (meals marked as eaten, P7; weigh-ins,
 P8; the dietitian's messages), not decoration. The home screen stays honest until that
 data exists (rules 4 and 5).
 
-Until slice 1 of the redesign lands, the tables below describe the code and this
-section describes the target. When it lands, fold these values into the tables.
+Until slice 1 of the redesign lands, the tables further down describe the code and this
+section describes the target. When it lands, fold these values into those tables.
 
-**Token changes.** Contrast measured on 23 Sep against the new ground unless stated.
+**Token changes.** Contrast measured on 23 Sep (and re-measured by both reviewers)
+against the new ground unless stated.
 
 | Token | Now | Sıcak | Contrast |
 |---|---|---|---|
 | `ground` | `#F7F9F8` | `#F6F1E8` warm | textPrimary 14.70, textSecondary 7.17, textMuted 4.95, primary 4.75, warning 5.26, error 6.72, aiDraft 7.33, borderStrong 3.12 |
-| `surfaceSubtle` | `#EBF1EE` | `#F1EADF` | textPrimary 12.42 (secondary buttons, "Yakında" chips) |
+| `surfaceSubtle` | `#EBF1EE` | `#F1EADF` | textPrimary 13.84, textSecondary 6.75, primaryHover 6.37. **`primary` is 4.47 here: links and text on this fill use `primaryHover`.** `borderStrong` is 2.94 here: no essential boundary on this fill |
 | `borderSubtle` | `#DAE4E0` | `#E8DDCB` | 1.19, decorative only |
-| `hero` (new) | — | `#18795C` (= primary) | white 5.35; `onHeroSecondary` `#E4F2EC` 4.64 |
-| `highlight` (new) | — | `#F2C14E` | 3.19 against hero (graphic); text on it `#3B2A00` 8.25 |
+| `hero` (new) | — | `#18795C` (= primary) | white 5.35; `onHeroSecondary` `#E4F2EC` 4.64 (also pending step numbers and borders) |
+| `heroTrack` (new) | — | `#135F49` (= primaryHover) | the ring's and steps' unfilled track; highlight on it 4.53 |
+| `highlight` (new) | — | `#F2C14E` | 3.19 on hero, 4.53 on heroTrack; text on it `#3B2A00` 8.25 |
 | `warningTint` (new) | — | `#FBEFD5` | warning text 5.19 |
 
 `highlight` (sun yellow) means **progress and achievement** only: the day's ring, a
-finished step, a streak. It sits on the green hero. It never marks "needs attention";
-that stays `warning` with a label.
+finished step, the week count. It sits on the green hero. It never marks "needs
+attention"; that stays `warning` with a label.
 
-**Exchange-group colours** (new, #132). Used only to identify one of the eight groups
-in bars, rings and chips, always next to the group's name (rule 10). Never violet.
-Bars measured against white (3:1 needed for graphics); chip text against its tint.
+The mockups used a warmer text colour and extra greys (`#1F2A24`, `#4F5A52`,
+`#5A5348`, `#6A6254`). They are **not** tokens: text keeps `textPrimary`,
+`textSecondary` and `textMuted`.
 
-| Group | Colour | vs white | Chip text on tint |
-|---|---|---|---|
-| Süt | `#3E7BD6` | 4.19 | to measure in slice 1 |
-| Et | `#C4552F` | 4.48 | `#8E3517` on `#F8E1D8`, 6.27 |
-| Nişastalı | `#B07B12` | 3.69 | `#7A5406` on `#F7EBCB`, 5.71 |
-| Kuru baklagil | `#8C6A3F` | 4.94 | to measure |
-| A grubu sebze | `#4E9B3D` | 3.45 | `#2F6A22` on `#E1EFDC`, 5.48 |
-| B grubu sebze | `#2F8F8A` | 3.88 | to measure |
-| Meyve | `#D2477B` | 4.26 | to measure |
-| Yağ | `#6B7A8F` | 4.37 | to measure |
+**Exchange-group colours** (new, #132). They identify one of the eight groups in bars,
+rings and chips, always next to the group's name (rule 10), and **nothing else**: never
+avatars, icon tiles or statuses. Never violet. Bars are measured against white and
+against their track, `surfaceSubtle` (3:1 needed for graphics); chip text against its
+tint.
 
-Nişastalı sits near `warning` in hue; the label keeps them apart.
+| Group | Colour | vs white | vs track | Chip text on tint |
+|---|---|---|---|---|
+| Süt | `#3E7BD6` | 4.19 | 3.51 | `#2B5EA8` on `#DCE8F7`, 5.18 |
+| Et | `#C4552F` | 4.48 | 3.75 | `#8E3517` on `#F8E1D8`, 6.27 |
+| Nişastalı | `#B07B12` | 3.69 | 3.09 | `#7A5406` on `#F7EBCB`, 5.71 |
+| Kuru baklagil | `#8C6A3F` | 4.94 | 4.14 | `#624A2D` on `#EEE5D8`, 6.64 |
+| A grubu sebze | `#478B37` | 4.19 | 3.50 | `#2F6A22` on `#E1EFDC`, 5.48 |
+| B grubu sebze | `#2F8F8A` | 3.88 | 3.24 | `#1D6662` on `#DCF0EC`, 5.66 |
+| Meyve | `#D2477B` | 4.26 | 3.57 | `#983055` on `#F8E0E9`, 5.83 |
+| Yağ | `#6B7A8F` | 4.37 | 3.66 | `#46546A` on `#E7ECF2`, 6.46 |
+
+Nişastalı sits near `warning` in hue; the label keeps them apart. For colour-blind
+users some pairs collapse (Meyve/Yağ, Et/Kuru baklagil): the group name is what carries
+the meaning.
+
+Avatars and icon tiles are neutral: `surfaceSubtle` fill with `textSecondary` (6.75).
+
+**Type.** Fraunces stays for greetings and screen titles only. **Every number** (the
+hero count, kcal, kg, times, counts) is **Figtree 700 with tabular figures**: the
+bundled Fraunces has no tabular digits, so "7/12" → "10/12" would shift sideways.
+`Figtree-Bold.ttf` is added to the bundle; until slice 1 only 400 and 600 ship.
 
 **Shape and depth (comfortable density).** Card radius 14 → 18, control radius
 10 → 14, the hero block's bottom corners 28, pills and avatars fully round. The
-floating bottom bar is the one shadowed element: `0 6 24` at 14 % of textPrimary.
+floating bottom bar is the one shadowed element: `0 6 24` at 14 % of textPrimary; no
+other card gets a shadow (rule 8).
 
-**Motion.** Rings and progress bars fill once when a screen opens (400 ms, ease-out);
-marking a meal gives the check a short pop (200 ms). Nothing else animates on arrival,
-and all of it is off when the OS asks for reduced motion.
+**Touch and text size.** Every tappable thing is at least 48 × 48 (whole rows are one
+target with a chevron, not a small text link). Rows have a **minimum** height (72) and
+grow with their text. Nav labels may wrap to two lines. Layouts are tested at 360 and
+412 dp wide with text scale 1.0, 1.3 and 2.0.
+
+**Motion.** A ring or bar animates **only when its value changes**: when the client marks
+a meal, or when something changed since the screen was last seen. Opening the app shows
+the current value at once (Can, 23 Sep; #132). Marking a meal gives the check a short
+pop (200 ms); value changes take 400 ms, ease-out. Everything is instant when
+`MediaQuery.disableAnimationsOf` is true.
+
+**Client home ("Bugün") order.** Hero (today's meals, "3/5 öğün", P7) → the next meal
+with the one action "Öğünü yedim" → the dietitian's latest message → today's plan by
+group ("Et · 4 değişim", planned amounts, not eaten fractions) → the week. The bottom
+bar only navigates: no action button in it. Tabs are added when a feature ships for
+everyone, not per user; a tab without data yet shows one true sentence ("Diyetisyenin
+planı gelince burada görünür"). Profil stays the last tab.
+
+**The week count, not a streak** (P7, was C22). "Bu hafta 5/7 gün", starting again each
+Monday, never "you broke it". The client can hide it; the dietitian can turn it (and
+the weight chart, and kcal) off for one client (P9). Kcal is not shown to clients unless
+the dietitian turns it on. Copy never praises or blames weight or a missed meal.
+
+**Panel on phones.** A slim green header, not the full hero block. Its counts are 48 dp
+filters that open the matching list. The AI-draft card shows **what was checked, not a
+verdict** ("Kayıtlı alerji: fıstık · planda yok", never "alerji kontrolü temiz") and
+keeps "Taslağı incele".
 
 ## Colour
 
@@ -188,8 +233,9 @@ instead.
 10. **Colour never carries meaning alone.** Every status has a label or icon too.
 11. **Numbering only for real sequences.** 01 / 02 / 03 only where order matters.
 12. **Motion only on a change of state,** and never when the OS asks for reduced
-    motion. One exception (#132): rings and progress bars fill once when a screen
-    opens (400 ms). No fade-ins, staggered lists or parallax.
+    motion. A ring or bar animates when its value changes (including a change since
+    the screen was last seen), never just because a screen opened (#132). No fade-ins,
+    staggered lists or parallax.
 13. **Label actions.** In the panel, an action gets a visible text label, and every
     destructive action (cancel, delete, reset) gets text plus a confirmation step.
     Icon-only buttons are allowed only for universal icons (back, close a search,
@@ -197,10 +243,16 @@ instead.
 14. **Money is off.** No fee, price, commission or ₺ figure is shown while PLANNING P6
     holds; the demo gates them behind `kShowMoney`.
 15. **It must not look AI-generated** (Can, 23 Sep 2026). Rules 1–3 and 12 already
-    cover gradients, emoji, "✨ AI" badges and animate-everything. Also banned: glass or
-    blur effects, grids of identical icon cards, purple anywhere but the AI-draft state,
-    oversized marketing headlines inside the app, and decoration without a job. Every
-    colour block, number and icon shows data, a status or an action.
+    cover gradients, emoji, "✨ AI" badges and animate-everything. Check every new screen
+    against this list:
+    - Every block shows something real from our data: a food, a person, a time, a number.
+    - No tinted icon tile or coloured shape without a meaning; no grid of identical
+      icon cards.
+    - No colour outside its token's meaning (group colours only for groups, violet only
+      for AI drafts, yellow only for progress).
+    - Numbers are in the sans (Figtree), not the serif.
+    - No glass or blur, no oversized marketing headlines inside the app.
+    - Cover the logo: if the screen could belong to any wellness app, it fails.
 
 ## Language
 
