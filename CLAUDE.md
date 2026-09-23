@@ -122,6 +122,22 @@ stored there is the **publishable** key (`sb_publishable_...`), not the legacy a
 - Update PLANNING.md when a decision changes or a question closes, in place. Rewrite
   HANDOFF.md at the end of a session. Session narratives go in commit messages.
 
+## How a session runs
+
+1. Can opens a new chat in this folder (no worktree). Read HANDOFF, then act on what Can
+   brings: answers to QUESTIONS.md, or a task from HANDOFF "Next steps".
+2. Work in one small slice. Run `dart run melos run analyze` and `… test`, show what
+   changed, and ask before committing or pushing. Plan mode first for anything larger.
+3. Codex (`../dietician-app-codex`, see AGENTS.md) gives second opinions in review mode
+   and saves them to its own `docs/research/`, uncommitted. To use one: verify every
+   claim against the code, copy the file into this repo's `docs/research/`, delete the
+   uncommitted copy in the Codex folder, and commit here. Work-mode branches (`codex/*`)
+   are reviewed with `git diff main...codex/<topic>` before merging.
+4. When Can says "wrap up": record decisions in PLANNING.md, close or add questions in
+   QUESTIONS.md, rewrite HANDOFF.md, update the artifact pages if screens or decisions
+   changed, commit and push after Can's OK, then fast-forward the Codex branch
+   (`git -C ../dietician-app-codex merge --ff-only main`).
+
 ## Gotchas
 
 Traps that already cost time. Decisions with the same flavour (RLS projections, the PDF

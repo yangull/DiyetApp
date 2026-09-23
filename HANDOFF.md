@@ -21,6 +21,11 @@
     energy formula, B2B + ads + dietitians' own clients as the acquisition plan, a
     "Diyetisyen bul" section, no client limit, Kutay's Excel dropped, placeholder logo.
   - An example intake form is in `docs/reference/`.
+  - The design rules moved into the repo (`docs/design-system.md`, 14 rules). Demo
+    buttons now follow rule 13: reset is labelled, cancelling an appointment is labelled
+    and asks for confirmation, and the video mockup's dead buttons are disabled.
+  - Codex reviewed the panel UI: `docs/research/2026-09-23-ui-review.md`, 15 findings,
+    all verified against the code. The fix plan is QUESTIONS.md C18.
 - Analyzer clean, all tests green, `main` pushed.
 
 ## Pages (Claude artifacts)
@@ -31,6 +36,7 @@
 | Project overview (EN) | Understanding the whole project | https://claude.ai/artifact/AoDqhG54mg7jngZ3Ensj6y |
 | Project overview (TR) | The same, for Kadir | https://claude.ai/artifact/La1Na7aVy1weCr9VpTRLad |
 | Panel tour | The 11 demo screens with one question each | https://claude.ai/code/artifact/002e0c24-01e2-4d49-a693-6261bcb414de |
+| Design system (history) | The 28 Aug design decisions; the source is now `docs/design-system.md` | https://claude.ai/code/artifact/1d9436dc-cd7c-4639-a4ec-9459de2d8ea3 |
 
 The interview guide mirrors QUESTIONS.md §2 (K) and §3 (DT) with the same numbers. After
 an interview, ask Claude to "read the guide notes"; it moves the answers into QUESTIONS.md
@@ -38,15 +44,20 @@ and PLANNING.md.
 
 ## Next steps
 
-1. **Can:** answer QUESTIONS.md §0 (keep / change / drop for I1–I16), then C1–C5:
-   plan model, interview date, next slice, B2B timing, whether "everything in-app" holds.
-2. **Can:** turn on email confirmation in Supabase (X1, about 1 minute). Invites
-   depend on it.
-3. **Can + Kadir:** share the interview guide and the Turkish overview with Kadir from
-   each page's Share menu; ask him K1–K3 (K2 first: is the intake form athletes-only?).
-4. **Interviews:** run them with the demo and the guide (DT1–DT17).
-5. **Build, once C1/C3 are answered:** either the "Diyetisyen bul" marketplace journey or
-   the real plan editor on `diet_plans`, keyed off `dietitian_client_relationships`.
-6. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev
-   project (C17), RLS access tests, invite email delivery, ending a relationship, the
-   demo's Randevular rows overflowing below ~900 px width.
+1. **Next build: the UI review fixes (QUESTIONS.md C18).** Waiting for Can's OK on the
+   recommendation: group A (nine bugs) plus #8, #11 and #15, as one slice; then #10
+   together with putting both plan editors in the same layout. Settle C19 (button
+   wording) in the same go.
+2. **Can:** answer QUESTIONS.md §0 (keep / change / drop for I1–I16), then C1–C5: plan
+   model, interview date, next slice, B2B timing, whether "everything in-app" holds.
+3. **Can:** turn on email confirmation in Supabase (X1, about 1 minute). Invites depend
+   on it.
+4. **Can + Kadir:** give Kadir edit access to the interview guide (Share menu) and ask
+   K1–K3, K2 first (is the intake form athletes-only?).
+5. **Interviews:** run them with the demo (`flutter run -t lib/main_demo.dart …`, see
+   CLAUDE.md) and the guide (DT1–DT17). Afterwards: "read the guide notes".
+6. **Build, once C1/C3 are answered:** the "Diyetisyen bul" journey or the real plan
+   editor on `diet_plans`, keyed off `dietitian_client_relationships`.
+7. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev project
+   (C17), RLS access tests, invite email delivery, ending a relationship, Randevular rows
+   overflowing below ~900 px width.

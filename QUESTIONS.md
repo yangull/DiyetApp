@@ -156,6 +156,27 @@ dietitian see?
 _Was: Q20._
 >
 
+### C18. Which UI review fixes do we build?
+Codex's review (`docs/research/2026-09-23-ui-review.md`, 15 findings, all verified
+against the code on 23 Sep) is split in three. Claude's recommendation: build group A
+and #8, #11, #15 now; #10 next, together with putting both plan editors in the same
+layout so dietitians compare the model, not the page; #12 after the interviews; #9 when
+the real client list grows.
+- **A, bugs:** #1 message drafts follow you between clients, #2 conversation list doesn't
+  scroll, #3 exchange-editor totals use an undefined font slot, #4 freeform macro boxes
+  look calculated, #5 intake form discards input without asking, #6 declined invites say
+  "Davet bekliyor", #7 raw errors with no retry in the real panel, #13 pill vs square
+  buttons, #14 Turkish casing/decimals/wording.
+- **B, design:** #8 triage links open the task, #11 weight chart spaces points by date,
+  #15 "Hatırlatmalar" becomes "Hatırlatma ayarları", #10 editor layout, #12 compact Takip.
+>
+
+### C19. Button wording
+Proposal: buttons use the short form ("Kaydet", "Vazgeç", "İptal et"), as most Turkish
+apps do; every sentence in the panel uses "siz". Today the real panel says "Vazgeçin"
+and the demo says "Vazgeç". Once decided, it goes into `docs/design-system.md`.
+>
+
 ### C17. Separate Supabase dev project?
 Today every dev signup lands in the one live project. A second project is free on the
 Supabase free tier.
