@@ -399,14 +399,14 @@ is built to be corrected, not admired.
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green. No CI yet. Both apps build and run on the Android emulator (#3). |
+| Monorepo, tooling | Done. Analyzer clean, all tests green (core 9, client 14, panel 98). No CI yet. Both apps build and run on the Android emulator (#3). |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
-| Client app | Login → 2-tab home, pending-invite card (accept/decline), "Hedeflerim" form. |
-| Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). |
-| Interview demo | 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
+| Client app | "Sıcak" design (#131). Login → Bugün (green hero, three real steps, invite card, goal row, connected dietitian, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |
+| Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). Phone layout below 600 dp: bottom bar, comfortable density, stacked client rows (#38). |
+| Interview demo | Warm palette; below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
-| Brand | Name and palette settled. **Logo: placeholder "W" mark** until one is designed with Claude later. |
+| Brand | Name and palette settled ("Sıcak", 23 Sep 2026). **Logo: placeholder "W" mark** until one is designed with Claude later. |
 | Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123). |
 | Interviews | Held; most answers in §2.1, five questions still open (QUESTIONS.md §3). |
 

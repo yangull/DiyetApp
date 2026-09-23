@@ -191,6 +191,11 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `DropdownButtonFormField`.
 - Dart's `toUpperCase()` turns "tipi" into "TIPI". Use `trUpper` / `formatDecimal` in
   the panel's `lib/util/turkish.dart`.
+- The panel's density comes from the window width (`panelThemeBuilder` in
+  `lib/util/breakpoints.dart`, 600 dp). Branch phone layouts on `isPanelPhone(context)`;
+  never hard-code `AppDensity.compact` in a screen.
+- Colours are checked by `packages/core/test/core_test.dart`: a new token needs its pairs
+  added there, and text on `surfaceSubtle` uses `primaryHover` (primary is 4.47:1).
 
 **Demo panel**
 - All money UI (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is gated by
@@ -207,6 +212,9 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `budget_range`, `health_notes`. Move the write if you replace it.
 
 **Tests**
+- The panel shells use an `IndexedStack`, so every tab stays built: scope test finders
+  with `find.descendant(of: find.byType(SomeScreen), …)`, and scroll lazily built lists
+  (`scrollUntilVisible`) before tapping at large text scales.
 - `FakeAuthRepository.sessionChanges` replays the current session to new listeners, like
   Supabase's `onAuthStateChange`. Making it a bare broadcast stream breaks tests in
   non-obvious ways.

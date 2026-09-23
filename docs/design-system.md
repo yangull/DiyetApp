@@ -14,7 +14,7 @@ blue-grey. A neutral, cool, light ground; exactly one brand colour, a vivid emer
 Every other colour means something. The client app is calm; the dietitian panel is
 dense enough to replace Excel. One token set, two densities.
 
-## Redesign "Sıcak" (decided 23 Sep 2026, being coded)
+## Redesign "Sıcak" (decided and coded 23 Sep 2026)
 
 Can saw the client app on a phone, called it dull and lifeless, and picked direction
 **"Sıcak"** (option B on the mockup canvas,
@@ -32,8 +32,8 @@ What makes it alive is mostly **daily data** (meals marked as eaten, P7; weigh-i
 P8; the dietitian's messages), not decoration. The home screen stays honest until that
 data exists (rules 4 and 5).
 
-Until slice 1 of the redesign lands, the tables further down describe the code and this
-section describes the target. When it lands, fold these values into those tables.
+Slices 1–5 coded it the same day (PLANNING #131). The tables further down now hold the
+coded values; this section keeps the reasoning and what differs from before.
 
 **Token changes.** Contrast measured on 23 Sep (and re-measured by both reviewers)
 against the new ground unless stated.
@@ -124,10 +124,10 @@ re-measuring. Ratios are also written next to each token in `app_colors.dart`.
 
 | Token | Hex | Contrast | Means |
 |---|---|---|---|
-| `ground` | `#F7F9F8` | — | App background |
+| `ground` | `#F6F1E8` | — | App background (warm since #131) |
 | `surface` | `#FFFFFF` | — | Cards, sheets |
-| `surfaceSubtle` | `#EBF1EE` | — | Table headers, subtle fills, selected rows |
-| `borderSubtle` | `#DAE4E0` | 1.36:1 | Decorative hairline; never carries state |
+| `surfaceSubtle` | `#F1EADF` | — | Table headers, subtle fills, secondary buttons, bar tracks. Text and links on it use `primaryHover` |
+| `borderSubtle` | `#E8DDCB` | 1.19:1 | Decorative hairline; never carries state |
 | `borderStrong` | `#7E8C86` | 3.51:1 | Input and control boundaries |
 | `textPrimary` | `#16211D` | 16.54:1 | Main text |
 | `textSecondary` | `#46534D` | 7.62:1 | Supporting text |
@@ -137,6 +137,16 @@ re-measuring. Ratios are also written next to each token in `app_colors.dart`.
 | `warning` | `#8A5A0B` | 5.92:1 | Pending, waiting, needs attention |
 | `error` | `#A32017` | 7.56:1 | Rejected, failed, destructive |
 | `aiDraft` | `#514196` | 8.25:1 | **Only** AI-written content no dietitian has approved |
+| `hero` | `#18795C` | white 5.35:1 | The one flat green block carrying a screen's main number |
+| `onHeroSecondary` | `#E4F2EC` | 4.64:1 on hero | Secondary text and pending steps on the hero |
+| `heroTrack` | `#135F49` | decorative | Unfilled ring or step line on the hero |
+| `highlight` | `#F2C14E` | 3.19:1 on hero | **Only** progress and achievement |
+| `onHighlight` | `#3B2A00` | 8.25:1 | Text and icons on `highlight` |
+| `warningTint` | `#FBEFD5` | warning 5.19:1 | Fill behind warning text |
+
+The eight exchange-group colours (`ExchangeGroupColors`) are in "Redesign Sıcak"
+above. Contrast is measured against the surface the token sits on (white unless
+stated) and checked by `packages/core/test/core_test.dart`.
 
 Rules:
 - **One brand hue.** No decorative second accent (#55). Since the "Sıcak" redesign
@@ -159,7 +169,9 @@ Known tension, open for review: `primary` means both "you can press this" and
 
 Fraunces (headings only) + Figtree (everything else), bundled in `packages/core/fonts/`,
 never fetched at runtime (#60, #63). All twelve Turkish glyphs are verified in the font
-files. Serif never appears in body text, tables or buttons.
+files. Serif never appears in body text, tables, buttons or numbers: every number is
+`AppTypography.figures` (Figtree 700, tabular figures; `Figtree-Bold.ttf` is bundled
+since #132).
 
 | Slot | Face | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
 |---|---|---|---|
@@ -187,8 +199,9 @@ change between them; only measurements do.
 | Metric | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
 |---|---|---|
 | Page padding | 20 | 24 |
-| Card radius | 14 | 10 |
-| Control radius | 10 | 8 |
+| Card radius | 18 | 10 |
+| Control radius | 14 | 8 |
+| Hero bottom radius | 28 | — |
 | Button height | 48 | 36 |
 | Input height | 52 | 38 |
 | Row height | 72 | 44 |
