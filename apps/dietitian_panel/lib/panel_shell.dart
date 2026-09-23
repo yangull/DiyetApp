@@ -54,11 +54,12 @@ class _PanelShellState extends State<PanelShell> {
                 selectedIcon: Icon(Icons.chat_bubble),
                 label: Text('Mesajlar'),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.payments_outlined),
-                selectedIcon: Icon(Icons.payments),
-                label: Text('Ödemeler'),
-              ),
+              if (kShowMoney)
+                NavigationRailDestination(
+                  icon: Icon(Icons.payments_outlined),
+                  selectedIcon: Icon(Icons.payments),
+                  label: Text('Ödemeler'),
+                ),
               NavigationRailDestination(
                 icon: Icon(Icons.insights_outlined),
                 selectedIcon: Icon(Icons.insights),
@@ -89,7 +90,7 @@ class _PanelShellState extends State<PanelShell> {
                 const ClientsScreen(),
                 const AppointmentsScreen(),
                 const MessagesScreen(),
-                const PaymentsScreen(),
+                if (kShowMoney) const PaymentsScreen(),
                 const ReportsScreen(),
                 const SettingsScreen(),
               ],

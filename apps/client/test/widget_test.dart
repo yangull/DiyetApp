@@ -58,7 +58,7 @@ void main() {
     await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
     final clientId = auth.currentSession!.userId;
     profiles.seedClient(clientId, fullName: 'Elif Aydın');
-    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Kutay');
+    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Deniz');
 
     final relationships = FakeClientRelationshipRepository(
       currentUserId: clientId,
@@ -77,7 +77,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Dyt. Kutay sizi davet etti'), findsOneWidget);
+    expect(find.text('Dyt. Deniz sizi davet etti'), findsOneWidget);
     // The client's own address is not identifying information here.
     expect(find.text('elif@example.com'), findsNothing);
   });
@@ -90,7 +90,7 @@ void main() {
     await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
     final clientId = auth.currentSession!.userId;
     profiles.seedClient(clientId, fullName: 'Elif Aydın');
-    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Kutay');
+    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Deniz');
 
     final relationships =
         FakeClientRelationshipRepository(
@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.text('Kabul et'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Dyt. Kutay sizi davet etti'), findsNothing);
+    expect(find.text('Dyt. Deniz sizi davet etti'), findsNothing);
     expect(relationships.byId('rel-a').status, RelationshipStatus.active);
     expect(relationships.byId('rel-a').clientId, clientId);
   });
@@ -130,7 +130,7 @@ void main() {
     await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
     final clientId = auth.currentSession!.userId;
     profiles.seedClient(clientId, fullName: 'Elif Aydın');
-    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Kutay');
+    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Deniz');
 
     final relationships =
         FakeClientRelationshipRepository(
@@ -157,7 +157,7 @@ void main() {
     await tester.tap(find.text('Reddet'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Dyt. Kutay sizi davet etti'), findsNothing);
+    expect(find.text('Dyt. Deniz sizi davet etti'), findsNothing);
     expect(relationships.byId('rel-a').status, RelationshipStatus.declined);
     expect(relationships.byId('rel-a').clientId, isNull);
   });

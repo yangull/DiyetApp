@@ -44,15 +44,17 @@ class SettingsScreen extends ConsumerWidget {
                 title: const Text('Randevudan 2 saat önce'),
                 subtitle: const Text('Son dakika iptallerini azaltır.'),
               ),
-              Divider(height: 1, color: palette.borderSubtle),
-              SwitchListTile(
-                value: r.paymentReminder,
-                onChanged: (v) => notifier.toggleReminder('payment', v),
-                title: const Text('Ödenmemiş seans hatırlatması'),
-                subtitle: const Text(
-                  'Seans sonrası ödeme yapılmadıysa danışana hatırlatılır.',
+              if (kShowMoney) ...[
+                Divider(height: 1, color: palette.borderSubtle),
+                SwitchListTile(
+                  value: r.paymentReminder,
+                  onChanged: (v) => notifier.toggleReminder('payment', v),
+                  title: const Text('Ödenmemiş seans hatırlatması'),
+                  subtitle: const Text(
+                    'Seans sonrası ödeme yapılmadıysa danışana hatırlatılır.',
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

@@ -23,7 +23,7 @@ class OverviewScreen extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.all(context.density.pagePadding),
       children: [
-        Text('Hoş geldiniz, Dyt. Kutay', style: text.headlineLarge),
+        Text('Hoş geldiniz, Dyt. Deniz', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
           'Bugün ${demo.draftCount} planınız onayınızı bekliyor.',
@@ -76,13 +76,15 @@ class OverviewScreen extends ConsumerWidget {
                   value: '${demo.upcoming.length}',
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _Metric(
-                  label: 'Tahsil edilmemiş',
-                  value: '${demo.unpaidTotal} ₺',
+              if (kShowMoney) ...[
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: _Metric(
+                    label: 'Tahsil edilmemiş',
+                    value: '${demo.unpaidTotal} ₺',
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

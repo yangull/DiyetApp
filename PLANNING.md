@@ -22,14 +22,18 @@ A two-sided dietitian marketplace for Turkey, named **Wellkit**.
 **The main promise to the first dietitians is bringing them new clients** (confirmed by
 Can, 21 Sep 2026). Managing existing clients is a supporting capability.
 
-**Revenue (draft):** commission on dietitian–client matches (rate open, Q1); a monthly
-subscription for the AI-only tier (price open, Q2); later B2B (catering, meal cards,
-corporate). Awaiting confirmation (QUESTIONS.md §0 I5); C1 asks whether there is any
-commission at launch.
+**How clients arrive** (Can, 23 Sep 2026; the general plan with Kadir, not final): mainly
+**B2B corporate deals**, plus Wellkit's own digital ads. Dietitians can also bring their
+existing clients. Clients find a dietitian in a **"Diyetisyen bul"** section of the
+client app; first contact is online. There is no limit on clients per dietitian (the
+usual load is 30–40). Where B2B sits in the roadmap is QUESTIONS.md C4.
+
+**Money:** deferred, see P6. Commission, packages, pricing and payouts are all decided
+later.
 
 **Awaiting Can's confirmation** (QUESTIONS.md §0): the client flow (I6), the dietitian
-types to serve (I7), blood-test handling (I8), Kutay's Excel as the reference (I9),
-meal-time notifications (I10), the AI chatbot (I11) and "cheap and accessible" (I15).
+types to serve (I7), blood-test handling (I8), meal-time notifications (I10), the AI
+chatbot (I11) and "cheap and accessible" (I15).
 
 ---
 
@@ -39,8 +43,9 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
 
 - **P1** **AI drafts, the dietitian approves.** On the human-service side a client never sees
   an AI plan no dietitian has approved.
-- **P2** **All communication stays in-app** (chat + embedded video). Leaving to
-  WhatsApp/Instagram risks the commission. ⚠️ Every Turkish competitor uses WhatsApp
+- **P2** **All communication stays in-app** (chat + embedded video). Original reason:
+  leaving to WhatsApp/Instagram risks the commission, which P6 has removed for now
+  (QUESTIONS.md C5). ⚠️ Every Turkish competitor uses WhatsApp
   for reminders — a real adoption friction to raise in interviews; do not change
   without Can.
 - **P3** **Build order:** shared core → dietitian marketplace → AI-only tier.
@@ -48,6 +53,10 @@ P1, P2, P3 and P5 are awaiting re-confirmation (QUESTIONS.md §0, I1–I4).
   exchange list (`ExchangePlan`: group + count) both exist in the demo on purpose
   (#93, #97). Research says Turkish dietitians use exchange lists; unconfirmed.
 - **P5** **No per-dietitian-type screens.** One general management panel; fields may vary.
+- **P6** **No money in the app at launch** (Can, 23 Sep 2026). Clients pay their dietitian
+  directly, outside Wellkit (bank transfer or a Turkish payment app). Wellkit takes no
+  commission and runs no payments until the money model is decided; every money question
+  is parked (QUESTIONS.md §5). ⚠️ This removes P2's original reason; see QUESTIONS.md C5.
 
 ---
 
@@ -228,7 +237,8 @@ is built to be corrected, not admired.
 - **#97** `kExchangeKcal` / `kExchangeFoods` are **example** ADA values, labelled "örnek" on
   screen. They are `const` outside `DemoState`; if dietitians may edit their own
   substitution list, they become state.
-- **#95** Energy: **original 1919 Harris-Benedict** × activity factor 1.2–1.6 (five levels),
+- **#95** Energy: **Harris-Benedict × activity factor is our default formula** (Can, 23 Sep
+  2026: one of the main ones dietitians use; others can be added later, DT6). **Original 1919 Harris-Benedict** × activity factor 1.2–1.6 (five levels),
   reverse-engineered from a dietitian's spreadsheet and tested against its cells.
   WHO/FAO child brackets and Cunningham (`500 + 22 × lean mass`) are decoded but not
   implemented — no children in the demo, no lean-mass measurement.
@@ -260,7 +270,7 @@ is built to be corrected, not admired.
 | Dietitian panel | Flutter Web | Shared `core` package |
 | Backend | Supabase, EU (eu-central-1) | Auth, Postgres, Storage, Realtime. EU for KVKK — EU hosting alone is not KVKK compliance |
 | AI calls | Supabase Edge Functions | LLM keys never in the client |
-| Payment, human service | iyzico | Commission marketplace; IAP not required (physical-world service, Uber/Airbnb model) — verify before release |
+| Payment, human service | **None at launch (P6)** | Clients pay dietitians directly. iyzico was the earlier choice for a commission marketplace; revisit with the money model |
 | Payment, AI tier | RevenueCat + in-app purchase | Apple/Google requirement |
 | Video | Embedded SDK, not chosen | Agora / 100ms / Daily (Q5) |
 
@@ -275,8 +285,9 @@ is built to be corrected, not admired.
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. No password reset, no email sending. |
 | Client app | Login → 2-tab home, pending-invite card (accept/decline), "Hedeflerim" form. |
 | Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). |
-| Interview demo | 7 tabs on fake data: overview + triage, clients, appointments, messages, payments, tracking, reminders; both plan editors, energy card, PDF export, anamnez form, measurements. |
-| Marketplace | **Nothing real yet** — no public profile, listing, request/accept flow or payment. |
+| Interview demo | 7 tabs on fake data: overview + triage, clients, appointments, messages, payments, tracking, reminders; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
+| Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
+| Brand | Name and palette settled. **Logo: placeholder "W" mark** until one is designed with Claude later. |
 | Plan editor, `diet_plans` | Not built — waits on the plan-model question (P4). |
 | Interviews | Unknown — QUESTIONS.md C3. |
 
@@ -291,17 +302,17 @@ profile models, both apps at "login → first screen".
 - [ ] Dietitian onboarding + verification (diploma/document upload)
 - [~] Client onboarding: goal, health info, optional blood values, budget — goal/budget/
       health-note form exists; structured health fields and blood values don't
-- [ ] Dietitian listing + filtering + selection — email invite stands in for now (#101)
+- [ ] "Diyetisyen bul": dietitian listing + filtering + selection — email invite stands in for now (#101)
 - [ ] In-app chat (Supabase Realtime)
 - [ ] Diet plan: AI draft (Edge Function) → dietitian edits/approves → client sees it
-- [ ] iyzico payment + commission
+- [ ] ~~iyzico payment + commission~~ — deferred (P6); clients pay dietitians directly
 - [ ] Embedded video call
 
 **Phase 2 — AI-only tier:** subscription (RevenueCat + IAP), AI plan generation + follow-up,
 AI chatbot.
 
-**Phase 3+ — later, don't touch (awaiting confirmation, QUESTIONS.md §0 I13–I14):** catering, meal cards, B2B, sports PT, WhatsApp/Instagram
-integration (only in a commission-protecting form).
+**Phase 3+ — later, don't touch (awaiting confirmation, QUESTIONS.md §0 I13–I14):** catering, meal cards, sports PT, WhatsApp/Instagram
+integration. **B2B is now the main acquisition plan** and may move earlier (QUESTIONS.md C4).
 
 **Release prerequisites** (not scheduled yet): Apple Developer ($99/yr) and Google Play
 ($25; new personal accounts need a 14-day closed test with 12+ testers — start early);
@@ -322,7 +333,7 @@ meal_logs      (plan_id, meal, time, eaten)
 conversations  (client_id, dietitian_id | ai)
 messages       (conversation_id, sender, body)
 appointments   (client_id, dietitian_id, time, video_room_id, status)
-payments       (payer, amount, commission, iyzico_ref)
+payments       (deferred, P6)
 subscriptions  (client_id, revenuecat_ref, status)
 ```
 

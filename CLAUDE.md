@@ -33,7 +33,8 @@ AI-only diet plan tier.
 ## Locked decisions (do not relitigate without asking Can)
 
 - AI drafts diet plans, the dietitian approves; clients never see unapproved AI plans (on the human-service side).
-- All communication stays in-app (chat + embedded video) to protect commission revenue.
+- All communication stays in-app (chat + embedded video). Its original reason, protecting the commission, is on hold: see the next line and QUESTIONS.md C5.
+- No money in the app at launch: clients pay dietitians directly; commission, packages and payouts are decided later (PLANNING P6).
 - Build order: shared core → dietitian marketplace → AI-only tier.
 - No per-dietitian-type screens; one general management panel.
 - No Mac available: iOS builds go through Codemagic (cloud CI). Daily development is web-first via `flutter run -d web-server`, opened from the Windows browser; the Android emulator arrives as an early Phase 1 slice.
@@ -43,7 +44,7 @@ AI-only diet plan tier.
 - **Flutter** for the client app (iOS + Android) and **Flutter Web** for the dietitian panel, sharing a `core` package in a single **Melos** monorepo.
 - **Supabase (EU region)** for auth, Postgres, storage, realtime. EU region is deliberate: the app holds personal health data and must be **KVKK**-compliant.
 - **Supabase Edge Functions** for all LLM calls — API keys never live in the client.
-- Payments: **iyzico** for human dietitian services (commission-based, IAP not required — Uber/Airbnb model); **RevenueCat + in-app purchase** for the AI subscription tier (Apple/Google requirement).
+- Payments: **none for human dietitian services at launch** (clients pay dietitians directly, PLANNING P6; iyzico was the earlier plan). **RevenueCat + in-app purchase** for the later AI subscription tier (Apple/Google requirement).
 - Video SDK not chosen yet (candidates: Agora / 100ms / Daily).
 
 ## Planned repo structure
@@ -150,6 +151,9 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   builder.
 
 **Demo panel**
+- All money UI (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is gated by
+  `kShowMoney` in `lib/demo/demo_repository.dart`, off because of PLANNING P6. Gate any
+  new fee or commission display the same way; `demo_widget_test.dart` checks nothing shows.
 - Adding or changing a field on a demo model: update `demo_codec.dart` **and** bump
   `_schemaVersion` in the same change. `demo_codec_test.dart` catches a missing field but
   not a missing bump.

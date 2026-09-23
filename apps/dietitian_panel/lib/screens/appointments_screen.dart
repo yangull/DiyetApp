@@ -69,44 +69,48 @@ class AppointmentsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.xxl),
-        Row(
-          children: [
-            Text('Tahsil edilmemiş', style: text.titleLarge),
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              '${demo.unpaidCount} seans · ${demo.unpaidTotal} ₺',
-              style: text.bodyMedium?.copyWith(
-                color: palette.warning,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Card(
-          child: Column(
+        if (kShowMoney) ...[
+          const SizedBox(height: AppSpacing.xxl),
+          Row(
             children: [
-              for (var i = 0; i < unpaid.length; i++)
-                _UnpaidRow(appointment: unpaid[i], showDivider: i > 0),
-              if (unpaid.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Text(
-                    'Tahsil edilmemiş seans yok.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
-                  ),
+              Text('Tahsil edilmemiş', style: text.titleLarge),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                '${demo.unpaidCount} seans · ${demo.unpaidTotal} ₺',
+                style: text.bodyMedium?.copyWith(
+                  color: palette.warning,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
+              ),
             ],
           ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          'Gelmeyen bir danışanın seansını tahsil edilecekler arasına '
-          'koymuyoruz — bu bizim varsayımımız. Siz gelmediğinde ücret alıyor '
-          'musunuz, iptal için bir süre sınırınız var mı?',
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
-        ),
+          const SizedBox(height: AppSpacing.md),
+          Card(
+            child: Column(
+              children: [
+                for (var i = 0; i < unpaid.length; i++)
+                  _UnpaidRow(appointment: unpaid[i], showDivider: i > 0),
+                if (unpaid.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: Text(
+                      'Tahsil edilmemiş seans yok.',
+                      style: text.bodyMedium?.copyWith(
+                        color: palette.textMuted,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Gelmeyen bir danışanın seansını tahsil edilecekler arasına '
+            'koymuyoruz — bu bizim varsayımımız. Siz gelmediğinde ücret alıyor '
+            'musunuz, iptal için bir süre sınırınız var mı?',
+            style: text.bodySmall?.copyWith(color: palette.textMuted),
+          ),
+        ],
       ],
     );
   }

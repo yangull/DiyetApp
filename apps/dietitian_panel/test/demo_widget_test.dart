@@ -16,7 +16,7 @@ void main() {
     expect(find.text('Genel Bakış'), findsOneWidget);
     expect(find.text('Danışanlar'), findsOneWidget);
     expect(find.text('Mesajlar'), findsOneWidget);
-    expect(find.text('Ödemeler'), findsOneWidget);
+    expect(find.text('Ödemeler'), findsNothing);
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.theme?.colorScheme.primary, AppColors.primary);
@@ -46,17 +46,22 @@ void main() {
     expect(find.text('Yarın görüşürüz.'), findsWidgets);
   });
 
-  testWidgets('the payments screen shows the commission split', (tester) async {
+  testWidgets('no money is shown while PLANNING P6 holds', (tester) async {
+    // A desktop-sized window: the panel is web-only and Randevular's rows
+    // overflow at the test default of 800 px.
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       const ProviderScope(child: DietitianPanelDemoApp()),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Ödemeler'));
+    expect(find.textContaining('Tahsil edilmemiş'), findsNothing);
+
+    await tester.tap(find.text('Randevular'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ödemeler'), findsWidgets);
-    // _SummaryCard renders its label with .toUpperCase().
-    expect(find.textContaining('PLATFORM KOMISYONU'), findsOneWidget);
+    expect(find.textContaining('₺'), findsNothing);
   });
 }

@@ -23,8 +23,12 @@ of `pending` / `approved` / `rejected`, approved only by an admin.
 marketplace, or takes the AI-only tier without one. Addressed informally ("sen");
 the dietitian is addressed formally ("siz").
 
-**Komisyon (commission).** The platform's cut of a paid session. The revenue model,
-and the reason all communication stays in-app. The rate itself is still open.
+**Komisyon (commission).** A platform cut of a paid session. **None at launch:** clients
+pay their dietitian directly, outside Wellkit (PLANNING P6). Whether and how Wellkit
+earns from sessions is decided later.
+
+**Diyetisyen bul.** The client app section where a client finds and picks a dietitian;
+the marketplace's front door. Not built yet.
 
 ---
 
@@ -62,6 +66,12 @@ client. Plausibly a dietitian's own professional asset, which would make it
 per-dietitian editable data rather than a shared constant.
 
 ---
+
+## Intake
+
+**Anamnez.** The intake form a dietitian fills in with a new client: history, habits,
+medication, allergies, and so on. The only real example we have is sports-oriented
+(`docs/reference/anamnez-ornek.md`); the demo's form is invented.
 
 ## AI and approval
 

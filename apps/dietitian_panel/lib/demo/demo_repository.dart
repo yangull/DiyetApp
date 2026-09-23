@@ -5,10 +5,14 @@ import 'demo_models.dart';
 import 'demo_store.dart';
 import 'energy.dart';
 
-/// The platform's cut of every human-dietitian session, per PLANNING.md §2
-/// #3 (commission-based revenue). Open Question #1 — the real rate is still
-/// unset — so this number is itself a conversation piece for the Ödemeler
-/// screen, not a decision.
+/// PLANNING.md P6: no money in the app at launch — clients pay their dietitian
+/// directly. Every fee, commission and "tahsil edilmemiş" figure in the demo is
+/// hidden behind this, so a dietitian isn't shown a model we haven't chosen.
+/// Flip it back once the money model is decided.
+const kShowMoney = false;
+
+/// A placeholder platform cut, only visible when [kShowMoney] is on. The real
+/// model (commission or not) is parked in QUESTIONS.md §5.
 const kCommissionRate = 0.15;
 
 /// Local data for the discovery prototype. No Supabase, no network: the panel

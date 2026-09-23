@@ -57,7 +57,7 @@ void main() {
       await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
       profiles.seedDietitian(
         auth.currentSession!.userId,
-        fullName: 'Dyt. Kutay',
+        fullName: 'Dyt. Deniz',
         status: VerificationStatus.approved,
       );
 
@@ -91,7 +91,7 @@ void main() {
       final dietitianId = auth.currentSession!.userId;
       profiles.seedDietitian(
         dietitianId,
-        fullName: 'Dyt. Kutay',
+        fullName: 'Dyt. Deniz',
         status: VerificationStatus.approved,
       );
 
@@ -178,7 +178,7 @@ void main() {
     await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
     profiles.seedDietitian(
       auth.currentSession!.userId,
-      fullName: 'Dyt. Kutay',
+      fullName: 'Dyt. Deniz',
       status: VerificationStatus.approved,
     );
 

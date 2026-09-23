@@ -41,9 +41,18 @@ built, key them off `dietitian_client_relationships`.
 
 All open questions now live in **`QUESTIONS.md`**, and only there. The most blocking:
 
-0. **§0: confirm or correct the 16 inherited decisions (I1–I16).**
-1. **C1: is there really no commission at launch?** ("şimdilik almıyoruz")
-2. **C2: confirm "exchange list first, freeform kept"**, which unblocks the plan editor.
-3. **C3 and C4: the interview date, and whether the next slice is the marketplace or the
+0. **§0: confirm or correct the inherited decisions** (I1–I16; I5 and I9 are done).
+1. **C1: "exchange list first, freeform kept": a decision, or wait for DT2?** This
+   unblocks the plan editor.
+2. **C2 and C3: the interview date, and whether the next slice is the marketplace or the
    editor.**
-4. **Send Kadir the guide's Kadir tab** (https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB#kadir); he answers K1–K9 there, starting with Kutay's Excel (K1).
+3. **C4: B2B is the main acquisition plan. When does it enter the roadmap?**
+4. **C5: does "everything in-app" still hold now that there is no commission?**
+5. **Ask Kadir K1–K3**, starting with whether the intake form is for athletes only (K2).
+   The guide's Kadir tab: https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB#kadir
+
+Decided on 23 Sep 2026 and already in PLANNING: no money in the app at launch (P6),
+Harris-Benedict × activity factor as the default energy formula (#95), B2B + ads +
+dietitians' own clients as the acquisition plan, a "Diyetisyen bul" section in the
+client app, no client limit per dietitian, Kutay's Excel dropped as a reference, and a
+placeholder logo until one is designed.

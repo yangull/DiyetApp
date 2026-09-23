@@ -73,15 +73,11 @@ void main() {
     await _open(tester, 'Mesajlar');
   }, height: 820);
 
-  _shot('10-odemeler', (tester) async {
-    await _open(tester, 'Ödemeler');
-  }, height: 1200);
-
-  _shot('11-takip', (tester) async {
+  _shot('10-takip', (tester) async {
     await _open(tester, 'Takip');
   }, height: 1600);
 
-  _shot('12-hatirlatmalar', (tester) async {
+  _shot('11-hatirlatmalar', (tester) async {
     await _open(tester, 'Hatırlatmalar');
   });
 }
