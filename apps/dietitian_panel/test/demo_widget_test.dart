@@ -5,6 +5,7 @@ import 'package:dietitian_panel/main_demo.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
+import 'package:dietitian_panel/screens/overview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +27,34 @@ void main() {
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.theme?.colorScheme.primary, AppColors.primary);
     expect(app.darkTheme, isNull);
+  });
+
+  // Rule 15, "count the colours": green plus one status colour. Drafts are
+  // told apart by their wording here, not by violet (C30), and the triage
+  // icons are grey; amber is left for the reason and a late wait.
+  testWidgets('Genel Bakış draws no violet and no amber icons', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 2400);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+
+    Iterable<T> inOverview<T extends Widget>() => tester.widgetList<T>(
+      find.descendant(
+        of: find.byType(OverviewScreen),
+        matching: find.byType(T),
+      ),
+    );
+    final textColours = inOverview<RichText>().map((t) => t.text.style?.color);
+    final iconColours = inOverview<Icon>().map((i) => i.color);
+
+    expect(inOverview<Icon>(), isNotEmpty);
+    expect(textColours, isNot(contains(AppColors.aiDraft)));
+    expect(iconColours, isNot(contains(AppColors.aiDraft)));
+    expect(iconColours, isNot(contains(AppColors.warning)));
+    expect(textColours, contains(AppColors.warning));
   });
 
   testWidgets('a dietitian can open a conversation and send a message', (

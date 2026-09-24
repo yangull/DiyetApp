@@ -82,7 +82,6 @@ class OverviewScreen extends ConsumerWidget {
                 child: _Metric(
                   label: 'Onay bekleyen plan',
                   value: '${demo.draftCount}',
-                  emphasise: demo.draftCount > 0,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -210,7 +209,9 @@ class _SignalRow extends ConsumerWidget {
     };
 
     final taskButton = OutlinedButton(onPressed: task, child: Text(taskLabel));
+    // Grey, so each row has one green action: the task (Can, 24 Sep 2026).
     final openButton = TextButton(
+      style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
       onPressed: openClient,
       child: const Text('Danışanı aç'),
     );
@@ -231,7 +232,7 @@ class _SignalRow extends ConsumerWidget {
                   child: Icon(
                     _icon(signal.kind),
                     size: 20,
-                    color: palette.warning,
+                    color: palette.textMuted,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -243,7 +244,7 @@ class _SignalRow extends ConsumerWidget {
                       Text(
                         signal.detail,
                         style: text.bodyMedium?.copyWith(
-                          color: palette.textSecondary,
+                          color: palette.warning,
                         ),
                       ),
                     ],
@@ -269,7 +270,7 @@ class _SignalRow extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
-          Icon(_icon(signal.kind), size: 20, color: palette.warning),
+          Icon(_icon(signal.kind), size: 20, color: palette.textMuted),
           const SizedBox(width: AppSpacing.md),
           // Both halves wrap rather than overflow: two labelled actions
           // don't fit beside the reason on a narrow window.
@@ -284,9 +285,7 @@ class _SignalRow extends ConsumerWidget {
                 ),
                 Text(
                   signal.detail,
-                  style: text.bodyMedium?.copyWith(
-                    color: palette.textSecondary,
-                  ),
+                  style: text.bodyMedium?.copyWith(color: palette.warning),
                 ),
               ],
             ),
@@ -331,7 +330,7 @@ class _DraftRow extends ConsumerWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      leading: Icon(Icons.description_outlined, color: palette.aiDraft),
+      leading: Icon(Icons.description_outlined, color: palette.textMuted),
       title: Row(
         children: [
           Flexible(child: Text(client.name, style: text.titleMedium)),
@@ -343,7 +342,9 @@ class _DraftRow extends ConsumerWidget {
         '${plan.day} · ${plan.kcal} kcal · taslak hazır',
         style: text.bodySmall?.copyWith(color: palette.textMuted),
       ),
-      trailing: FilledButton(
+      // A pale pill: three solid green buttons in a column were the loudest
+      // thing on the screen (Can, 24 Sep 2026).
+      trailing: OutlinedButton(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => PlanEditorScreen(clientId: plan.clientId),
@@ -374,42 +375,11 @@ class _WaitingBadge extends StatelessWidget {
   }
 }
 
-class _Count extends StatelessWidget {
-  const _Count({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: palette.warning,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        '$count',
-        style: Theme.of(context).textTheme.labelSmall
-            ?.copyWith(color: AppColors.surface),
-      ),
-    );
-  }
-}
-
 class _Metric extends StatelessWidget {
-  const _Metric({
-    required this.label,
-    required this.value,
-    this.emphasise = false,
-  });
+  const _Metric({required this.label, required this.value});
 
   final String label;
   final String value;
-  final bool emphasise;
 
   @override
   Widget build(BuildContext context) {
@@ -430,9 +400,7 @@ class _Metric extends StatelessWidget {
             Text(
               value,
               style: text.headlineLarge?.copyWith(
-                color: emphasise
-                    ? context.palette.aiDraft
-                    : Theme.of(context).colorScheme.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -457,7 +425,7 @@ class _TriageHeader extends StatelessWidget {
     final palette = context.palette;
     final title = Text('Dikkat gerekenler', style: text.titleLarge);
     final count = signals.isNotEmpty
-        ? _Count(count: signals.length)
+        ? TonePill(label: '${signals.length}', tone: PillTone.neutral)
         : Text(
             'temiz',
             style: text.bodyMedium?.copyWith(color: palette.textMuted),
