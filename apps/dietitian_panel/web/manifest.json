@@ -1,11 +1,11 @@
 {
-    "name": "dietitian_panel",
-    "short_name": "dietitian_panel",
+    "name": "Wellkit Panel",
+    "short_name": "Wellkit Panel",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F2F4F3",
+    "theme_color": "#F2F4F3",
+    "description": "Wellkit: diyetisyen paneli",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
