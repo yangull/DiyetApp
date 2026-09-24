@@ -181,14 +181,13 @@ class _MealCard extends ConsumerWidget {
               ),
             // Below the rows, where the new row appears; the header has no
             // room for it on a phone.
-            TextButton.icon(
-              // No start inset: the icon lines up with the fields above.
-              style: TextButton.styleFrom(
-                padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+            // The icon lines up with the fields above.
+            EdgeButton(
+              child: TextButton.icon(
+                onPressed: () => notifier.addItem(clientId, mealIndex),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Besin ekle'),
               ),
-              onPressed: () => notifier.addItem(clientId, mealIndex),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Besin ekle'),
             ),
           ],
         ),

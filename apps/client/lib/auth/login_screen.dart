@@ -112,9 +112,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : const Text('Giriş yap'),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextButton(
-                      onPressed: widget.onSwitchToSignUp,
-                      child: const Text('Hesabın yok mu? Kayıt ol'),
+                    // Left on the fields' edge (Can, rule 6), not centred.
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: EdgeButton(
+                        child: TextButton(
+                          onPressed: widget.onSwitchToSignUp,
+                          child: const Text('Hesabın yok mu? Kayıt ol'),
+                        ),
+                      ),
                     ),
                   ],
                 ),

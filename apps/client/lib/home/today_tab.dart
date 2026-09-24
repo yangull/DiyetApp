@@ -425,27 +425,21 @@ class _ComingSoon extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
     final body = text.bodyMedium?.copyWith(color: palette.textSecondary);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'YAKINDA',
-            style: text.labelSmall?.copyWith(color: palette.textMuted),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Diyetisyen bul: sana uygun diyetisyeni kendin seç.',
-            style: body,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Yapay zekâ ile ilerle: diyetisyensiz beslenme planı.',
-            style: body,
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'YAKINDA',
+          style: text.labelSmall?.copyWith(color: palette.textMuted),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text('Diyetisyen bul: sana uygun diyetisyeni kendin seç.', style: body),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Yapay zekâ ile ilerle: diyetisyensiz beslenme planı.',
+          style: body,
+        ),
+      ],
     );
   }
 }

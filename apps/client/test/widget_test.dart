@@ -319,6 +319,111 @@ void main() {
     }
   }
 
+  // Slice 12: every block starts on the page's one left edge (rule 6), so a
+  // button's padding must not push its icon or label inward.
+  group('one left edge', () {
+    Future<void> pumpSignedIn(WidgetTester tester) async {
+      final auth = FakeAuthRepository();
+      final profiles = FakeProfileRepository();
+      await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
+      profiles.seedClient(auth.currentSession!.userId, fullName: 'Elif Aydın');
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(auth),
+            profileRepositoryProvider.overrideWithValue(profiles),
+            clientRelationshipRepositoryProvider.overrideWithValue(
+              FakeClientRelationshipRepository(),
+            ),
+          ],
+          child: const ClientApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Bugün: "YAKINDA" starts where the cards start', (
+      tester,
+    ) async {
+      await pumpSignedIn(tester);
+      final cardLeft = tester.getTopLeft(find.byType(Card).first).dx;
+      expect(tester.getTopLeft(find.text('YAKINDA')).dx, cardLeft);
+      expect(tester.getTopLeft(find.text('Merhaba, Elif')).dx, cardLeft);
+    });
+
+    testWidgets('Profil: "Çıkış yap" starts on the page edge', (tester) async {
+      await pumpSignedIn(tester);
+      await tester.tap(find.text('Profil'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Çıkış yap'),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      final edge = tester.getTopLeft(find.text('YAKINDA')).dx;
+      final signOut = find.ancestor(
+        of: find.text('Çıkış yap'),
+        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+      );
+      final icon = find.descendant(
+        of: signOut,
+        matching: find.byIcon(Icons.logout),
+      );
+      expect(tester.getTopLeft(icon).dx, edge);
+      expect(tester.getSize(signOut).height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('Profil: "Düzenle" ends on the card\'s right edge', (
+      tester,
+    ) async {
+      await pumpSignedIn(tester);
+      await tester.tap(find.text('Profil'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopRight(find.text('Düzenle')).dx,
+        tester.getTopRight(find.byType(Card).first).dx,
+      );
+    });
+
+    testWidgets('login and signup links start on the fields\' edge', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+            profileRepositoryProvider.overrideWithValue(
+              FakeProfileRepository(),
+            ),
+          ],
+          child: const ClientApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      double fieldLeft() =>
+          tester.getTopLeft(find.byType(TextFormField).first).dx;
+
+      expect(
+        tester.getTopLeft(find.text('Hesabın yok mu? Kayıt ol')).dx,
+        fieldLeft(),
+      );
+      expect(
+        tester
+            .getSize(
+              find.widgetWithText(TextButton, 'Hesabın yok mu? Kayıt ol'),
+            )
+            .height,
+        greaterThanOrEqualTo(48),
+      );
+      await tester.tap(find.text('Hesabın yok mu? Kayıt ol'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text('Zaten hesabın var mı? Giriş yap')).dx,
+        fieldLeft(),
+      );
+    });
+  });
+
   testWidgets(
     'a dietitian-role account sees the mismatch screen, not the home',
     (tester) async {

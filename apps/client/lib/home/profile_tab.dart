@@ -48,13 +48,16 @@ class ProfileTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.x3),
         _SectionHeader(
           title: 'HEDEFLERİN',
-          action: TextButton(
-            onPressed: () => GoalsEditScreen.open(
-              context,
-              userId: profile.id,
-              detail: detail,
+          action: EdgeButton(
+            end: true,
+            child: TextButton(
+              onPressed: () => GoalsEditScreen.open(
+                context,
+                userId: profile.id,
+                detail: detail,
+              ),
+              child: const Text('Düzenle'),
             ),
-            child: const Text('Düzenle'),
           ),
         ),
         Card(
@@ -91,11 +94,13 @@ class ProfileTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.x4),
         Align(
           alignment: AlignmentDirectional.centerStart,
-          child: TextButton.icon(
-            style: AppTheme.quietButton,
-            onPressed: actions.signOut,
-            icon: const Icon(Icons.logout),
-            label: const Text('Çıkış yap'),
+          child: EdgeButton(
+            child: TextButton.icon(
+              style: AppTheme.quietButton,
+              onPressed: actions.signOut,
+              icon: const Icon(Icons.logout),
+              label: const Text('Çıkış yap'),
+            ),
           ),
         ),
       ],
