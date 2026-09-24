@@ -1,10 +1,12 @@
 import 'package:dietitian_panel/main_demo.dart';
+import 'package:dietitian_panel/screens/appointments_screen.dart';
 import 'package:dietitian_panel/screens/client_detail_screen.dart';
 import 'package:dietitian_panel/screens/clients_screen.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -217,6 +219,43 @@ void main() {
           scrollable: inClients(find.byType(Scrollable)).first,
         );
         expect(inClients(find.text('Ahmet Demir')), findsWidgets);
+      });
+
+      testWidgets('past appointments read on a $width dp phone at $scale×', (
+        tester,
+      ) async {
+        await pumpPhone(tester, width, scale);
+        await openTab(tester, 'Randevular');
+        final done = find.descendant(
+          of: find.byType(AppointmentsScreen),
+          matching: find.text('Görüşme yapıldı'),
+        );
+        final list = find
+            .descendant(
+              of: find.byType(AppointmentsScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first;
+        await tester.scrollUntilVisible(
+          find.text('Geçmiş randevular'),
+          300,
+          scrollable: list,
+        );
+        await tester.drag(list, const Offset(0, -300));
+        await tester.pumpAndSettle();
+        expect(done, findsWidgets);
+        // Squeezed into a column beside the name, it broke mid-word
+        // ("Görüşm / e / yapıldı"): narrower than its longest word.
+        for (final element in done.evaluate()) {
+          final paragraph = element.renderObject! as RenderParagraph;
+          expect(
+            paragraph.size.width,
+            greaterThanOrEqualTo(
+              paragraph.getMinIntrinsicWidth(double.infinity) - 0.5,
+            ),
+            reason: 'a word in "Görüşme yapıldı" is broken',
+          );
+        }
       });
 
       for (final tab in ['Danışanlar', 'Randevular', 'Mesajlar', 'Takip']) {

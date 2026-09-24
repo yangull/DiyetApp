@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:dietitian_panel/demo/demo_models.dart';
 import 'package:dietitian_panel/demo/demo_repository.dart';
 import 'package:dietitian_panel/main_demo.dart';
+import 'package:dietitian_panel/screens/appointments_screen.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
@@ -61,6 +62,42 @@ void main() {
     expect(iconColours, isNot(contains(AppColors.aiDraft)));
     expect(iconColours, isNot(contains(AppColors.warning)));
     expect(textColours, contains(AppColors.warning));
+  });
+
+  // One green action per row (Can, C29): "Görüşmeye başla", a pale pill
+  // with primaryHover text. Nothing else on Randevular is primary-green.
+  testWidgets('Randevular keeps green for "Görüşmeye başla" alone', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 2400);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Randevular'));
+    await tester.pumpAndSettle();
+
+    final green = <String>[];
+    for (final t in tester.widgetList<RichText>(
+      find.descendant(
+        of: find.byType(AppointmentsScreen),
+        matching: find.byType(RichText),
+      ),
+    )) {
+      t.text.visitChildren((span) {
+        final colour = span.style?.color;
+        // Icons are glyph text too; the pill's video icon shares its colour.
+        final icon = span.style?.fontFamily == 'MaterialIcons';
+        if (!icon &&
+            (colour == AppColors.primary || colour == AppColors.primaryHover)) {
+          green.add(span.toPlainText());
+        }
+        return true;
+      });
+    }
+    expect(green.toSet(), {'Görüşmeye başla'});
   });
 
   testWidgets('the counts under the greeting open where their items are', (

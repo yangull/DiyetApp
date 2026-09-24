@@ -186,21 +186,24 @@ class _AppointmentRow extends ConsumerWidget {
           style: text.bodyMedium?.copyWith(color: palette.textMuted),
         )
       else if (reminded)
+        // A done state, told like "Onaylı": a black tick, grey words.
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check, size: 16, color: AppColors.primary),
+            const Icon(Icons.check, size: 16, color: AppColors.textPrimary),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
                 'Hatırlatma gönderildi',
-                style: text.bodyMedium?.copyWith(color: AppColors.primary),
+                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
               ),
             ),
           ],
         )
       else
+        // One green action per row, "Görüşmeye başla" (Can, C29).
         TextButton.icon(
+          style: AppTheme.quietButton,
           onPressed: () {
             ref.read(demoProvider.notifier).sendReminder(appointment.id);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -214,7 +217,7 @@ class _AppointmentRow extends ConsumerWidget {
         ),
       if (!cancelled)
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: palette.textMuted),
+          style: AppTheme.quietButton,
           onPressed: () async {
             final confirmed = await showDialog<bool>(
               context: context,
@@ -318,6 +321,36 @@ class _PastRow extends ConsumerWidget {
     final palette = context.palette;
     final noShow = appointment.status == AppointmentStatus.noShow;
     final cancelled = appointment.status == AppointmentStatus.cancelled;
+    final who = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(client.name, style: text.titleMedium),
+        Text(
+          _when(appointment.at),
+          style: text.bodySmall?.copyWith(color: palette.textMuted),
+        ),
+      ],
+    );
+    final status = Text(
+      switch (appointment.status) {
+        AppointmentStatus.noShow => 'Gelmedi',
+        AppointmentStatus.cancelled => 'İptal edildi',
+        _ => 'Görüşme yapıldı',
+      },
+      style: text.bodyMedium?.copyWith(
+        color: noShow ? palette.warning : palette.textSecondary,
+      ),
+    );
+    // Quiet: a record kept after the fact, not the row's next step.
+    final markNoShow = noShow || cancelled
+        ? null
+        : TextButton.icon(
+            style: AppTheme.quietButton,
+            onPressed: () =>
+                ref.read(demoProvider.notifier).markNoShow(appointment.id),
+            icon: const Icon(Icons.event_busy_outlined, size: 18),
+            label: const Text('Gelmedi olarak işaretle'),
+          );
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -329,42 +362,34 @@ class _PastRow extends ConsumerWidget {
             ? Border(top: BorderSide(color: palette.borderSubtle))
             : null,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      // Like the upcoming rows: below 720 px the status and the action go
+      // under the name. Beside it, the action took the whole width and the
+      // status broke mid-word ("Görüşm / e / yapıldı").
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 720) {
+            // Full width even with no action, or the row shrinks to its text.
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(client.name, style: text.titleMedium),
-                Text(
-                  _when(appointment.at),
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                who,
+                const SizedBox(height: AppSpacing.xs),
+                Wrap(
+                  spacing: AppSpacing.md,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [status, ?markNoShow],
                 ),
               ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              switch (appointment.status) {
-                AppointmentStatus.noShow => 'Gelmedi',
-                AppointmentStatus.cancelled => 'İptal edildi',
-                _ => 'Görüşme yapıldı',
-              },
-              style: text.bodyMedium?.copyWith(
-                color: noShow ? palette.warning : palette.textSecondary,
-              ),
-            ),
-          ),
-          if (!noShow && !cancelled)
-            TextButton.icon(
-              onPressed: () =>
-                  ref.read(demoProvider.notifier).markNoShow(appointment.id),
-              icon: const Icon(Icons.event_busy_outlined, size: 18),
-              label: const Text('Gelmedi olarak işaretle'),
-            ),
-        ],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(flex: 3, child: who),
+              Expanded(flex: 2, child: status),
+              ?markNoShow,
+            ],
+          );
+        },
       ),
     );
   }
