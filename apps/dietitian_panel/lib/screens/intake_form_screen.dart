@@ -6,6 +6,7 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../util/breakpoints.dart';
 import 'plan_editor_screen.dart';
+import '../widgets/readable_width.dart';
 
 /// The anamnez form, and it is a guess on purpose.
 ///
@@ -91,6 +92,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
         ),
         actions: [
           TextButton(
+            style: AppTheme.quietButton,
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Düzenlemeye dön'),
           ),
@@ -140,149 +142,165 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
         appBar: AppBar(title: const Text('Yeni danışan')),
         body: Form(
           key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.all(context.density.pagePadding),
-            children: [
-              Text('Temel bilgiler', style: text.titleLarge),
-              const SizedBox(height: AppSpacing.md),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    children: [
-                      _row(
-                        [
-                          _field(_name, 'Ad soyad', required: true),
-                          _number(_age, 'Yaş', min: 10, max: 100),
-                          _dropdown<Sex>(
-                            label: 'Cinsiyet',
-                            value: _sex,
-                            entries: {Sex.kadin: 'Kadın', Sex.erkek: 'Erkek'},
-                            onChanged: (v) => setState(() => _sex = v),
-                          ),
-                        ],
-                        flex: [3, 1, 1],
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _row([
-                        _number(_height, 'Boy (cm)', min: 100, max: 230),
-                        _number(_weight, 'Kilo (kg)', min: 30, max: 300),
-                        _number(
-                          _targetWeight,
-                          'Hedef kilo (kg)',
-                          min: 30,
-                          max: 300,
-                          optional: true,
+          child: LayoutBuilder(
+            builder: (context, constraints) => ListView(
+              padding: readablePadding(
+                constraints.maxWidth,
+                context.density.pagePadding,
+              ),
+              children: [
+                Text('Temel bilgiler', style: text.titleLarge),
+                const SizedBox(height: AppSpacing.md),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      children: [
+                        _row(
+                          [
+                            _field(_name, 'Ad soyad', required: true),
+                            _number(_age, 'Yaş', min: 10, max: 100),
+                            _dropdown<Sex>(
+                              label: 'Cinsiyet',
+                              value: _sex,
+                              entries: {Sex.kadin: 'Kadın', Sex.erkek: 'Erkek'},
+                              onChanged: (v) => setState(() => _sex = v),
+                            ),
+                          ],
+                          spans: [4, 1, 1],
                         ),
-                      ]),
-                      const SizedBox(height: AppSpacing.lg),
-                      _row(
-                        [
-                          _field(_goal, 'Hedef'),
-                          _dropdown<ActivityLevel>(
-                            label: 'Hareket düzeyi',
-                            value: _activity,
-                            entries: const {
-                              ActivityLevel.sedanter: 'Hareketsiz',
-                              ActivityLevel.hafifAktif: 'Az hareketli',
-                              ActivityLevel.ortaAktif: 'Orta hareketli',
-                              ActivityLevel.aktif: 'Hareketli',
-                              ActivityLevel.cokAktif: 'Çok hareketli',
-                            },
-                            onChanged: (v) => setState(() => _activity = v),
-                          ),
-                        ],
-                        flex: [2, 2],
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.lg),
+                        _row(
+                          [
+                            _number(_height, 'Boy (cm)', min: 100, max: 230),
+                            _number(_weight, 'Kilo (kg)', min: 30, max: 300),
+                            _number(
+                              _targetWeight,
+                              'Hedef kilo (kg)',
+                              min: 30,
+                              max: 300,
+                              optional: true,
+                            ),
+                          ],
+                          spans: [2, 2, 2],
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _row(
+                          [
+                            _field(_goal, 'Hedef'),
+                            _dropdown<ActivityLevel>(
+                              label: 'Hareket düzeyi',
+                              value: _activity,
+                              entries: const {
+                                ActivityLevel.sedanter: 'Hareketsiz',
+                                ActivityLevel.hafifAktif: 'Az hareketli',
+                                ActivityLevel.ortaAktif: 'Orta hareketli',
+                                ActivityLevel.aktif: 'Hareketli',
+                                ActivityLevel.cokAktif: 'Çok hareketli',
+                              },
+                              onChanged: (v) => setState(() => _activity = v),
+                            ),
+                          ],
+                          spans: [3, 3],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text('Sağlık bilgileri', style: text.titleLarge),
-              const SizedBox(height: AppSpacing.md),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    children: [
-                      _row(
-                        [
-                          _field(_dietType, 'Beslenme tipi'),
-                          _field(
-                            _allergies,
-                            'Alerji / hassasiyet',
-                            hint: 'virgülle ayırın',
+                const SizedBox(height: AppSpacing.xl),
+                Text('Sağlık bilgileri', style: text.titleLarge),
+                const SizedBox(height: AppSpacing.md),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      children: [
+                        _row(
+                          [
+                            _field(_dietType, 'Beslenme tipi'),
+                            _field(
+                              _allergies,
+                              'Alerji / hassasiyet',
+                              hint: 'virgülle ayırın',
+                            ),
+                          ],
+                          spans: [2, 4],
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _row(
+                          [
+                            _field(
+                              _conditions,
+                              'Kronik rahatsızlık',
+                              hint: 'virgülle ayırın',
+                            ),
+                            _field(
+                              _medications,
+                              'İlaç / takviye',
+                              hint: 'virgülle ayırın',
+                            ),
+                          ],
+                          spans: [3, 3],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text('Anamnez', style: text.titleLarge),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Bu bölümdeki sorular bizim tahminimiz — ilk görüşmede gerçekte '
+                  'neleri sorduğunuzu bilmiyoruz. Sormadıklarınızı çizin, eksik '
+                  'olanları söyleyin: hangi cevap planı değiştiriyorsa onu '
+                  'modellemek istiyoruz.',
+                  style: text.bodyMedium?.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      children: [
+                        for (final entry in _anamnesis.entries)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
+                            child: _field(entry.value, entry.key),
                           ),
-                        ],
-                        flex: [1, 2],
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _row([
-                        _field(
-                          _conditions,
-                          'Kronik rahatsızlık',
-                          hint: 'virgülle ayırın',
-                        ),
-                        _field(
-                          _medications,
-                          'İlaç / takviye',
-                          hint: 'virgülle ayırın',
-                        ),
-                      ]),
-                    ],
+                        _field(_note, 'Diğer notlar', maxLines: 3),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text('Anamnez', style: text.titleLarge),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                'Bu bölümdeki sorular bizim tahminimiz — ilk görüşmede gerçekte '
-                'neleri sorduğunuzu bilmiyoruz. Sormadıklarınızı çizin, eksik '
-                'olanları söyleyin: hangi cevap planı değiştiriyorsa onu '
-                'modellemek istiyoruz.',
-                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    children: [
-                      for (final entry in _anamnesis.entries)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: _field(entry.value, entry.key),
-                        ),
-                      _field(_note, 'Diğer notlar', maxLines: 3),
-                    ],
-                  ),
+                const SizedBox(height: AppSpacing.xl),
+                Wrap(
+                  spacing: AppSpacing.md,
+                  runSpacing: AppSpacing.sm,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    FilledButton(
+                      onPressed: _save,
+                      child: const Text('Kaydet ve taslak oluştur'),
+                    ),
+                    TextButton(
+                      style: AppTheme.quietButton,
+                      onPressed: _confirmLeave,
+                      child: const Text('Vazgeç'),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Wrap(
-                spacing: AppSpacing.md,
-                runSpacing: AppSpacing.sm,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  FilledButton(
-                    onPressed: _save,
-                    child: const Text('Kaydet ve taslak oluştur'),
-                  ),
-                  TextButton(
-                    onPressed: _confirmLeave,
-                    child: const Text('Vazgeç'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
-                'yapay zekâ taslağı hazırlanır ve onayınıza düşer.',
-                style: text.bodySmall?.copyWith(color: palette.textMuted),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
+                  'yapay zekâ taslağı hazırlanır ve onayınıza düşer.',
+                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -340,31 +358,48 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
       if (part.trim().isNotEmpty) part.trim(),
   ];
 
-  /// Flex lives here rather than in the field helpers, so a field can also be
-  /// used on its own in a Column — an `Expanded` baked into the helper meant
-  /// vertical flex with unbounded height the moment one was, which is a crash.
+  /// Width lives here rather than in the field helpers, so a field can also
+  /// be used on its own in a Column — an `Expanded` baked into the helper
+  /// meant vertical flex with unbounded height the moment one was, which is a
+  /// crash.
   ///
-  /// On a phone every field gets its own line: three to a row left "Yaş" as
-  /// "Y…" and overflowed the dropdown.
-  Widget _row(List<Widget> children, {List<int>? flex}) => isPanelPhone(context)
-      ? Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              if (i > 0) const SizedBox(height: AppSpacing.lg),
-              children[i],
-            ],
+  /// Wide, every row sits on one six-column grid: [spans] says how many
+  /// columns each field takes (they sum to 6), so field edges line up from row
+  /// to row. On a phone every field gets its own line: three to a row left
+  /// "Yaş" as "Y…" and overflowed the dropdown.
+  Widget _row(List<Widget> children, {required List<int> spans}) {
+    assert(spans.length == children.length);
+    assert(spans.fold(0, (a, b) => a + b) == 6);
+    if (isPanelPhone(context)) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.lg),
+            children[i],
           ],
-        )
-      : Row(
+        ],
+      );
+    }
+    const gap = AppSpacing.lg;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final column = (constraints.maxWidth - 5 * gap) / 6;
+        return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (var i = 0; i < children.length; i++) ...[
-              if (i > 0) const SizedBox(width: AppSpacing.lg),
-              Expanded(flex: flex?[i] ?? 1, child: children[i]),
+              if (i > 0) const SizedBox(width: gap),
+              SizedBox(
+                width: spans[i] * column + (spans[i] - 1) * gap,
+                child: children[i],
+              ),
             ],
           ],
         );
+      },
+    );
+  }
 
   Widget _field(
     TextEditingController controller,
@@ -416,7 +451,15 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     return DropdownButtonFormField<T>(
       initialValue: value,
       isExpanded: true,
-      decoration: InputDecoration(labelText: label),
+      // A dropdown's content has a 24 px floor, taller than a text line, so
+      // its padding is trimmed to land on the text fields' height.
+      decoration: InputDecoration(
+        labelText: label,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: (context.density.inputHeight - 24) / 2,
+        ),
+      ),
       items: [
         for (final entry in entries.entries)
           DropdownMenuItem(

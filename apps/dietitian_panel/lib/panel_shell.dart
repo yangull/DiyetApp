@@ -211,6 +211,7 @@ Future<void> _confirmReset(
       ),
       actions: [
         TextButton(
+          style: AppTheme.quietButton,
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Vazgeç'),
         ),

@@ -235,6 +235,7 @@ class _AppointmentRow extends ConsumerWidget {
                   content: Text('${client.name} ile randevu iptal edilecek.'),
                   actions: [
                     TextButton(
+                      style: AppTheme.quietButton,
                       onPressed: () => Navigator.of(context).pop(false),
                       child: const Text('Vazgeç'),
                     ),

@@ -214,6 +214,7 @@ class _InviteDialogState extends State<_InviteDialog> {
       ),
       actions: [
         TextButton(
+          style: AppTheme.quietButton,
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Vazgeç'),
         ),

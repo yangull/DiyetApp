@@ -91,46 +91,57 @@ class PlanEditorLayout extends StatelessWidget {
         final phone = isPanelPhone(context);
 
         return Scaffold(
+          // The pill sits right after the title, where it is read with it;
+          // at the far right of a wide window it floated alone. A phone has
+          // no room for it here (see [phone]).
           appBar: AppBar(
-            title: Text(title),
-            actions: phone
-                ? null
-                : [
-                    Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.lg),
-                      child: Center(child: StatusPill(state: state)),
-                    ),
-                  ],
+            title: phone
+                ? Text(title)
+                : Row(
+                    children: [
+                      Flexible(child: Text(title)),
+                      const SizedBox(width: AppSpacing.md),
+                      StatusPill(state: state),
+                    ],
+                  ),
           ),
           body: wide
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Flexible(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 760),
-                        child: ListView(
-                          padding: EdgeInsets.all(padding),
-                          children: _work(),
+              // The meal column and the side panel as one centred block, not
+              // pinned to the left with an empty strip on the right.
+              ? Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 760 + 320 + padding),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 760),
+                            child: ListView(
+                              padding: EdgeInsets.all(padding),
+                              children: _work(),
+                            ),
+                          ),
                         ),
-                      ),
+                        SizedBox(
+                          width: 320 + padding,
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.fromLTRB(
+                              0,
+                              padding,
+                              padding,
+                              padding,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: _panel(context, withApprove: true),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                      width: 320 + padding,
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          0,
-                          padding,
-                          padding,
-                          padding,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _panel(context, withApprove: true),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 )
               : ListView(
                   padding: EdgeInsets.all(padding),

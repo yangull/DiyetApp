@@ -7,6 +7,7 @@ import '../demo/demo_repository.dart';
 import '../demo/progress.dart';
 import '../widgets/weight_chart.dart';
 import '../util/turkish.dart';
+import '../widgets/readable_width.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -17,54 +18,62 @@ class ReportsScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return ListView(
-      padding: EdgeInsets.all(context.density.pagePadding),
-      children: [
-        Text('Takip ve raporlar', style: text.headlineLarge),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          'Danışan başına kilo seyri, hedef kilosuna göre değerlendirilmiş. '
-          'Kilo koruma hedefindeki bir danışanda düşüş de dikkat gerektirir; '
-          'bu ayrımı doğru mu kuruyoruz, ve hangi ölçümleri düzenli takip '
-          'ediyorsunuz?',
-          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+    return LayoutBuilder(
+      builder: (context, constraints) => ListView(
+        padding: readablePadding(
+          constraints.maxWidth,
+          context.density.pagePadding,
         ),
-        const SizedBox(height: AppSpacing.xl),
-        for (final client in demo.clients) ...[
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Wraps rather than overflows on a phone or at large text.
-                  Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.xs,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(client.name, style: text.titleLarge),
-                      Text(
-                        client.goal,
-                        style: text.bodyMedium?.copyWith(
-                          color: palette.textMuted,
+        children: [
+          Text('Takip ve raporlar', style: text.headlineLarge),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Danışan başına kilo seyri, hedef kilosuna göre değerlendirilmiş. '
+            'Kilo koruma hedefindeki bir danışanda düşüş de dikkat gerektirir; '
+            'bu ayrımı doğru mu kuruyoruz, ve hangi ölçümleri düzenli takip '
+            'ediyorsunuz?',
+            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          for (final client in demo.clients) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Wraps rather than overflows on a phone or at large text.
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(client.name, style: text.titleLarge),
+                        Text(
+                          client.goal,
+                          style: text.bodyMedium?.copyWith(
+                            color: palette.textMuted,
+                          ),
                         ),
-                      ),
-                      _Delta(client: client, entries: demo.weights[client.id]!),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  WeightChart(
-                    entries: demo.weights[client.id]!,
-                    targetKg: client.targetWeightKg,
-                  ),
-                ],
+                        _Delta(
+                          client: client,
+                          entries: demo.weights[client.id]!,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    WeightChart(
+                      entries: demo.weights[client.id]!,
+                      targetKg: client.targetWeightKg,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
