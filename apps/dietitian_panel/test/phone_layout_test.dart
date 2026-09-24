@@ -92,6 +92,30 @@ void main() {
         expect(find.byType(BackButton), findsOneWidget);
       });
 
+      testWidgets('a thread with the keyboard open fits a $width dp phone '
+          'at $scale×', (tester) async {
+        await pumpPhone(tester, width, scale);
+        await openTab(tester, 'Mesajlar');
+        final thread = find
+            .descendant(
+              of: find.byType(MessagesScreen),
+              matching: find.text('Elif Aydın'),
+            )
+            .first;
+        await tester.ensureVisible(thread);
+        await tester.pumpAndSettle();
+        await tester.tap(thread);
+        await tester.pumpAndSettle();
+        // A soft keyboard a little under half the screen tall.
+        tester.view.viewInsets = const FakeViewPadding(bottom: 320 * 3);
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'Kolay gelsin');
+        await tester.tap(find.byTooltip('Gönder'));
+        await tester.pumpAndSettle();
+        expect(find.text('Kolay gelsin'), findsOneWidget);
+        expect(find.byType(TextField).hitTestable(), findsOneWidget);
+      });
+
       testWidgets('a message thread opens as its own page on a $width dp '
           'phone at $scale×', (tester) async {
         await pumpPhone(tester, width, scale);

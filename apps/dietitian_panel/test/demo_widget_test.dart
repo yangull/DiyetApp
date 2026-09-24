@@ -100,6 +100,83 @@ void main() {
     expect(green.toSet(), {'Görüşmeye başla'});
   });
 
+  // C27 (Can): the wide thread sits on the grey ground, so the client's white
+  // bubbles read; the dietitian's are the pale green tint.
+  testWidgets('Mesajlar: a titled screen, thread on the ground, two bubbles', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    // A laptop in landscape: short enough that the context panel has to
+    // scroll under the new heading.
+    tester.view.physicalSize = const Size(1280, 600);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mesajlar'));
+    await tester.pumpAndSettle();
+    Finder inMessages(Finder f) =>
+        find.descendant(of: find.byType(MessagesScreen), matching: f);
+
+    expect(inMessages(find.text('Mesajlar')), findsOneWidget);
+
+    // The rounded container around the text; the same words also show as
+    // the preview in the conversation list.
+    Color bubbleOf(String message) {
+      final bubbles = tester
+          .widgetList<Container>(
+            find.ancestor(
+              of: inMessages(find.text(message)),
+              matching: find.byType(Container),
+            ),
+          )
+          .map((c) => c.decoration)
+          .whereType<BoxDecoration>()
+          .where((d) => d.borderRadius != null);
+      return bubbles.single.color!;
+    }
+
+    const fromClient = 'Süper, teşekkürler!';
+    expect(bubbleOf(fromClient), AppColors.surface);
+    final bubble = find.byWidgetPredicate(
+      (w) =>
+          w is Container &&
+          w.decoration is BoxDecoration &&
+          (w.decoration! as BoxDecoration).borderRadius != null,
+    );
+    final inBubble = inMessages(
+      find.descendant(of: bubble, matching: find.text(fromClient)),
+    );
+    expect(inBubble, findsOneWidget);
+    expect(
+      find.ancestor(of: inBubble, matching: find.byType(Card)),
+      findsNothing,
+    );
+    await tester.enterText(inMessages(find.byType(TextField)), 'Kolay gelsin');
+    await tester.tap(inMessages(find.byTooltip('Gönder')));
+    await tester.pumpAndSettle();
+    expect(bubbleOf('Kolay gelsin'), AppColors.primaryTint);
+  });
+
+  testWidgets('an unread conversation says so without colour', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mesajlar'));
+    await tester.pumpAndSettle();
+    final handle = tester.ensureSemantics();
+    expect(
+      find.descendant(
+        of: find.byType(MessagesScreen),
+        matching: find.bySemanticsLabel(RegExp('okunmamış')),
+      ),
+      findsWidgets,
+    );
+    handle.dispose();
+  });
+
   testWidgets('the counts under the greeting open where their items are', (
     tester,
   ) async {

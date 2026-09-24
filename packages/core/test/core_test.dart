@@ -170,6 +170,8 @@ void main() {
       // Disabled controls are exempt from WCAG; kept readable anyway.
       atLeast(AppColors.textMuted, AppColors.surfaceSubtle, 4.5, 'disabled');
       atLeast(AppColors.onPrimary, AppColors.error, 4.5, 'destructive');
+      // Timestamps in the dietitian's chat bubble.
+      atLeast(AppColors.textMuted, AppColors.primaryTint, 4.5, 'muted/tint');
       atLeast(AppColors.primary, AppColors.surfaceSubtle, 3, 'bar on track');
     });
   });

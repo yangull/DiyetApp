@@ -55,6 +55,24 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         ? selected!
         : demo.clients.first.id;
     final draft = _drafts.putIfAbsent(selectedId, TextEditingController.new);
+    final text = Theme.of(context).textTheme;
+    final unread = demo.clients
+        .where((c) => demo.conversationOf(c.id).hasUnread)
+        .length;
+    // Every other tab opens with its name; Mesajlar had none.
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Mesajlar', style: text.headlineLarge),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          unread == 0 ? 'Hepsi okundu' : '$unread okunmamış konuşma',
+          style: text.bodyMedium?.copyWith(
+            color: context.palette.textSecondary,
+          ),
+        ),
+      ],
+    );
 
     // On a phone there is room for one column: the conversation list, and a
     // tap opens the thread as its own page (#38). Drafts stay per client.
@@ -62,6 +80,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       return ListView(
         padding: EdgeInsets.all(context.density.pagePadding),
         children: [
+          heading,
+          const SizedBox(height: AppSpacing.xl),
           Card(
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -112,48 +132,56 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
 
         return Padding(
           padding: EdgeInsets.all(context.density.pagePadding),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(
-                width: listWidth,
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  // Scrolls on its own: with 40 clients a plain Column ran
-                  // off the bottom and the later conversations were
-                  // unreachable.
-                  child: ListView(
-                    children: [
-                      for (final client in demo.clients)
-                        _ConversationRow(
-                          client: client,
-                          conversation: demo.conversationOf(client.id),
-                          selected: client.id == selectedId,
-                          onTap: () => ref
-                              .read(selectedConversationProvider.notifier)
-                              .select(client.id),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
+              heading,
+              const SizedBox(height: AppSpacing.xl),
               Expanded(
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: _ConversationDetail(
-                    clientId: selectedId,
-                    draft: draft,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: listWidth,
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        // Scrolls on its own: with 40 clients a plain Column ran
+                        // off the bottom and the later conversations were
+                        // unreachable.
+                        child: ListView(
+                          children: [
+                            for (final client in demo.clients)
+                              _ConversationRow(
+                                client: client,
+                                conversation: demo.conversationOf(client.id),
+                                selected: client.id == selectedId,
+                                onTap: () => ref
+                                    .read(selectedConversationProvider.notifier)
+                                    .select(client.id),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    // On the grey ground, not in a card, so the client's white
+                    // bubbles read (Can, C27).
+                    Expanded(
+                      child: _ConversationDetail(
+                        clientId: selectedId,
+                        draft: draft,
+                      ),
+                    ),
+                    if (showContext) ...[
+                      const SizedBox(width: AppSpacing.lg),
+                      SizedBox(
+                        width: 300,
+                        child: _ClientContextPanel(clientId: selectedId),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              if (showContext) ...[
-                const SizedBox(width: AppSpacing.lg),
-                SizedBox(
-                  width: 300,
-                  child: _ClientContextPanel(clientId: selectedId),
-                ),
-              ],
             ],
           ),
         );
@@ -181,48 +209,60 @@ class _ConversationRow extends StatelessWidget {
     final palette = context.palette;
     final last = conversation.lastMessage;
 
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: selected ? palette.surfaceSubtle : null,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(client.name, style: text.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(
-                    last == null ? 'Henüz mesaj yok' : last.text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: text.bodySmall?.copyWith(
-                      color: conversation.hasUnread
-                          ? palette.textSecondary
-                          : palette.textMuted,
-                      fontWeight: conversation.hasUnread
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+    return Semantics(
+      label: conversation.hasUnread ? 'okunmamış mesaj' : null,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          color: selected ? palette.surfaceSubtle : null,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      client.name,
+                      style: text.titleMedium?.copyWith(
+                        fontWeight: conversation.hasUnread
+                            ? FontWeight.w700
+                            : null,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            if (conversation.hasUnread)
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
+                    const SizedBox(height: 2),
+                    Text(
+                      last == null ? 'Henüz mesaj yok' : last.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall?.copyWith(
+                        color: conversation.hasUnread
+                            ? palette.textSecondary
+                            : palette.textMuted,
+                        fontWeight: conversation.hasUnread
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-          ],
+              // Black, not green: unread is news, not an action. The bold
+              // name and preview carry it too.
+              if (conversation.hasUnread)
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.textPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -247,8 +287,10 @@ class _ClientContextPanel extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
+    // Scrolls on a short window: the facts and the day's meals are taller
+    // than a laptop in landscape leaves under the heading.
     return Card(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,10 +425,12 @@ class _ConversationDetail extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (showName)
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: palette.borderSubtle)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              0,
+              AppSpacing.md,
+              0,
+              AppSpacing.sm,
             ),
             child: Text(client.name, style: text.titleLarge),
           ),
@@ -400,18 +444,18 @@ class _ConversationDetail extends ConsumerWidget {
                 )
               : ListView(
                   reverse: true,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: EdgeInsets.symmetric(
+                    vertical: AppSpacing.lg,
+                    horizontal: showName ? 0 : AppSpacing.lg,
+                  ),
                   children: [
                     for (final message in conversation.messages.reversed)
                       _MessageBubble(message: message),
                   ],
                 ),
         ),
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: palette.borderSubtle)),
-          ),
+        Padding(
+          padding: EdgeInsets.all(showName ? 0 : AppSpacing.md),
           child: Row(
             children: [
               Expanded(
@@ -464,11 +508,15 @@ class _MessageBubble extends StatelessWidget {
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.sm,
                 ),
+                // White for the client on the grey ground, the pale tint
+                // for the dietitian: both measured, both opaque (C27).
                 decoration: BoxDecoration(
                   color: fromDietitian
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : palette.surfaceSubtle,
-                  borderRadius: BorderRadius.circular(12),
+                      ? palette.primaryTint
+                      : AppColors.surface,
+                  borderRadius: BorderRadius.circular(
+                    context.density.cardRadius,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
