@@ -97,8 +97,9 @@ class DemoState {
 
   int get draftCount => plans.where((p) => p.isDraft).length;
 
-  int get unreadConversationCount =>
-      conversations.where((c) => c.hasUnread).length;
+  /// Conversations where the client wrote last.
+  int get awaitingReplyCount =>
+      conversations.where((c) => c.awaitsReply).length;
 }
 
 class DemoNotifier extends Notifier<DemoState> {

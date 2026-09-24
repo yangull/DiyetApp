@@ -3,6 +3,7 @@ import 'package:dietitian_panel/demo/demo_models.dart';
 import 'package:dietitian_panel/demo/demo_repository.dart';
 import 'package:dietitian_panel/main_demo.dart';
 import 'package:dietitian_panel/screens/appointments_screen.dart';
+import 'package:dietitian_panel/screens/clients_screen.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
@@ -159,7 +160,9 @@ void main() {
     expect(bubbleOf('Kolay gelsin'), AppColors.primaryTint);
   });
 
-  testWidgets('an unread conversation says so without colour', (tester) async {
+  testWidgets('a conversation awaiting a reply says so without colour', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       const ProviderScope(child: DietitianPanelDemoApp()),
     );
@@ -170,11 +173,114 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(MessagesScreen),
-        matching: find.bySemanticsLabel(RegExp('okunmamış')),
+        matching: find.bySemanticsLabel(RegExp('yanıt bekliyor')),
       ),
       findsWidgets,
     );
     handle.dispose();
+  });
+
+  // Fields were keyed by row index: after deleting the first food, the
+  // first field kept "Yumurta" while the model held "Tam buğday ekmeği".
+  testWidgets('deleting a food row shows the foods that are left', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 1600);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(AppDensity.compact),
+          home: const PlanEditorScreen(clientId: 'c1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Satırı sil').first);
+    await tester.pumpAndSettle();
+
+    final first = tester.widget<EditableText>(find.byType(EditableText).at(1));
+    expect(first.controller.text, 'Tam buğday ekmeği');
+    expect(find.text('Yumurta (haşlanmış)'), findsNothing);
+  });
+
+  testWidgets('search reads Turkish capitals: YILMAZ finds Yılmaz', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 1600);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Danışanlar').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(ClientsScreen),
+        matching: find.byType(TextField),
+      ),
+      'YILMAZ',
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(ClientsScreen),
+        matching: find.text('Merve Yılmaz'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  // awaitsReply means "the client wrote last": reading doesn't clear it, a
+  // reply does. The screen says so.
+  testWidgets('Mesajlar counts conversations awaiting a reply', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mesajlar'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(MessagesScreen),
+        matching: find.textContaining('yanıt bekleyen'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('okunmamış'), findsNothing);
+  });
+
+  // Each row's actions differ in width, so a flexible middle column started
+  // somewhere else in every row.
+  testWidgets('Randevular columns line up across rows', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1600, 1400);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Randevular'));
+    await tester.pumpAndSettle();
+
+    Set<double> leftEdges(Iterable<String> labels) => {
+      for (final label in labels)
+        for (final e
+            in find
+                .descendant(
+                  of: find.byType(AppointmentsScreen),
+                  matching: find.text(label),
+                )
+                .evaluate())
+          tester.getTopLeft(find.byWidget(e.widget)).dx,
+    };
+
+    expect(leftEdges(['Görüntülü görüşme', 'Yüz yüze']), hasLength(1));
+    expect(leftEdges(['Görüşme yapıldı', 'Gelmedi']), hasLength(1));
   });
 
   testWidgets('the counts under the greeting open where their items are', (

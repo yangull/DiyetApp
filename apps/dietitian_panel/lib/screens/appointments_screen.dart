@@ -289,13 +289,24 @@ class _AppointmentRow extends ConsumerWidget {
               ],
             );
           }
+          // The actions get a fixed share of the row, so "Görüntülü görüşme"
+          // and "Yüz yüze" start at the same place in every row whatever the
+          // actions' width.
           return Row(
             children: [
               kindIcon,
               const SizedBox(width: AppSpacing.md),
               Expanded(flex: 3, child: who),
               Expanded(flex: 2, child: kindLabel),
-              ...actions,
+              Expanded(
+                flex: 4,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: AppSpacing.xs,
+                  children: actions,
+                ),
+              ),
             ],
           );
         },
@@ -382,11 +393,19 @@ class _PastRow extends ConsumerWidget {
               ],
             );
           }
+          // A fixed share for the action as well, present or not, so the
+          // status column lines up across rows.
           return Row(
             children: [
               Expanded(flex: 3, child: who),
               Expanded(flex: 2, child: status),
-              ?markNoShow,
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: markNoShow,
+                ),
+              ),
             ],
           );
         },

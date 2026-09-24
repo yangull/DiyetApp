@@ -122,7 +122,11 @@ class _MealCard extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             for (var i = 0; i < meal.items.length; i++)
+              // Keyed by the item, not its index: after a row above is
+              // deleted, the fields move with their food instead of keeping
+              // the deleted row's text.
               Padding(
+                key: ObjectKey(meal.items[i]),
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -130,7 +134,6 @@ class _MealCard extends ConsumerWidget {
                     Expanded(
                       flex: 5,
                       child: TextFormField(
-                        key: ValueKey('$clientId-$mealIndex-$i-food'),
                         initialValue: meal.items[i].food,
                         decoration: const InputDecoration(
                           isDense: true,
@@ -149,7 +152,6 @@ class _MealCard extends ConsumerWidget {
                     Expanded(
                       flex: 3,
                       child: TextFormField(
-                        key: ValueKey('$clientId-$mealIndex-$i-amount'),
                         initialValue: meal.items[i].amount,
                         decoration: const InputDecoration(
                           isDense: true,

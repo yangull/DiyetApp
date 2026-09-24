@@ -5,6 +5,7 @@ import 'package:dietitian_panel/screens/clients_screen.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/intake_form_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
+import 'package:dietitian_panel/screens/overview_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -91,6 +92,35 @@ void main() {
         await tester.tap(client);
         await tester.pumpAndSettle();
         expect(find.byType(BackButton), findsOneWidget);
+      });
+
+      testWidgets('"Mesajı yanıtla" opens that thread on a $width dp phone '
+          'at $scale×', (tester) async {
+        await pumpPhone(tester, width, scale);
+        final reply = find
+            .descendant(
+              of: find.byType(OverviewScreen),
+              matching: find.text('Mesajı yanıtla'),
+            )
+            .first;
+        await tester.scrollUntilVisible(
+          find.text('47 saattir mesajı yanıtsız'),
+          300,
+          scrollable: find
+              .descendant(
+                of: find.byType(OverviewScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.ensureVisible(reply);
+        await tester.pumpAndSettle();
+        await tester.tap(reply);
+        await tester.pumpAndSettle();
+        // The thread itself, not the list: a back arrow and the composer.
+        expect(find.byType(BackButton), findsOneWidget);
+        expect(find.widgetWithText(AppBar, 'Zeynep Kaya'), findsOneWidget);
+        expect(find.byType(TextField).hitTestable(), findsOneWidget);
       });
 
       testWidgets('a thread with the keyboard open fits a $width dp phone '

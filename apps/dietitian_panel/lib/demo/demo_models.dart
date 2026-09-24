@@ -199,7 +199,7 @@ class Conversation {
   ChatMessage? get lastMessage => messages.isEmpty ? null : messages.last;
 
   /// The dietitian hasn't replied to the client's most recent message yet.
-  bool get hasUnread =>
+  bool get awaitsReply =>
       lastMessage != null && lastMessage!.sender == MessageSender.client;
 }
 

@@ -23,6 +23,10 @@ class SelectedConversation extends Notifier<String?> {
   String? build() => null;
 
   void select(String clientId) => state = clientId;
+
+  /// On a phone the thread is a page: closing it clears the selection, so the
+  /// next "Mesajı yanıtla" for the same client opens it again.
+  void clear() => state = null;
 }
 
 class MessagesScreen extends ConsumerStatefulWidget {
@@ -46,6 +50,30 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     super.dispose();
   }
 
+  void _openThread(String clientId) {
+    final client = ref.read(demoProvider).clientOf(clientId);
+    final draft = _drafts.putIfAbsent(clientId, TextEditingController.new);
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => Scaffold(
+              appBar: AppBar(title: Text(client.name)),
+              body: SafeArea(
+                top: false,
+                child: _ConversationDetail(
+                  clientId: clientId,
+                  draft: draft,
+                  showName: false,
+                ),
+              ),
+            ),
+          ),
+        )
+        .then((_) {
+          if (mounted) ref.read(selectedConversationProvider.notifier).clear();
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     final demo = ref.watch(demoProvider);
@@ -56,9 +84,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         : demo.clients.first.id;
     final draft = _drafts.putIfAbsent(selectedId, TextEditingController.new);
     final text = Theme.of(context).textTheme;
-    final unread = demo.clients
-        .where((c) => demo.conversationOf(c.id).hasUnread)
-        .length;
+    // The client wrote last: reading doesn't clear it, a reply does.
+    final awaiting = demo.awaitingReplyCount;
     // Every other tab opens with its name; Mesajlar had none.
     final heading = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +93,9 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         Text('Mesajlar', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          unread == 0 ? 'Hepsi okundu' : '$unread okunmamış konuşma',
+          awaiting == 0
+              ? 'Yanıt bekleyen mesaj yok'
+              : '$awaiting yanıt bekleyen konuşma',
           style: text.bodyMedium?.copyWith(
             color: context.palette.textSecondary,
           ),
@@ -75,7 +104,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     );
 
     // On a phone there is room for one column: the conversation list, and a
-    // tap opens the thread as its own page (#38). Drafts stay per client.
+    // selected conversation opens as its own page (#38), whoever selected it:
+    // a row here or "Mesajı yanıtla" on Genel Bakış. Drafts stay per client.
+    ref.listen(selectedConversationProvider, (previous, next) {
+      if (next != null && isPanelPhone(context)) _openThread(next);
+    });
     if (isPanelPhone(context)) {
       return ListView(
         padding: EdgeInsets.all(context.density.pagePadding),
@@ -91,30 +124,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                     client: client,
                     conversation: demo.conversationOf(client.id),
                     selected: false,
-                    onTap: () {
-                      ref
-                          .read(selectedConversationProvider.notifier)
-                          .select(client.id);
-                      final threadDraft = _drafts.putIfAbsent(
-                        client.id,
-                        TextEditingController.new,
-                      );
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => Scaffold(
-                            appBar: AppBar(title: Text(client.name)),
-                            body: SafeArea(
-                              top: false,
-                              child: _ConversationDetail(
-                                clientId: client.id,
-                                draft: threadDraft,
-                                showName: false,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                    // Selecting opens the page (the listener above), the
+                    // same way "Mesajı yanıtla" on Genel Bakış does.
+                    onTap: () => ref
+                        .read(selectedConversationProvider.notifier)
+                        .select(client.id),
                   ),
               ],
             ),
@@ -210,7 +224,7 @@ class _ConversationRow extends StatelessWidget {
     final last = conversation.lastMessage;
 
     return Semantics(
-      label: conversation.hasUnread ? 'okunmamış mesaj' : null,
+      label: conversation.awaitsReply ? 'yanıt bekliyor' : null,
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -228,7 +242,7 @@ class _ConversationRow extends StatelessWidget {
                     Text(
                       client.name,
                       style: text.titleMedium?.copyWith(
-                        fontWeight: conversation.hasUnread
+                        fontWeight: conversation.awaitsReply
                             ? FontWeight.w700
                             : null,
                       ),
@@ -239,10 +253,10 @@ class _ConversationRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall?.copyWith(
-                        color: conversation.hasUnread
+                        color: conversation.awaitsReply
                             ? palette.textSecondary
                             : palette.textMuted,
-                        fontWeight: conversation.hasUnread
+                        fontWeight: conversation.awaitsReply
                             ? FontWeight.w600
                             : FontWeight.normal,
                       ),
@@ -250,9 +264,9 @@ class _ConversationRow extends StatelessWidget {
                   ],
                 ),
               ),
-              // Black, not green: unread is news, not an action. The bold
+              // Black, not green: a waiting message is news, not an action. The bold
               // name and preview carry it too.
-              if (conversation.hasUnread)
+              if (conversation.awaitsReply)
                 Container(
                   width: 8,
                   height: 8,

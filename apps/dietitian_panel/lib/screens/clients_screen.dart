@@ -37,7 +37,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     final palette = context.palette;
     final density = context.density;
 
-    final query = _search.text.trim().toLowerCase();
+    final query = trLower(_search.text.trim());
     final goals = {for (final c in demo.clients) c.goal}.toList()..sort();
     final clients = _matching(demo);
 
@@ -268,10 +268,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   }
 
   List<DemoClient> _matching(DemoState demo) {
-    final query = _search.text.trim().toLowerCase();
+    final query = trLower(_search.text.trim());
     return [
       for (final client in demo.clients)
-        if ((query.isEmpty || client.name.toLowerCase().contains(query)) &&
+        if ((query.isEmpty || trLower(client.name).contains(query)) &&
             (_goal == null || client.goal == _goal) &&
             (_planState == null || demo.planFor(client.id).state == _planState))
           client,

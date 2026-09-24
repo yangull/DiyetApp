@@ -194,7 +194,9 @@ class _SignalRow extends ConsumerWidget {
         'Mesajı yanıtla',
         () {
           ref.read(selectedConversationProvider.notifier).select(clientId);
-          onOpenMessages();
+          // On a phone Mesajlar opens the thread itself as a page over this
+          // screen, so back returns here; wide screens switch tabs.
+          if (!isPanelPhone(context)) onOpenMessages();
         },
       ),
       TriageKind.noShow => ('Randevuları aç', onOpenAppointments),

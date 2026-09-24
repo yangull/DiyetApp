@@ -60,7 +60,7 @@ List<TriageSignal> triageSignals(DemoState state, {DateTime? now}) {
 
     final conversation = state.conversationOf(client.id);
     final last = conversation.lastMessage;
-    if (conversation.hasUnread && last != null) {
+    if (conversation.awaitsReply && last != null) {
       final waiting = at.difference(last.sentAt);
       if (waiting.inHours >= kUnansweredMessageHours) {
         signals.add(
