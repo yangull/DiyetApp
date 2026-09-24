@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'auth_providers.dart';
 import 'models.dart';
+import '../theme/app_theme.dart';
 
 /// What an authenticated or mismatched screen needs to act, beyond the data
 /// it was handed: refetch the identity (the "Durumu yenile" button), or sign
@@ -104,6 +105,7 @@ class AuthGate extends ConsumerWidget {
               // Quiet: signing out is not a secondary action to invite, and
               // OutlinedButton is the green pill (AppTheme).
               TextButton.icon(
+                style: AppTheme.quietButton,
                 onPressed: actions.signOut,
                 icon: const Icon(Icons.logout),
                 label: const Text('Çıkış yap'),

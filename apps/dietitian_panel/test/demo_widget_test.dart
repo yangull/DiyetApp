@@ -47,7 +47,13 @@ void main() {
         matching: find.byType(T),
       ),
     );
-    final textColours = inOverview<RichText>().map((t) => t.text.style?.color);
+    final textColours = <Color?>[];
+    for (final t in inOverview<RichText>()) {
+      t.text.visitChildren((span) {
+        textColours.add(span.style?.color);
+        return true;
+      });
+    }
     final iconColours = inOverview<Icon>().map((i) => i.color);
 
     expect(inOverview<Icon>(), isNotEmpty);
@@ -430,6 +436,34 @@ void main() {
         await tester.drag(list, const Offset(0, -300));
         await tester.pumpAndSettle();
         expect(find.text('Danışanı aç'), findsWidgets);
+        // The last draft row, so every row of the draft card was laid out.
+        await tester.scrollUntilVisible(
+          find.textContaining('1700 kcal'),
+          300,
+          scrollable: list,
+        );
+      });
+
+      testWidgets('"onay bekliyor" reaches the drafts on a $width dp phone '
+          'at $scale×', (tester) async {
+        tester.view.devicePixelRatio = 3;
+        tester.view.physicalSize = Size(width * 3, 740 * 3);
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await tester.pumpWidget(
+          const ProviderScope(child: DietitianPanelDemoApp()),
+        );
+        await tester.pumpAndSettle();
+
+        // At 2x on 360 dp the count itself starts under the bottom bar.
+        final count = find.text('3 onay bekliyor', findRichText: true);
+        await tester.ensureVisible(count);
+        await tester.pumpAndSettle();
+        expect(find.text('Sıradaki işler').hitTestable(), findsNothing);
+        await tester.tap(count);
+        await tester.pumpAndSettle();
+        expect(find.text('Sıradaki işler').hitTestable(), findsOneWidget);
       });
     }
   }

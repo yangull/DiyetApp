@@ -20,6 +20,13 @@ abstract final class AppTheme {
     foregroundColor: AppColors.onPrimary,
   );
 
+  /// A quiet action that is not the screen's business, like signing out:
+  /// grey, not green. Green text on the ground dropped to 4.24:1 under the
+  /// focus overlay; this grey keeps AA in every state.
+  static final quietButton = TextButton.styleFrom(
+    foregroundColor: AppColors.textSecondary,
+  );
+
   static ThemeData light(AppDensity density) {
     final text = AppTypography.textTheme(density);
     final controlShape = RoundedRectangleBorder(

@@ -92,6 +92,7 @@ class ProfileTab extends ConsumerWidget {
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
+            style: AppTheme.quietButton,
             onPressed: actions.signOut,
             icon: const Icon(Icons.logout),
             label: const Text('Çıkış yap'),

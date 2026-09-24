@@ -87,7 +87,8 @@ Rules:
 - **Buttons are pills** (Can, 24 Sep 2026). `FilledButton` (green) is the one main
   action; `OutlinedButton` is themed as the pale-green pill and is every secondary
   action (it has no outline, the name is Material's). Quiet or neutral actions, like
-  signing out, use `TextButton`. A destructive dialog confirms with
+  signing out or "Danışanı aç", use `TextButton` with `AppTheme.quietButton` (grey:
+  green text on the ground fails AA under the focus overlay). A destructive dialog confirms with
   `AppTheme.destructiveButton` (red).
 - **Status pills** are text on a tint without a border. "Onaylı" is grey with a black
   tick, never green: a green pill is a button.

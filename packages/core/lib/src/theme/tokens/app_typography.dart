@@ -44,6 +44,9 @@ abstract final class AppTypography {
       displaySmall: _heading(32, 38),
       headlineLarge: _heading(c ? 22 : 28, c ? 28 : 34),
       headlineMedium: _heading(c ? 18 : 22, c ? 24 : 28),
+      // AlertDialog titles resolve to headlineSmall; left empty, they fell
+      // back to the platform font.
+      headlineSmall: _heading(c ? 18 : 20, c ? 24 : 26),
       titleLarge: _sans(c ? 16 : 18, c ? 22 : 24, FontWeight.w600),
       titleMedium: _sans(c ? 14 : 16, c ? 20 : 24, FontWeight.w600),
       bodyLarge: _sans(c ? 14 : 16, c ? 20 : 24),

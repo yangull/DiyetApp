@@ -71,6 +71,7 @@ class RealProfileScreen extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
+            style: AppTheme.quietButton,
             onPressed: actions.signOut,
             icon: const Icon(Icons.logout),
             label: const Text('Çıkış yap'),

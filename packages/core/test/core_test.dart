@@ -84,6 +84,25 @@ void main() {
     );
   });
 
+  test('dialog titles use Figtree, not the platform font', () {
+    final text = AppTheme.light(AppDensity.comfortable).textTheme;
+    expect(text.headlineSmall!.fontFamily, 'packages/core/Figtree');
+  });
+
+  test('the quiet sign-out keeps AA when hovered or focused', () {
+    // TextButton lays its foreground at 10 % over the ground when focused.
+    final focused = Color.alphaBlend(
+      AppTheme.quietButton.foregroundColor!
+          .resolve(const <WidgetState>{})!
+          .withValues(alpha: 0.10),
+      AppColors.ground,
+    );
+    final ink = AppTheme.quietButton.foregroundColor!.resolve(
+      const <WidgetState>{},
+    )!;
+    expect(contrast(ink, focused), greaterThanOrEqualTo(4.5));
+  });
+
   test('the rail matches the bottom bar: white, no pill', () {
     final rail = AppTheme.light(AppDensity.compact).navigationRailTheme;
     expect(rail.backgroundColor, AppColors.surface);

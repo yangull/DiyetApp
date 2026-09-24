@@ -47,52 +47,59 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final palette = context.palette;
     final signals = triageSignals(demo);
 
-    return ListView(
+    // Not a lazy ListView: "onay bekliyor" scrolls to Sıradaki işler, which
+    // has to be built for that, even below the fold on a phone.
+    return SingleChildScrollView(
       padding: EdgeInsets.all(context.density.pagePadding),
-      children: [
-        // The client's Bugün pattern: the date, then the greeting in bold.
-        Text(
-          formatTodayLabel(DateTime.now()),
-          style: text.bodyMedium?.copyWith(color: palette.textMuted),
-        ),
-        const SizedBox(height: 2),
-        Text('Hoş geldiniz, Dyt. Deniz', style: text.headlineLarge),
-        const SizedBox(height: AppSpacing.xs),
-        _CountsLine(
-          counts: [
-            (demo.clients.length, 'danışan', widget.onOpenClients),
-            (demo.draftCount, 'onay bekliyor', _showDrafts),
-            (demo.upcoming.length, 'randevu', widget.onOpenAppointments),
-            if (kShowMoney) (demo.unpaidTotal, '₺ tahsil edilmemiş', null),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        _TriageCard(
-          signals: signals,
-          onOpenClients: widget.onOpenClients,
-          onOpenMessages: widget.onOpenMessages,
-          onOpenAppointments: widget.onOpenAppointments,
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        Text('Sıradaki işler', key: _draftsKey, style: text.titleLarge),
-        const SizedBox(height: AppSpacing.md),
-        Card(
-          child: Column(
-            children: [
-              for (final plan in demo.plans.where((p) => p.isDraft))
-                _DraftRow(plan: plan),
-              if (demo.draftCount == 0)
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Text(
-                    'Bekleyen plan yok.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
-                  ),
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // The client's Bugün pattern: the date, then the greeting in bold.
+          Text(
+            formatTodayLabel(DateTime.now()),
+            style: text.bodyMedium?.copyWith(color: palette.textMuted),
+          ),
+          const SizedBox(height: 2),
+          Text('Hoş geldiniz, Dyt. Deniz', style: text.headlineLarge),
+          const SizedBox(height: AppSpacing.xs),
+          _CountsLine(
+            counts: [
+              (demo.clients.length, 'danışan', widget.onOpenClients),
+              (demo.draftCount, 'onay bekliyor', _showDrafts),
+              (demo.upcoming.length, 'randevu', widget.onOpenAppointments),
+              if (kShowMoney) (demo.unpaidTotal, '₺ tahsil edilmemiş', null),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.xl),
+          _TriageCard(
+            signals: signals,
+            onOpenClients: widget.onOpenClients,
+            onOpenMessages: widget.onOpenMessages,
+            onOpenAppointments: widget.onOpenAppointments,
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          Text('Sıradaki işler', key: _draftsKey, style: text.titleLarge),
+          const SizedBox(height: AppSpacing.md),
+          Card(
+            child: Column(
+              children: [
+                for (final plan in demo.plans.where((p) => p.isDraft))
+                  _DraftRow(plan: plan),
+                if (demo.draftCount == 0)
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: Text(
+                      'Bekleyen plan yok.',
+                      style: text.bodyMedium?.copyWith(
+                        color: palette.textMuted,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -200,7 +207,7 @@ class _SignalRow extends ConsumerWidget {
     final taskButton = OutlinedButton(onPressed: task, child: Text(taskLabel));
     // Grey, so each row has one green action: the task (Can, 24 Sep 2026).
     final openButton = TextButton(
-      style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
+      style: AppTheme.quietButton,
       onPressed: openClient,
       child: const Text('Danışanı aç'),
     );
@@ -314,33 +321,67 @@ class _DraftRow extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
+    void open() => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlanEditorScreen(clientId: plan.clientId),
+      ),
+    );
+    // A pale pill: three solid green buttons in a column were the loudest
+    // thing on the screen (Can, 24 Sep 2026).
+    final review = OutlinedButton(onPressed: open, child: const Text('İncele'));
+    // Name and status wrap, so a long name or a large text size moves the
+    // status to the next line instead of overflowing.
+    final title = Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.xs,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(client.name, style: text.titleMedium),
+        _WaitingBadge(draftedAt: plan.draftedAt),
+      ],
+    );
+    final subtitle = Text(
+      '${plan.day} · ${plan.kcal} kcal · taslak hazır',
+      style: text.bodySmall?.copyWith(color: palette.textMuted),
+    );
+    final icon = Icon(Icons.description_outlined, color: palette.textMuted);
+
+    if (isPanelPhone(context)) {
+      // As in the triage rows: the text gets the full width, the action
+      // sits under it.
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            icon,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  title,
+                  const SizedBox(height: AppSpacing.xs),
+                  subtitle,
+                  const SizedBox(height: AppSpacing.sm),
+                  review,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      leading: Icon(Icons.description_outlined, color: palette.textMuted),
-      title: Row(
-        children: [
-          Flexible(child: Text(client.name, style: text.titleMedium)),
-          const SizedBox(width: AppSpacing.md),
-          _WaitingBadge(draftedAt: plan.draftedAt),
-        ],
-      ),
-      subtitle: Text(
-        '${plan.day} · ${plan.kcal} kcal · taslak hazır',
-        style: text.bodySmall?.copyWith(color: palette.textMuted),
-      ),
-      // A pale pill: three solid green buttons in a column were the loudest
-      // thing on the screen (Can, 24 Sep 2026).
-      trailing: OutlinedButton(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => PlanEditorScreen(clientId: plan.clientId),
-          ),
-        ),
-        child: const Text('İncele'),
-      ),
+      leading: icon,
+      title: title,
+      subtitle: subtitle,
+      trailing: review,
     );
   }
 }
