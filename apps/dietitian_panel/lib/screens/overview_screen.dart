@@ -80,22 +80,25 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
           const SizedBox(height: AppSpacing.xxl),
           Text('Sıradaki işler', key: _draftsKey, style: text.titleLarge),
           const SizedBox(height: AppSpacing.md),
+          // The same inner padding as the triage card, so both cards' rows
+          // share one set of columns.
           Card(
-            child: Column(
-              children: [
-                for (final plan in demo.plans.where((p) => p.isDraft))
-                  _DraftRow(plan: plan),
-                if (demo.draftCount == 0)
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Text(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final plan in demo.plans.where((p) => p.isDraft))
+                    _DraftRow(plan: plan),
+                  if (demo.draftCount == 0)
+                    Text(
                       'Bekleyen plan yok.',
                       style: text.bodyMedium?.copyWith(
                         color: palette.textMuted,
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -214,91 +217,15 @@ class _SignalRow extends ConsumerWidget {
       child: const Text('Danışanı aç'),
     );
 
-    if (isPanelPhone(context)) {
-      // On a phone the reason gets the full width and the two actions sit
-      // under it, instead of both halves wrapping a word per line.
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Icon(
-                    _icon(signal.kind),
-                    size: 20,
-                    color: palette.textMuted,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(signal.client.name, style: text.titleMedium),
-                      Text(
-                        signal.detail,
-                        style: text.bodyMedium?.copyWith(
-                          color: palette.warning,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Padding(
-              padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
-              child: Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.xs,
-                children: [taskButton, openButton],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        children: [
-          Icon(_icon(signal.kind), size: 20, color: palette.textMuted),
-          const SizedBox(width: AppSpacing.md),
-          // Both halves wrap rather than overflow: two labelled actions
-          // don't fit beside the reason on a narrow window.
-          Expanded(
-            flex: 3,
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                SizedBox(
-                  width: 160,
-                  child: Text(signal.client.name, style: text.titleMedium),
-                ),
-                Text(
-                  signal.detail,
-                  style: text.bodyMedium?.copyWith(color: palette.warning),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Wrap(
-              alignment: WrapAlignment.end,
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [taskButton, openButton],
-            ),
-          ),
-        ],
+    return _OverviewRow(
+      icon: _icon(signal.kind),
+      name: Text(signal.client.name, style: text.titleMedium),
+      detail: Text(
+        signal.detail,
+        style: text.bodyMedium?.copyWith(color: palette.warning),
       ),
+      task: taskButton,
+      secondary: openButton,
     );
   }
 
@@ -346,44 +273,105 @@ class _DraftRow extends ConsumerWidget {
       '${plan.day} · ${plan.kcal} kcal · taslak hazır',
       style: text.bodySmall?.copyWith(color: palette.textMuted),
     );
-    final icon = Icon(Icons.description_outlined, color: palette.textMuted);
+    return _OverviewRow(
+      icon: Icons.description_outlined,
+      name: title,
+      detail: subtitle,
+      task: review,
+    );
+  }
+}
 
-    if (isPanelPhone(context)) {
-      // As in the triage rows: the text gets the full width, the action
-      // sits under it.
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            icon,
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  title,
-                  const SizedBox(height: AppSpacing.xs),
-                  subtitle,
-                  const SizedBox(height: AppSpacing.sm),
-                  review,
-                ],
+/// One row shape for both Genel Bakış cards (Can, 24 Sep 2026): icon, name,
+/// the reason or the plan, then the green task in a column of its own, so
+/// "Ölçümleri incele", "Mesajı yanıtla" and "İncele" start at one place.
+/// Narrower than [_gridBreakpoint], the actions go under the text.
+class _OverviewRow extends StatelessWidget {
+  const _OverviewRow({
+    required this.icon,
+    required this.name,
+    required this.detail,
+    required this.task,
+    this.secondary,
+  });
+
+  final IconData icon;
+  final Widget name;
+  final Widget detail;
+  final Widget task;
+  final Widget? secondary;
+
+  static const _gridBreakpoint = 1000.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconWidget = Icon(icon, size: 20, color: context.palette.textMuted);
+    final actions = Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [task, ?secondary],
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < _gridBreakpoint) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: iconWidget,
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [name, const SizedBox(height: 2), detail],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
+                  child: actions,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+            );
+          }
+          // The task and the quiet link each get a column, so both start at
+          // one place in every row.
+          return Row(
+            children: [
+              iconWidget,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(flex: 3, child: name),
+              Expanded(flex: 4, child: detail),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: task,
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: secondary,
+                ),
+              ),
+            ],
+          );
+        },
       ),
-      leading: icon,
-      title: title,
-      subtitle: subtitle,
-      trailing: review,
     );
   }
 }

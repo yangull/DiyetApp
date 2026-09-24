@@ -256,7 +256,17 @@ void main() {
 
   // Each row's actions differ in width, so a flexible middle column started
   // somewhere else in every row.
-  testWidgets('Randevular columns line up across rows', (tester) async {
+  // Left edges of every widget showing one of [labels] inside [screen].
+  Set<double> leftEdges(Type screen, Iterable<String> labels) => {
+    for (final label in labels)
+      for (final e
+          in find
+              .descendant(of: find.byType(screen), matching: find.text(label))
+              .evaluate())
+        (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dx,
+  };
+
+  Future<void> pumpWide(WidgetTester tester, [String? tab]) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1600, 1400);
     addTearDown(tester.view.reset);
@@ -264,23 +274,109 @@ void main() {
       const ProviderScope(child: DietitianPanelDemoApp()),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Randevular'));
-    await tester.pumpAndSettle();
+    if (tab != null) {
+      await tester.tap(find.text(tab));
+      await tester.pumpAndSettle();
+    }
+  }
 
-    Set<double> leftEdges(Iterable<String> labels) => {
-      for (final label in labels)
+  // Can, 24 Sep: the two cards lined up within themselves but not with each
+  // other, and "Görüşmeye başla" moved with the reminder text beside it.
+  testWidgets('Randevular: one grid for both cards', (tester) async {
+    await pumpWide(tester, 'Randevular');
+    const names = [
+      'Ahmet Demir',
+      'Merve Yılmaz',
+      'Zeynep Kaya',
+      'Elif Aydın',
+      'Burak Şahin',
+    ];
+    expect(leftEdges(AppointmentsScreen, names), hasLength(1));
+    expect(
+      leftEdges(AppointmentsScreen, [
+        'Görüntülü görüşme',
+        'Yüz yüze',
+        'Görüşme yapıldı',
+        'Gelmedi',
+      ]),
+      hasLength(1),
+    );
+    expect(leftEdges(AppointmentsScreen, ['Görüşmeye başla']), hasLength(1));
+    expect(leftEdges(AppointmentsScreen, ['İptal et']), hasLength(1));
+    // The icons in the first action column: camera and "gelmedi" calendar.
+    final icons = {
+      for (final icon in [Icons.videocam_outlined, Icons.event_busy_outlined])
         for (final e
             in find
                 .descendant(
-                  of: find.byType(AppointmentsScreen),
-                  matching: find.text(label),
+                  of: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+                  matching: find.byIcon(icon),
                 )
                 .evaluate())
-          tester.getTopLeft(find.byWidget(e.widget)).dx,
+          (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dx,
     };
+    expect(icons, hasLength(1));
+  });
 
-    expect(leftEdges(['Görüntülü görüşme', 'Yüz yüze']), hasLength(1));
-    expect(leftEdges(['Görüşme yapıldı', 'Gelmedi']), hasLength(1));
+  testWidgets('Genel Bakış: both cards share their columns', (tester) async {
+    await pumpWide(tester);
+    const names = [
+      'Burak Şahin',
+      'Ahmet Demir',
+      'Zeynep Kaya',
+      'Elif Aydın',
+      'Merve Yılmaz',
+    ];
+    expect(leftEdges(OverviewScreen, names), hasLength(1));
+    expect(
+      leftEdges(OverviewScreen, [
+        'Ölçümleri incele',
+        'Randevuları aç',
+        'Mesajı yanıtla',
+        'İncele',
+      ]),
+      hasLength(1),
+    );
+    expect(leftEdges(OverviewScreen, ['Danışanı aç']), hasLength(1));
+  });
+
+  testWidgets('Mesajlar: the three columns start on one line', (tester) async {
+    await pumpWide(tester, 'Mesajlar');
+    final tops = {
+      for (final e
+          in find
+              .descendant(
+                of: find.byType(MessagesScreen),
+                matching: find.text('Elif Aydın'),
+              )
+              .evaluate())
+        (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dy,
+    };
+    expect(tops, hasLength(1));
+    expect(find.text('BUGÜNÜN ÖĞÜNLERİ'), findsOneWidget);
+  });
+
+  testWidgets('"Besin ekle" lines up with the food fields', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1600, 1400);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(AppDensity.compact),
+          home: const PlanEditorScreen(clientId: 'c1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final field = tester.getTopLeft(
+      find.ancestor(
+        of: find.text('Yumurta (haşlanmış)'),
+        matching: find.byType(TextFormField),
+      ),
+    );
+    final add = tester.getTopLeft(find.byIcon(Icons.add).first);
+    expect(add.dx, moreOrLessEquals(field.dx, epsilon: 0.5));
   });
 
   testWidgets('the counts under the greeting open where their items are', (

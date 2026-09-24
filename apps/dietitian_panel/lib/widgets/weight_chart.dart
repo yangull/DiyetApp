@@ -126,6 +126,10 @@ class _WeightPainter extends CustomPainter {
       );
     }
 
+    final last = pointAt(entries.length - 1);
+    final valueTop = last.dy - 10;
+    final valueHeight = _measure('${formatDecimal(kgs.last)} kg', valueStyle);
+
     if (targetKg != null) {
       final y = yFor(targetKg!);
       final dash = Paint()
@@ -135,7 +139,20 @@ class _WeightPainter extends CustomPainter {
         final end = (x + 4).clamp(leftPad, leftPad + plotW);
         canvas.drawLine(Offset(x, y), Offset(end, y), dash);
       }
-      _text(canvas, 'hedef', Offset(leftPad + plotW + 6, y - 7), labelStyle);
+      _text(
+        canvas,
+        'hedef',
+        Offset(
+          leftPad + plotW + 6,
+          targetLabelTop(
+            targetY: y,
+            labelHeight: _measure('hedef', labelStyle),
+            valueTop: valueTop,
+            valueHeight: valueHeight,
+          ),
+        ),
+        labelStyle,
+      );
     }
 
     final path = Path()..moveTo(pointAt(0).dx, pointAt(0).dy);
@@ -152,13 +169,12 @@ class _WeightPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round,
     );
 
-    final last = pointAt(entries.length - 1);
     canvas.drawCircle(last, 6, Paint()..color = surface);
     canvas.drawCircle(last, 4.5, Paint()..color = line);
     _text(
       canvas,
       '${formatDecimal(kgs.last)} kg',
-      Offset(last.dx + 10, last.dy - 10),
+      Offset(last.dx + 10, valueTop),
       valueStyle,
     );
 
@@ -178,6 +194,11 @@ class _WeightPainter extends CustomPainter {
     );
   }
 
+  double _measure(String value, TextStyle style) => (TextPainter(
+    text: TextSpan(text: value, style: style),
+    textDirection: TextDirection.ltr,
+  )..layout()).height;
+
   void _text(
     Canvas canvas,
     String value,
@@ -195,4 +216,29 @@ class _WeightPainter extends CustomPainter {
   @override
   bool shouldRepaint(_WeightPainter old) =>
       old.entries != entries || old.targetKg != targetKg;
+}
+
+/// Where the "hedef" label goes: centred on the target line, unless the last
+/// weight's label is there (a weight close to its target, like 58,2 over
+/// 58,0). Then it takes the nearest spot that clears that label.
+@visibleForTesting
+double targetLabelTop({
+  required double targetY,
+  required double labelHeight,
+  required double valueTop,
+  required double valueHeight,
+}) {
+  bool clear(double top) =>
+      top >= valueTop + valueHeight || top + labelHeight <= valueTop;
+  final onLine = targetY - labelHeight / 2;
+  // Nearest to the line first: on it, just below or above it, then clear of
+  // the value label altogether.
+  final candidates = [
+    onLine,
+    targetY + 3,
+    targetY - labelHeight - 3,
+    valueTop + valueHeight + 2,
+    valueTop - labelHeight - 2,
+  ]..sort((a, b) => (a - onLine).abs().compareTo((b - onLine).abs()));
+  return candidates.firstWhere(clear, orElse: () => onLine);
 }

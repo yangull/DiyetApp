@@ -305,11 +305,16 @@ class _ClientContextPanel extends ConsumerWidget {
     // than a laptop in landscape leaves under the heading.
     return Card(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(client.name, style: text.titleLarge),
+            Text(client.name, style: text.titleMedium),
             Text(
               client.goal,
               style: text.bodySmall?.copyWith(color: palette.textMuted),
@@ -343,7 +348,7 @@ class _ClientContextPanel extends ConsumerWidget {
             Divider(color: palette.borderSubtle),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Bugünün öğünleri',
+              trUpper('Bugünün öğünleri'),
               style: text.labelSmall?.copyWith(color: palette.textMuted),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -438,6 +443,8 @@ class _ConversationDetail extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Same top inset and style as the list's first name and the context
+        // panel's title, so the three columns start on one line.
         if (showName)
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -446,7 +453,7 @@ class _ConversationDetail extends ConsumerWidget {
               0,
               AppSpacing.sm,
             ),
-            child: Text(client.name, style: text.titleLarge),
+            child: Text(client.name, style: text.titleMedium),
           ),
         Expanded(
           child: conversation.messages.isEmpty

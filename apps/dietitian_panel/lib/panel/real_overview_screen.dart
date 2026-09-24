@@ -99,11 +99,15 @@ class RealOverviewScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Wraps at large text instead of pushing the button off the edge.
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: AppSpacing.lg,
-            runSpacing: AppSpacing.md,
-            children: [greeting, inviteButton],
+          // Full width, or spaceBetween has no room to push the button right.
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: AppSpacing.lg,
+              runSpacing: AppSpacing.md,
+              children: [greeting, inviteButton],
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Expanded(child: states(scrollable: true)),

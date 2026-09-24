@@ -346,6 +346,45 @@ void main() {
     expect(context.density.isCompact, isFalse);
   });
 
+  // Slice 5 wrapped the greeting and the button so they could reflow at 2×;
+  // the wrap was only as wide as its content, so the button sat right after
+  // the greeting instead of at the right edge.
+  testWidgets('"Danışan davet et" sits at the right edge', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1600, 1000);
+    addTearDown(tester.view.reset);
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    final dietitianId = auth.currentSession!.userId;
+    profiles.seedDietitian(
+      dietitianId,
+      fullName: 'Dyt. Deniz',
+      status: VerificationStatus.approved,
+    );
+    final relationships = FakeClientRelationshipRepository()
+      ..seedRelationship(
+        dietitianId: dietitianId,
+        invitedEmail: 'a@example.com',
+      );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(relationships),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final button = tester.getTopRight(
+      find.widgetWithText(FilledButton, 'Danışan davet et'),
+    );
+    final table = tester.getTopRight(find.byType(Card).first);
+    expect(button.dx, moreOrLessEquals(table.dx, epsilon: 0.5));
+  });
+
   testWidgets('the wide client table grows with 2× text', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(800, 1600);

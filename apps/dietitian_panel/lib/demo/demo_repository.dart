@@ -578,10 +578,12 @@ List<Appointment> _seedAppointments() {
       DateTime(today.year, today.month, today.day + dayOffset, hour, minute);
 
   return [
+    // Two hours from now, on the hour: "today 16:30" turned into a past
+    // appointment every evening, and the demo and its tests with it.
     Appointment(
       id: 'a1',
       clientId: 'c1',
-      at: at(0, 16, 30),
+      at: DateTime(today.year, today.month, today.day, today.hour + 2),
       kind: AppointmentKind.online,
       status: AppointmentStatus.planned,
       fee: 900,

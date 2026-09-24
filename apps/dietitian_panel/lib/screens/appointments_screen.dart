@@ -165,11 +165,15 @@ class _AppointmentRow extends ConsumerWidget {
         ),
       ],
     );
-    final actions = <Widget>[
-      if (!cancelled && appointment.kind == AppointmentKind.online)
-        Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.sm),
-          child: OutlinedButton.icon(
+    // TextButton.icon insets its icon by 12; plain states in the same slot
+    // do the same, so a sent reminder lines up with an unsent one.
+    Widget inset(Widget child) => Padding(
+      padding: const EdgeInsetsDirectional.only(start: 12),
+      child: child,
+    );
+    final start = cancelled || appointment.kind != AppointmentKind.online
+        ? null
+        : OutlinedButton.icon(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) =>
@@ -178,72 +182,123 @@ class _AppointmentRow extends ConsumerWidget {
             ),
             icon: const Icon(Icons.videocam_outlined, size: 18),
             label: const Text('Görüşmeye başla'),
-          ),
-        ),
-      if (cancelled)
-        Text(
-          'İptal edildi',
-          style: text.bodyMedium?.copyWith(color: palette.textMuted),
-        )
-      else if (reminded)
-        // A done state, told like "Onaylı": a black tick, grey words.
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.check, size: 16, color: AppColors.textPrimary),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                'Hatırlatma gönderildi',
-                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-              ),
+          );
+    final reminder = cancelled
+        ? inset(
+            Text(
+              'İptal edildi',
+              style: text.bodyMedium?.copyWith(color: palette.textMuted),
             ),
-          ],
-        )
-      else
+          )
+        : reminded
+        // A done state, told like "Onaylı": a black tick, grey words.
+        ? inset(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check, size: 16, color: AppColors.textPrimary),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    'Hatırlatma gönderildi',
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
         // One green action per row, "Görüşmeye başla" (Can, C29).
-        TextButton.icon(
-          style: AppTheme.quietButton,
-          onPressed: () {
-            ref.read(demoProvider.notifier).sendReminder(appointment.id);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${client.name} için hatırlatma gönderildi.'),
-              ),
-            );
-          },
-          icon: const Icon(Icons.notifications_none, size: 18),
-          label: const Text('Hatırlatma gönder'),
-        ),
-      if (!cancelled)
-        TextButton(
-          style: AppTheme.quietButton,
-          onPressed: () async {
-            final confirmed = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Randevuyu iptal et'),
-                content: Text('${client.name} ile randevu iptal edilecek.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Vazgeç'),
-                  ),
-                  FilledButton(
-                    style: AppTheme.destructiveButton,
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('İptal et'),
-                  ),
-                ],
-              ),
-            );
-            if (confirmed ?? false) {
-              ref.read(demoProvider.notifier).cancelAppointment(appointment.id);
-            }
-          },
-          child: const Text('İptal et'),
-        ),
-    ];
+        : TextButton.icon(
+            style: AppTheme.quietButton,
+            onPressed: () {
+              ref.read(demoProvider.notifier).sendReminder(appointment.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${client.name} için hatırlatma gönderildi.'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.notifications_none, size: 18),
+            label: const Text('Hatırlatma gönder'),
+          );
+    final cancel = cancelled
+        ? null
+        : TextButton(
+            style: AppTheme.quietButton,
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Randevuyu iptal et'),
+                  content: Text('${client.name} ile randevu iptal edilecek.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Vazgeç'),
+                    ),
+                    FilledButton(
+                      style: AppTheme.destructiveButton,
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('İptal et'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed ?? false) {
+                ref
+                    .read(demoProvider.notifier)
+                    .cancelAppointment(appointment.id);
+              }
+            },
+            child: const Text('İptal et'),
+          );
+
+    return _AppointmentGrid(
+      showDivider: showDivider,
+      icon: kindIcon,
+      who: who,
+      what: kindLabel,
+      first: start,
+      second: reminder,
+      third: cancel,
+    );
+  }
+}
+
+/// One grid for every appointment row, upcoming and past (Can, 24 Sep 2026):
+/// a kind icon, who and when, what kind or what happened, then three action
+/// slots. Each slot starts at the same place in every row of both cards, so
+/// "Görüşmeye başla" does not move with the width of the text beside it.
+/// Below [_gridBreakpoint] the row stacks: the actions go under the name.
+class _AppointmentGrid extends StatelessWidget {
+  const _AppointmentGrid({
+    required this.showDivider,
+    required this.icon,
+    required this.who,
+    required this.what,
+    this.first,
+    this.second,
+    this.third,
+  });
+
+  final bool showDivider;
+  final Widget icon;
+  final Widget who;
+  final Widget what;
+  final Widget? first;
+  final Widget? second;
+  final Widget? third;
+
+  /// Three action slots need about this much room; below it they would
+  /// squeeze their buttons.
+  static const _gridBreakpoint = 1000.0;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget slot(Widget? child) =>
+        Align(alignment: AlignmentDirectional.centerStart, child: child);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -252,61 +307,53 @@ class _AppointmentRow extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         border: showDivider
-            ? Border(top: BorderSide(color: palette.borderSubtle))
+            ? Border(top: BorderSide(color: context.palette.borderSubtle))
             : null,
       ),
-      // Below ~720 px the actions go under the name instead of beside it;
-      // in one line they overflowed any window narrower than about 900 px.
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth < 720) {
+          if (constraints.maxWidth < _gridBreakpoint) {
+            // Full width even with no action, or the row shrinks to its text.
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    kindIcon,
+                    icon,
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [who, kindLabel],
+                        children: [who, what],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
-                  child: Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.xs,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: actions,
+                if (first != null || second != null || third != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
+                    child: Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [?first, ?second, ?third],
+                    ),
                   ),
-                ),
+                ],
               ],
             );
           }
-          // The actions get a fixed share of the row, so "Görüntülü görüşme"
-          // and "Yüz yüze" start at the same place in every row whatever the
-          // actions' width.
           return Row(
             children: [
-              kindIcon,
+              icon,
               const SizedBox(width: AppSpacing.md),
               Expanded(flex: 3, child: who),
-              Expanded(flex: 2, child: kindLabel),
-              Expanded(
-                flex: 4,
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  runSpacing: AppSpacing.xs,
-                  children: actions,
-                ),
-              ),
+              Expanded(flex: 2, child: what),
+              Expanded(flex: 3, child: slot(first)),
+              Expanded(flex: 3, child: slot(second)),
+              Expanded(flex: 2, child: slot(third)),
             ],
           );
         },
@@ -356,60 +403,31 @@ class _PastRow extends ConsumerWidget {
     final markNoShow = noShow || cancelled
         ? null
         : TextButton.icon(
-            style: AppTheme.quietButton,
+            // The pill's inset, so this icon lines up with the camera icon of
+            // "Görüşmeye başla" in the same column.
+            style: AppTheme.quietButton.copyWith(
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              ),
+            ),
             onPressed: () =>
                 ref.read(demoProvider.notifier).markNoShow(appointment.id),
             icon: const Icon(Icons.event_busy_outlined, size: 18),
             label: const Text('Gelmedi olarak işaretle'),
           );
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+    return _AppointmentGrid(
+      showDivider: showDivider,
+      icon: Icon(
+        appointment.kind == AppointmentKind.online
+            ? Icons.videocam_outlined
+            : Icons.person_outline,
+        size: 20,
+        color: palette.textMuted,
       ),
-      decoration: BoxDecoration(
-        border: showDivider
-            ? Border(top: BorderSide(color: palette.borderSubtle))
-            : null,
-      ),
-      // Like the upcoming rows: below 720 px the status and the action go
-      // under the name. Beside it, the action took the whole width and the
-      // status broke mid-word ("Görüşm / e / yapıldı").
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 720) {
-            // Full width even with no action, or the row shrinks to its text.
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                who,
-                const SizedBox(height: AppSpacing.xs),
-                Wrap(
-                  spacing: AppSpacing.md,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [status, ?markNoShow],
-                ),
-              ],
-            );
-          }
-          // A fixed share for the action as well, present or not, so the
-          // status column lines up across rows.
-          return Row(
-            children: [
-              Expanded(flex: 3, child: who),
-              Expanded(flex: 2, child: status),
-              Expanded(
-                flex: 2,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: markNoShow,
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+      who: who,
+      what: status,
+      first: markNoShow,
     );
   }
 }
