@@ -39,13 +39,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
 
     final query = _search.text.trim().toLowerCase();
     final goals = {for (final c in demo.clients) c.goal}.toList()..sort();
-    final clients = [
-      for (final client in demo.clients)
-        if ((query.isEmpty || client.name.toLowerCase().contains(query)) &&
-            (_goal == null || client.goal == _goal) &&
-            (_planState == null || demo.planFor(client.id).state == _planState))
-          client,
-    ];
+    final clients = _matching(demo);
 
     final phone = isPanelPhone(context);
     final heading = Column(
@@ -83,83 +77,98 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
             ],
           ),
         const SizedBox(height: AppSpacing.xl),
-        Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            SizedBox(
-              width: 260,
-              child: TextField(
-                controller: _search,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  hintText: 'Danışan ara',
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  suffixIcon: query.isEmpty
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.close, size: 18),
-                          tooltip: 'Aramayı temizle',
-                          onPressed: () => setState(_search.clear),
-                        ),
+        if (phone) ...[
+          // Search stays in view; goal and plan status wait behind one button
+          // (Can, C28): four controls took 40 % of the screen before the
+          // first client.
+          _searchField(query),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _showFilters(goals),
+                icon: const Icon(Icons.tune, size: 18),
+                label: Text(
+                  _activeFilters == 0
+                      ? 'Filtrele'
+                      : 'Filtrele · $_activeFilters',
                 ),
               ),
-            ),
-            // Not DropdownMenu: its arrow button is a fixed 48 px, which
-            // the theme can't reach, so it stood taller than the search
-            // field beside it. This one has a 24 px content floor instead,
-            // so its padding is trimmed to land on the same 38 px.
-            SizedBox(
-              width: 220,
-              child: DropdownButtonFormField<String?>(
-                initialValue: _goal,
-                isExpanded: true,
-                iconSize: 20,
-                decoration: const InputDecoration(
-                  labelText: 'Hedef',
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 7,
-                  ),
+              if (_activeFilters > 0)
+                TextButton(
+                  style: AppTheme.quietButton,
+                  onPressed: () => setState(() {
+                    _goal = null;
+                    _planState = null;
+                  }),
+                  child: const Text('Temizle'),
                 ),
-                onChanged: (value) => setState(() => _goal = value),
-                items: [
-                  const DropdownMenuItem(
-                    value: null,
-                    child: Text('Tüm hedefler'),
-                  ),
-                  for (final goal in goals)
-                    DropdownMenuItem(
-                      value: goal,
-                      child: Text(goal, overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ] else
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(width: 260, child: _searchField(query)),
+              // Not DropdownMenu: its arrow button is a fixed 48 px, which
+              // the theme can't reach, so it stood taller than the search
+              // field beside it. This one has a 24 px content floor instead,
+              // so its padding is trimmed to land on the same 38 px.
+              SizedBox(
+                width: 220,
+                child: DropdownButtonFormField<String?>(
+                  initialValue: _goal,
+                  isExpanded: true,
+                  iconSize: 20,
+                  decoration: const InputDecoration(
+                    labelText: 'Hedef',
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 7,
                     ),
-                ],
+                  ),
+                  onChanged: (value) => setState(() => _goal = value),
+                  items: [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Tüm hedefler'),
+                    ),
+                    for (final goal in goals)
+                      DropdownMenuItem(
+                        value: goal,
+                        child: Text(goal, overflow: TextOverflow.ellipsis),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            FilterChip(
-              label: const Text('Onay bekleyen'),
-              selected: _planState == PlanState.aiDraft,
-              onSelected: (on) =>
-                  setState(() => _planState = on ? PlanState.aiDraft : null),
-            ),
-            FilterChip(
-              label: const Text('Onaylanan'),
-              selected: _planState == PlanState.approved,
-              onSelected: (on) =>
-                  setState(() => _planState = on ? PlanState.approved : null),
-            ),
-          ],
-        ),
+              FilterChip(
+                label: const Text('Onay bekleyen'),
+                selected: _planState == PlanState.aiDraft,
+                onSelected: (on) =>
+                    setState(() => _planState = on ? PlanState.aiDraft : null),
+              ),
+              FilterChip(
+                label: const Text('Onaylanan'),
+                selected: _planState == PlanState.approved,
+                onSelected: (on) =>
+                    setState(() => _planState = on ? PlanState.approved : null),
+              ),
+            ],
+          ),
         const SizedBox(height: AppSpacing.lg),
         Card(
           child: Column(
             children: [
               if (!phone)
                 Container(
-                  height: density.rowHeight,
+                  constraints: BoxConstraints(minHeight: density.rowHeight),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.sm,
                   ),
                   decoration: BoxDecoration(
                     color: palette.surfaceSubtle,
@@ -197,9 +206,12 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           state: demo.planFor(client.id).state,
                         )
                       : Container(
-                          height: density.rowHeight,
+                          constraints: BoxConstraints(
+                            minHeight: density.rowHeight,
+                          ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.lg,
+                            vertical: AppSpacing.sm,
                           ),
                           decoration: BoxDecoration(
                             border: Border(
@@ -252,6 +264,132 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  List<DemoClient> _matching(DemoState demo) {
+    final query = _search.text.trim().toLowerCase();
+    return [
+      for (final client in demo.clients)
+        if ((query.isEmpty || client.name.toLowerCase().contains(query)) &&
+            (_goal == null || client.goal == _goal) &&
+            (_planState == null || demo.planFor(client.id).state == _planState))
+          client,
+    ];
+  }
+
+  int get _activeFilters =>
+      (_goal == null ? 0 : 1) + (_planState == null ? 0 : 1);
+
+  Widget _searchField(String query) => TextField(
+    controller: _search,
+    onChanged: (_) => setState(() {}),
+    decoration: InputDecoration(
+      hintText: 'Danışan ara',
+      prefixIcon: const Icon(Icons.search, size: 20),
+      suffixIcon: query.isEmpty
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.close, size: 18),
+              tooltip: 'Aramayı temizle',
+              onPressed: () => setState(_search.clear),
+            ),
+    ),
+  );
+
+  /// The phone's filters: the same goal and plan-status choices as the wide
+  /// row, applied as they are tapped, with the result count on the button.
+  Future<void> _showFilters(List<String> goals) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          final text = Theme.of(sheetContext).textTheme;
+          void update(VoidCallback change) {
+            setState(change);
+            setSheetState(() {});
+          }
+
+          // On the white sheet an unselected chip needs a grey fill to read
+          // as a chip; on the grey ground the theme's white does that.
+          Widget choice(String label, bool selected, VoidCallback onTap) =>
+              ChoiceChip(
+                label: Text(label),
+                selected: selected,
+                backgroundColor: sheetContext.palette.surfaceSubtle,
+                onSelected: (_) => onTap(),
+              );
+
+          final count = _matching(ref.read(demoProvider)).length;
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                sheetContext.density.pagePadding,
+                0,
+                sheetContext.density.pagePadding,
+                sheetContext.density.pagePadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Filtrele', style: text.headlineMedium),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Hedef', style: text.titleMedium),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      choice(
+                        'Tüm hedefler',
+                        _goal == null,
+                        () => update(() => _goal = null),
+                      ),
+                      for (final goal in goals)
+                        choice(
+                          goal,
+                          _goal == goal,
+                          () => update(() => _goal = goal),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Plan durumu', style: text.titleMedium),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      choice(
+                        'Tümü',
+                        _planState == null,
+                        () => update(() => _planState = null),
+                      ),
+                      choice(
+                        'Onay bekleyen',
+                        _planState == PlanState.aiDraft,
+                        () => update(() => _planState = PlanState.aiDraft),
+                      ),
+                      choice(
+                        'Onaylanan',
+                        _planState == PlanState.approved,
+                        () => update(() => _planState = PlanState.approved),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  FilledButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: Text('$count danışanı göster'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

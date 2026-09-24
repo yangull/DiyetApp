@@ -103,6 +103,35 @@ void main() {
     expect(contrast(ink, focused), greaterThanOrEqualTo(4.5));
   });
 
+  testWidgets('a selected filter chip is pale green with readable text', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(AppDensity.compact),
+        home: Scaffold(
+          body: FilterChip(
+            label: const Text('Onay bekleyen'),
+            selected: true,
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    final chip = AppTheme.light(AppDensity.compact).chipTheme;
+    final label = tester.widget<RichText>(
+      find.descendant(
+        of: find.byType(FilterChip),
+        matching: find.byType(RichText),
+      ),
+    );
+    final ink = label.text.style!.color!;
+
+    expect(chip.selectedColor, AppColors.primaryTint);
+    expect(chip.side, BorderSide.none);
+    expect(contrast(ink, AppColors.primaryTint), greaterThanOrEqualTo(4.5));
+  });
+
   test('the rail matches the bottom bar: white, no pill', () {
     final rail = AppTheme.light(AppDensity.compact).navigationRailTheme;
     expect(rail.backgroundColor, AppColors.surface);

@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'text_fits.dart';
+
 /// Every demo destination on a phone (#38): a RenderFlex overflow anywhere
 /// fails the test on its own.
 void main() {
@@ -36,6 +38,28 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('the wide client table grows with 2× text', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Danışanlar').first);
+    await tester.pumpAndSettle();
+
+    expectTextNotClipped(
+      tester,
+      find.descendant(
+        of: find.byType(ClientsScreen),
+        matching: find.byType(Card),
+      ),
+    );
+  });
 
   for (final width in [360.0, 412.0]) {
     for (final scale in [1.0, 1.3, 2.0]) {
@@ -146,6 +170,54 @@ void main() {
           await tester.pumpAndSettle();
         });
       }
+
+      testWidgets('Danışanlar filters behind one button on a $width dp '
+          'phone at $scale×', (tester) async {
+        await pumpPhone(tester, width, scale);
+        await openTab(tester, 'Danışanlar');
+        Finder inClients(Finder f) =>
+            find.descendant(of: find.byType(ClientsScreen), matching: f);
+
+        // Search stays on the screen (Can, C28); goal and plan status don't.
+        expect(inClients(find.byType(TextField)), findsOneWidget);
+        expect(inClients(find.byType(FilterChip)), findsNothing);
+        expect(
+          inClients(find.byType(DropdownButtonFormField<String?>)),
+          findsNothing,
+        );
+
+        final filter = inClients(find.textContaining('Filtrele'));
+        await tester.ensureVisible(filter);
+        await tester.pumpAndSettle();
+        await tester.tap(filter);
+        await tester.pumpAndSettle();
+        // At 2x the sheet scrolls; reach each control before tapping it.
+        for (final target in [
+          find.text('Onay bekleyen'),
+          find.textContaining('danışanı göster'),
+        ]) {
+          await tester.ensureVisible(target);
+          await tester.pumpAndSettle();
+          await tester.tap(target);
+          await tester.pumpAndSettle();
+        }
+
+        expect(inClients(find.text('Filtrele · 1')), findsOneWidget);
+        expect(inClients(find.text('Ahmet Demir')), findsNothing);
+        final clear = inClients(find.text('Temizle'));
+        await tester.ensureVisible(clear);
+        await tester.pumpAndSettle();
+        await tester.tap(clear);
+        await tester.pumpAndSettle();
+        // At large text "Temizle" wrapped under the button, so the button
+        // may now sit just above the view.
+        await tester.scrollUntilVisible(
+          inClients(find.text('Filtrele')),
+          -200,
+          scrollable: inClients(find.byType(Scrollable)).first,
+        );
+        expect(inClients(find.text('Ahmet Demir')), findsWidgets);
+      });
 
       for (final tab in ['Danışanlar', 'Randevular', 'Mesajlar', 'Takip']) {
         testWidgets('$tab fits a $width dp phone at $scale×', (tester) async {

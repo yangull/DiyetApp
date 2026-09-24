@@ -501,10 +501,13 @@ class _TriageHeader extends StatelessWidget {
     }
     return Row(
       children: [
-        title,
-        const SizedBox(width: AppSpacing.md),
-        count,
-        const Spacer(),
+        Expanded(
+          child: Wrap(
+            spacing: AppSpacing.md,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [title, count],
+          ),
+        ),
         button,
       ],
     );

@@ -98,12 +98,12 @@ class RealOverviewScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: greeting),
-              inviteButton,
-            ],
+          // Wraps at large text instead of pushing the button off the edge.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.md,
+            children: [greeting, inviteButton],
           ),
           const SizedBox(height: AppSpacing.xl),
           Expanded(child: states(scrollable: true)),
@@ -255,8 +255,11 @@ class _RelationshipTable extends StatelessWidget {
             // on a phone each row stacks its own labelled facts.
             if (!isPanelPhone(context))
               Container(
-                height: density.rowHeight,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                constraints: BoxConstraints(minHeight: density.rowHeight),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
                 decoration: BoxDecoration(
                   color: palette.surfaceSubtle,
                   borderRadius: BorderRadius.vertical(
@@ -365,8 +368,11 @@ class _RelationshipRow extends StatelessWidget {
       );
     } else {
       content = Container(
-        height: density.rowHeight,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        constraints: BoxConstraints(minHeight: density.rowHeight),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: palette.borderSubtle)),
         ),

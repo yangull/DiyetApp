@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'text_fits.dart';
+
 void main() {
   testWidgets('signed out shows the login form with the shared brand palette', (
     tester,
@@ -342,6 +344,56 @@ void main() {
     // Touch-sized controls on phones (#38, #64).
     final context = tester.element(find.byType(NavigationBar));
     expect(context.density.isCompact, isFalse);
+  });
+
+  testWidgets('the wide client table grows with 2× text', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    final dietitianId = auth.currentSession!.userId;
+    profiles.seedDietitian(
+      dietitianId,
+      fullName: 'Dyt. Deniz',
+      status: VerificationStatus.approved,
+    );
+    final relationships = FakeClientRelationshipRepository()
+      ..seedRelationship(
+        dietitianId: dietitianId,
+        invitedEmail: 'elif.aydin.uzun.adres@example.com',
+        clientId: 'client-1',
+        status: RelationshipStatus.active,
+      )
+      ..seedClientName('client-1', 'Elif Aydın Karaoğlanoğlu')
+      ..seedRelationship(
+        dietitianId: dietitianId,
+        invitedEmail: 'bekleyen.danisan.uzun@example.com',
+      );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(relationships),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expectTextNotClipped(
+      tester,
+      find.ancestor(
+        of: find.text('elif.aydin.uzun.adres@example.com'),
+        matching: find.byType(Card),
+      ),
+    );
   });
 
   for (final width in [360.0, 412.0]) {

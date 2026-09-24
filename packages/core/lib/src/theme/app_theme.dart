@@ -166,10 +166,19 @@ abstract final class AppTheme {
           shape: const StadiumBorder(),
         ),
       ),
+      // Filter chips without a border (Sade): white on the grey ground when
+      // off, pale green with green text when on. Selected used to fall back
+      // to a solid primary fill under black text, 3.09:1.
       chipTheme: ChipThemeData(
         shape: controlShape,
-        side: const BorderSide(color: AppColors.borderStrong),
+        side: BorderSide.none,
+        backgroundColor: AppColors.surface,
+        selectedColor: AppColors.primaryTint,
+        checkmarkColor: AppColors.primaryHover,
         labelStyle: text.labelLarge?.copyWith(color: AppColors.textPrimary),
+        secondaryLabelStyle: text.labelLarge?.copyWith(
+          color: AppColors.primaryHover,
+        ),
         // The chip adds 2 px of its own above and below the label.
         padding: EdgeInsets.symmetric(
           horizontal: 8,
