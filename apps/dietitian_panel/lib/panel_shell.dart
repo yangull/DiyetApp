@@ -215,6 +215,7 @@ Future<void> _confirmReset(
           child: const Text('Vazgeç'),
         ),
         FilledButton(
+          style: AppTheme.destructiveButton,
           onPressed: () => Navigator.of(context).pop(true),
           child: const Text('Sıfırla'),
         ),

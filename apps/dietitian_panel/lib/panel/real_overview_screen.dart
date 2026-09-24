@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import 'real_client_detail_screen.dart';
 import '../util/turkish.dart';
 import '../util/breakpoints.dart';
+import '../widgets/tone_pill.dart';
 
 /// The dietitian's real client list. Two calls back this screen: the
 /// relationship rows (which include pending invites, so an invite is visible
@@ -417,26 +418,13 @@ class _RelationshipStatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    final (label, color) = switch (status) {
-      RelationshipStatus.active => ('Aktif', AppColors.primary),
-      RelationshipStatus.pending => ('Davet bekliyor', palette.textSecondary),
-      RelationshipStatus.declined => ('Reddedildi', palette.textMuted),
+    final (label, tone) = switch (status) {
+      RelationshipStatus.active => ('Aktif', PillTone.approved),
+      RelationshipStatus.pending => ('Davet bekliyor', PillTone.neutral),
+      RelationshipStatus.declined => ('Reddedildi', PillTone.neutral),
     };
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodySmall
-            ?.copyWith(color: color, fontWeight: FontWeight.w600),
-      ),
-    );
+    return TonePill(label: label, tone: tone);
   }
 }
 

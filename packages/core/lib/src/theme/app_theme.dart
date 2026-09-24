@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'tokens/app_colors.dart';
 import 'tokens/app_density.dart';
+import 'tokens/app_spacing.dart';
 import 'tokens/app_typography.dart';
 
 /// The app ships light-only for now. Dark tokens are measured and documented
@@ -12,6 +13,13 @@ import 'tokens/app_typography.dart';
 /// ramps from one seed and would not reproduce the measured values in
 /// [AppColors]; every slot below is set explicitly instead.
 abstract final class AppTheme {
+  /// The confirm button of a destructive dialog ("İptal et", "Sıfırla"): red,
+  /// because green means "go ahead" (Can, 24 Sep 2026). White on it is 7.56:1.
+  static final destructiveButton = FilledButton.styleFrom(
+    backgroundColor: AppColors.error,
+    foregroundColor: AppColors.onPrimary,
+  );
+
   static ThemeData light(AppDensity density) {
     final text = AppTypography.textTheme(density);
     final controlShape = RoundedRectangleBorder(
@@ -122,18 +130,25 @@ abstract final class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           textStyle: text.labelLarge,
-          shape: controlShape,
+          // Every button is a pill (Can, 24 Sep 2026): one shape next to the
+          // secondary pill below. Inputs and chips keep the control radius.
+          shape: const StadiumBorder(),
         ),
       ),
-      // Without these, outlined and text buttons kept Material's pill shape
-      // next to the square-cornered filled button.
+      // The secondary action ("Düzenle", "Mesajı yanıtla") is Sade's pale-green
+      // pill, not an outline (#133): OutlinedButton is Material's name for it,
+      // so every secondary button in both apps takes this one style.
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: Size(64, density.controlHeight),
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.borderStrong),
+          backgroundColor: AppColors.primaryTint,
+          foregroundColor: AppColors.primaryHover,
+          disabledBackgroundColor: AppColors.surfaceSubtle,
+          disabledForegroundColor: AppColors.textMuted,
+          side: BorderSide.none,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           textStyle: text.labelLarge,
-          shape: controlShape,
+          shape: const StadiumBorder(),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -141,7 +156,7 @@ abstract final class AppTheme {
           minimumSize: Size(48, density.controlHeight),
           foregroundColor: AppColors.primary,
           textStyle: text.labelLarge,
-          shape: controlShape,
+          shape: const StadiumBorder(),
         ),
       ),
       chipTheme: ChipThemeData(

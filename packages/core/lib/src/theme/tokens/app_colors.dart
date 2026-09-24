@@ -18,7 +18,8 @@ abstract final class AppColors {
   /// Card and sheet background.
   static const surface = Color(0xFFFFFFFF);
 
-  /// Table headers, subtle fills, secondary buttons, progress tracks.
+  /// Table headers, progress tracks, neutral status pills and disabled
+  /// secondary buttons.
   /// [primary] is 4.58:1 here, [primaryHover] 6.51:1; [borderStrong] is below
   /// 3:1, so no essential boundary sits on it.
   static const surfaceSubtle = Color(0xFFEBEEEC);
@@ -65,6 +66,9 @@ abstract final class AppColors {
   /// Reserved exclusively for AI-drafted, not-yet-approved content, so that
   /// violet always means exactly that. 8.25:1 on [surface].
   static const aiDraft = Color(0xFF514196);
+
+  /// Fill behind [aiDraft] text in a status pill. [aiDraft] on it is 7.01:1.
+  static const aiDraftTint = Color(0xFFEEEBF6);
 }
 
 /// Tokens Material's [ColorScheme] has no slot for. Read with `context.palette`.
@@ -82,6 +86,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.warning,
     required this.warningTint,
     required this.aiDraft,
+    required this.aiDraftTint,
   });
 
   static const light = AppPalette(
@@ -96,6 +101,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     warning: AppColors.warning,
     warningTint: AppColors.warningTint,
     aiDraft: AppColors.aiDraft,
+    aiDraftTint: AppColors.aiDraftTint,
   );
 
   final Color ground;
@@ -109,6 +115,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color warning;
   final Color warningTint;
   final Color aiDraft;
+  final Color aiDraftTint;
 
   @override
   AppPalette copyWith({
@@ -123,6 +130,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? warning,
     Color? warningTint,
     Color? aiDraft,
+    Color? aiDraftTint,
   }) {
     return AppPalette(
       ground: ground ?? this.ground,
@@ -136,6 +144,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       warning: warning ?? this.warning,
       warningTint: warningTint ?? this.warningTint,
       aiDraft: aiDraft ?? this.aiDraft,
+      aiDraftTint: aiDraftTint ?? this.aiDraftTint,
     );
   }
 
@@ -154,6 +163,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       warning: Color.lerp(warning, other.warning, t)!,
       warningTint: Color.lerp(warningTint, other.warningTint, t)!,
       aiDraft: Color.lerp(aiDraft, other.aiDraft, t)!,
+      aiDraftTint: Color.lerp(aiDraftTint, other.aiDraftTint, t)!,
     );
   }
 }

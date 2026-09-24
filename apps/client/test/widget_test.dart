@@ -258,7 +258,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final button = find.widgetWithText(FilledButton, 'Yaz');
+    final button = find.widgetWithText(OutlinedButton, 'Yaz');
     // The pill looks 40 tall; its tap target is padded to 48.
     expect(tester.getSize(button).height, greaterThanOrEqualTo(48));
     await tester.tap(button);

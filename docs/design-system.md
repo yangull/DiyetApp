@@ -60,7 +60,7 @@ re-measuring. Ratios are also written next to each token in `app_colors.dart`.
 |---|---|---|---|
 | `ground` | `#F2F4F3` | — | App background: neutral light grey |
 | `surface` | `#FFFFFF` | — | Cards, sheets; no border, the ground separates them |
-| `surfaceSubtle` | `#EBEEEC` | — | Table headers, secondary buttons, progress tracks |
+| `surfaceSubtle` | `#EBEEEC` | — | Table headers, progress tracks, neutral status pills, disabled secondary buttons |
 | `borderSubtle` | `#E4E8E6` | 1.24:1 | Dividers inside a card; never carries state |
 | `borderStrong` | `#7E8C86` | 3.51:1 | Input and control boundaries |
 | `textPrimary` | `#16211D` | 16.54:1 | Main text |
@@ -73,6 +73,7 @@ re-measuring. Ratios are also written next to each token in `app_colors.dart`.
 | `aiDraft` | `#514196` | 8.25:1 | **Only** AI-written content no dietitian has approved |
 | `primaryTint` | `#E3F1EA` | primaryHover 6.53:1 | Pale-green fill of a secondary action pill; the one place the accent is a background |
 | `warningTint` | `#FBEFD5` | warning 5.19:1 | Fill behind warning text |
+| `aiDraftTint` | `#EEEBF6` | aiDraft 7.01:1 | Fill behind violet text in a draft status pill |
 
 Contrast on the grey ground: textPrimary 14.98, textSecondary 7.30, textMuted 5.04,
 primary 4.84, warning 5.36, error 6.85, aiDraft 7.47, borderStrong 3.18. Contrast is measured against the surface the token sits on (white unless
@@ -83,10 +84,18 @@ Rules:
   fills (progress) and "approved"; headings, ticks, selected navigation and body text are
   black or grey. No decorative second accent, no colour per category: groups and macros
   are told apart by name.
+- **Buttons are pills** (Can, 24 Sep 2026). `FilledButton` (green) is the one main
+  action; `OutlinedButton` is themed as the pale-green pill and is every secondary
+  action (it has no outline, the name is Material's). Quiet or neutral actions, like
+  signing out, use `TextButton`. A destructive dialog confirms with
+  `AppTheme.destructiveButton` (red).
+- **Status pills** are text on a tint without a border. "Onaylı" is grey with a black
+  tick, never green: a green pill is a button.
 - **No separate success colour.** A success green measured 1.19:1 against the brand
   green, so "approved" uses `primary` (#56).
-- **Violet is reserved for unapproved AI drafts:** violet + a 1.5 px dashed border + a
-  text label, together (#57). It appears nowhere else, so violet always means "a
+- **Violet is reserved for unapproved AI drafts** (#57). A draft *container* (the AI
+  banner) is violet + a 1.5 px dashed border + a text label; a draft *status pill* is
+  violet text on `aiDraftTint` with its label, no border. It appears nowhere else, so violet always means "a
   machine wrote this and nobody approved it". Other statuses (invites, appointments)
   must not reuse it.
 - **`ColorScheme.fromSeed` is never used.** It would regenerate the palette (#65).
@@ -166,7 +175,8 @@ instead.
    "tahminimiz"; no progress bar without a real target behind it.
 6. **Left-aligned, one grid.** Centre only a single short message (e.g. the "under
    review" card).
-7. **One radius scale per density.** Don't mix 4, 8, 16 and 24 on one screen.
+7. **One radius scale per density.** Don't mix 4, 8, 16 and 24 on one screen. Buttons
+   and status pills are full pills; cards, inputs and chips use the density's radii.
 8. **At most two elevation levels.** Borders and surface tone do the separating. Only
    floating elements (the bottom bar, sheets) get a shadow (#132).
 9. **No stock photos.** A real dietitian's photo or none (QUESTIONS Q23 parked). One

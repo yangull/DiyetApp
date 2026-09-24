@@ -53,6 +53,43 @@ void main() {
     expect(text.bodyMedium!.fontFamily, 'packages/core/Figtree');
   });
 
+  test('the secondary button is the pale-green pill, not an outline', () {
+    final style = AppTheme.light(AppDensity.comfortable)
+        .outlinedButtonTheme
+        .style!;
+    const none = <WidgetState>{};
+    const disabled = {WidgetState.disabled};
+
+    expect(style.side!.resolve(none), BorderSide.none);
+    expect(style.backgroundColor!.resolve(none), AppColors.primaryTint);
+    expect(style.foregroundColor!.resolve(none), AppColors.primaryHover);
+    expect(style.backgroundColor!.resolve(disabled), AppColors.surfaceSubtle);
+    expect(style.foregroundColor!.resolve(disabled), AppColors.textMuted);
+    expect(style.shape!.resolve(none), isA<StadiumBorder>());
+  });
+
+  test('every button is a pill; destructive confirms are red', () {
+    final theme = AppTheme.light(AppDensity.compact);
+    const none = <WidgetState>{};
+    for (final style in [
+      theme.filledButtonTheme.style!,
+      theme.outlinedButtonTheme.style!,
+      theme.textButtonTheme.style!,
+    ]) {
+      expect(style.shape!.resolve(none), isA<StadiumBorder>());
+    }
+    expect(
+      AppTheme.destructiveButton.backgroundColor!.resolve(none),
+      AppColors.error,
+    );
+  });
+
+  test('the rail matches the bottom bar: white, no pill', () {
+    final rail = AppTheme.light(AppDensity.compact).navigationRailTheme;
+    expect(rail.backgroundColor, AppColors.surface);
+    expect(rail.indicatorColor, Colors.transparent);
+  });
+
   group('measured palette (PLANNING #58)', () {
     void atLeast(Color fg, Color bg, double min, String what) {
       expect(contrast(fg, bg), greaterThanOrEqualTo(min), reason: what);
@@ -77,10 +114,14 @@ void main() {
       );
       atLeast(AppColors.borderStrong, AppColors.ground, 3, 'borderStrong');
       atLeast(AppColors.warning, AppColors.warningTint, 4.5, 'warning/tint');
+      atLeast(AppColors.aiDraft, AppColors.aiDraftTint, 4.5, 'aiDraft/tint');
     });
 
-    test('the one tinted fill keeps its text readable', () {
+    test('tinted fills keep their text readable', () {
       atLeast(AppColors.primaryHover, AppColors.primaryTint, 4.5, 'on tint');
+      // Disabled controls are exempt from WCAG; kept readable anyway.
+      atLeast(AppColors.textMuted, AppColors.surfaceSubtle, 4.5, 'disabled');
+      atLeast(AppColors.onPrimary, AppColors.error, 4.5, 'destructive');
       atLeast(AppColors.primary, AppColors.surfaceSubtle, 3, 'bar on track');
     });
   });

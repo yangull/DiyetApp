@@ -280,11 +280,15 @@ Full reference, including type scale, density numbers and the design rules:
 - **#55** **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
   draft); no decorative second accent, no colour per category (#133 removed the group
   colours and the yellow highlight Sıcak had added). The one tinted fill is `primaryTint`
-  behind a secondary action.
+  behind a secondary action. "Onaylı" is a grey pill with a black tick (Can, 24 Sep
+  2026), so a green pill always means a button. Buttons are pills; destructive confirms
+  are red.
 - **#56** **No separate `success` colour** — it measured 1.19:1 against brand green. Approved
   states use brand green.
 - **#57** **An AI draft has its own visual state:** violet `#514196` + 1.5px dashed border + a
-  text label. Violet is used nowhere else. Colour never carries meaning alone.
+  text label on a draft container; a draft status pill is violet text on `aiDraftTint`
+  with its label and no border (Can, 24 Sep 2026). Violet is used nowhere else. Colour
+  never carries meaning alone.
 - **#58** Every value is **measured**: WCAG AA 4.5:1 for text, 3:1 for interactive boundaries.
   Ratios are written next to each token in `app_colors.dart`. **Don't change a value
   without re-measuring.**

@@ -10,6 +10,7 @@ import 'messages_screen.dart';
 import 'plan_editor_screen.dart';
 import '../util/breakpoints.dart';
 import '../util/turkish.dart';
+import '../widgets/tone_pill.dart';
 
 class OverviewScreen extends ConsumerWidget {
   const OverviewScreen({
@@ -363,24 +364,12 @@ class _WaitingBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     final age = DateTime.now().difference(draftedAt);
     final late = age.inHours >= kPlanWaitingWarningHours;
-    final color = late ? palette.warning : palette.textMuted;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        '${formatAge(age)} bekliyor',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
-      ),
+    return TonePill(
+      label: '${formatAge(age)} bekliyor',
+      tone: late ? PillTone.warning : PillTone.neutral,
     );
   }
 }

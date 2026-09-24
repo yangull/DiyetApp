@@ -101,9 +101,12 @@ class AuthGate extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              OutlinedButton(
+              // Quiet: signing out is not a secondary action to invite, and
+              // OutlinedButton is the green pill (AppTheme).
+              TextButton.icon(
                 onPressed: actions.signOut,
-                child: const Text('Çıkış yap'),
+                icon: const Icon(Icons.logout),
+                label: const Text('Çıkış yap'),
               ),
             ],
           ),

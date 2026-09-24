@@ -40,7 +40,7 @@ class AdaptiveNavScaffold extends StatelessWidget {
   /// Wide screens only: pinned to the bottom of the rail.
   final Widget? railTrailing;
 
-  /// Phones only: a slim strip above the body for labelled actions that have
+  /// Phones only: a row above the body for labelled actions that have
   /// no place in a navigation bar.
   final List<Widget>? phoneTopActions;
 

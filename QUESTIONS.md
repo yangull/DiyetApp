@@ -200,6 +200,23 @@ dietitian, goals) with simple choices instead of forms; (3) both?
 _Blocks: the next client-app design session._
 >
 
+### C27–C30. Panel in Sade: open taste calls (24 Sep 2026)
+From the review of slices 1–3 (`docs/research/2026-09-24-panel-sade-review.md`).
+Claude's recommendation first in each. Answered the same day, now in PLANNING #55,
+#57, #133 and `docs/design-system.md`: C24 "Onaylı" is grey with a black tick, C25
+every button is a pill, C26 destructive confirms are red; C30 below (grey icon) lands
+with slice 4.
+- **C27. Wide Mesajlar:** white client bubbles vanish inside the white thread card.
+  (a) put the thread on the grey ground; (b) keep the card, give client bubbles a grey
+  fill instead of white. _Blocks: slice 7._
+- **C28. Danışanlar on phones:** (a) search stays visible, goal and plan status go behind
+  "Filtrele"; (b) everything behind "Filtrele". _Blocks: slice 5._
+- **C29. Randevular, one green action per row:** which keeps the green, "Görüşmeye başla"
+  or "Hatırlatma gönder"? Recommendation: "Görüşmeye başla". _Blocks: slice 6._
+- **C30. Genel Bakış draft rows:** (a) grey document icon (screen becomes green + amber);
+  (b) keep the violet icon and add the "Yapay zekâ taslağı" label. _Blocks: slice 4._
+>
+
 ---
 
 ## 2. Kadir (partner)

@@ -320,8 +320,8 @@ class _DietitianName extends ConsumerWidget {
   }
 }
 
-/// The accent as a pale fill with green text, for a secondary action in a
-/// row (like "Düzenle"). Its tap target is still at least 48 tall.
+/// The theme's secondary pill (pale green, see AppTheme), drawn 40 tall to sit
+/// inside a row. Its tap target is still at least 48 tall.
 class _TintButton extends StatelessWidget {
   const _TintButton({required this.label, required this.onPressed});
 
@@ -330,15 +330,10 @@ class _TintButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return FilledButton(
-      style: FilledButton.styleFrom(
-        backgroundColor: palette.primaryTint,
-        foregroundColor: palette.primaryHover,
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
         minimumSize: const Size(64, 40),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         tapTargetSize: MaterialTapTargetSize.padded,
-        shape: const StadiumBorder(),
       ),
       onPressed: onPressed,
       child: Text(label),
