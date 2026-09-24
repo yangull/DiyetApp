@@ -45,7 +45,7 @@ class TodayTab extends ConsumerWidget {
       ),
       children: [
         Text(
-          _todayLabel(DateTime.now()),
+          formatTodayLabel(DateTime.now()),
           style: text.bodyMedium?.copyWith(color: palette.textMuted),
         ),
         const SizedBox(height: 2),
@@ -75,33 +75,6 @@ class TodayTab extends ConsumerWidget {
 
 String _firstName(String fullName) =>
     fullName.trim().isEmpty ? 'Danışan' : fullName.trim().split(' ').first;
-
-const _days = [
-  'Pazartesi',
-  'Salı',
-  'Çarşamba',
-  'Perşembe',
-  'Cuma',
-  'Cumartesi',
-  'Pazar',
-];
-const _months = [
-  'Ocak',
-  'Şubat',
-  'Mart',
-  'Nisan',
-  'Mayıs',
-  'Haziran',
-  'Temmuz',
-  'Ağustos',
-  'Eylül',
-  'Ekim',
-  'Kasım',
-  'Aralık',
-];
-
-String _todayLabel(DateTime d) =>
-    '${_days[d.weekday - 1]}, ${d.day} ${_months[d.month - 1]}';
 
 /// Three real steps in order (rule 11): goals, a dietitian, the first plan.
 /// The count and bar are the screen's one number; the first plan cannot be

@@ -9,10 +9,9 @@ import 'client_detail_screen.dart';
 import 'messages_screen.dart';
 import 'plan_editor_screen.dart';
 import '../util/breakpoints.dart';
-import '../util/turkish.dart';
 import '../widgets/tone_pill.dart';
 
-class OverviewScreen extends ConsumerWidget {
+class OverviewScreen extends ConsumerStatefulWidget {
   const OverviewScreen({
     super.key,
     required this.onOpenClients,
@@ -25,7 +24,24 @@ class OverviewScreen extends ConsumerWidget {
   final VoidCallback onOpenAppointments;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OverviewScreen> createState() => _OverviewScreenState();
+}
+
+class _OverviewScreenState extends ConsumerState<OverviewScreen> {
+  final _draftsKey = GlobalKey();
+
+  void _showDrafts() {
+    final target = _draftsKey.currentContext;
+    if (target == null) return;
+    Scrollable.ensureVisible(
+      target,
+      duration: AppMotion.of(context, AppMotion.change),
+      curve: AppMotion.curve,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final demo = ref.watch(demoProvider);
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
@@ -34,21 +50,31 @@ class OverviewScreen extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.all(context.density.pagePadding),
       children: [
+        // The client's Bugün pattern: the date, then the greeting in bold.
+        Text(
+          formatTodayLabel(DateTime.now()),
+          style: text.bodyMedium?.copyWith(color: palette.textMuted),
+        ),
+        const SizedBox(height: 2),
         Text('Hoş geldiniz, Dyt. Deniz', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          'Bugün ${demo.draftCount} planınız onayınızı bekliyor.',
-          style: text.bodyLarge?.copyWith(color: palette.textSecondary),
+        _CountsLine(
+          counts: [
+            (demo.clients.length, 'danışan', widget.onOpenClients),
+            (demo.draftCount, 'onay bekliyor', _showDrafts),
+            (demo.upcoming.length, 'randevu', widget.onOpenAppointments),
+            if (kShowMoney) (demo.unpaidTotal, '₺ tahsil edilmemiş', null),
+          ],
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.xl),
         _TriageCard(
           signals: signals,
-          onOpenClients: onOpenClients,
-          onOpenMessages: onOpenMessages,
-          onOpenAppointments: onOpenAppointments,
+          onOpenClients: widget.onOpenClients,
+          onOpenMessages: widget.onOpenMessages,
+          onOpenAppointments: widget.onOpenAppointments,
         ),
         const SizedBox(height: AppSpacing.xxl),
-        Text('Sıradaki işler', style: text.titleLarge),
+        Text('Sıradaki işler', key: _draftsKey, style: text.titleLarge),
         const SizedBox(height: AppSpacing.md),
         Card(
           child: Column(
@@ -63,43 +89,6 @@ class OverviewScreen extends ConsumerWidget {
                     style: text.bodyMedium?.copyWith(color: palette.textMuted),
                   ),
                 ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _Metric(
-                  label: 'Aktif danışan',
-                  value: '${demo.clients.length}',
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _Metric(
-                  label: 'Onay bekleyen plan',
-                  value: '${demo.draftCount}',
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _Metric(
-                  label: 'Yaklaşan randevu',
-                  value: '${demo.upcoming.length}',
-                ),
-              ),
-              if (kShowMoney) ...[
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _Metric(
-                    label: 'Tahsil edilmemiş',
-                    value: '${demo.unpaidTotal} ₺',
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -375,38 +364,65 @@ class _WaitingBadge extends StatelessWidget {
   }
 }
 
-class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value});
+/// One slim line in place of the stat tiles: "5 danışan · 3 onay bekliyor ·
+/// 4 randevu". Each count opens where its items are. The tiles sat below the
+/// work because nobody acts on "5 aktif danışan"; a line under the greeting
+/// keeps the numbers without the weight.
+class _CountsLine extends StatelessWidget {
+  const _CountsLine({required this.counts});
 
-  final String label;
-  final String value;
+  final List<(int, String, VoidCallback?)> counts;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              trUpper(label),
-              style: text.labelSmall?.copyWith(
-                color: context.palette.textMuted,
+    final palette = context.palette;
+    final separator = Text(
+      ' · ',
+      style: text.bodyLarge?.copyWith(color: palette.textMuted),
+    );
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        for (final (i, (value, label, onTap)) in counts.indexed)
+          // The dot rides on the end of its count, so a wrapped line never
+          // starts with one.
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: TextButton(
+                  onPressed: onTap,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(0, context.density.controlHeight),
+                  ),
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '$value',
+                          style: AppTypography.figures(
+                            text.bodyLarge!.fontSize!,
+                            text.bodyLarge!.height! * text.bodyLarge!.fontSize!,
+                          ).copyWith(color: AppColors.textPrimary),
+                        ),
+                        TextSpan(
+                          text: ' $label',
+                          style: text.bodyLarge?.copyWith(
+                            color: palette.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              value,
-              style: text.headlineLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
-        ),
-      ),
+              if (i < counts.length - 1) separator,
+            ],
+          ),
+      ],
     );
   }
 }

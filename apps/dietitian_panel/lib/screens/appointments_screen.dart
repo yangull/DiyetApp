@@ -116,18 +116,9 @@ class AppointmentsScreen extends ConsumerWidget {
 }
 
 String _when(DateTime at) {
-  const days = [
-    'Pazartesi',
-    'Salı',
-    'Çarşamba',
-    'Perşembe',
-    'Cuma',
-    'Cumartesi',
-    'Pazar',
-  ];
   final hh = at.hour.toString().padLeft(2, '0');
   final mm = at.minute.toString().padLeft(2, '0');
-  return '${formatDayMonth(at)} ${days[at.weekday - 1]} · $hh:$mm';
+  return '${formatDayMonth(at)} ${trWeekdays[at.weekday - 1]} · $hh:$mm';
 }
 
 class _AppointmentRow extends ConsumerWidget {

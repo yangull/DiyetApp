@@ -10,6 +10,7 @@ export 'src/auth/profile_repository.dart';
 export 'src/auth/supabase_auth_repository.dart';
 export 'src/auth/supabase_profile_repository.dart';
 export 'src/config/app_config.dart';
+export 'src/format/turkish_date.dart';
 export 'src/relationships/client_relationship_providers.dart';
 export 'src/relationships/client_relationship_repository.dart';
 export 'src/relationships/fake_client_relationship_repository.dart';

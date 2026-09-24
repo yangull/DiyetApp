@@ -57,6 +57,28 @@ void main() {
     expect(textColours, contains(AppColors.warning));
   });
 
+  testWidgets('the counts under the greeting open where their items are', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+
+    Finder count(String label) => find.descendant(
+      of: find.byType(OverviewScreen),
+      matching: find.text(label, findRichText: true),
+    );
+    expect(count('5 danışan'), findsOneWidget);
+    expect(count('3 onay bekliyor'), findsOneWidget);
+    expect(count('4 randevu'), findsOneWidget);
+
+    await tester.tap(count('4 randevu'));
+    await tester.pumpAndSettle();
+    final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+    expect(rail.selectedIndex, 2);
+  });
+
   testWidgets('a dietitian can open a conversation and send a message', (
     tester,
   ) async {
@@ -392,8 +414,21 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // A RenderFlex overflow fails the test on its own.
-        expect(find.text('Dikkat gerekenler'), findsOneWidget);
+        // A RenderFlex overflow fails the test on its own. At 2× the greeting
+        // and counts fill the first screen, so scroll to the card.
+        final list = find
+            .descendant(
+              of: find.byType(OverviewScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first;
+        await tester.scrollUntilVisible(
+          find.text('Dikkat gerekenler'),
+          300,
+          scrollable: list,
+        );
+        await tester.drag(list, const Offset(0, -300));
+        await tester.pumpAndSettle();
         expect(find.text('Danışanı aç'), findsWidgets);
       });
     }
