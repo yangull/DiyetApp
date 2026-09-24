@@ -318,6 +318,18 @@ Full reference, including type scale, density numbers and the design rules:
   our green (not MyFitnessPal's blue), all sans, grey + white cards, no group colours.
   Everything else from #131/#132 (numbers, touch targets, motion, week count, P9, tab bar
   only navigates) stands. Spec: `docs/design-system.md`.
+  **The panel follows Sade screen by screen** (24 Sep 2026, slices 1–9, each checked on
+  the emulator at phone and wide size, reviewed by a subagent and by Codex:
+  `docs/research/2026-09-24-panel-sade-review*.md`). Can decided along the way: every
+  button is a pill; `OutlinedButton` is the pale-green secondary pill; "Onaylı" is a grey
+  pill with a black tick, so a green pill always means a button (C24–C25); destructive
+  confirms are red (C26); **one green action per row**, the rest grey quiet buttons
+  (Genel Bakış; Randevular keeps "Görüşmeye başla", C29); Genel Bakış opens with the date,
+  the greeting and a tappable counts line instead of stat tiles, with grey triage and
+  draft icons and amber only on the reason (C30); Danışanlar on phones keeps search in
+  view and puts goal and plan status behind one "Filtrele" sheet (C28); the Mesajlar
+  thread sits on the grey ground with white client bubbles and pale-green dietitian
+  bubbles (C27). Filter chips are borderless (white off, pale green on).
 - **#131** **Redesign direction "Sıcak"**, colour superseded by #133 the same night (Can, 23 Sep 2026, after calling the client app
   dull on a phone; option B of three on the mockup canvas
   https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn). Close to Lifesum: warm ground, a
@@ -410,16 +422,16 @@ is built to be corrected, not admired.
 
 ---
 
-## 5. Current state (23 Sep 2026)
+## 5. Current state (24 Sep 2026)
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green (core 8, client 14, panel 98). No CI yet. Both apps build and run on the Android emulator (#3). |
+| Monorepo, tooling | Done. Analyzer clean, all tests green (core 14, client 14, panel 159). No CI yet. Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
 | Client app | "Sade" design (#133). Login → Bugün (date and greeting, any invite first, a white Başlangıç card with a progress bar and three real steps, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |
-| Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). Phone layout below 600 dp: bottom bar, comfortable density, stacked client rows (#38). |
-| Interview demo | Sade palette; below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
+| Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). Phone layout below 600 dp: bottom bar, comfortable density, stacked client rows (#38). Takes Sade through the shared theme; not yet checked on the emulator (needs an approved dietitian account, #35). |
+| Interview demo | Fully Sade screen by screen (24 Sep 2026, #133); below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
 | Brand | Name and palette settled ("Sade", 23 Sep 2026). **Logo: placeholder "W" mark** until one is designed with Claude later. |
 | Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123). |

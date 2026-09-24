@@ -196,6 +196,13 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   never hard-code `AppDensity.compact` in a screen.
 - Colours are checked by `packages/core/test/core_test.dart`: a new token needs its pairs
   added there, and text on `surfaceSubtle` uses `primaryHover` (primary is 4.47:1).
+- `OutlinedButton` is themed as the pale-green secondary pill, not an outline. A neutral
+  action (sign-out, "Danışanı aç") is a `TextButton` with `AppTheme.quietButton`; green
+  text on the ground fails AA under the focus overlay. A destructive confirm uses
+  `AppTheme.destructiveButton` (red).
+- `Scrollable.ensureVisible` needs the target built. A lazy `ListView` doesn't build
+  off-screen children, so a screen with a "jump to" link (Genel Bakış, the client
+  record) is a `SingleChildScrollView`.
 
 **Demo panel**
 - All money UI (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is gated by
@@ -218,6 +225,13 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
 - `FakeAuthRepository.sessionChanges` replays the current session to new listeners, like
   Supabase's `onAuthStateChange`. Making it a bare broadcast stream breaks tests in
   non-obvious ways.
+- Text clipped by a fixed-height box raises no overflow error. Use
+  `test/text_fits.dart` (`expectTextNotClipped`), and give rows a `minHeight`, not a
+  `height`.
+- `scrollUntilVisible` / `ensureVisible` with a `.first` finder throws while nothing
+  matches yet. Scroll to a unique heading, then drag.
+- The test font draws every glyph as a square, much wider than Figtree: a label that
+  truncates at 2× in a test may fit on a device. Check real layouts on the emulator.
 - `test/screenshots_test.dart` produces captures, not regression goldens. It is tagged and
   skipped by default. Regenerate with
   `flutter test test/screenshots_test.dart --tags screenshots --run-skipped --update-goldens`.

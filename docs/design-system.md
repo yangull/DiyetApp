@@ -90,6 +90,10 @@ Rules:
   signing out or "Danışanı aç", use `TextButton` with `AppTheme.quietButton` (grey:
   green text on the ground fails AA under the focus overlay). A destructive dialog confirms with
   `AppTheme.destructiveButton` (red).
+- **One green action per row.** A row's main task keeps the green (a pale pill);
+  every other action in it is a grey quiet button ("Danışanı aç", "Hatırlatma gönder").
+- **Filter chips** have no border: white on the grey ground when off, pale green with a
+  green tick when on.
 - **Status pills** are text on a tint without a border. "Onaylı" is grey with a black
   tick, never green: a green pill is a button.
 - **No separate success colour.** A success green measured 1.19:1 against the brand
