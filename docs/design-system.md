@@ -92,6 +92,7 @@ Rules:
   `AppTheme.destructiveButton` (red).
 - **One green action per row.** A row's main task keeps the green (a pale pill);
   every other action in it is a grey quiet button ("Danışanı aç", "Hatırlatma gönder").
+- **Cancel is grey.** "Vazgeç" next to a green or red button is a quiet button.
 - **Filter chips** have no border: white on the grey ground when off, pale green with a
   green tick when on.
 - **Status pills** are text on a tint without a border. "Onaylı" is grey with a black
@@ -156,6 +157,12 @@ side on one line. Flutter's own `VisualDensity` is pinned to standard in the the
 `AppDensity` is the only density system.
 
 Spacing scale (`AppSpacing`): 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48.
+
+**Alignment (24 Sep 2026).** Rows of related cards share one column grid, with a fixed
+column for every action, so nothing drifts with the width of its neighbour
+(Randevular, Genel Bakış). Forms and text pages stop at `kReadableWidth` (1100 px) and
+centre; lists and tables use the full width. Form fields sit on a six-column grid; facts
+use fixed-width columns. Tests measure these edges, so keep them measurable.
 Navigation: the client app uses a bottom bar; the panel uses a `NavigationRail` with
 labels on wide screens and a bottom bar on phones. The panel runs on web, phones and
 tablets (PLANNING #38): wide screens use the compact density, phones the comfortable

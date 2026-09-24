@@ -3,7 +3,7 @@
 > Where the project stands and what is waiting on whom. Rewrite this file (don't append)
 > at the end of a session. Decisions live in `PLANNING.md`; open questions in
 > `QUESTIONS.md`; traps in `CLAUDE.md` ("Gotchas"); vocabulary in `CONTEXT.md`.
-> Updated 24 September 2026.
+> Updated 24 September 2026 (evening).
 
 ## Where things stand
 
@@ -24,16 +24,25 @@
   ground; 8. app names "Wellkit" / "Wellkit Panel"; 9. sweep (intake form on phones,
   video mockup, settings, AI banner tint).
   Can's taste calls (C24–C30, C27–C29) are recorded in PLANNING #133.
-- **Reviews:** a Claude subagent reviewed slices 1–3 and Codex slices 1–4b
-  (`docs/research/2026-09-24-panel-sade-review.md`, `…-review-codex.md`). Every finding
-  was checked against the code; the valid ones are fixed.
-- **Tests:** core 14, client 14, panel 159 (98 this morning). New: phone tests for the
-  plan editors, intake form, filters, past appointments, the keyboard-open thread and
-  the video mockup; a clipping check (`test/text_fits.dart`); colour guards for Genel
-  Bakış and Randevular.
+- **After the wrap-up the same day (slices 10–11b):** Codex's second review found four
+  demo bugs (deleted food rows showing stale text, "Mesajı yanıtla" not opening the
+  thread on phones, Turkish capitals in search, "okunmamış" that meant "yanıt
+  bekleyen"), all fixed. Then Can spotted drifting columns in Randevular; an audit of
+  every screen at 1440 and 412 dp (rendered with Figtree in a widget test, since the
+  emulator was off) led to 11a (one grid per screen for Randevular and Genel Bakış, the
+  real panel's invite button back at the right, Mesajlar titles on one line, Takip's
+  label collision, "Besin ekle") and 11b (1100 px readable width, centred plan editors
+  with the pill by the title, grids for the intake form and client record, grey
+  "Vazgeç"). Found on the way: the first demo appointment was seeded at "today 16:30".
+- **Reviews:** a Claude subagent reviewed slices 1–3, Codex slices 1–4b and then
+  c13c327 (`docs/research/2026-09-24-panel-sade-review.md`, `…-review-codex.md`; the
+  second Codex review was relayed in chat). Every finding was checked against the code.
+- **Tests:** core 14, client 14, panel 181 (98 at the start of 24 Sep). Layout tests now
+  measure column edges, widths and heights (`test/layout_width_test.dart`,
+  `demo_widget_test.dart`), not just overflow.
 - **Where to see it:** the emulator ("Wellkit Panel" in the app list), `flutter run -d
-  web-server … -t lib/main_demo.dart` on localhost:8080, or before/after screenshots in
-  `C:\Users\jhana\Pictures\Wellkit Sade panel 24 Sep\` (`once`, `sonra\1…9`).
+  web-server … -t lib/main_demo.dart` on localhost:8080, or before/after captures in
+  `C:\Users\jhana\Pictures\Wellkit Sade panel 24 Sep\` (`once`, `sonra\1…11b`).
 
 ## Pages (Claude artifacts)
 
@@ -52,24 +61,29 @@ and PLANNING.md.
 
 ## Next steps
 
-1. **Refresh the panel tour artifact** with the Sade screens (it shows the old colours
+1. **Slice 12, the client app's alignment pass** (audited, agreed, not built): Profil's
+   "Çıkış yap" is indented 11 px by its button padding; Bugün's "YAKINDA" block is inset
+   4 px from the cards; the login link "Hesabın yok mu? Kayıt ol" becomes left-aligned
+   (Can, rule 6). Then a Codex review of slices 10–12 (`git diff c13c327..HEAD`).
+2. **Refresh the panel tour artifact** with the Sade screens (it shows the old colours
    and is what Kadir and dietitians see). Also the canvas's "Sonuç" row.
-2. **Can answers C23:** what "more hooky" means for the client app (visual, interaction,
-   or both). It shapes the next client-app design session.
-3. **The data features that bring Bugün to life**, each planned on its own before code:
+3. **Can answers C23:** what "more hooky" means for the client app (visual,
+   interaction, or both). It shapes the next client-app design session.
+4. **The data features that bring Bugün to life**, each planned on its own before code:
    `diet_plans` + the client's Planım tab and a meal count on Bugün; meal logs (P7) with
    the weekly count; weigh-ins (P8); chat. Keyed off `dietitian_client_relationships`.
    P9 (hide numbers per client) lands with the first of them.
-4. **Can answers C21** (how much plan editing on a phone); it blocks the panel's phone
+5. **Can answers C21** (how much plan editing on a phone); it blocks the panel's phone
    plan screen.
-5. **The real panel on the emulator:** sign up in the panel app, approve the account in
+6. **The real panel on the emulator:** sign up in the panel app, approve the account in
    the Supabase dashboard (#35), then check its screens at phone and wide size.
-6. **Small follow-ups:** tablets (600 dp+) use the compact layout without touch padding;
-   `Fraunces-SemiBold.ttf` can be deleted now that Sade is settled; launcher icons are
-   still Flutter's (logo placeholder, PLANNING §5); on phones the first client row draws
-   its top divider against the card edge.
-7. **Can + Kadir:** give Kadir edit access to the interview guide and ask K1–K3, K2 first.
-8. **Can:** the rest of the interview answers (DT1, DT7, DT8, DT10, DT15), then §0
+7. **Small follow-ups:** tablets (600 dp+) use the compact layout without touch padding;
+   `Fraunces-SemiBold.ttf` can be deleted; launcher icons are still Flutter's (logo
+   placeholder, PLANNING §5); the Mesajlar context panel ends at its content while the
+   list runs full height.
+8. **Can + Kadir:** give Kadir edit access to the interview guide and ask K1–K3, K2 first.
+9. **Can:** the rest of the interview answers (DT1, DT7, DT8, DT10, DT15), then §0
    (I1–I16), C4 and C8.
-9. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev project
-   (C17), custom SMTP, RLS access tests, invite email delivery, ending a relationship.
+10. **Unblocked any time:** CI (analyze + test on GitHub), a separate Supabase dev
+   project (C17), custom SMTP, RLS access tests, invite email delivery, ending a
+   relationship.

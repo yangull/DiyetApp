@@ -330,6 +330,11 @@ Full reference, including type scale, density numbers and the design rules:
   view and puts goal and plan status behind one "Filtrele" sheet (C28); the Mesajlar
   thread sits on the grey ground with white client bubbles and pale-green dietitian
   bubbles (C27). Filter chips are borderless (white off, pale green on).
+  **Alignment pass** (24 Sep 2026, slices 10–11b, after Can spotted drifting columns in
+  Randevular): rows of related cards share one column grid, every action has a fixed
+  column; forms and text pages stop at 1100 px and centre (lists and tables stay full
+  width); wide plan editors centre, the status pill next to the title; cancel buttons
+  ("Vazgeç") are grey. The client app gets the same pass next (HANDOFF).
 - **#131** **Redesign direction "Sıcak"**, colour superseded by #133 the same night (Can, 23 Sep 2026, after calling the client app
   dull on a phone; option B of three on the mockup canvas
   https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn). Close to Lifesum: warm ground, a
@@ -426,7 +431,7 @@ is built to be corrected, not admired.
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green (core 14, client 14, panel 159). No CI yet. Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
+| Monorepo, tooling | Done. Analyzer clean, all tests green (core 14, client 14, panel 181). No CI yet. Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
 | Client app | "Sade" design (#133). Login → Bugün (date and greeting, any invite first, a white Başlangıç card with a progress bar and three real steps, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |

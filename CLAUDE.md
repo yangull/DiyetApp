@@ -230,6 +230,13 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `height`.
 - `scrollUntilVisible` / `ensureVisible` with a `.first` finder throws while nothing
   matches yet. Scroll to a unique heading, then drag.
+- `find.byType` matches the exact class only: `OutlinedButton.icon` is a subclass. Use
+  `find.byWidgetPredicate((w) => w is ButtonStyleButton)`.
+- Seed times must be relative to now, not a time of day: "today 16:30" made an
+  appointment past every evening and flipped a test.
+- To see screens without the emulator, render them in a widget test with Figtree
+  loaded (as `test/screenshots_test.dart` does) and `matchesGoldenFile` to a scratch
+  path; that is how the 24 Sep alignment audit was done.
 - The test font draws every glyph as a square, much wider than Figtree: a label that
   truncates at 2× in a test may fit on a device. Check real layouts on the emulator.
 - `test/screenshots_test.dart` produces captures, not regression goldens. It is tagged and
