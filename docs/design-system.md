@@ -163,6 +163,11 @@ column for every action, so nothing drifts with the width of its neighbour
 (Randevular, Genel Bakış). Forms and text pages stop at `kReadableWidth` (1100 px) and
 centre; lists and tables use the full width. Form fields sit on a six-column grid; facts
 use fixed-width columns. Tests measure these edges, so keep them measurable.
+A text button that must sit on an edge (a link under a form, "Çıkış yap", "Düzenle" in a
+section header) is wrapped in core's `EdgeButton`: its text is on the edge and its pill
+hangs into the margin. Never zero a pill's padding. On wide screens a row groups its
+actions at the right end; columns that spread actions across the window look scattered
+(Can, 24 Sep 2026).
 Navigation: the client app uses a bottom bar; the panel uses a `NavigationRail` with
 labels on wide screens and a bottom bar on phones. The panel runs on web, phones and
 tablets (PLANNING #38): wide screens use the compact density, phones the comfortable
