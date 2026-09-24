@@ -77,8 +77,11 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
                 ),
               ),
             ),
+            // Above the call controls, not beside them: on a phone the
+            // controls are as wide as the screen and the tile covered the
+            // hang-up button.
             Positioned(
-              bottom: 24,
+              bottom: 24 + 64 + 24,
               right: 24,
               child: Container(
                 width: 100,

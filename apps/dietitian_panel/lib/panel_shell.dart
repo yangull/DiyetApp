@@ -248,7 +248,9 @@ void _showDemoSheet(BuildContext context, {required VoidCallback onReset}) {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => Scaffold(
-                      appBar: AppBar(title: const Text('Hatırlatma ayarları')),
+                      // The page's own heading names it; a title here too
+                      // said it twice.
+                      appBar: AppBar(),
                       body: const SettingsScreen(),
                     ),
                   ),

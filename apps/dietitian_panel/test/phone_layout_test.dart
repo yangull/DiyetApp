@@ -3,6 +3,7 @@ import 'package:dietitian_panel/screens/appointments_screen.dart';
 import 'package:dietitian_panel/screens/client_detail_screen.dart';
 import 'package:dietitian_panel/screens/clients_screen.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
+import 'package:dietitian_panel/screens/intake_form_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:flutter/material.dart';
@@ -280,6 +281,87 @@ void main() {
             reason: 'a word in "Görüşme yapıldı" is broken',
           );
         }
+      });
+
+      testWidgets('the intake form fits a $width dp phone at $scale×', (
+        tester,
+      ) async {
+        await pumpPhone(tester, width, scale);
+        await openTab(tester, 'Danışanlar');
+        final add = find.text('Danışan ekle');
+        await tester.ensureVisible(add);
+        await tester.pumpAndSettle();
+        await tester.tap(add);
+        await tester.pumpAndSettle();
+        // One field per line on a phone: every label reads in full.
+        for (final label in ['Yaş', 'Boy (cm)', 'Beslenme tipi']) {
+          await tester.scrollUntilVisible(
+            find.text(label),
+            300,
+            scrollable: find
+                .descendant(
+                  of: find.byType(IntakeFormScreen),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
+          // A field label is one line by design. At 2x the test font's
+          // square glyphs outrun a phone even for "Beslenme tipi", so the
+          // full-label check stops at 1.3x; overflow is still checked.
+          if (scale > 1.3) continue;
+          final paragraph = tester.renderObject<RenderParagraph>(
+            find.text(label),
+          );
+          expect(paragraph.didExceedMaxLines, isFalse, reason: label);
+          expect(
+            paragraph.size.width,
+            greaterThanOrEqualTo(
+              paragraph.getMaxIntrinsicWidth(double.infinity) - 0.5,
+            ),
+            reason: '"$label" is cut off',
+          );
+        }
+        await tester.scrollUntilVisible(
+          find.text('Kaydet ve taslak oluştur'),
+          300,
+          scrollable: find
+              .descendant(
+                of: find.byType(IntakeFormScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+      });
+
+      testWidgets('the video call keeps its controls clear on a $width dp '
+          'phone at $scale×', (tester) async {
+        await pumpPhone(tester, width, scale);
+        await openTab(tester, 'Randevular');
+        final start = find.text('Görüşmeye başla').first;
+        await tester.ensureVisible(start);
+        await tester.pumpAndSettle();
+        await tester.tap(start);
+        await tester.pumpAndSettle();
+        final self = tester.getRect(
+          find
+              .ancestor(of: find.text('Siz'), matching: find.byType(Container))
+              .first,
+        );
+        for (final control in ['Görüşmeyi bitir']) {
+          final rect = tester.getRect(find.byTooltip(control));
+          expect(self.overlaps(rect), isFalse, reason: control);
+        }
+      });
+
+      testWidgets('reminder settings name the page once on a $width dp '
+          'phone at $scale×', (tester) async {
+        await pumpPhone(tester, width, scale);
+        await tester.tap(find.text('Demo'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Hatırlatma ayarları'));
+        await tester.pumpAndSettle();
+        expect(find.text('Hatırlatma ayarları'), findsOneWidget);
+        expect(find.byType(BackButton), findsOneWidget);
       });
 
       for (final tab in ['Danışanlar', 'Randevular', 'Mesajlar', 'Takip']) {

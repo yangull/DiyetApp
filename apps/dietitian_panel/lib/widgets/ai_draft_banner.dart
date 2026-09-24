@@ -108,7 +108,8 @@ class DottedBorderBox extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.04),
+          // The measured tint (#EEEBF6), not an unmeasured alpha of violet.
+          color: context.palette.aiDraftTint,
           borderRadius: BorderRadius.circular(context.density.cardRadius),
         ),
         child: child,

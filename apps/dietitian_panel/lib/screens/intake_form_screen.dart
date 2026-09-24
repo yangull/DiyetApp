@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
+import '../util/breakpoints.dart';
 import 'plan_editor_screen.dart';
 
 /// The anamnez form, and it is a guess on purpose.
@@ -260,13 +261,15 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Row(
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   FilledButton(
                     onPressed: _save,
                     child: const Text('Kaydet ve taslak oluştur'),
                   ),
-                  const SizedBox(width: AppSpacing.md),
                   TextButton(
                     onPressed: _confirmLeave,
                     child: const Text('Vazgeç'),
@@ -340,15 +343,28 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
   /// Flex lives here rather than in the field helpers, so a field can also be
   /// used on its own in a Column — an `Expanded` baked into the helper meant
   /// vertical flex with unbounded height the moment one was, which is a crash.
-  Widget _row(List<Widget> children, {List<int>? flex}) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      for (var i = 0; i < children.length; i++) ...[
-        if (i > 0) const SizedBox(width: AppSpacing.lg),
-        Expanded(flex: flex?[i] ?? 1, child: children[i]),
-      ],
-    ],
-  );
+  ///
+  /// On a phone every field gets its own line: three to a row left "Yaş" as
+  /// "Y…" and overflowed the dropdown.
+  Widget _row(List<Widget> children, {List<int>? flex}) => isPanelPhone(context)
+      ? Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.lg),
+              children[i],
+            ],
+          ],
+        )
+      : Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) const SizedBox(width: AppSpacing.lg),
+              Expanded(flex: flex?[i] ?? 1, child: children[i]),
+            ],
+          ],
+        );
 
   Widget _field(
     TextEditingController controller,
@@ -395,12 +411,18 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     required Map<T, String> entries,
     required ValueChanged<T> onChanged,
   }) {
+    // Expanded, so a long choice ("Orta hareketli") at large text is cut
+    // with an ellipsis inside the field instead of overflowing it.
     return DropdownButtonFormField<T>(
       initialValue: value,
+      isExpanded: true,
       decoration: InputDecoration(labelText: label),
       items: [
         for (final entry in entries.entries)
-          DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+          DropdownMenuItem(
+            value: entry.key,
+            child: Text(entry.value, overflow: TextOverflow.ellipsis),
+          ),
       ],
       onChanged: (v) {
         if (v != null) onChanged(v);
