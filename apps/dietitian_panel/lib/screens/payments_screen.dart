@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../util/panel_date.dart';
-import '../util/turkish.dart';
 
 /// The commission model made visible, per locked decision §2 #3 (build order:
 /// core → dietitian marketplace) and Open Question #1 (the commission rate

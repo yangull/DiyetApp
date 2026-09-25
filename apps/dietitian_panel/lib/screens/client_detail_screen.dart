@@ -12,7 +12,6 @@ import '../widgets/status_pill.dart';
 import '../widgets/weight_chart.dart';
 import 'exchange_plan_editor_screen.dart';
 import 'plan_editor_screen.dart';
-import '../util/turkish.dart';
 
 class ClientDetailScreen extends ConsumerStatefulWidget {
   const ClientDetailScreen({

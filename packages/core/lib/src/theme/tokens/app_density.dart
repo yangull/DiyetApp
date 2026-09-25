@@ -33,11 +33,12 @@ class AppDensity extends ThemeExtension<AppDensity> {
   );
 
   /// The dietitian panel on wide screens, where a screenful of clients matters
-  /// more than air.
+  /// more than air. Cards are rounder than the controls since direction B
+  /// (PLANNING #133): 10 read as a business form next to the pill buttons.
   static const compact = AppDensity(
     profile: AppDensityProfile.compact,
     pagePadding: 24,
-    cardRadius: 10,
+    cardRadius: 16,
     controlRadius: 8,
     controlHeight: 36,
     inputHeight: 38,

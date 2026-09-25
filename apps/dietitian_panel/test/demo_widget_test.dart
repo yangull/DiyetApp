@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'text_fits.dart';
+
 void main() {
   testWidgets('the interview demo opens straight on the overview, no login', (
     tester,
@@ -31,10 +33,13 @@ void main() {
     expect(app.darkTheme, isNull);
   });
 
-  // Rule 15, "count the colours": green plus one status colour. Drafts are
-  // told apart by their wording here, not by violet (C30), and the triage
-  // icons are grey; amber is left for the reason and a late wait.
-  testWidgets('Genel Bakış draws no violet and no amber icons', (tester) async {
+  // Rule 15, "count the colours": violet appears once, on the drafts card's
+  // label (Can, 25 Sep 2026, over C30), because that card holds unapproved AI
+  // drafts; the triage icons are grey and amber is left for the reasons and a
+  // late wait.
+  testWidgets('Genel Bakış shows violet once, on the drafts label', (
+    tester,
+  ) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 2400);
     addTearDown(tester.view.reset);
@@ -49,17 +54,21 @@ void main() {
         matching: find.byType(T),
       ),
     );
+    final violetTexts = <String>[];
     final textColours = <Color?>[];
     for (final t in inOverview<RichText>()) {
       t.text.visitChildren((span) {
         textColours.add(span.style?.color);
+        if (span.style?.color == AppColors.aiDraft && span is TextSpan) {
+          violetTexts.add(span.text ?? '');
+        }
         return true;
       });
     }
     final iconColours = inOverview<Icon>().map((i) => i.color);
 
+    expect(violetTexts, ['Yapay zekâ taslağı']);
     expect(inOverview<Icon>(), isNotEmpty);
-    expect(textColours, isNot(contains(AppColors.aiDraft)));
     expect(iconColours, isNot(contains(AppColors.aiDraft)));
     expect(iconColours, isNot(contains(AppColors.warning)));
     expect(textColours, contains(AppColors.warning));
@@ -318,18 +327,32 @@ void main() {
     expect(icons, hasLength(1));
   });
 
-  testWidgets('Genel Bakış: both cards share their columns', (tester) async {
+  Set<double> rightEdges(Type screen, Iterable<String> labels) => {
+    for (final label in labels)
+      for (final e
+          in find
+              .descendant(of: find.byType(screen), matching: find.text(label))
+              .evaluate())
+        (e.renderObject! as RenderBox)
+            .localToGlobal(Offset((e.renderObject! as RenderBox).size.width, 0))
+            .dx,
+  };
+
+  // Direction B (PLANNING #133): the drafts card and the triage card share
+  // one text edge and one action edge, and nobody appears twice in triage.
+  testWidgets('Genel Bakış: both cards share their edges', (tester) async {
     await pumpWide(tester);
-    const names = [
-      'Burak Şahin',
-      'Ahmet Demir',
-      'Zeynep Kaya',
-      'Elif Aydın',
-      'Merve Yılmaz',
-    ];
-    expect(leftEdges(OverviewScreen, names), hasLength(1));
+    const names = ['Burak Şahin', 'Ahmet Demir', 'Elif Aydın', 'Merve Yılmaz'];
+    // The agenda column repeats some names; this is about the work column.
+    final agendaLeft = tester.getTopLeft(find.text('BUGÜN')).dx;
+    final textEdge = leftEdges(OverviewScreen, [
+      ...names,
+      '21 gündür tartım girmedi',
+      '31 saattir mesajı yanıtsız',
+    ]).where((x) => x < agendaLeft);
+    expect(textEdge.toSet(), hasLength(1));
     expect(
-      leftEdges(OverviewScreen, [
+      rightEdges(OverviewScreen, [
         'Ölçümleri incele',
         'Randevuları aç',
         'Mesajı yanıtla',
@@ -337,7 +360,29 @@ void main() {
       ]),
       hasLength(1),
     );
-    expect(leftEdges(OverviewScreen, ['Danışanı aç']), hasLength(1));
+    expect(
+      find.descendant(
+        of: find.byType(OverviewScreen),
+        matching: find.text('Burak Şahin'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Genel Bakış puts the agenda beside the work on wide screens', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    final drafts = tester.getTopLeft(find.text('plan onayınızı bekliyor'));
+    final agenda = tester.getTopLeft(find.text('BUGÜN'));
+    expect(agenda.dx, greaterThan(drafts.dx + 600));
+    expect(
+      find.descendant(
+        of: find.byType(OverviewScreen),
+        matching: find.text('Görüşmeye başla'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Mesajlar: the three columns start on one line', (tester) async {
@@ -379,26 +424,41 @@ void main() {
     expect(add.dx, moreOrLessEquals(field.dx, epsilon: 0.5));
   });
 
-  testWidgets('the counts under the greeting open where their items are', (
+  testWidgets('Genel Bakış links open Danışanlar and Randevular', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: DietitianPanelDemoApp()),
-    );
-    await tester.pumpAndSettle();
-
-    Finder count(String label) => find.descendant(
+    await pumpWide(tester);
+    Finder link(String label) => find.descendant(
       of: find.byType(OverviewScreen),
-      matching: find.text(label, findRichText: true),
+      matching: find.text(label),
     );
-    expect(count('5 danışan'), findsOneWidget);
-    expect(count('3 onay bekliyor'), findsOneWidget);
-    expect(count('4 randevu'), findsOneWidget);
 
-    await tester.tap(count('4 randevu'));
+    await tester.tap(link('Tüm randevular'));
     await tester.pumpAndSettle();
-    final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+    var rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
     expect(rail.selectedIndex, 2);
+
+    await tester.tap(find.text('Genel Bakış'));
+    await tester.pumpAndSettle();
+    await tester.tap(link('Tüm danışanlar'));
+    await tester.pumpAndSettle();
+    rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+    expect(rail.selectedIndex, 1);
+  });
+
+  testWidgets('a client name in triage opens the client record', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(OverviewScreen),
+        matching: find.text('Burak Şahin'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(find.text('Burak Şahin'), findsWidgets);
   });
 
   testWidgets('a dietitian can open a conversation and send a message', (
@@ -736,8 +796,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // A RenderFlex overflow fails the test on its own. At 2× the greeting
-        // and counts fill the first screen, so scroll to the card.
+        // A RenderFlex overflow fails the test on its own. Scroll through
+        // every section so each row is laid out at this size.
         final list = find
             .descendant(
               of: find.byType(OverviewScreen),
@@ -745,22 +805,26 @@ void main() {
             )
             .first;
         await tester.scrollUntilVisible(
-          find.text('Dikkat gerekenler'),
+          find.text('DİKKAT GEREKENLER'),
           300,
           scrollable: list,
         );
-        await tester.drag(list, const Offset(0, -300));
-        await tester.pumpAndSettle();
-        expect(find.text('Danışanı aç'), findsWidgets);
-        // The last draft row, so every row of the draft card was laid out.
         await tester.scrollUntilVisible(
-          find.textContaining('1700 kcal'),
+          find.text('47 saattir mesajı yanıtsız'),
           300,
           scrollable: list,
+        );
+        expect(find.text('Yanıtla'), findsNWidgets(2));
+        expectTextNotClipped(
+          tester,
+          find.descendant(
+            of: find.byType(OverviewScreen),
+            matching: find.byType(Card),
+          ),
         );
       });
 
-      testWidgets('"onay bekliyor" reaches the drafts on a $width dp phone '
+      testWidgets('"İncele" opens the oldest draft on a $width dp phone '
           'at $scale×', (tester) async {
         tester.view.devicePixelRatio = 3;
         tester.view.physicalSize = Size(width * 3, 740 * 3);
@@ -772,14 +836,17 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // At 2x on 360 dp the count itself starts under the bottom bar.
-        final count = find.text('3 onay bekliyor', findRichText: true);
-        await tester.ensureVisible(count);
+        final review = find
+            .descendant(
+              of: find.byType(OverviewScreen),
+              matching: find.text('İncele'),
+            )
+            .first;
+        await tester.ensureVisible(review);
         await tester.pumpAndSettle();
-        expect(find.text('Sıradaki işler').hitTestable(), findsNothing);
-        await tester.tap(count);
+        await tester.tap(review);
         await tester.pumpAndSettle();
-        expect(find.text('Sıradaki işler').hitTestable(), findsOneWidget);
+        expect(find.byType(PlanEditorScreen), findsOneWidget);
       });
     }
   }

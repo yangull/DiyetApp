@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import 'real_client_detail_screen.dart';
-import '../util/turkish.dart';
 import '../util/breakpoints.dart';
 import '../widgets/tone_pill.dart';
 

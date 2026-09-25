@@ -119,8 +119,8 @@ void main() {
       }
     });
 
-    // Drafts have their own row and their own waiting badge under "Sıradaki
-    // işler"; a client listed twice on one screen reads as a bug.
+    // Drafts have their own card with their own wait on Genel Bakış; a
+    // client listed twice in one section reads as a bug.
     test('a pending draft alone does not raise a triage signal', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -143,6 +143,33 @@ void main() {
         isEmpty,
       );
     });
+  });
+
+  group('groupByClient', () {
+    test('one entry per client, worst first, reasons kept in order', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final signals = triageSignals(container.read(demoProvider));
+
+      final groups = groupByClient(signals);
+      final ids = groups.map((g) => g.client.id).toList();
+
+      expect(ids.toSet(), hasLength(ids.length));
+      expect(groups.first.client.id, signals.first.client.id);
+      expect(groups.expand((g) => g.signals).toSet(), signals.toSet());
+      final burak = groups.firstWhere((g) => g.client.id == 'c5');
+      expect(burak.signals.map((s) => s.kind), [
+        TriageKind.staleWeighIn,
+        TriageKind.unansweredMessage,
+      ]);
+    });
+  });
+
+  test('a wait reads with the suffix the reasons use', () {
+    expect(formatWaitingSince(const Duration(days: 3, hours: 4)), '3 gündür');
+    expect(formatWaitingSince(const Duration(hours: 6)), '6 saattir');
+    expect(formatWaitingSince(const Duration(minutes: 40)), '40 dakikadır');
+    expect(formatWaitingSince(Duration.zero), '1 dakikadır');
   });
 
   group('addClient', () {

@@ -6,7 +6,6 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/progress.dart';
 import '../widgets/weight_chart.dart';
-import '../util/turkish.dart';
 import '../widgets/readable_width.dart';
 
 class ReportsScreen extends ConsumerWidget {

@@ -94,10 +94,35 @@ List<TriageSignal> triageSignals(DemoState state, {DateTime? now}) {
   return signals;
 }
 
-/// "3 gün", "26 saat", "40 dakika" — the longest unit that is not zero, so a
-/// draft's age reads the way a person would say it out loud.
-String formatAge(Duration age) {
-  if (age.inDays >= 1) return '${age.inDays} gün';
-  if (age.inHours >= 1) return '${age.inHours} saat';
-  return '${age.inMinutes.clamp(1, 59)} dakika';
+/// One client and every reason they are on the list, worst first.
+class TriageGroup {
+  const TriageGroup({required this.client, required this.signals});
+
+  final DemoClient client;
+  final List<TriageSignal> signals;
+}
+
+/// One entry per client, in the order of each client's worst signal: Burak
+/// with a missed weigh-in and an unanswered message is one row with two
+/// lines, not two rows that read as a duplicate (Can, 25 Sep 2026).
+List<TriageGroup> groupByClient(List<TriageSignal> signals) {
+  final byClient = <String, List<TriageSignal>>{};
+  final clients = <String, DemoClient>{};
+  for (final signal in signals) {
+    byClient.putIfAbsent(signal.client.id, () => []).add(signal);
+    clients[signal.client.id] = signal.client;
+  }
+  return [
+    for (final entry in byClient.entries)
+      TriageGroup(client: clients[entry.key]!, signals: entry.value),
+  ];
+}
+
+/// "3 gündür", "6 saattir", "40 dakikadır" — the longest unit that is not
+/// zero, with the suffix the triage reasons use, so a draft's wait reads the
+/// way a person would say it out loud.
+String formatWaitingSince(Duration age) {
+  if (age.inDays >= 1) return '${age.inDays} gündür';
+  if (age.inHours >= 1) return '${age.inHours} saattir';
+  return '${age.inMinutes.clamp(1, 59)} dakikadır';
 }

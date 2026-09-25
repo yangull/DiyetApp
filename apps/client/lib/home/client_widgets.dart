@@ -21,54 +21,6 @@ final dietitianProfileProvider = FutureProvider.family<AppProfile, String>((
   return ref.watch(profileRepositoryProvider).fetchProfile(dietitianId);
 });
 
-/// First and last initials, skipping titles such as "Dyt.".
-String initialsOf(String? fullName) {
-  final parts = (fullName ?? '').trim().split(RegExp(r'\s+'))
-    ..removeWhere((p) => p.isEmpty || p.endsWith('.'));
-  if (parts.isEmpty) return '';
-  final first = parts.first.characters.first;
-  final last = parts.length > 1 ? parts.last.characters.first : '';
-  return (first + last).toUpperCase();
-}
-
-/// Neutral on purpose: group colours never mark people (design rule 15).
-class PersonAvatar extends StatelessWidget {
-  const PersonAvatar({
-    super.key,
-    required this.name,
-    this.size,
-    this.background,
-  });
-
-  final String? name;
-  final double? size;
-
-  /// Defaults to `surfaceSubtle`, which reads on white cards.
-  final Color? background;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final side = size ?? context.density.avatarSize + 4;
-    final text = Theme.of(context).textTheme;
-    return Container(
-      width: side,
-      height: side,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: background ?? palette.surfaceSubtle,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        initialsOf(name),
-        style: (side > 56 ? text.titleLarge : text.titleMedium)?.copyWith(
-          color: palette.textSecondary,
-        ),
-      ),
-    );
-  }
-}
-
 class DietitianRow extends ConsumerWidget {
   const DietitianRow({super.key, required this.dietitianId});
 

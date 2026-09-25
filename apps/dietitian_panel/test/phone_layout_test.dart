@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:dietitian_panel/main_demo.dart';
 import 'package:dietitian_panel/screens/appointments_screen.dart';
 import 'package:dietitian_panel/screens/client_detail_screen.dart';
@@ -94,15 +95,17 @@ void main() {
         expect(find.byType(BackButton), findsOneWidget);
       });
 
-      testWidgets('"Mesajı yanıtla" opens that thread on a $width dp phone '
+      // On a phone the label is short; the row's reason says whose message.
+      testWidgets('"Yanıtla" opens that thread on a $width dp phone '
           'at $scale×', (tester) async {
         await pumpPhone(tester, width, scale);
-        final reply = find
-            .descendant(
-              of: find.byType(OverviewScreen),
-              matching: find.text('Mesajı yanıtla'),
-            )
-            .first;
+        final reply = find.descendant(
+          of: find.ancestor(
+            of: find.text('47 saattir mesajı yanıtsız'),
+            matching: find.byType(ActionRow),
+          ),
+          matching: find.text('Yanıtla'),
+        );
         await tester.scrollUntilVisible(
           find.text('47 saattir mesajı yanıtsız'),
           300,

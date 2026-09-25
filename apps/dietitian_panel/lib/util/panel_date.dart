@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 /// The panel's one date format: dd.MM.yyyy.
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}.'
@@ -32,3 +34,30 @@ const _monthsShort = [
 /// '4 Ağu', for chart axes: the endpoints of a date-spaced series.
 String formatDayMonthShort(DateTime d) =>
     '${d.day} ${_monthsShort[d.month - 1]}';
+
+DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// An agenda's day heading: "Bugün", "Yarın · Cumartesi 26 Eylül",
+/// "Pazartesi 28 Eylül". The screen's header already carries today's date.
+String formatDayHeading(DateTime day, {DateTime? now}) {
+  final today = _dateOnly(now ?? DateTime.now());
+  final d = _dateOnly(day);
+  final date = '${trWeekdays[d.weekday - 1]} ${d.day} ${trMonths[d.month - 1]}';
+  if (d == today) return 'Bugün';
+  if (d == today.add(const Duration(days: 1))) return 'Yarın · $date';
+  return date;
+}
+
+/// The day inside a sentence: "bugün", "yarın", "pazartesi" within the week,
+/// else "2 Ekim".
+String formatDayInSentence(DateTime day, {DateTime? now}) {
+  final today = _dateOnly(now ?? DateTime.now());
+  final d = _dateOnly(day);
+  final days = d.difference(today).inDays;
+  if (days == 0) return 'bugün';
+  if (days == 1) return 'yarın';
+  if (days > 1 && days < 7) {
+    return trLower(trWeekdays[d.weekday - 1]);
+  }
+  return '${d.day} ${trMonths[d.month - 1]}';
+}

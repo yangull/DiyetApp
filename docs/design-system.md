@@ -20,6 +20,28 @@ Excel. One token set, two densities.
 Premium here means restraint: few colours, generous space, rows of equal rhythm, and
 nothing drawn that is not data, a status or an action (rule 15).
 
+**Direction B** (Can, 25 Sep 2026, PLANNING #133) keeps Sade's colour and takes its
+hierarchy from Lifesum (references in `docs/design/references/2026-09-25-lifesum/`,
+mockups on https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4). It applies to every panel
+screen and to the client app:
+
+- **One focal card per screen**, led by the screen's one big number in `figures`
+  (Genel Bakış: "3 plan onayınızı bekliyor"). The greeting and date are small.
+- **Quiet section labels**: the section's name in small capitals (`labelSmall`, 700,
+  `textSecondary`, through `trUpper`) on the ground, a grey count after it and a grey
+  link with a chevron at the right end (core `SectionLabel`).
+- **Rows** (core `ActionRow`): an initials avatar or a time first (core `PersonAvatar`),
+  who and what, then the row's **one action as green text at the right end** (a
+  `TextButton`, its label on the edge). When they can't share a line the action drops
+  under the words. A person's name line opens their record, with a grey chevron. On a
+  phone, labels may be short ("Yanıtla", "Ölçümler") and say the full task to a screen
+  reader. A client appears once per section, their reasons under the name.
+- **Width carries content**: a dashboard stops at `kDashboardWidth` (1200) and puts
+  secondary content (the agenda) in a second column from 1000 px; lists and forms keep
+  `kReadableWidth` (1100).
+- Cards are rounder on wide screens (16) and pad 20 (16 on phones), so rows in
+  neighbouring cards share one text edge and one action edge.
+
 ## How we got here (23 Sep 2026)
 
 Can found the first client app "dull, like a form". Three directions were mocked up
@@ -90,8 +112,10 @@ Rules:
   signing out or "Danışanı aç", use `TextButton` with `AppTheme.quietButton` (grey:
   green text on the ground fails AA under the focus overlay). A destructive dialog confirms with
   `AppTheme.destructiveButton` (red).
-- **One green action per row.** A row's main task keeps the green (a pale pill);
-  every other action in it is a grey quiet button ("Danışanı aç", "Hatırlatma gönder").
+- **One green action per row.** A row's main task keeps the green; every other action
+  in it is grey. In lists (direction B) the task is green text at the row's right end,
+  not a pale pill, so a column of rows doesn't become a column of pills; the pale pill
+  stays for a standalone secondary action.
 - **Cancel is grey.** "Vazgeç" next to a green or red button is a quiet button.
 - **Filter chips** have no border: white on the grey ground when off, pale green with a
   green tick when on.
@@ -99,7 +123,9 @@ Rules:
   tick, never green: a green pill is a button.
 - **No separate success colour.** A success green measured 1.19:1 against the brand
   green, so "approved" uses `primary` (#56).
-- **Violet is reserved for unapproved AI drafts** (#57). A draft *container* (the AI
+- **Violet is reserved for unapproved AI drafts** (#57). Genel Bakış shows it once, as the
+  "Yapay zekâ taslağı" label on the drafts card (Can, 25 Sep 2026, replacing C30's
+  wording-only drafts). A draft *container* (the AI
   banner) is violet + a 1.5 px dashed border + a text label; a draft *status pill* is
   violet text on `aiDraftTint` with its label, no border. It appears nowhere else, so violet always means "a
   machine wrote this and nobody approved it". Other statuses (invites, appointments)
@@ -124,6 +150,7 @@ bundled but unused (remove it once Sade is settled).
 | displaySmall | Figtree 700 | 32 / 38 | 32 / 38 |
 | headlineLarge | Figtree 700 | 28 / 34 | 22 / 28 |
 | headlineMedium | Figtree 700 | 22 / 28 | 18 / 24 |
+| headlineSmall | Figtree 700 | 20 / 26 | 18 / 24 |
 | titleLarge | Figtree 600 | 18 / 24 | 16 / 22 |
 | titleMedium | Figtree 600 | 16 / 24 | 14 / 20 |
 | bodyLarge | Figtree 400 | 16 / 24 | 14 / 20 |
@@ -145,7 +172,7 @@ change between them; only measurements do.
 | Metric | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
 |---|---|---|
 | Page padding | 20 | 24 |
-| Card radius | 20 | 10 |
+| Card radius | 20 | 16 |
 | Control radius | 14 | 8 |
 | Button height | 48 | 36 |
 | Input height | 52 | 38 |

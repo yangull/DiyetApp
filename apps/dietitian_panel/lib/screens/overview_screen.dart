@@ -5,13 +5,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/triage.dart';
+import '../util/breakpoints.dart';
+import '../util/panel_date.dart';
+import '../widgets/readable_width.dart';
+import '../widgets/tone_pill.dart';
 import 'client_detail_screen.dart';
 import 'messages_screen.dart';
 import 'plan_editor_screen.dart';
-import '../util/breakpoints.dart';
-import '../widgets/tone_pill.dart';
+import 'video_call_placeholder_screen.dart';
 
-class OverviewScreen extends ConsumerStatefulWidget {
+/// Genel Bakış in direction B (Can, 25 Sep 2026, PLANNING #133). The drafts
+/// card leads with the day's one big number: approving an AI draft is the
+/// work only the dietitian can do, and a client waits on it. Everything else
+/// sits under quiet uppercase labels, and each row keeps its one green action
+/// at the right end. From [_twoColumnsFrom] the agenda takes a second column,
+/// so a wide window carries content instead of gaps.
+class OverviewScreen extends ConsumerWidget {
   const OverviewScreen({
     super.key,
     required this.onOpenClients,
@@ -23,221 +32,268 @@ class OverviewScreen extends ConsumerStatefulWidget {
   final VoidCallback onOpenMessages;
   final VoidCallback onOpenAppointments;
 
+  /// Narrower than this the page is one column: a phone, a tablet, a small
+  /// window.
+  static const _twoColumnsFrom = 1000.0;
+  static const _sideWidth = 396.0;
+
   @override
-  ConsumerState<OverviewScreen> createState() => _OverviewScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final demo = ref.watch(demoProvider);
+    final groups = groupByClient(triageSignals(demo));
+    final drafts = demo.plans.where((p) => p.isDraft).toList()
+      ..sort((a, b) => a.draftedAt.compareTo(b.draftedAt));
+    final agenda = demo.upcoming
+        .where((a) => a.status != AppointmentStatus.cancelled)
+        .toList();
 
-class _OverviewScreenState extends ConsumerState<OverviewScreen> {
-  final _draftsKey = GlobalKey();
+    final triage = [
+      SectionLabel(
+        'Dikkat gerekenler',
+        count: groups.isEmpty ? null : '${groups.length} danışan',
+        actionLabel: 'Tüm danışanlar',
+        onAction: onOpenClients,
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      _TriageCard(
+        groups: groups,
+        onOpenMessages: onOpenMessages,
+        onOpenAppointments: onOpenAppointments,
+      ),
+      const SizedBox(height: AppSpacing.md),
+      const _Footnote(),
+    ];
 
-  void _showDrafts() {
-    final target = _draftsKey.currentContext;
-    if (target == null) return;
-    Scrollable.ensureVisible(
-      target,
-      duration: AppMotion.of(context, AppMotion.change),
-      curve: AppMotion.curve,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= _twoColumnsFrom;
+        final Widget content;
+        if (wide) {
+          content = Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _DraftsCard(drafts: drafts),
+                    const SizedBox(height: AppSpacing.x3),
+                    ...triage,
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xxl),
+              SizedBox(
+                width: _sideWidth,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _AgendaCard(appointments: agenda),
+                    const SizedBox(height: AppSpacing.sm),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: _AllAppointmentsLink(
+                        onPressed: onOpenAppointments,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        } else {
+          content = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _DraftsCard(drafts: drafts),
+              const SizedBox(height: AppSpacing.xxl),
+              SectionLabel(
+                'Bugün',
+                actionLabel: 'Tüm randevular',
+                onAction: onOpenAppointments,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _AgendaCard(appointments: agenda, todayOnly: true),
+              const SizedBox(height: AppSpacing.xxl),
+              ...triage,
+            ],
+          );
+        }
+        // Not a lazy ListView: the page is short, and every section has to
+        // be built for "jump to" links and for tests at large text.
+        return SingleChildScrollView(
+          padding: readablePadding(
+            constraints.maxWidth,
+            context.density.pagePadding,
+            maxWidth: kDashboardWidth,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const _Header(),
+              const SizedBox(height: AppSpacing.xxl),
+              content,
+            ],
+          ),
+        );
+      },
     );
   }
+}
+
+/// Inner padding of every card on this page, so the names in the drafts card
+/// and the triage card share one left edge and their actions one right edge.
+double _cardPadding(BuildContext context) =>
+    context.density.isCompact ? AppSpacing.xl : AppSpacing.lg;
+
+/// The date as a small label, then the greeting. It is no longer the biggest
+/// text on the page: the drafts count is.
+class _Header extends StatelessWidget {
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
-    final demo = ref.watch(demoProvider);
+    final text = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          trUpper(formatTodayLabel(DateTime.now())),
+          style: text.labelSmall?.copyWith(
+            color: context.palette.textMuted,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Hoş geldiniz, Dyt. Deniz',
+          style: isPanelPhone(context)
+              ? text.headlineMedium
+              : text.headlineLarge,
+        ),
+      ],
+    );
+  }
+}
+
+/// The page's focal card: how many AI drafts wait, oldest first. Violet once,
+/// on the label (Can, 25 Sep 2026, over C30): the home screen names the
+/// safeguard.
+class _DraftsCard extends StatelessWidget {
+  const _DraftsCard({required this.drafts});
+
+  final List<DietPlan> drafts;
+
+  @override
+  Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    final signals = triageSignals(demo);
+    final wide = context.density.isCompact;
+    final pad = _cardPadding(context);
 
-    // Not a lazy ListView: "onay bekliyor" scrolls to Sıradaki işler, which
-    // has to be built for that, even below the fold on a phone.
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(context.density.pagePadding),
+    if (drafts.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: EdgeInsets.all(pad),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Onay bekleyen plan yok', style: text.headlineSmall),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Yapay zekâ yeni bir taslak hazırladığında onayınızı burada '
+                'bekler.',
+                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final count = drafts.length;
+    final number = ExcludeSemantics(
+      child: Text(
+        '$count',
+        style: AppTypography.figures(
+          wide ? 48 : 56,
+          wide ? 52 : 60,
+        ).copyWith(color: AppColors.textPrimary, letterSpacing: -1),
+      ),
+    );
+    final title = Semantics(
+      header: true,
+      child: Text(
+        'plan onayınızı bekliyor',
+        semanticsLabel: '$count plan onayınızı bekliyor',
+        style: text.headlineSmall,
+      ),
+    );
+    final caption = Text(
+      'Danışanlar planı siz onaylayana kadar göremez.',
+      style: (wide ? text.bodyLarge : text.bodyMedium)?.copyWith(
+        color: palette.textSecondary,
+      ),
+    );
+    const label = TonePill(label: 'Yapay zekâ taslağı', tone: PillTone.aiDraft);
+    // Number, words and label on one line on a wide screen; stacked on a
+    // phone, or when large text leaves the words too little room.
+    final head = LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        if (wide && constraints.maxWidth >= 560 * scale) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              number,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [title, const SizedBox(height: 2), caption],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              label,
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            label,
+            const SizedBox(height: AppSpacing.md),
+            number,
+            title,
+            const SizedBox(height: 2),
+            caption,
+          ],
+        );
+      },
+    );
+    final inset = pad + context.density.avatarSize + ActionRow.gap;
+
+    return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // The client's Bugün pattern: the date, then the greeting in bold.
-          Text(
-            formatTodayLabel(DateTime.now()),
-            style: text.bodyMedium?.copyWith(color: palette.textMuted),
+          Padding(
+            padding: EdgeInsets.fromLTRB(pad, pad, pad, AppSpacing.lg),
+            child: head,
           ),
-          const SizedBox(height: 2),
-          Text('Hoş geldiniz, Dyt. Deniz', style: text.headlineLarge),
-          const SizedBox(height: AppSpacing.xs),
-          _CountsLine(
-            counts: [
-              (demo.clients.length, 'danışan', widget.onOpenClients),
-              (demo.draftCount, 'onay bekliyor', _showDrafts),
-              (demo.upcoming.length, 'randevu', widget.onOpenAppointments),
-              if (kShowMoney) (demo.unpaidTotal, '₺ tahsil edilmemiş', null),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _TriageCard(
-            signals: signals,
-            onOpenClients: widget.onOpenClients,
-            onOpenMessages: widget.onOpenMessages,
-            onOpenAppointments: widget.onOpenAppointments,
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          Text('Sıradaki işler', key: _draftsKey, style: text.titleLarge),
-          const SizedBox(height: AppSpacing.md),
-          // The same inner padding as the triage card, so both cards' rows
-          // share one set of columns.
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final plan in demo.plans.where((p) => p.isDraft))
-                    _DraftRow(plan: plan),
-                  if (demo.draftCount == 0)
-                    Text(
-                      'Bekleyen plan yok.',
-                      style: text.bodyMedium?.copyWith(
-                        color: palette.textMuted,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+          for (final (i, plan) in drafts.indexed) ...[
+            i == 0 ? const Divider() : Divider(indent: inset),
+            _DraftRow(plan: plan),
+          ],
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     );
   }
 }
 
-/// Our guess at what a dietitian opens the panel to find out. It is placed
-/// above the counters, and the counters were pushed below the work, because
-/// "5 aktif danışan" is not a thing anyone acts on at nine in the morning.
-class _TriageCard extends StatelessWidget {
-  const _TriageCard({
-    required this.signals,
-    required this.onOpenClients,
-    required this.onOpenMessages,
-    required this.onOpenAppointments,
-  });
-
-  final List<TriageSignal> signals;
-  final VoidCallback onOpenClients;
-  final VoidCallback onOpenMessages;
-  final VoidCallback onOpenAppointments;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _TriageHeader(signals: signals, onOpenClients: onOpenClients),
-            const SizedBox(height: AppSpacing.md),
-            if (signals.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                child: Text(
-                  'Şu an geride kalan danışan görünmüyor.',
-                  style: text.bodyMedium?.copyWith(color: palette.textMuted),
-                ),
-              )
-            else
-              for (final signal in signals)
-                _SignalRow(
-                  signal: signal,
-                  onOpenMessages: onOpenMessages,
-                  onOpenAppointments: onOpenAppointments,
-                ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Bu liste bizim tahminimiz: 7 gündür tartılmayan, 24 saattir '
-              'yanıt bekleyen ve randevusuna gelmeyen danışanlar. Siz sabah '
-              'ilk neye bakıyorsunuz, hangi eşikleri kullanıyorsunuz?',
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The link does the task the reason names. It used to open the client
-/// record for every reason, and answering a message then meant going back,
-/// opening Mesajlar and finding the client again.
-class _SignalRow extends ConsumerWidget {
-  const _SignalRow({
-    required this.signal,
-    required this.onOpenMessages,
-    required this.onOpenAppointments,
-  });
-
-  final TriageSignal signal;
-  final VoidCallback onOpenMessages;
-  final VoidCallback onOpenAppointments;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-    final clientId = signal.client.id;
-
-    void openClient({bool atWeights = false}) => Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            ClientDetailScreen(clientId: clientId, showWeights: atWeights),
-      ),
-    );
-
-    final (taskLabel, task) = switch (signal.kind) {
-      TriageKind.unansweredMessage => (
-        'Mesajı yanıtla',
-        () {
-          ref.read(selectedConversationProvider.notifier).select(clientId);
-          // On a phone Mesajlar opens the thread itself as a page over this
-          // screen, so back returns here; wide screens switch tabs.
-          if (!isPanelPhone(context)) onOpenMessages();
-        },
-      ),
-      TriageKind.noShow => ('Randevuları aç', onOpenAppointments),
-      TriageKind.staleWeighIn => (
-        'Ölçümleri incele',
-        () => openClient(atWeights: true),
-      ),
-    };
-
-    final taskButton = OutlinedButton(onPressed: task, child: Text(taskLabel));
-    // Grey, so each row has one green action: the task (Can, 24 Sep 2026).
-    final openButton = TextButton(
-      style: AppTheme.quietButton,
-      onPressed: openClient,
-      child: const Text('Danışanı aç'),
-    );
-
-    return _OverviewRow(
-      icon: _icon(signal.kind),
-      name: Text(signal.client.name, style: text.titleMedium),
-      detail: Text(
-        signal.detail,
-        style: text.bodyMedium?.copyWith(color: palette.warning),
-      ),
-      task: taskButton,
-      secondary: openButton,
-    );
-  }
-
-  static IconData _icon(TriageKind kind) => switch (kind) {
-    TriageKind.staleWeighIn => Icons.monitor_weight_outlined,
-    TriageKind.unansweredMessage => Icons.mark_chat_unread_outlined,
-    TriageKind.noShow => Icons.event_busy_outlined,
-  };
-}
-
-/// "İncele" used to switch to the client list, which buried the one screen
-/// this product turns on. It opens the draft itself now.
+/// "İncele" opens the draft itself, the one screen this product turns on.
 class _DraftRow extends ConsumerWidget {
   const _DraftRow({required this.plan});
 
@@ -249,257 +305,441 @@ class _DraftRow extends ConsumerWidget {
     final client = demo.clientOf(plan.clientId);
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-
-    void open() => Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => PlanEditorScreen(clientId: plan.clientId),
+    final wide = context.density.isCompact;
+    final age = DateTime.now().difference(plan.draftedAt);
+    // Amber past two days: a guess, and the triage note says our thresholds
+    // are guesses.
+    final late = age.inHours >= kPlanWaitingWarningHours;
+    final waiting = Text(
+      '${formatWaitingSince(age)} bekliyor',
+      style: text.bodyMedium?.copyWith(
+        color: late ? palette.warning : palette.textMuted,
       ),
-    );
-    // A pale pill: three solid green buttons in a column were the loudest
-    // thing on the screen (Can, 24 Sep 2026).
-    final review = OutlinedButton(onPressed: open, child: const Text('İncele'));
-    // Name and status wrap, so a long name or a large text size moves the
-    // status to the next line instead of overflowing.
-    final title = Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.xs,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(client.name, style: text.titleMedium),
-        _WaitingBadge(draftedAt: plan.draftedAt),
-      ],
-    );
-    final subtitle = Text(
-      '${plan.day} · ${plan.kcal} kcal · taslak hazır',
-      style: text.bodySmall?.copyWith(color: palette.textMuted),
-    );
-    return _OverviewRow(
-      icon: Icons.description_outlined,
-      name: title,
-      detail: subtitle,
-      task: review,
-    );
-  }
-}
-
-/// One row shape for both Genel Bakış cards (Can, 24 Sep 2026): icon, name,
-/// the reason or the plan, then the green task in a column of its own, so
-/// "Ölçümleri incele", "Mesajı yanıtla" and "İncele" start at one place.
-/// Narrower than [_gridBreakpoint], the actions go under the text.
-class _OverviewRow extends StatelessWidget {
-  const _OverviewRow({
-    required this.icon,
-    required this.name,
-    required this.detail,
-    required this.task,
-    this.secondary,
-  });
-
-  final IconData icon;
-  final Widget name;
-  final Widget detail;
-  final Widget task;
-  final Widget? secondary;
-
-  static const _gridBreakpoint = 1000.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final iconWidget = Icon(icon, size: 20, color: context.palette.textMuted);
-    final actions = Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.xs,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [task, ?secondary],
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < _gridBreakpoint) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: iconWidget,
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [name, const SizedBox(height: 2), detail],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
-                  child: actions,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-            );
-          }
-          // The task and the quiet link each get a column, so both start at
-          // one place in every row.
-          return Row(
-            children: [
-              iconWidget,
-              const SizedBox(width: AppSpacing.md),
-              Expanded(flex: 3, child: name),
-              Expanded(flex: 4, child: detail),
-              Expanded(
-                flex: 2,
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: task,
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: secondary,
-                ),
-              ),
-            ],
-          );
-        },
+      padding: EdgeInsets.symmetric(
+        horizontal: _cardPadding(context),
+        vertical: AppSpacing.md,
+      ),
+      child: ActionRow(
+        lead: PersonAvatar(name: client.name),
+        leadWidth: context.density.avatarSize,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(client.name, style: text.titleMedium),
+            const SizedBox(height: 2),
+            Text(
+              '${plan.day} · ${plan.kcal} kcal',
+              style: text.bodyMedium?.copyWith(color: palette.textMuted),
+            ),
+            if (!wide) waiting,
+          ],
+        ),
+        meta: wide ? waiting : null,
+        metaWidth: 170 * MediaQuery.textScalerOf(context).scale(1),
+        actionLabel: 'İncele',
+        actionSemantics: '${client.name}: planı incele',
+        onAction: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PlanEditorScreen(clientId: plan.clientId),
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Amber past two days. The threshold is a guess and the copy says so on the
-/// card above; the badge itself stays short enough to scan.
-class _WaitingBadge extends StatelessWidget {
-  const _WaitingBadge({required this.draftedAt});
+/// One entry per client, their reasons under the name (Can, 25 Sep 2026: a
+/// client appearing twice read as a bug).
+class _TriageCard extends StatelessWidget {
+  const _TriageCard({
+    required this.groups,
+    required this.onOpenMessages,
+    required this.onOpenAppointments,
+  });
 
-  final DateTime draftedAt;
-
-  @override
-  Widget build(BuildContext context) {
-    final age = DateTime.now().difference(draftedAt);
-    final late = age.inHours >= kPlanWaitingWarningHours;
-
-    return TonePill(
-      label: '${formatAge(age)} bekliyor',
-      tone: late ? PillTone.warning : PillTone.neutral,
-    );
-  }
-}
-
-/// One slim line in place of the stat tiles: "5 danışan · 3 onay bekliyor ·
-/// 4 randevu". Each count opens where its items are. The tiles sat below the
-/// work because nobody acts on "5 aktif danışan"; a line under the greeting
-/// keeps the numbers without the weight.
-class _CountsLine extends StatelessWidget {
-  const _CountsLine({required this.counts});
-
-  final List<(int, String, VoidCallback?)> counts;
+  final List<TriageGroup> groups;
+  final VoidCallback onOpenMessages;
+  final VoidCallback onOpenAppointments;
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-    final separator = Text(
-      ' · ',
-      style: text.bodyLarge?.copyWith(color: palette.textMuted),
-    );
-
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        for (final (i, (value, label, onTap)) in counts.indexed)
-          // The dot rides on the end of its count, so a wrapped line never
-          // starts with one.
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: TextButton(
-                  onPressed: onTap,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size(0, context.density.controlHeight),
-                  ),
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '$value',
-                          style: AppTypography.figures(
-                            text.bodyLarge!.fontSize!,
-                            text.bodyLarge!.height! * text.bodyLarge!.fontSize!,
-                          ).copyWith(color: AppColors.textPrimary),
-                        ),
-                        TextSpan(
-                          text: ' $label',
-                          style: text.bodyLarge?.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              if (i < counts.length - 1) separator,
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-/// Title, count and "Tüm danışanlar". On a phone all three wrap as one group,
-/// so large text never pushes the button off-screen.
-class _TriageHeader extends StatelessWidget {
-  const _TriageHeader({required this.signals, required this.onOpenClients});
-
-  final List<TriageSignal> signals;
-  final VoidCallback onOpenClients;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-    final title = Text('Dikkat gerekenler', style: text.titleLarge);
-    final count = signals.isNotEmpty
-        ? TonePill(label: '${signals.length}', tone: PillTone.neutral)
-        : Text(
-            'temiz',
-            style: text.bodyMedium?.copyWith(color: palette.textMuted),
-          );
-    final button = TextButton(
-      onPressed: onOpenClients,
-      child: const Text('Tüm danışanlar'),
-    );
-
-    if (isPanelPhone(context)) {
-      return Wrap(
-        spacing: AppSpacing.md,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [title, count, button],
-      );
-    }
-    return Row(
-      children: [
-        Expanded(
-          child: Wrap(
-            spacing: AppSpacing.md,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [title, count],
+    final pad = _cardPadding(context);
+    if (groups.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: EdgeInsets.all(pad),
+          child: Text(
+            'Şu an geride kalan danışan görünmüyor.',
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: context.palette.textMuted),
           ),
         ),
-        button,
-      ],
+      );
+    }
+    final inset = pad + context.density.avatarSize + ActionRow.gap;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (i, group) in groups.indexed) ...[
+              if (i > 0) Divider(indent: inset),
+              _TriageGroupTile(
+                group: group,
+                onOpenMessages: onOpenMessages,
+                onOpenAppointments: onOpenAppointments,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The name opens the client (the chevron says so); each reason's action does
+/// the task it names, so answering a message never means finding the client
+/// again in Mesajlar. On a phone the action labels are short, and a screen
+/// reader hears the full task with the client's name.
+class _TriageGroupTile extends ConsumerWidget {
+  const _TriageGroupTile({
+    required this.group,
+    required this.onOpenMessages,
+    required this.onOpenAppointments,
+  });
+
+  final TriageGroup group;
+  final VoidCallback onOpenMessages;
+  final VoidCallback onOpenAppointments;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    final density = context.density;
+    final pad = _cardPadding(context);
+    final phone = isPanelPhone(context);
+    final client = group.client;
+
+    void openClient({bool atWeights = false}) => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ClientDetailScreen(clientId: client.id, showWeights: atWeights),
+      ),
+    );
+
+    final header = Semantics(
+      button: true,
+      label: '${client.name}, danışanı aç',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: openClient,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: density.controlHeight + 4),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: pad),
+            child: Row(
+              children: [
+                PersonAvatar(name: client.name),
+                const SizedBox(width: ActionRow.gap),
+                Expanded(child: Text(client.name, style: text.titleMedium)),
+                Icon(
+                  Icons.chevron_right,
+                  size: phone ? 24 : 20,
+                  color: palette.textMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Widget line(TriageSignal signal) {
+      final (full, short, task) = switch (signal.kind) {
+        TriageKind.unansweredMessage => (
+          'Mesajı yanıtla',
+          'Yanıtla',
+          () {
+            ref.read(selectedConversationProvider.notifier).select(client.id);
+            // On a phone Mesajlar opens the thread itself as a page over this
+            // screen, so back returns here; wide screens switch tabs.
+            if (!phone) onOpenMessages();
+          },
+        ),
+        TriageKind.noShow => (
+          'Randevuları aç',
+          'Randevular',
+          onOpenAppointments,
+        ),
+        TriageKind.staleWeighIn => (
+          'Ölçümleri incele',
+          'Ölçümler',
+          () => openClient(atWeights: true),
+        ),
+      };
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: pad + density.avatarSize + ActionRow.gap,
+          end: pad,
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: density.controlHeight),
+          child: ActionRow(
+            body: Text(
+              signal.detail,
+              style: text.bodyMedium?.copyWith(color: palette.warning),
+            ),
+            actionLabel: phone ? short : full,
+            actionSemantics: '${client.name}: $full',
+            onAction: task,
+            minBodyWidth: 110,
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [header, for (final signal in group.signals) line(signal)],
+      ),
+    );
+  }
+}
+
+/// Upcoming appointments by day, time first (the agenda of #133). On a phone
+/// only today's, with one line for the rest.
+class _AgendaCard extends StatelessWidget {
+  const _AgendaCard({required this.appointments, this.todayOnly = false});
+
+  final List<Appointment> appointments;
+  final bool todayOnly;
+
+  /// The column shows the next few; Randevular has the rest.
+  static const _maxRows = 6;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    final pad = _cardPadding(context);
+    final now = DateTime.now();
+    bool isToday(Appointment a) => DateUtils.isSameDay(a.at, now);
+    final muted = text.bodyMedium?.copyWith(color: palette.textMuted);
+
+    Widget note(String s) => Padding(
+      padding: EdgeInsets.all(pad),
+      child: Text(s, style: muted),
+    );
+
+    final children = <Widget>[];
+    if (todayOnly) {
+      final today = appointments.where(isToday).toList();
+      final later = appointments.where((a) => !isToday(a)).toList();
+      if (today.isEmpty) {
+        children.add(note('Bugün randevu yok.'));
+      } else {
+        children.addAll([for (final a in today) _AgendaRow(appointment: a)]);
+      }
+      if (later.isNotEmpty) {
+        final next = later.first.at;
+        children.addAll([
+          Divider(indent: pad, endIndent: pad),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: pad,
+              vertical: AppSpacing.md,
+            ),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${later.length}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                        ' randevu daha · ilki ${formatDayInSentence(next)} '
+                        '${formatTime(next)}',
+                  ),
+                ],
+              ),
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+            ),
+          ),
+        ]);
+      }
+    } else if (appointments.isEmpty) {
+      children.add(note('Yaklaşan randevu yok.'));
+    } else {
+      final days = <DateTime, List<Appointment>>{};
+      for (final a in appointments.take(_maxRows)) {
+        days.putIfAbsent(DateUtils.dateOnly(a.at), () => []).add(a);
+      }
+      for (final (i, day) in days.entries.indexed) {
+        if (i > 0) children.add(Divider(indent: pad, endIndent: pad));
+        children.add(
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              pad,
+              i == 0 ? AppSpacing.lg + 2 : AppSpacing.md + 2,
+              pad,
+              AppSpacing.xs,
+            ),
+            child: Semantics(
+              header: true,
+              child: Text(
+                trUpper(formatDayHeading(day.key)),
+                style: text.labelSmall?.copyWith(
+                  color: palette.textMuted,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        );
+        children.addAll([
+          for (final a in day.value) _AgendaRow(appointment: a),
+        ]);
+      }
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
+    );
+  }
+}
+
+/// The time, who and how; "Görüşmeye başla" only for today's online
+/// appointment, the one a dietitian can start from here.
+class _AgendaRow extends ConsumerWidget {
+  const _AgendaRow({required this.appointment});
+
+  final Appointment appointment;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final demo = ref.watch(demoProvider);
+    final client = demo.clientOf(appointment.clientId);
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    final online = appointment.kind == AppointmentKind.online;
+    final today = DateUtils.isSameDay(appointment.at, DateTime.now());
+    final name = text.titleMedium!;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: _cardPadding(context),
+        vertical: AppSpacing.sm + 2,
+      ),
+      child: ActionRow(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        lead: Text(
+          formatTime(appointment.at),
+          style: AppTypography.figures(
+            name.fontSize!,
+            name.height! * name.fontSize!,
+          ).copyWith(color: AppColors.textPrimary),
+        ),
+        leadWidth: 48 * scale,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(client.name, style: name),
+            Text(
+              online ? 'Görüntülü görüşme' : 'Yüz yüze',
+              style: text.bodyMedium?.copyWith(color: palette.textMuted),
+            ),
+            if (appointment.status == AppointmentStatus.reminderSent)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check,
+                    size: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Flexible(
+                    child: Text(
+                      'Hatırlatma gönderildi',
+                      style: text.bodyMedium?.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+        minBodyWidth: 120,
+        actionLabel: online && today ? 'Görüşmeye başla' : null,
+        actionSemantics: '${client.name}: görüşmeye başla',
+        onAction: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => VideoCallPlaceholderScreen(clientName: client.name),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AllAppointmentsLink extends StatelessWidget {
+  const _AllAppointmentsLink({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return EdgeButton(
+      end: true,
+      child: TextButton.icon(
+        style: AppTheme.quietButton,
+        onPressed: onPressed,
+        iconAlignment: IconAlignment.end,
+        icon: const Icon(Icons.chevron_right, size: 18),
+        label: const Text('Tüm randevular'),
+      ),
+    );
+  }
+}
+
+/// The interview question behind the triage thresholds (#110): the list is
+/// our guess, and it says so.
+class _Footnote extends StatelessWidget {
+  const _Footnote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 680),
+        child: Text(
+          'Bu liste bizim tahminimiz: 7 gündür tartılmayan, 24 saattir yanıt '
+          'bekleyen ve randevusuna gelmeyen danışanlar. Siz sabah ilk neye '
+          'bakıyorsunuz, hangi eşikleri kullanıyorsunuz?',
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: context.palette.textMuted),
+        ),
+      ),
     );
   }
 }

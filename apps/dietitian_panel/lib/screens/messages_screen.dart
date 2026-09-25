@@ -6,7 +6,6 @@ import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
-import '../util/turkish.dart';
 import '../util/breakpoints.dart';
 
 /// In-app messaging, per PLANNING.md P2: chat stays in the product rather than

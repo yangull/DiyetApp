@@ -7,10 +7,18 @@ import 'package:flutter/widgets.dart';
 /// client record's fields and the intake form ran to 1500 px.
 const kReadableWidth = 1100.0;
 
+/// A two-column screen (Genel Bakış: the work beside the agenda) stops here
+/// and centres (direction B, PLANNING #133), so neither column stretches.
+const kDashboardWidth = 1200.0;
+
 /// Page padding that centres the content once [available] is wider than
-/// [kReadableWidth]. Padding rather than a narrower box, so the scroll bar
-/// stays at the window's edge.
-EdgeInsets readablePadding(double available, double pagePadding) {
-  final side = math.max(pagePadding, (available - kReadableWidth) / 2);
+/// [maxWidth]. Padding rather than a narrower box, so the scroll bar stays at
+/// the window's edge.
+EdgeInsets readablePadding(
+  double available,
+  double pagePadding, {
+  double maxWidth = kReadableWidth,
+}) {
+  final side = math.max(pagePadding, (available - maxWidth) / 2);
   return EdgeInsets.symmetric(horizontal: side, vertical: pagePadding);
 }

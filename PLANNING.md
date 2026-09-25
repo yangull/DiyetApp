@@ -344,6 +344,20 @@ Full reference, including type scale, density numbers and the design rules:
   end**, capped at the readable width, and rarer actions ("Randevuyu iptal et",
   "Gelmedi olarak işaretle") in a labelled **⋯ menu** that still confirms. A first cut is
   in `git stash` ("Randevular agenda (WIP…)"), to be carried into the UI revamp (HANDOFF).
+  **Direction B, everywhere** (Can, 25 Sep 2026, after two proposals on
+  https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4; references: five Lifesum screens in
+  `docs/design/references/2026-09-25-lifesum/`). Sade's colour stays; the hierarchy comes
+  from Lifesum. For every panel screen and the client app (which also closes the visual
+  half of C23): one focal card per screen with the screen's one big number; small-capital
+  section labels on the ground; rows with an initials avatar or time first and their one
+  green action as text at the right end (no column of pale pills); a person's name opens
+  their record; one client once per section; dashboards stop at 1200 px with a second
+  column for secondary content; wide-screen cards radius 16. Genel Bakış (first reference
+  screen): the drafts card leads ("3 plan onayınızı bekliyor", oldest first), with the
+  violet "Yapay zekâ taslağı" label (Can chose it over C30's no-violet); today's agenda
+  beside it (a column on wide screens, today plus one line on phones); triage grouped by
+  client; the counts line and the greeting's size are gone (C30 revised). Spec:
+  `docs/design-system.md` "Direction B".
 - **#131** **Redesign direction "Sıcak"**, colour superseded by #133 the same night (Can, 23 Sep 2026, after calling the client app
   dull on a phone; option B of three on the mockup canvas
   https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn). Close to Lifesum: warm ground, a

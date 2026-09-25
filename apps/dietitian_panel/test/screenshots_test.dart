@@ -1,13 +1,12 @@
 @Tags(['screenshots'])
 library;
 
-import 'dart:io';
-
 import 'package:dietitian_panel/main_demo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'capture_fonts.dart';
 
 /// Renders every screen of the interview demo to `test/goldens/*.png`, so the
 /// panel can be put in front of someone who is not sitting at Can's machine.
@@ -20,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// flutter test test/screenshots_test.dart --tags screenshots --update-goldens
 /// ```
 void main() {
-  setUpAll(_loadFonts);
+  setUpAll(loadAppFonts);
 
   _shot('01-genel-bakis', (tester) async {});
 
@@ -122,47 +121,4 @@ Future<void> _scrollToBottom(WidgetTester tester) async {
   final scrollable = find.byType(Scrollable).first;
   await tester.drag(scrollable, const Offset(0, -4000));
   await tester.pumpAndSettle();
-}
-
-/// Without this every glyph renders as a filled box: the test binding ships
-/// only the placeholder font, and the panel's whole look is Fraunces + Figtree.
-///
-/// The family name must carry the `packages/core/` prefix, because
-/// `AppTypography` declares the faces with `package: 'core'` and that is the
-/// name the text styles actually ask for. Registering the bare family loads a
-/// font nothing ever looks up.
-Future<void> _loadFonts() async {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  const dir = '../../packages/core/fonts';
-  const faces = {
-    'Fraunces': ['Fraunces-SemiBold.ttf'],
-    'Figtree': [
-      'Figtree-Regular.ttf',
-      'Figtree-SemiBold.ttf',
-      'Figtree-Bold.ttf',
-    ],
-  };
-
-  for (final entry in faces.entries) {
-    for (final family in [entry.key, 'packages/core/${entry.key}']) {
-      final loader = FontLoader(family);
-      for (final file in entry.value) {
-        final bytes = File('$dir/$file').readAsBytesSync();
-        loader.addFont(Future.value(ByteData.sublistView(bytes)));
-      }
-      await loader.load();
-    }
-  }
-
-  // Icons are a font too, and the test binding does not ship it either — every
-  // Icon renders as the same box as unstyled text without this.
-  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
-  if (flutterRoot == null) return;
-  final icons = File(
-    '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
-  );
-  if (!icons.existsSync()) return;
-  final iconLoader = FontLoader('MaterialIcons')
-    ..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())));
-  await iconLoader.load();
 }

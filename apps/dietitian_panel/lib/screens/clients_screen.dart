@@ -7,7 +7,6 @@ import '../demo/demo_repository.dart';
 import '../widgets/status_pill.dart';
 import 'client_detail_screen.dart';
 import 'intake_form_screen.dart';
-import '../util/turkish.dart';
 import '../util/breakpoints.dart';
 
 class ClientsScreen extends ConsumerStatefulWidget {

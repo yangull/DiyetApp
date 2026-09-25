@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:core/core.dart' show trUpper;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../demo/demo_models.dart';
-import '../util/turkish.dart';
 
 /// The plan as the client receives it: a sheet to carry, stick on a fridge, or
 /// read on a phone. This is the artifact a dietitian hands over today, and the

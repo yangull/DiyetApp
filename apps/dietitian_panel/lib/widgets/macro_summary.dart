@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../demo/demo_models.dart';
-import '../util/turkish.dart';
 
 /// Four independent measures. Each shares the brand hue and takes its
 /// identity from the label rather than from four decorative colors — no
