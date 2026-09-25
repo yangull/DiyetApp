@@ -25,9 +25,20 @@
   clean; `apps/dietitian_panel/test/widget_test.dart` still expects the old table
   ("Aktif" pill, "Davet bekliyor" twice, the invite button's edge test). Also add
   `clipBehavior: Clip.antiAlias` to the demo triage card (splash at rounded corners).
-- **Review of B1:** a Claude subagent was reviewing `664086c` when the session ended; its
-  findings were not collected. Re-run the review (same scope: correctness, a11y, docs
-  consistency, test gaps) before B2 is committed.
+- **Review of B1 (Claude subagent, 25 Sep, verified at runtime; fix before committing B2):**
+  1. Wide draft rows drop the wait ("3 gündür bekliyor") when `ActionRow` stacks (700–1100 px
+     at 1.3×, any width at 2×): show `meta` under the body instead.
+  2. The two new wide tests fail after 22:00 (seed `today.hour + 2` rolls into tomorrow):
+     keep that seed inside today or don't look for "BUGÜN".
+  3. The triage name row's `Semantics(excludeSemantics)` drops the tap action: add `onTap`.
+  4. `formatDayHeading`/`formatDayInSentence` break on DST days: compare calendar dates.
+  5. Today's appointment leaves the agenda once it starts (`upcoming`); keep it until it ends.
+  6. Draft and agenda names don't open the record, though the B rule says names do.
+  7. Stale docs: CLAUDE.md and design-system.md still name `lib/util/turkish.dart`;
+     PLANNING #133's older sentence about the counts line; `triage.dart` mentions "Sıradaki işler".
+  8. Client app: `DietitianRow` avatar shrank 44 → 40 (default size changed).
+  9. Missing tests: day helpers, empty states, which draft "İncele" opens.
+  10. `_AllAppointmentsLink` duplicates `SectionLabel`'s link button.
 - `stash@{1}` still holds the 24 Sep Randevular agenda first cut.
 
 ## Pages (Claude artifacts)
@@ -46,8 +57,8 @@ Captures: `C:\Users\jhana\Pictures\Wellkit revamp\01 before\`. New captures:
 
 ## Next steps
 
-1. **Finish B2:** `git stash pop stash@{0}`, update `widget_test.dart`, run melos analyze
-   and test, re-run the subagent review of B1+B2, fix, commit.
+1. **Fix the B1 review findings above**, then **finish B2:** `git stash pop stash@{0}`, update
+   `widget_test.dart`, run melos analyze and test, review B2 with a subagent, commit.
 2. **Put the Flutter renders on the canvas** next to mockup B (a "Result" row) and copy
    them to `Pictures\Wellkit revamp\02 after\`; then the validation pass: 360/412 dp,
    text 1.0/1.3/2.0, wide rail, contrast, screen-reader labels, focus, tap targets
