@@ -344,7 +344,14 @@ void main() {
     await pumpWide(tester);
     const names = ['Burak Şahin', 'Ahmet Demir', 'Elif Aydın', 'Merve Yılmaz'];
     // The agenda column repeats some names; this is about the work column.
-    final agendaLeft = tester.getTopLeft(find.text('BUGÜN')).dx;
+    final agendaLeft = tester
+        .getTopRight(
+          find.ancestor(
+            of: find.text('plan onayınızı bekliyor'),
+            matching: find.byType(Card),
+          ),
+        )
+        .dx;
     final textEdge = leftEdges(OverviewScreen, [
       ...names,
       '21 gündür tartım girmedi',
@@ -374,15 +381,78 @@ void main() {
   ) async {
     await pumpWide(tester);
     final drafts = tester.getTopLeft(find.text('plan onayınızı bekliyor'));
-    final agenda = tester.getTopLeft(find.text('BUGÜN'));
+    final agenda = tester.getTopLeft(
+      find.descendant(
+        of: find.byType(OverviewScreen),
+        matching: find.text('Tüm randevular'),
+      ),
+    );
     expect(agenda.dx, greaterThan(drafts.dx + 600));
+    // The seed's first appointment is two hours ahead, which is tomorrow
+    // after 22:00: only expect "Görüşmeye başla" while it is still today.
+    final demo = ProviderScope.containerOf(
+      tester.element(find.byType(OverviewScreen)),
+    ).read(demoProvider);
+    final startable = demo.upcoming.any(
+      (a) =>
+          a.kind == AppointmentKind.online &&
+          a.status == AppointmentStatus.planned &&
+          DateUtils.isSameDay(a.at, DateTime.now()),
+    );
     expect(
       find.descendant(
         of: find.byType(OverviewScreen),
         matching: find.text('Görüşmeye başla'),
       ),
-      findsOneWidget,
+      startable ? findsOneWidget : findsNothing,
     );
+  });
+
+  testWidgets('a draft row keeps its wait when it stacks at large text', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1100, 2400);
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('3 gündür bekliyor'), findsOneWidget);
+  });
+
+  testWidgets('with every draft approved the drafts card says so', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(OverviewScreen)),
+    );
+    final notifier = container.read(demoProvider.notifier);
+    for (final plan in container.read(demoProvider).plans) {
+      if (plan.isDraft) notifier.approve(plan.clientId);
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('Onay bekleyen plan yok'), findsOneWidget);
+    expect(find.text('Yapay zekâ taslağı'), findsNothing);
+  });
+
+  testWidgets('a client name in triage can be opened by a screen reader', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pumpWide(tester);
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Burak Şahin, danışanı aç')),
+      matchesSemantics(
+        label: 'Burak Şahin, danışanı aç',
+        isButton: true,
+        hasTapAction: true,
+      ),
+    );
+    handle.dispose();
   });
 
   testWidgets('Mesajlar: the three columns start on one line', (tester) async {
@@ -846,7 +916,13 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(review);
         await tester.pumpAndSettle();
-        expect(find.byType(PlanEditorScreen), findsOneWidget);
+        // Elif's draft is the oldest seed (three days).
+        expect(
+          tester
+              .widget<PlanEditorScreen>(find.byType(PlanEditorScreen))
+              .clientId,
+          'c1',
+        );
       });
     }
   }

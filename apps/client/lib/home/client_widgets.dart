@@ -47,7 +47,7 @@ class DietitianRow extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              PersonAvatar(name: name),
+              PersonAvatar(name: name, size: context.density.avatarSize + 4),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(

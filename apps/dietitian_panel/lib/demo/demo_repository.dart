@@ -49,7 +49,7 @@ class DemoState {
   final List<Conversation> conversations;
 
   List<Appointment> get upcoming =>
-      appointments.where((a) => !a.isPast).toList()
+      appointments.where((a) => a.isOnAgenda).toList()
         ..sort((a, b) => a.at.compareTo(b.at));
 
   List<Appointment> get completed =>

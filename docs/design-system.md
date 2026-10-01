@@ -33,7 +33,9 @@ screen and to the client app:
 - **Rows** (core `ActionRow`): an initials avatar or a time first (core `PersonAvatar`),
   who and what, then the row's **one action as green text at the right end** (a
   `TextButton`, its label on the edge). When they can't share a line the action drops
-  under the words. A person's name line opens their record, with a grey chevron. On a
+  under the words. In a list of people (triage, clients) the name line opens the
+  person's record, with a grey chevron; in a row about a thing (a draft, an
+  appointment) the action does the thing and the name is plain text. On a
   phone, labels may be short ("Yanıtla", "Ölçümler") and say the full task to a screen
   reader. A client appears once per section, their reasons under the name.
 - **Width carries content**: a dashboard stops at `kDashboardWidth` (1200) and puts
@@ -260,6 +262,6 @@ Turkish UI. "Sen" in the client app, "siz" in the panel; always "danışan", nev
   dene". Sentences, hints and dialog text use "siz" (#120).
 - **Turkish casing and numbers.** Uppercase labels go through `trUpper` (so "tipi" becomes
   "TİPİ", not "TIPI") and decimals through `formatDecimal` (72,4 kg, not 72.4), both in
-  the panel's `lib/util/turkish.dart`.
+  core's `format/turkish_text.dart`.
 - "Yapay zekâ taslağı", not "AI taslağı". No English product words ("Marketplace") in
   UI text: the section is "Diyetisyen bul".

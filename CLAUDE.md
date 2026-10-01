@@ -190,7 +190,7 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
 - `DropdownMenu` ignores the input theme's height (its arrow is a fixed 48 px button). Use
   `DropdownButtonFormField`.
 - Dart's `toUpperCase()` turns "tipi" into "TIPI". Use `trUpper` / `formatDecimal` in
-  the panel's `lib/util/turkish.dart`.
+  core's `format/turkish_text.dart`.
 - The panel's density comes from the window width (`panelThemeBuilder` in
   `lib/util/breakpoints.dart`, 600 dp). Branch phone layouts on `isPanelPhone(context)`;
   never hard-code `AppDensity.compact` in a screen.

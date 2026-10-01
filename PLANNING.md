@@ -324,9 +324,9 @@ Full reference, including type scale, density numbers and the design rules:
   button is a pill; `OutlinedButton` is the pale-green secondary pill; "Onaylı" is a grey
   pill with a black tick, so a green pill always means a button (C24–C25); destructive
   confirms are red (C26); **one green action per row**, the rest grey quiet buttons
-  (Genel Bakış; Randevular keeps "Görüşmeye başla", C29); Genel Bakış opens with the date,
-  the greeting and a tappable counts line instead of stat tiles, with grey triage and
-  draft icons and amber only on the reason (C30); Danışanlar on phones keeps search in
+  (Genel Bakış; Randevular keeps "Görüşmeye başla", C29); grey triage and draft icons
+  and amber only on the reason (C30; its counts line and no-violet rule were replaced by
+  direction B below); Danışanlar on phones keeps search in
   view and puts goal and plan status behind one "Filtrele" sheet (C28); the Mesajlar
   thread sits on the grey ground with white client bubbles and pale-green dietitian
   bubbles (C27). Filter chips are borderless (white off, pale green on).
@@ -350,7 +350,7 @@ Full reference, including type scale, density numbers and the design rules:
   from Lifesum. For every panel screen and the client app (which also closes the visual
   half of C23): one focal card per screen with the screen's one big number; small-capital
   section labels on the ground; rows with an initials avatar or time first and their one
-  green action as text at the right end (no column of pale pills); a person's name opens
+  green action as text at the right end (no column of pale pills); a person's name in a list of people opens
   their record; one client once per section; dashboards stop at 1200 px with a second
   column for secondary content; wide-screen cards radius 16. Genel Bakış (first reference
   screen): the drafts card leads ("3 plan onayınızı bekliyor", oldest first), with the

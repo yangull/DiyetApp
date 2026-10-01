@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart' show DateUtils;
+
 enum VerificationStatus { pending, approved, rejected }
 
 enum PlanState { aiDraft, approved }
@@ -126,6 +128,19 @@ class Appointment {
   bool paid;
 
   bool get isPast => at.isBefore(DateTime.now());
+
+  /// How long a started appointment stays on the agenda, so "Görüşmeye
+  /// başla" is still there for a dietitian a few minutes late. A guess: the
+  /// panel stores no session length.
+  static const agendaGrace = Duration(hours: 1);
+
+  /// Still ahead, or started today less than [agendaGrace] ago. Genel Bakış
+  /// and Randevular both split upcoming from past with this.
+  bool get isOnAgenda {
+    final now = DateTime.now();
+    if (at.isAfter(now)) return true;
+    return DateUtils.isSameDay(at, now) && at.add(agendaGrace).isAfter(now);
+  }
 }
 
 class WeightEntry {

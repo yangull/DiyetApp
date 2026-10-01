@@ -51,16 +51,8 @@ class SectionLabel extends StatelessWidget {
           ),
       ],
     );
-    Widget action(bool end) => EdgeButton(
-      end: end,
-      child: TextButton.icon(
-        style: AppTheme.quietButton,
-        onPressed: onAction,
-        iconAlignment: IconAlignment.end,
-        icon: const Icon(Icons.chevron_right, size: 18),
-        label: Text(label!),
-      ),
-    );
+    Widget action(bool end) =>
+        SectionLink(label: label!, onPressed: onAction, end: end);
 
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: context.density.controlHeight),
@@ -94,6 +86,37 @@ class SectionLabel extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// A grey link with a chevron that leads to a whole section ("Tüm
+/// randevular"). Grey because it often sits on the ground, where green text
+/// fails AA under the focus overlay; its text sits on the edge ([end] for a
+/// right edge).
+class SectionLink extends StatelessWidget {
+  const SectionLink({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.end = true,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool end;
+
+  @override
+  Widget build(BuildContext context) {
+    return EdgeButton(
+      end: end,
+      child: TextButton.icon(
+        style: AppTheme.quietButton,
+        onPressed: onPressed,
+        iconAlignment: IconAlignment.end,
+        icon: const Icon(Icons.chevron_right, size: 18),
+        label: Text(label),
       ),
     );
   }

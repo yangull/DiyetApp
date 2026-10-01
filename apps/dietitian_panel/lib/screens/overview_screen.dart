@@ -44,7 +44,11 @@ class OverviewScreen extends ConsumerWidget {
     final drafts = demo.plans.where((p) => p.isDraft).toList()
       ..sort((a, b) => a.draftedAt.compareTo(b.draftedAt));
     final agenda = demo.upcoming
-        .where((a) => a.status != AppointmentStatus.cancelled)
+        .where(
+          (a) =>
+              a.status == AppointmentStatus.planned ||
+              a.status == AppointmentStatus.reminderSent,
+        )
         .toList();
 
     final triage = [
@@ -92,7 +96,8 @@ class OverviewScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
-                      child: _AllAppointmentsLink(
+                      child: SectionLink(
+                        label: 'Tüm randevular',
                         onPressed: onOpenAppointments,
                       ),
                     ),
@@ -435,6 +440,7 @@ class _TriageGroupTile extends ConsumerWidget {
     final header = Semantics(
       button: true,
       label: '${client.name}, danışanı aç',
+      onTap: openClient,
       excludeSemantics: true,
       child: InkWell(
         onTap: openClient,
@@ -696,26 +702,6 @@ class _AgendaRow extends ConsumerWidget {
             builder: (_) => VideoCallPlaceholderScreen(clientName: client.name),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _AllAppointmentsLink extends StatelessWidget {
-  const _AllAppointmentsLink({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return EdgeButton(
-      end: true,
-      child: TextButton.icon(
-        style: AppTheme.quietButton,
-        onPressed: onPressed,
-        iconAlignment: IconAlignment.end,
-        icon: const Icon(Icons.chevron_right, size: 18),
-        label: const Text('Tüm randevular'),
       ),
     );
   }

@@ -17,8 +17,9 @@ class AppointmentsScreen extends ConsumerWidget {
     final palette = context.palette;
     final upcoming = demo.upcoming;
     final unpaid = demo.unpaid;
-    final past = demo.appointments.where((a) => a.isPast).toList()
-      ..sort((a, b) => b.at.compareTo(a.at));
+    final past =
+        demo.appointments.where((a) => a.isPast && !a.isOnAgenda).toList()
+          ..sort((a, b) => b.at.compareTo(a.at));
 
     return ListView(
       padding: EdgeInsets.all(context.density.pagePadding),

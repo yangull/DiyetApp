@@ -47,8 +47,8 @@ class ActionRow extends StatelessWidget {
   final Widget? lead;
   final double leadWidth;
 
-  /// A fixed column between the words and the action, shown only while
-  /// everything fits on one line.
+  /// A fixed column between the words and the action; under the words when
+  /// the row stacks.
   final Widget? meta;
   final double metaWidth;
 
@@ -120,7 +120,14 @@ class ActionRow extends StatelessWidget {
                   SizedBox(width: leadWidth, child: lead),
                   const SizedBox(width: gap),
                 ],
-                Expanded(child: body),
+                Expanded(
+                  child: meta == null
+                      ? body
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [body, meta!],
+                        ),
+                ),
               ],
             ),
             if (label != null)

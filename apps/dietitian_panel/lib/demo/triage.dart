@@ -36,7 +36,7 @@ class TriageSignal {
 }
 
 /// Pending drafts are excluded on purpose: they already have their own row and
-/// their own waiting badge under "Sıradaki işler", and a client appearing twice
+/// their own wait on Genel Bakış's drafts card, and a client appearing twice
 /// on one screen reads as a bug rather than as urgency.
 List<TriageSignal> triageSignals(DemoState state, {DateTime? now}) {
   final at = now ?? DateTime.now();
