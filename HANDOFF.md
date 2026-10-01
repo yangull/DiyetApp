@@ -44,6 +44,24 @@ commit on Can's word, push on "push".
      columns.
    - The plan PDF still uses Figtree (Alpino's static files would fix it).
 
+### A2. Polish pass (Can: "it doesn't look polished yet")
+
+The redesign changed the theme; most screens kept their old layouts and copy, and the
+client app is sparse because its features don't exist yet. One pass, before features:
+
+- **Audit:** capture every screen of both apps (client, real panel, demo): phone and
+  computer, light and dark. Put them on one artifact page with a numbered list of what
+  looks unfinished: spacing, empty states, alignment, copy, icons, loading and error
+  states, the compact panel size. Can marks what matters, then it's fixed in small
+  slices.
+- **Known already:**
+  - Field labels belong above the fields.
+  - Number columns aren't aligned yet.
+  - There's no logo or app icon.
+  - Material icons look Android-like on iOS (rule 2 waits for an icon pack).
+  - The panel's compact text may be too small (to-do 1).
+- New screens from part B are built polished from the start, on the same system.
+
 ### B. Phase 1 features: the next build (one slice each, plan mode first)
 
 4. **Weigh-ins and measurements** (P8). The client logs weight, the dietitian adds

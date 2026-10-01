@@ -223,6 +223,9 @@ https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB#kadir
   `docs/reference/anamnez-ornek.md`.)
 - **K3. Which companies are we talking to for B2B, and what would they expect from
   Wellkit?** Feeds C4.
+- **K4. Does the pilot start with one company, or with individual clients first?** If
+  a company, the first release needs company accounts, bulk sign-up and aggregate-only
+  reporting. The guide's form of C4.
 
 ---
 
@@ -247,6 +250,8 @@ DT11–DT14, DT16, DT17, part of DT3 and most of DT1 and DT15. Still open, same 
 - DT8. Which measurements, device, frequency, BIA; who weighs the client? (Default in use: weight, waist, hip; fat % and muscle optional.)
 - DT10. Genel Bakış: what do you check first on Monday; when is a client "falling behind"?
 - DT15. What is still missing?
+- DT18. Which choices should the client make alone, e.g. swapping a food for another
+  from the same exchange group? Feeds C23. (Added 1 Oct 2026.)
 
 ---
 
