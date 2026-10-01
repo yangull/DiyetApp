@@ -37,7 +37,7 @@ class DietitianRow extends ConsumerWidget {
         ?.value
         .fullName;
 
-    return Card(
+    return CloudCard(
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: density.rowHeight),
         child: Padding(
@@ -56,7 +56,9 @@ class DietitianRow extends ConsumerWidget {
                   children: [
                     Text(
                       'Diyetisyenin',
-                      style: text.bodySmall?.copyWith(color: palette.textMuted),
+                      style: text.bodySmall?.copyWith(
+                        color: palette.textSecondary,
+                      ),
                     ),
                     Text(name ?? '', style: text.titleMedium),
                   ],

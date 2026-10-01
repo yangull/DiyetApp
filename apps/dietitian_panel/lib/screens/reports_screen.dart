@@ -35,7 +35,7 @@ class ReportsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           for (final client in demo.clients) ...[
-            Card(
+            CloudCard(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
@@ -51,7 +51,7 @@ class ReportsScreen extends ConsumerWidget {
                         Text(
                           client.goal,
                           style: text.bodyMedium?.copyWith(
-                            color: palette.textMuted,
+                            color: palette.textSecondary,
                           ),
                         ),
                         _Delta(
@@ -92,9 +92,9 @@ class _Delta extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final progress = weightProgress(client, entries);
     final color = switch (progress.verdict) {
-      ProgressVerdict.onTrack => AppColors.primary,
+      ProgressVerdict.onTrack => AppColors.accent,
       ProgressVerdict.offTrack => palette.warning,
-      ProgressVerdict.neutral => palette.textMuted,
+      ProgressVerdict.neutral => palette.textSecondary,
     };
 
     return Row(
@@ -108,16 +108,13 @@ class _Delta extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           '${formatDecimal(progress.deltaKg.abs())} kg',
-          style: text.titleMedium?.copyWith(
-            color: color,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+          style: text.titleMedium?.copyWith(color: color),
         ),
         const SizedBox(width: 6),
         Flexible(
           child: Text(
             progress.label,
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
         ),
       ],

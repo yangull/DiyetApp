@@ -23,22 +23,22 @@ class RealProfileScreen extends StatelessWidget {
       children: [
         Text('Profil', style: text.headlineLarge),
         const SizedBox(height: AppSpacing.xl),
-        Card(
+        CloudCard(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AD SOYAD',
-                  style: text.labelSmall?.copyWith(color: palette.textMuted),
+                  'Ad soyad',
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(identity.profile.fullName, style: text.titleMedium),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'ONAY DURUMU',
-                  style: text.labelSmall?.copyWith(color: palette.textMuted),
+                  'Onay durumu',
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -47,8 +47,8 @@ class RealProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'UZMANLIK ALANLARI',
-                  style: text.labelSmall?.copyWith(color: palette.textMuted),
+                  'Uzmanlık alanları',
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -57,7 +57,7 @@ class RealProfileScreen extends StatelessWidget {
                       : detail.specialties.join(', '),
                   style: text.bodyMedium?.copyWith(
                     color: detail == null || detail.specialties.isEmpty
-                        ? palette.textMuted
+                        ? palette.textSecondary
                         : null,
                   ),
                 ),
@@ -71,7 +71,6 @@ class RealProfileScreen extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
-            style: AppTheme.quietButton,
             onPressed: actions.signOut,
             icon: const Icon(Icons.logout),
             label: const Text('Çıkış yap'),

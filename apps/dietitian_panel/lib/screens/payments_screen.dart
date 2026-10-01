@@ -63,7 +63,7 @@ class PaymentsScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xxl),
         Text('Tamamlanan seanslar', style: text.titleLarge),
         const SizedBox(height: AppSpacing.md),
-        Card(
+        CloudCard(
           child: Column(
             children: [
               if (demo.completed.isEmpty)
@@ -71,7 +71,9 @@ class PaymentsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   child: Text(
                     'Henüz tamamlanan seans yok.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
                 ),
               for (var i = 0; i < demo.completed.length; i++)
@@ -102,26 +104,25 @@ class _SummaryCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              trUpper(label),
-              style: text.labelSmall?.copyWith(color: palette.textMuted),
+              label,
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               value,
               style: text.headlineLarge?.copyWith(
                 color: muted
-                    ? palette.textMuted
+                    ? palette.textSecondary
                     : emphasise
-                    ? AppColors.primary
+                    ? AppColors.accent
                     : Theme.of(context).colorScheme.onSurface,
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -153,7 +154,7 @@ class _PayoutRow extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         border: showDivider
-            ? Border(top: BorderSide(color: palette.borderSubtle))
+            ? Border(top: BorderSide(color: palette.divider))
             : null,
       ),
       child: Row(
@@ -166,40 +167,23 @@ class _PayoutRow extends ConsumerWidget {
                 Text(client.name, style: text.titleMedium),
                 Text(
                   formatDate(appointment.at),
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: Text(
-              '${appointment.fee} ₺',
-              style: text.bodyMedium?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
+          Expanded(child: Text('${appointment.fee} ₺', style: text.bodyMedium)),
           Expanded(
             child: Text(
               '-$commission ₺',
-              style: text.bodyMedium?.copyWith(
-                color: palette.textMuted,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             ),
           ),
-          Expanded(
-            child: Text(
-              '$net ₺',
-              style: text.titleMedium?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
+          Expanded(child: Text('$net ₺', style: text.titleMedium)),
           Text(
             appointment.paid ? 'Tahsil edildi' : 'Bekliyor',
             style: text.bodySmall?.copyWith(
-              color: appointment.paid ? AppColors.primary : palette.warning,
+              color: appointment.paid ? AppColors.accent : palette.warning,
               fontWeight: FontWeight.w600,
             ),
           ),

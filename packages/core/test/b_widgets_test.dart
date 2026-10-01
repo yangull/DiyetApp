@@ -72,7 +72,7 @@ void main() {
     });
   });
 
-  testWidgets('a section label is a header in Turkish capitals', (
+  testWidgets('a section label is a sentence-case header (#135)', (
     tester,
   ) async {
     final handle = tester.ensureSemantics();
@@ -86,11 +86,11 @@ void main() {
         ),
       ),
     );
-    expect(find.text('DİKKAT GEREKENLER'), findsOneWidget);
-    expect(find.text('3 DANIŞAN'), findsOneWidget);
+    expect(find.text('Dikkat gerekenler'), findsOneWidget);
+    expect(find.text('3 danışan'), findsOneWidget);
     expect(
-      tester.getSemantics(find.text('DİKKAT GEREKENLER')),
-      matchesSemantics(label: 'DİKKAT GEREKENLER', isHeader: true),
+      tester.getSemantics(find.text('Dikkat gerekenler')),
+      matchesSemantics(label: 'Dikkat gerekenler', isHeader: true),
     );
     handle.dispose();
   });

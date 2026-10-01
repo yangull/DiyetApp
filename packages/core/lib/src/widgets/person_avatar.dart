@@ -14,7 +14,7 @@ String initialsOf(String? fullName) {
   return trUpper(first + last);
 }
 
-/// A person's initials on a grey disc, in both apps. Neutral on purpose:
+/// A person's initials on a pale disc, in both apps. Neutral on purpose:
 /// colour never marks people (design rule 15), and it is not a photo (rule 9).
 /// In a list it gives each row an anchor the eye can run down (direction B,
 /// PLANNING #133). Decorative: the name beside it is what a screen reader
@@ -32,7 +32,8 @@ class PersonAvatar extends StatelessWidget {
   /// Defaults to the density's avatar size.
   final double? size;
 
-  /// Defaults to `surfaceSubtle`, which reads on white cards.
+  /// Defaults to the palette's `inset`: Cloud Card on the canvas, white
+  /// inside a `CloudCard`.
   final Color? background;
 
   @override
@@ -44,14 +45,14 @@ class PersonAvatar extends StatelessWidget {
         ? text.titleLarge
         : side >= 36
         ? text.titleMedium
-        : text.labelMedium?.copyWith(fontWeight: FontWeight.w700);
+        : text.labelMedium?.copyWith(fontWeight: FontWeight.w600);
     return ExcludeSemantics(
       child: Container(
         width: side,
         height: side,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: background ?? palette.surfaceSubtle,
+          color: background ?? palette.inset,
           shape: BoxShape.circle,
         ),
         // The disc keeps its size at large text; initials that grew with it

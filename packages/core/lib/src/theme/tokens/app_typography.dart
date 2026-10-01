@@ -2,62 +2,84 @@ import 'package:flutter/material.dart';
 
 import 'app_density.dart';
 
-/// One family, Figtree, for everything ("Sade", PLANNING #133): headings in
-/// bold, body in regular, numbers in bold with tabular figures ([figures]).
-/// It was verified at the cmap level to carry all twelve Turkish glyphs
-/// (ı İ ğ Ğ ş Ş ç Ç ö Ö ü Ü). Fraunces is still bundled but no longer used.
+/// One family, Alpino (PLANNING #135), from its variable file: Flutter maps
+/// [FontWeight] onto the wght axis, so 400, 500 and 600 come from one asset.
+/// Headings and numbers 600, buttons and navigation 500, body 400; nothing
+/// above 600. All Turkish letters were verified in the file's cmap.
 ///
-/// The files ship as assets in `packages/core/fonts` (latin + latin-ext
-/// subsets, licences alongside them). Nothing is fetched at runtime, so the
-/// panel renders identically offline and there is no first-load flash.
+/// Sizes are HIG's: iOS for touch, macOS (11 as the floor) for the compact
+/// panel. Line heights stay at or above 1.18 em, above Alpino's 1.14 em of
+/// ink, with Flutter's default proportional leading so İ and ş never clip.
+///
+/// Bundled in `packages/core/fonts` with its licence, unmodified (no
+/// subsetting or conversion, as the licence requires); never fetched at
+/// runtime (#63).
 abstract final class AppTypography {
-  static const _sansFamily = 'Figtree';
+  static const _family = 'Alpino';
   static const _package = 'core';
 
-  /// Headings: bold and slightly tight, the way large sans type reads best.
-  static TextStyle _heading(double size, double lineHeight) =>
-      _sans(size, lineHeight, FontWeight.w700).copyWith(letterSpacing: -0.3);
-
-  static TextStyle _sans(
+  static TextStyle _style(
     double size,
     double lineHeight, [
     FontWeight weight = FontWeight.w400,
+    double tracking = 0,
   ]) => TextStyle(
-    fontFamily: _sansFamily,
+    fontFamily: _family,
     package: _package,
     fontSize: size,
     height: lineHeight / size,
     fontWeight: weight,
+    letterSpacing: tracking,
   );
 
-  /// Every number the user reads as data: counts, kcal, kg, times (#132).
-  /// Figtree 700 with tabular figures, so digits keep their width.
-  static TextStyle figures(double size, double lineHeight) => _sans(
-    size,
-    lineHeight,
-    FontWeight.w700,
-  ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+  /// Every number the user reads as data: counts, kcal, kg, times. Alpino 600.
+  /// Alpino has no tabular figures, so numbers that must line up sit in a
+  /// fixed-width, right-aligned slot (was C39).
+  static TextStyle figures(double size, double lineHeight) =>
+      _style(size, lineHeight, FontWeight.w600, size >= 28 ? -0.5 : 0);
 
   static TextTheme textTheme(AppDensity density) {
-    final c = density.isCompact;
+    if (density.isCompact) {
+      final largeTitle = _style(26, 32, FontWeight.w600, -0.4);
+      return TextTheme(
+        displayLarge: largeTitle,
+        displayMedium: largeTitle,
+        displaySmall: largeTitle,
+        headlineLarge: _style(22, 26, FontWeight.w600, -0.3),
+        headlineMedium: _style(17, 22, FontWeight.w600),
+        headlineSmall: _style(15, 20, FontWeight.w600),
+        titleLarge: _style(13, 16, FontWeight.w600),
+        titleMedium: _style(12, 15, FontWeight.w600),
+        titleSmall: _style(11, 14, FontWeight.w600),
+        bodyLarge: _style(13, 16),
+        bodyMedium: _style(12, 15),
+        bodySmall: _style(11, 14),
+        labelLarge: _style(13, 16, FontWeight.w500),
+        labelMedium: _style(11, 14, FontWeight.w500),
+        labelSmall: _style(11, 14, FontWeight.w600, 0.2),
+      );
+    }
+    final largeTitle = _style(34, 41, FontWeight.w600, -0.7);
     return TextTheme(
-      displaySmall: _heading(32, 38),
-      headlineLarge: _heading(c ? 22 : 28, c ? 28 : 34),
-      headlineMedium: _heading(c ? 18 : 22, c ? 24 : 28),
-      // AlertDialog titles resolve to headlineSmall; left empty, they fell
-      // back to the platform font.
-      headlineSmall: _heading(c ? 18 : 20, c ? 24 : 26),
-      titleLarge: _sans(c ? 16 : 18, c ? 22 : 24, FontWeight.w600),
-      titleMedium: _sans(c ? 14 : 16, c ? 20 : 24, FontWeight.w600),
-      bodyLarge: _sans(c ? 14 : 16, c ? 20 : 24),
-      bodyMedium: _sans(c ? 13 : 14, c ? 18 : 20),
-      bodySmall: _sans(c ? 12 : 13, c ? 16 : 18),
-      labelLarge: _sans(c ? 13.5 : 15, c ? 18 : 20, FontWeight.w600),
-      // NavigationRail labels resolve to labelMedium. Leaving the slot empty
-      // did not fall back to Figtree — it fell back to Material's own default,
-      // so the panel's rail was the one piece of chrome not in our type.
-      labelMedium: _sans(c ? 12 : 13, c ? 16 : 18, FontWeight.w600),
-      labelSmall: _sans(11, 16, FontWeight.w600).copyWith(letterSpacing: 0.88),
+      // The date and time pickers read the display slots; left empty they
+      // fall back to Material's font.
+      displayLarge: largeTitle,
+      displayMedium: largeTitle,
+      displaySmall: largeTitle,
+      headlineLarge: _style(28, 34, FontWeight.w600, -0.5),
+      headlineMedium: _style(22, 28, FontWeight.w600, -0.3),
+      // AlertDialog titles resolve to headlineSmall.
+      headlineSmall: _style(20, 25, FontWeight.w600, -0.2),
+      titleLarge: _style(17, 22, FontWeight.w600),
+      titleMedium: _style(16, 21, FontWeight.w600),
+      titleSmall: _style(15, 20, FontWeight.w600),
+      bodyLarge: _style(17, 22),
+      bodyMedium: _style(15, 20),
+      bodySmall: _style(13, 18),
+      labelLarge: _style(16, 21, FontWeight.w500),
+      // NavigationBar and NavigationRail labels resolve to labelMedium.
+      labelMedium: _style(12, 16, FontWeight.w500),
+      labelSmall: _style(12, 16, FontWeight.w600, 0.2),
     );
   }
 }

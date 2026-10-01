@@ -25,11 +25,13 @@ void main() {
     expect(AppConfig.isConfigured, isFalse);
   });
 
-  test('theme uses the measured brand palette, not a generated seed', () {
+  test('theme uses the measured palette, not a generated seed', () {
     final theme = AppTheme.light(AppDensity.comfortable);
-    expect(theme.colorScheme.primary, AppColors.primary);
-    expect(theme.colorScheme.surface, AppColors.surface);
-    expect(theme.scaffoldBackgroundColor, AppColors.ground);
+    expect(theme.colorScheme.primary, AppColors.charcoal);
+    expect(theme.colorScheme.secondary, AppColors.accent);
+    expect(theme.colorScheme.surface, AppColors.canvas);
+    expect(theme.scaffoldBackgroundColor, AppColors.canvas);
+    expect(theme.cardTheme.color, AppColors.cloudCard);
   });
 
   test('both density profiles share colors but differ in metrics', () {
@@ -45,15 +47,79 @@ void main() {
     expect(compact.extension<AppDensity>()!.isCompact, isTrue);
   });
 
-  test('one bundled family, Figtree, with bold headings (#133)', () {
-    final text = AppTheme.light(AppDensity.comfortable).textTheme;
-
-    expect(text.headlineLarge!.fontFamily, 'packages/core/Figtree');
-    expect(text.headlineLarge!.fontWeight, FontWeight.w700);
-    expect(text.bodyMedium!.fontFamily, 'packages/core/Figtree');
+  test('density follows the input: compact only in a computer browser', () {
+    for (final p in [
+      TargetPlatform.windows,
+      TargetPlatform.macOS,
+      TargetPlatform.linux,
+    ]) {
+      expect(AppDensity.forPlatform(isWeb: true, platform: p).isCompact, true);
+      expect(
+        AppDensity.forPlatform(isWeb: false, platform: p).isCompact,
+        false,
+      );
+    }
+    for (final p in [TargetPlatform.iOS, TargetPlatform.android]) {
+      expect(AppDensity.forPlatform(isWeb: true, platform: p).isCompact, false);
+    }
   });
 
-  test('the secondary button is the pale-green pill, not an outline', () {
+  test('one bundled family, Alpino, with 600 headings (#135)', () {
+    for (final density in [AppDensity.comfortable, AppDensity.compact]) {
+      final text = AppTheme.light(density).textTheme;
+      for (final style in [
+        text.displayLarge,
+        text.displayMedium,
+        text.displaySmall,
+        text.headlineLarge,
+        text.headlineMedium,
+        text.headlineSmall,
+        text.titleLarge,
+        text.titleMedium,
+        text.titleSmall,
+        text.bodyLarge,
+        text.bodyMedium,
+        text.bodySmall,
+        text.labelLarge,
+        text.labelMedium,
+        text.labelSmall,
+      ]) {
+        expect(style!.fontFamily, 'packages/core/Alpino');
+        expect(style.fontWeight!.value, lessThanOrEqualTo(600));
+        expect(style.fontSize, greaterThanOrEqualTo(11));
+        // Alpino's ink spans 1.14 em; HIG's line heights stay above it.
+        expect(style.height, greaterThanOrEqualTo(1.18));
+      }
+      expect(text.headlineLarge!.fontWeight, FontWeight.w600);
+    }
+  });
+
+  test('the touch scale is HIG iOS at the default size', () {
+    final text = AppTheme.light(AppDensity.comfortable).textTheme;
+    expect(text.displaySmall!.fontSize, 34);
+    expect(text.headlineLarge!.fontSize, 28);
+    expect(text.headlineMedium!.fontSize, 22);
+    expect(text.headlineSmall!.fontSize, 20);
+    expect(text.titleLarge!.fontSize, 17);
+    expect(text.bodyLarge!.fontSize, 17);
+    expect(text.bodySmall!.fontSize, 13);
+  });
+
+  test('the filled button is a Charcoal pill with a Cloud Card label', () {
+    final style = AppTheme.light(AppDensity.comfortable)
+        .filledButtonTheme
+        .style!;
+    const none = <WidgetState>{};
+    expect(style.backgroundColor!.resolve(none), AppColors.charcoal);
+    expect(style.foregroundColor!.resolve(none), AppColors.cloudCard);
+    expect(
+      style.backgroundColor!.resolve({WidgetState.pressed}),
+      AppColors.charcoalHover,
+    );
+    expect(style.shape!.resolve(none), isA<StadiumBorder>());
+  });
+
+  test('the secondary button is a pale pill, not an outline', () {
     final style = AppTheme.light(AppDensity.comfortable)
         .outlinedButtonTheme
         .style!;
@@ -61,14 +127,13 @@ void main() {
     const disabled = {WidgetState.disabled};
 
     expect(style.side!.resolve(none), BorderSide.none);
-    expect(style.backgroundColor!.resolve(none), AppColors.primaryTint);
-    expect(style.foregroundColor!.resolve(none), AppColors.primaryHover);
-    expect(style.backgroundColor!.resolve(disabled), AppColors.surfaceSubtle);
-    expect(style.foregroundColor!.resolve(disabled), AppColors.textMuted);
+    expect(style.backgroundColor!.resolve(none), AppColors.cloudCard);
+    expect(style.foregroundColor!.resolve(none), AppColors.ink);
+    expect(style.foregroundColor!.resolve(disabled), AppColors.textSecondary);
     expect(style.shape!.resolve(none), isA<StadiumBorder>());
   });
 
-  test('every button is a pill; destructive confirms are red', () {
+  test('every button is a pill; actions are Ink; destructive is red', () {
     final theme = AppTheme.light(AppDensity.compact);
     const none = <WidgetState>{};
     for (final style in [
@@ -79,31 +144,27 @@ void main() {
       expect(style.shape!.resolve(none), isA<StadiumBorder>());
     }
     expect(
+      theme.textButtonTheme.style!.foregroundColor!.resolve(none),
+      AppColors.ink,
+    );
+    expect(
       AppTheme.destructiveButton.backgroundColor!.resolve(none),
       AppColors.error,
     );
   });
 
-  test('dialog titles use Figtree, not the platform font', () {
-    final text = AppTheme.light(AppDensity.comfortable).textTheme;
-    expect(text.headlineSmall!.fontFamily, 'packages/core/Figtree');
+  test('overlays stay at or under 8 % Ink', () {
+    final theme = AppTheme.light(AppDensity.comfortable);
+    final overlay = theme.textButtonTheme.style!.overlayColor!;
+    expect(overlay.resolve({WidgetState.pressed}), AppTheme.pressOverlay);
+    expect(overlay.resolve({WidgetState.focused}), AppTheme.pressOverlay);
+    expect(overlay.resolve({WidgetState.hovered}), AppTheme.hoverOverlay);
+    expect(AppTheme.pressOverlay.a, closeTo(0.08, 0.005));
+    expect(AppTheme.hoverOverlay.a, closeTo(0.04, 0.005));
+    expect(theme.highlightColor, Colors.transparent);
   });
 
-  test('the quiet sign-out keeps AA when hovered or focused', () {
-    // TextButton lays its foreground at 10 % over the ground when focused.
-    final focused = Color.alphaBlend(
-      AppTheme.quietButton.foregroundColor!
-          .resolve(const <WidgetState>{})!
-          .withValues(alpha: 0.10),
-      AppColors.ground,
-    );
-    final ink = AppTheme.quietButton.foregroundColor!.resolve(
-      const <WidgetState>{},
-    )!;
-    expect(contrast(ink, focused), greaterThanOrEqualTo(4.5));
-  });
-
-  testWidgets('a selected filter chip is pale green with readable text', (
+  testWidgets('a selected filter chip is Charcoal with readable text', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -127,60 +188,130 @@ void main() {
     );
     final ink = label.text.style!.color!;
 
-    expect(chip.selectedColor, AppColors.primaryTint);
+    expect(chip.selectedColor, AppColors.charcoal);
     expect(chip.side, BorderSide.none);
-    expect(contrast(ink, AppColors.primaryTint), greaterThanOrEqualTo(4.5));
+    expect(contrast(ink, AppColors.charcoal), greaterThanOrEqualTo(4.5));
   });
 
   test('the rail matches the bottom bar: white, no pill', () {
     final rail = AppTheme.light(AppDensity.compact).navigationRailTheme;
-    expect(rail.backgroundColor, AppColors.surface);
+    expect(rail.backgroundColor, AppColors.canvas);
     expect(rail.indicatorColor, Colors.transparent);
   });
 
-  group('measured palette (PLANNING #58)', () {
+  group('measured palette (docs/design-system.md)', () {
+    // The darkest state any text sits on: a Cloud Card under the press.
+    final pressedCard = Color.alphaBlend(
+      AppTheme.pressOverlay,
+      AppColors.cloudCard,
+    );
+    final pressedCanvas = Color.alphaBlend(
+      AppTheme.pressOverlay,
+      AppColors.canvas,
+    );
+
     void atLeast(Color fg, Color bg, double min, String what) {
       expect(contrast(fg, bg), greaterThanOrEqualTo(min), reason: what);
     }
 
-    test('text tokens keep AA on every background they sit on', () {
+    test('text tokens keep 4.5:1 on every surface, pressed too', () {
       for (final bg in [
-        AppColors.surface,
-        AppColors.ground,
-        AppColors.surfaceSubtle,
+        AppColors.canvas,
+        AppColors.cloudCard,
+        pressedCanvas,
+        pressedCard,
       ]) {
-        atLeast(AppColors.textPrimary, bg, 4.5, 'textPrimary');
+        atLeast(AppColors.ink, bg, 4.5, 'ink');
         atLeast(AppColors.textSecondary, bg, 4.5, 'textSecondary');
+        atLeast(AppColors.error, bg, 4.5, 'error');
+        atLeast(AppColors.aiDraft, bg, 4.5, 'aiDraft');
       }
-      atLeast(AppColors.textMuted, AppColors.ground, 4.5, 'textMuted/ground');
-      atLeast(AppColors.primary, AppColors.ground, 4.5, 'primary/ground');
-      atLeast(
-        AppColors.primaryHover,
-        AppColors.surfaceSubtle,
-        4.5,
-        'links on surfaceSubtle use primaryHover',
-      );
-      atLeast(AppColors.borderStrong, AppColors.ground, 3, 'borderStrong');
-      atLeast(AppColors.warning, AppColors.warningTint, 4.5, 'warning/tint');
-      atLeast(AppColors.aiDraft, AppColors.aiDraftTint, 4.5, 'aiDraft/tint');
+      for (final bg in [AppColors.canvas, AppColors.cloudCard]) {
+        atLeast(AppColors.accent, bg, 4.5, 'accent');
+        atLeast(AppColors.warning, bg, 4.5, 'warning');
+        atLeast(AppColors.borderStrong, bg, 3, 'borderStrong');
+      }
+      // Accent as a graphic (a bar, a ring) on a pressed card.
+      atLeast(AppColors.accent, pressedCard, 3, 'accent graphic');
     });
 
-    test('tinted fills keep their text readable', () {
-      atLeast(AppColors.primaryHover, AppColors.primaryTint, 4.5, 'on tint');
+    test('status text keeps 4.5:1 on its tint', () {
+      atLeast(AppColors.accentStrong, AppColors.accentTint, 4.5, 'Onaylı');
+      atLeast(AppColors.warning, AppColors.warningTint, 4.5, 'warning');
+      atLeast(AppColors.error, AppColors.errorTint, 4.5, 'error');
+      atLeast(AppColors.aiDraft, AppColors.aiDraftTint, 4.5, 'aiDraft');
+      for (final tint in [
+        AppColors.accentTint,
+        AppColors.warningTint,
+        AppColors.errorTint,
+        AppColors.aiDraftTint,
+      ]) {
+        atLeast(AppColors.ink, tint, 4.5, 'ink on tint');
+      }
+    });
+
+    test('labels on filled controls keep 4.5:1', () {
+      atLeast(AppColors.cloudCard, AppColors.charcoal, 4.5, 'filled');
+      atLeast(AppColors.cloudCard, AppColors.charcoalHover, 4.5, 'pressed');
+      atLeast(AppColors.onFilled, AppColors.error, 4.5, 'destructive');
+      atLeast(AppColors.onFilled, AppColors.accent, 4.5, 'on accent');
       // Disabled controls are exempt from WCAG; kept readable anyway.
-      atLeast(AppColors.textMuted, AppColors.surfaceSubtle, 4.5, 'disabled');
-      atLeast(AppColors.onPrimary, AppColors.error, 4.5, 'destructive');
-      // Timestamps in the dietitian's chat bubble.
-      atLeast(AppColors.textMuted, AppColors.primaryTint, 4.5, 'muted/tint');
-      atLeast(AppColors.primary, AppColors.surfaceSubtle, 3, 'bar on track');
+      atLeast(AppColors.textSecondary, AppColors.cloudCard, 4.5, 'disabled');
     });
   });
 
-  test('numbers use Figtree Bold with tabular figures', () {
-    final style = AppTypography.figures(32, 36);
-    expect(style.fontFamily, 'packages/core/Figtree');
-    expect(style.fontWeight, FontWeight.w700);
-    expect(style.fontFeatures, contains(const FontFeature.tabularFigures()));
+  testWidgets('inside a CloudCard, pale fills turn white so they show', (
+    tester,
+  ) async {
+    late BuildContext outside;
+    late BuildContext inside;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(AppDensity.comfortable),
+        home: Scaffold(
+          body: Column(
+            children: [
+              Builder(
+                builder: (c) {
+                  outside = c;
+                  return const SizedBox();
+                },
+              ),
+              CloudCard(
+                child: Builder(
+                  builder: (c) {
+                    inside = c;
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    const none = <WidgetState>{};
+    Color? secondary(BuildContext c) =>
+        Theme.of(c).outlinedButtonTheme.style!.backgroundColor!.resolve(none);
+
+    expect(outside.palette.inset, AppColors.cloudCard);
+    expect(inside.palette.inset, AppColors.canvas);
+    expect(secondary(outside), AppColors.cloudCard);
+    expect(secondary(inside), AppColors.canvas);
+    expect(
+      Theme.of(inside).progressIndicatorTheme.linearTrackColor,
+      AppColors.canvas,
+    );
+    expect(
+      Theme.of(inside).filledButtonTheme.style!.backgroundColor!.resolve(none),
+      AppColors.charcoal,
+    );
+  });
+
+  test('numbers are Alpino 600', () {
+    final style = AppTypography.figures(34, 41);
+    expect(style.fontFamily, 'packages/core/Alpino');
+    expect(style.fontWeight, FontWeight.w600);
   });
 
   testWidgets('motion drops to zero when the OS asks for reduced motion', (

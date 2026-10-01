@@ -148,8 +148,7 @@ class OverviewScreen extends ConsumerWidget {
 
 /// Inner padding of every card on this page, so the names in the drafts card
 /// and the triage card share one left edge and their actions one right edge.
-double _cardPadding(BuildContext context) =>
-    context.density.isCompact ? AppSpacing.xl : AppSpacing.lg;
+double _cardPadding(BuildContext context) => context.density.cardPadding;
 
 /// The date as a small label, then the greeting. It is no longer the biggest
 /// text on the page: the drafts count is.
@@ -163,11 +162,8 @@ class _Header extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          trUpper(formatTodayLabel(DateTime.now())),
-          style: text.labelSmall?.copyWith(
-            color: context.palette.textMuted,
-            fontWeight: FontWeight.w700,
-          ),
+          formatTodayLabel(DateTime.now()),
+          style: text.bodySmall?.copyWith(color: context.palette.textSecondary),
         ),
         const SizedBox(height: 6),
         Text(
@@ -193,11 +189,12 @@ class _DraftsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    final wide = context.density.isCompact;
+    // Layout follows the width; density follows the input (#135).
+    final wide = !isPanelPhone(context);
     final pad = _cardPadding(context);
 
     if (drafts.isEmpty) {
-      return Card(
+      return CloudCard(
         child: Padding(
           padding: EdgeInsets.all(pad),
           child: Column(
@@ -223,7 +220,7 @@ class _DraftsCard extends StatelessWidget {
         style: AppTypography.figures(
           wide ? 48 : 56,
           wide ? 52 : 60,
-        ).copyWith(color: AppColors.textPrimary, letterSpacing: -1),
+        ).copyWith(color: AppColors.ink, letterSpacing: -1),
       ),
     );
     final title = Semantics(
@@ -279,7 +276,7 @@ class _DraftsCard extends StatelessWidget {
     );
     final inset = pad + context.density.avatarSize + ActionRow.gap;
 
-    return Card(
+    return CloudCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -310,7 +307,8 @@ class _DraftRow extends ConsumerWidget {
     final client = demo.clientOf(plan.clientId);
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    final wide = context.density.isCompact;
+    // Layout follows the width; density follows the input (#135).
+    final wide = !isPanelPhone(context);
     final age = DateTime.now().difference(plan.draftedAt);
     // Amber past two days: a guess, and the triage note says our thresholds
     // are guesses.
@@ -318,7 +316,7 @@ class _DraftRow extends ConsumerWidget {
     final waiting = Text(
       '${formatWaitingSince(age)} bekliyor',
       style: text.bodyMedium?.copyWith(
-        color: late ? palette.warning : palette.textMuted,
+        color: late ? palette.warning : palette.textSecondary,
       ),
     );
 
@@ -337,7 +335,7 @@ class _DraftRow extends ConsumerWidget {
             const SizedBox(height: 2),
             Text(
               '${plan.day} · ${plan.kcal} kcal',
-              style: text.bodyMedium?.copyWith(color: palette.textMuted),
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             ),
             if (!wide) waiting,
           ],
@@ -373,19 +371,19 @@ class _TriageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pad = _cardPadding(context);
     if (groups.isEmpty) {
-      return Card(
+      return CloudCard(
         child: Padding(
           padding: EdgeInsets.all(pad),
           child: Text(
             'Şu an geride kalan danışan görünmüyor.',
             style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(color: context.palette.textMuted),
+                ?.copyWith(color: context.palette.textSecondary),
           ),
         ),
       );
     }
     final inset = pad + context.density.avatarSize + ActionRow.gap;
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Column(
@@ -456,7 +454,7 @@ class _TriageGroupTile extends ConsumerWidget {
                 Icon(
                   Icons.chevron_right,
                   size: phone ? 24 : 20,
-                  color: palette.textMuted,
+                  color: palette.textSecondary,
                 ),
               ],
             ),
@@ -537,7 +535,7 @@ class _AgendaCard extends StatelessWidget {
     final pad = _cardPadding(context);
     final now = DateTime.now();
     bool isToday(Appointment a) => DateUtils.isSameDay(a.at, now);
-    final muted = text.bodyMedium?.copyWith(color: palette.textMuted);
+    final muted = text.bodyMedium?.copyWith(color: palette.textSecondary);
 
     Widget note(String s) => Padding(
       padding: EdgeInsets.all(pad),
@@ -568,8 +566,8 @@ class _AgendaCard extends StatelessWidget {
                   TextSpan(
                     text: '${later.length}',
                     style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.ink,
                     ),
                   ),
                   TextSpan(
@@ -604,11 +602,8 @@ class _AgendaCard extends StatelessWidget {
             child: Semantics(
               header: true,
               child: Text(
-                trUpper(formatDayHeading(day.key)),
-                style: text.labelSmall?.copyWith(
-                  color: palette.textMuted,
-                  fontWeight: FontWeight.w700,
-                ),
+                formatDayHeading(day.key),
+                style: text.bodySmall?.copyWith(color: palette.textSecondary),
               ),
             ),
           ),
@@ -619,7 +614,7 @@ class _AgendaCard extends StatelessWidget {
       }
     }
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Column(
@@ -647,7 +642,10 @@ class _AgendaRow extends ConsumerWidget {
     final online = appointment.kind == AppointmentKind.online;
     final today = DateUtils.isSameDay(appointment.at, DateTime.now());
     final name = text.titleMedium!;
-    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final timeStyle = AppTypography.figures(
+      name.fontSize!,
+      name.height! * name.fontSize!,
+    ).copyWith(color: AppColors.ink);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -656,31 +654,27 @@ class _AgendaRow extends ConsumerWidget {
       ),
       child: ActionRow(
         crossAxisAlignment: CrossAxisAlignment.baseline,
+        // A fixed slot sized to "00:00", the time right-aligned in it, so the
+        // colons line up without tabular figures (#135).
         lead: Text(
           formatTime(appointment.at),
-          style: AppTypography.figures(
-            name.fontSize!,
-            name.height! * name.fontSize!,
-          ).copyWith(color: AppColors.textPrimary),
+          textAlign: TextAlign.end,
+          style: timeStyle,
         ),
-        leadWidth: 48 * scale,
+        leadWidth: numberSlotWidth(context, '00:00', timeStyle),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(client.name, style: name),
             Text(
               online ? 'Görüntülü görüşme' : 'Yüz yüze',
-              style: text.bodyMedium?.copyWith(color: palette.textMuted),
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             ),
             if (appointment.status == AppointmentStatus.reminderSent)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.check,
-                    size: 16,
-                    color: AppColors.textPrimary,
-                  ),
+                  const Icon(Icons.check, size: 16, color: AppColors.ink),
                   const SizedBox(width: AppSpacing.xs),
                   Flexible(
                     child: Text(
@@ -723,7 +717,7 @@ class _Footnote extends StatelessWidget {
           'bekleyen ve randevusuna gelmeyen danışanlar. Siz sabah ilk neye '
           'bakıyorsunuz, hangi eşikleri kullanıyorsunuz?',
           style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: context.palette.textMuted),
+              ?.copyWith(color: context.palette.textSecondary),
         ),
       ),
     );

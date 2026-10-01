@@ -35,7 +35,7 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
         body: Center(
           child: Text(
             'Bu danışan için değişim listesi hazırlanmadı.',
-            style: text.bodyMedium?.copyWith(color: palette.textMuted),
+            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
           ),
         ),
       );
@@ -56,8 +56,8 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
             spacing: AppSpacing.x3,
             runSpacing: AppSpacing.md,
             children: [
-              _Figure(label: 'PLANDA', value: '${plan.kcal} kcal'),
-              _Figure(label: 'HEDEF', value: '$target kcal', muted: true),
+              _Figure(label: 'Planda', value: '${plan.kcal} kcal'),
+              _Figure(label: 'Hedef', value: '$target kcal', muted: true),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -67,7 +67,7 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
             'Plan, toplam değişim sayılarından; hedef, danışanın yaş, '
             'cinsiyet, boy ve kilosundan hesaplanıyor. Grup kalorileri '
             'örnek değerlerdir.',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
         ],
       ),
@@ -92,7 +92,7 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
           'değişim listesiyle mi kuruyorsunuz? Gruplar, ölçüler ve kalori '
           'değerleri örnektir — sizin kullandığınız tabloyu öğrenmek '
           'istiyoruz.',
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -114,13 +114,15 @@ class _Figure extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: text.labelSmall?.copyWith(color: palette.textMuted)),
+        Text(
+          label,
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
+        ),
         const SizedBox(height: 2),
         Text(
           value,
           style: text.headlineMedium?.copyWith(
             color: muted ? palette.textSecondary : null,
-            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],
@@ -150,7 +152,7 @@ class _MealCard extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -178,7 +180,6 @@ class _MealCard extends ConsumerWidget {
                   '${meal.kcal} kcal',
                   style: text.bodyMedium?.copyWith(
                     color: palette.textSecondary,
-                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ],
@@ -239,7 +240,7 @@ class _LineRow extends ConsumerWidget {
                   examples.take(2).join(' · '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
               ],
             ),
@@ -254,9 +255,7 @@ class _LineRow extends ConsumerWidget {
             child: Text(
               '${line.count}',
               textAlign: TextAlign.center,
-              style: text.titleMedium?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: text.titleMedium,
             ),
           ),
           IconButton(
@@ -269,10 +268,7 @@ class _LineRow extends ConsumerWidget {
             child: Text(
               '${line.kcal} kcal',
               textAlign: TextAlign.right,
-              style: text.bodySmall?.copyWith(
-                color: palette.textMuted,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
           ),
         ],
@@ -292,7 +288,7 @@ class _SubstitutionSheet extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -318,7 +314,7 @@ class _SubstitutionSheet extends StatelessWidget {
                 ),
                 subtitle: Text(
                   '1 değişim · ${kExchangeKcal[group]} kcal',
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
                 children: [
                   for (final food in kExchangeFoods[group] ?? const <String>[])

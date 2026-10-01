@@ -62,7 +62,7 @@ class _Detail extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.all(density.pagePadding),
       children: [
-        Card(
+        CloudCard(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -70,11 +70,11 @@ class _Detail extends StatelessWidget {
               children: [
                 Text('Danışan bilgileri', style: text.titleLarge),
                 const SizedBox(height: AppSpacing.lg),
-                _Fact(label: 'HEDEF', value: detail.goal),
+                _Fact(label: 'Hedef', value: detail.goal),
                 const SizedBox(height: AppSpacing.lg),
-                _Fact(label: 'BÜTÇE ARALIĞI', value: detail.budgetRange),
+                _Fact(label: 'Bütçe aralığı', value: detail.budgetRange),
                 const SizedBox(height: AppSpacing.lg),
-                _Fact(label: 'SAĞLIK NOTLARI', value: detail.healthNotes),
+                _Fact(label: 'Sağlık notları', value: detail.healthNotes),
               ],
             ),
           ),
@@ -83,7 +83,7 @@ class _Detail extends StatelessWidget {
         Text(
           'Bu bilgileri danışanınız kendi uygulamasından giriyor. Ölçüm '
           'takibi ve diyet planı henüz bu ekranda yok.',
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -107,12 +107,15 @@ class _Fact extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: text.labelSmall?.copyWith(color: palette.textMuted)),
+        Text(
+          label,
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
+        ),
         const SizedBox(height: 2),
         Text(
           empty ? 'Bilgi girilmemiş' : value!,
           style: empty
-              ? text.bodyMedium?.copyWith(color: palette.textMuted)
+              ? text.bodyMedium?.copyWith(color: palette.textSecondary)
               : text.titleMedium,
         ),
       ],
@@ -142,7 +145,7 @@ class _Message extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 40, color: palette.textMuted),
+            Icon(Icons.error_outline, size: 40, color: palette.textSecondary),
             const SizedBox(height: AppSpacing.md),
             Text(title, style: text.titleLarge, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.xs),

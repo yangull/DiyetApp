@@ -93,7 +93,7 @@ class RealOverviewScreen extends ConsumerWidget {
                 Text(
                   'Bekleyen davetler, danışan kabul edene kadar açılamaz.',
                   style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(color: context.palette.textMuted),
+                      ?.copyWith(color: context.palette.textSecondary),
                 ),
               ],
             ];
@@ -156,8 +156,7 @@ class RealOverviewScreen extends ConsumerWidget {
 }
 
 /// Inner padding of every card here, as on the demo's Genel Bakış.
-double _cardPadding(BuildContext context) =>
-    context.density.isCompact ? AppSpacing.xl : AppSpacing.lg;
+double _cardPadding(BuildContext context) => context.density.cardPadding;
 
 class _Header extends StatelessWidget {
   const _Header({required this.name});
@@ -171,11 +170,8 @@ class _Header extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          trUpper(formatTodayLabel(DateTime.now())),
-          style: text.labelSmall?.copyWith(
-            color: context.palette.textMuted,
-            fontWeight: FontWeight.w700,
-          ),
+          formatTodayLabel(DateTime.now()),
+          style: text.bodySmall?.copyWith(color: context.palette.textSecondary),
         ),
         const SizedBox(height: 6),
         Text(
@@ -207,7 +203,8 @@ class _ClientsFocalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    final wide = context.density.isCompact;
+    // Layout follows the width; density follows the input (#135).
+    final wide = !isPanelPhone(context);
     final pad = _cardPadding(context);
     final button = FilledButton.icon(
       onPressed: onInvite,
@@ -252,7 +249,7 @@ class _ClientsFocalCard extends StatelessWidget {
                   style: AppTypography.figures(
                     wide ? 48 : 56,
                     wide ? 52 : 60,
-                  ).copyWith(color: AppColors.textPrimary, letterSpacing: -1),
+                  ).copyWith(color: AppColors.ink, letterSpacing: -1),
                 ),
               ),
               const SizedBox(width: 14),
@@ -276,7 +273,7 @@ class _ClientsFocalCard extends StatelessWidget {
             ],
           );
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: EdgeInsets.all(pad),
         child: LayoutBuilder(
@@ -320,7 +317,7 @@ class _ClientsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pad = _cardPadding(context);
     final inset = pad + context.density.avatarSize + ActionRow.gap;
-    return Card(
+    return CloudCard(
       clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -372,7 +369,7 @@ class _ClientRow extends StatelessWidget {
                     Text(
                       row.invitedEmail,
                       style: text.bodyMedium?.copyWith(
-                        color: palette.textMuted,
+                        color: palette.textSecondary,
                       ),
                     ),
                 ],
@@ -382,7 +379,7 @@ class _ClientRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right,
                 size: isPanelPhone(context) ? 24 : 20,
-                color: palette.textMuted,
+                color: palette.textSecondary,
               ),
           ],
         ),
@@ -422,7 +419,7 @@ class _InvitesCard extends StatelessWidget {
     final pad = _cardPadding(context);
     final avatar = context.density.avatarSize;
     final inset = pad + avatar + ActionRow.gap;
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Column(
@@ -446,7 +443,7 @@ class _InvitesCard extends StatelessWidget {
                           width: avatar,
                           height: avatar,
                           decoration: BoxDecoration(
-                            color: palette.surfaceSubtle,
+                            color: palette.inset,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -501,14 +498,14 @@ class _NoInvitesNote extends StatelessWidget {
       children: [
         const SectionLabel('Davetler'),
         const SizedBox(height: AppSpacing.sm),
-        Card(
+        CloudCard(
           child: Padding(
             padding: EdgeInsets.all(_cardPadding(context)),
             child: Text(
               'Bekleyen davet yok. Davet ettiğiniz danışanlar kabul edene '
               'kadar burada görünür.',
               style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: context.palette.textMuted),
+                  ?.copyWith(color: context.palette.textSecondary),
             ),
           ),
         ),
@@ -614,7 +611,6 @@ class _InviteDialogState extends State<_InviteDialog> {
       ),
       actions: [
         TextButton(
-          style: AppTheme.quietButton,
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Vazgeç'),
         ),
@@ -648,13 +644,13 @@ class _ErrorCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: EdgeInsets.all(_cardPadding(context)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.error_outline, size: 28, color: palette.textMuted),
+            Icon(Icons.error_outline, size: 28, color: palette.textSecondary),
             const SizedBox(height: AppSpacing.md),
             Text('Danışan listesi yüklenemedi', style: text.headlineSmall),
             const SizedBox(height: AppSpacing.xs),
@@ -708,7 +704,6 @@ class _NamesErrorNotice extends StatelessWidget {
         EdgeButton(
           end: true,
           child: TextButton(
-            style: AppTheme.quietButton,
             onPressed: onRetry,
             child: const Text('Tekrar dene'),
           ),

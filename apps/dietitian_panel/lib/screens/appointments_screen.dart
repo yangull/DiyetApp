@@ -34,7 +34,7 @@ class AppointmentsScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xl),
         Text('Yaklaşan', style: text.titleLarge),
         const SizedBox(height: AppSpacing.md),
-        Card(
+        CloudCard(
           child: Column(
             children: [
               for (var i = 0; i < upcoming.length; i++)
@@ -44,7 +44,9 @@ class AppointmentsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   child: Text(
                     'Yaklaşan randevu yok.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
                 ),
             ],
@@ -53,7 +55,7 @@ class AppointmentsScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xxl),
         Text('Geçmiş randevular', style: text.titleLarge),
         const SizedBox(height: AppSpacing.md),
-        Card(
+        CloudCard(
           child: Column(
             children: [
               for (var i = 0; i < past.length; i++)
@@ -63,7 +65,9 @@ class AppointmentsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   child: Text(
                     'Geçmiş randevu yok.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
                 ),
             ],
@@ -77,15 +81,12 @@ class AppointmentsScreen extends ConsumerWidget {
               const SizedBox(width: AppSpacing.md),
               Text(
                 '${demo.unpaidCount} seans · ${demo.unpaidTotal} ₺',
-                style: text.bodyMedium?.copyWith(
-                  color: palette.warning,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+                style: text.bodyMedium?.copyWith(color: palette.warning),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Card(
+          CloudCard(
             child: Column(
               children: [
                 for (var i = 0; i < unpaid.length; i++)
@@ -96,7 +97,7 @@ class AppointmentsScreen extends ConsumerWidget {
                     child: Text(
                       'Tahsil edilmemiş seans yok.',
                       style: text.bodyMedium?.copyWith(
-                        color: palette.textMuted,
+                        color: palette.textSecondary,
                       ),
                     ),
                   ),
@@ -108,7 +109,7 @@ class AppointmentsScreen extends ConsumerWidget {
             'Gelmeyen bir danışanın seansını tahsil edilecekler arasına '
             'koymuyoruz — bu bizim varsayımımız. Siz gelmediğinde ücret alıyor '
             'musunuz, iptal için bir süre sınırınız var mı?',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
         ],
       ],
@@ -142,7 +143,7 @@ class _AppointmentRow extends ConsumerWidget {
           ? Icons.videocam_outlined
           : Icons.person_outline,
       size: 20,
-      color: palette.textMuted,
+      color: palette.textSecondary,
     );
     final kindLabel = Text(
       appointment.kind == AppointmentKind.online
@@ -157,12 +158,12 @@ class _AppointmentRow extends ConsumerWidget {
           client.name,
           style: text.titleMedium?.copyWith(
             decoration: cancelled ? TextDecoration.lineThrough : null,
-            color: cancelled ? palette.textMuted : null,
+            color: cancelled ? palette.textSecondary : null,
           ),
         ),
         Text(
           _when(appointment.at),
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -188,7 +189,7 @@ class _AppointmentRow extends ConsumerWidget {
         ? inset(
             Text(
               'İptal edildi',
-              style: text.bodyMedium?.copyWith(color: palette.textMuted),
+              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             ),
           )
         : reminded
@@ -197,7 +198,7 @@ class _AppointmentRow extends ConsumerWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check, size: 16, color: AppColors.textPrimary),
+                const Icon(Icons.check, size: 16, color: AppColors.ink),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -212,7 +213,6 @@ class _AppointmentRow extends ConsumerWidget {
           )
         // One green action per row, "Görüşmeye başla" (Can, C29).
         : TextButton.icon(
-            style: AppTheme.quietButton,
             onPressed: () {
               ref.read(demoProvider.notifier).sendReminder(appointment.id);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -227,7 +227,6 @@ class _AppointmentRow extends ConsumerWidget {
     final cancel = cancelled
         ? null
         : TextButton(
-            style: AppTheme.quietButton,
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
@@ -236,7 +235,6 @@ class _AppointmentRow extends ConsumerWidget {
                   content: Text('${client.name} ile randevu iptal edilecek.'),
                   actions: [
                     TextButton(
-                      style: AppTheme.quietButton,
                       onPressed: () => Navigator.of(context).pop(false),
                       child: const Text('Vazgeç'),
                     ),
@@ -309,7 +307,7 @@ class _AppointmentGrid extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         border: showDivider
-            ? Border(top: BorderSide(color: context.palette.borderSubtle))
+            ? Border(top: BorderSide(color: context.palette.divider))
             : null,
       ),
       child: LayoutBuilder(
@@ -387,7 +385,7 @@ class _PastRow extends ConsumerWidget {
         Text(client.name, style: text.titleMedium),
         Text(
           _when(appointment.at),
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -407,8 +405,8 @@ class _PastRow extends ConsumerWidget {
         : TextButton.icon(
             // The pill's inset, so this icon lines up with the camera icon of
             // "Görüşmeye başla" in the same column.
-            style: AppTheme.quietButton.copyWith(
-              padding: const WidgetStatePropertyAll(
+            style: const ButtonStyle(
+              padding: WidgetStatePropertyAll(
                 EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               ),
             ),
@@ -425,7 +423,7 @@ class _PastRow extends ConsumerWidget {
             ? Icons.videocam_outlined
             : Icons.person_outline,
         size: 20,
-        color: palette.textMuted,
+        color: palette.textSecondary,
       ),
       who: who,
       what: status,
@@ -454,7 +452,7 @@ class _UnpaidRow extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         border: showDivider
-            ? Border(top: BorderSide(color: palette.borderSubtle))
+            ? Border(top: BorderSide(color: palette.divider))
             : null,
       ),
       child: Row(
@@ -467,18 +465,13 @@ class _UnpaidRow extends ConsumerWidget {
                 Text(client.name, style: text.titleMedium),
                 Text(
                   _when(appointment.at),
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
               ],
             ),
           ),
           Expanded(
-            child: Text(
-              '${appointment.fee} ₺',
-              style: text.titleMedium?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
+            child: Text('${appointment.fee} ₺', style: text.titleMedium),
           ),
           TextButton.icon(
             onPressed: () {

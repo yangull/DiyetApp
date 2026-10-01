@@ -92,7 +92,6 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
         ),
         actions: [
           TextButton(
-            style: AppTheme.quietButton,
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Düzenlemeye dön'),
           ),
@@ -151,7 +150,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
               children: [
                 Text('Temel bilgiler', style: text.titleLarge),
                 const SizedBox(height: AppSpacing.md),
-                Card(
+                CloudCard(
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(
@@ -210,7 +209,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 Text('Sağlık bilgileri', style: text.titleLarge),
                 const SizedBox(height: AppSpacing.md),
-                Card(
+                CloudCard(
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(
@@ -259,7 +258,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                Card(
+                CloudCard(
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(
@@ -287,7 +286,6 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                       child: const Text('Kaydet ve taslak oluştur'),
                     ),
                     TextButton(
-                      style: AppTheme.quietButton,
                       onPressed: _confirmLeave,
                       child: const Text('Vazgeç'),
                     ),
@@ -297,7 +295,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                 Text(
                   'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
                   'yapay zekâ taslağı hazırlanır ve onayınıza düşer.',
-                  style: text.bodySmall?.copyWith(color: palette.textMuted),
+                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
                 ),
               ],
             ),

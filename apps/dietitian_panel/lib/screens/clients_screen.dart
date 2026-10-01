@@ -97,7 +97,6 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               ),
               if (_activeFilters > 0)
                 TextButton(
-                  style: AppTheme.quietButton,
                   onPressed: () => setState(() {
                     _goal = null;
                     _planState = null;
@@ -159,7 +158,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
             ],
           ),
         const SizedBox(height: AppSpacing.lg),
-        Card(
+        CloudCard(
           child: Column(
             children: [
               if (!phone)
@@ -169,11 +168,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                     horizontal: AppSpacing.lg,
                     vertical: AppSpacing.sm,
                   ),
+                  // No band of its own inside the Cloud Card: the divider below
+                  // separates the column names from the rows.
                   decoration: BoxDecoration(
-                    color: palette.surfaceSubtle,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(density.cardRadius),
-                    ),
+                    border: Border(bottom: BorderSide(color: palette.divider)),
                   ),
                   child: Row(
                     children: [
@@ -189,7 +187,9 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   child: Text(
                     'Bu filtrelerle eşleşen danışan yok.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
                 ),
               for (final client in clients)
@@ -214,7 +214,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           ),
                           decoration: BoxDecoration(
                             border: Border(
-                              top: BorderSide(color: palette.borderSubtle),
+                              top: BorderSide(color: palette.divider),
                             ),
                           ),
                           child: Row(
@@ -239,11 +239,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                                 flex: 2,
                                 child: Text(
                                   '${formatDecimal(client.weightKg)} kg',
-                                  style: text.bodyMedium?.copyWith(
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
+                                  style: text.bodyMedium,
                                 ),
                               ),
                               Expanded(
@@ -311,13 +307,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
             setSheetState(() {});
           }
 
-          // On the white sheet an unselected chip needs a grey fill to read
-          // as a chip; on the grey ground the theme's white does that.
           Widget choice(String label, bool selected, VoidCallback onTap) =>
               ChoiceChip(
                 label: Text(label),
                 selected: selected,
-                backgroundColor: sheetContext.palette.surfaceSubtle,
                 onSelected: (_) => onTap(),
               );
 
@@ -396,9 +389,9 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     return Expanded(
       flex: flex,
       child: Text(
-        trUpper(label),
-        style: Theme.of(context).textTheme.labelSmall
-            ?.copyWith(color: context.palette.textMuted),
+        label,
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: context.palette.textSecondary),
       ),
     );
   }
@@ -423,7 +416,7 @@ class _PhoneClientRow extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: palette.borderSubtle)),
+        border: Border(top: BorderSide(color: palette.divider)),
       ),
       child: Row(
         children: [
@@ -444,7 +437,7 @@ class _PhoneClientRow extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: palette.textMuted),
+          Icon(Icons.chevron_right, color: palette.textSecondary),
         ],
       ),
     );

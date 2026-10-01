@@ -61,7 +61,7 @@ class PlanEditorLayout extends StatelessWidget {
       ),
       const SizedBox(height: AppSpacing.lg),
     ],
-    Card(
+    CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: energy,
@@ -188,8 +188,8 @@ class _ApproveBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: palette.borderSubtle)),
+        color: AppColors.canvas,
+        border: Border(top: BorderSide(color: palette.divider)),
       ),
       child: SafeArea(
         top: false,
@@ -203,10 +203,8 @@ class _ApproveBar extends StatelessWidget {
             builder: (context, constraints) {
               final figures = Text(
                 'Plan $plannedKcal kcal · hedef $targetKcal kcal',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: palette.textSecondary,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: palette.textSecondary),
               );
               final button = FilledButton(
                 onPressed: onApprove,

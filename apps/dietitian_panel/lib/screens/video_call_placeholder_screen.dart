@@ -15,13 +15,7 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = clientName
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((s) => s.isNotEmpty)
-        .take(2)
-        .map((s) => s[0].toUpperCase())
-        .join();
+    final initials = initialsOf(clientName);
 
     return Scaffold(
       backgroundColor: const Color(0xFF15181A),

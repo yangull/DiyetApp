@@ -28,7 +28,7 @@ class VerificationStatusScreen extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 420),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Card(
+            child: CloudCard(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.xl),
                 child: Column(
@@ -39,7 +39,7 @@ class VerificationStatusScreen extends StatelessWidget {
                           ? Icons.error_outline
                           : Icons.hourglass_top_outlined,
                       size: 40,
-                      color: rejected ? palette.warning : palette.textMuted,
+                      color: rejected ? palette.warning : palette.textSecondary,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(

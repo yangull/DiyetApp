@@ -30,7 +30,7 @@ void main() {
     expect(find.text('Hesabın yok mu? Kayıt ol'), findsOneWidget);
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-    expect(app.theme?.colorScheme.primary, AppColors.primary);
+    expect(app.theme?.colorScheme.primary, AppColors.charcoal);
     expect(app.darkTheme, isNull);
   });
 
@@ -56,8 +56,9 @@ void main() {
     expect(find.text('Merhaba, Elif'), findsOneWidget);
     expect(_steps(0), findsOneWidget);
     expect(find.text('Diyetisyenin buradan başlar.'), findsOneWidget);
-    // Unbuilt paths are named once, as text, never as buttons (rule 4).
-    expect(find.text('YAKINDA'), findsOneWidget);
+    // Unbuilt paths are named once, as text, never as buttons (rule 4): one
+    // "Yakında" section, and the first plan's step says it inline.
+    expect(find.text('Yakında'), findsNWidgets(2));
     expect(find.widgetWithText(InkWell, 'Diyetisyen bul'), findsNothing);
   });
 
@@ -313,7 +314,7 @@ void main() {
 
         await tester.tap(find.text('Profil'));
         await tester.pumpAndSettle();
-        expect(find.text('HEDEFLERİN'), findsOneWidget);
+        expect(find.text('Hedeflerin'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }
@@ -342,12 +343,12 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('Bugün: "YAKINDA" starts where the cards start', (
+    testWidgets('Bugün: "Yakında" starts where the cards start', (
       tester,
     ) async {
       await pumpSignedIn(tester);
       final cardLeft = tester.getTopLeft(find.byType(Card).first).dx;
-      expect(tester.getTopLeft(find.text('YAKINDA')).dx, cardLeft);
+      expect(tester.getTopLeft(find.text('Yakında').last).dx, cardLeft);
       expect(tester.getTopLeft(find.text('Merhaba, Elif')).dx, cardLeft);
     });
 
@@ -360,7 +361,7 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).last,
       );
-      final edge = tester.getTopLeft(find.text('YAKINDA')).dx;
+      final edge = tester.getTopLeft(find.text('Yakında')).dx;
       final signOut = find.ancestor(
         of: find.text('Çıkış yap'),
         matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),

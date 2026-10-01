@@ -67,7 +67,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Card(
+              CloudCard(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
@@ -107,7 +107,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      Divider(color: palette.borderSubtle),
+                      Divider(color: palette.divider),
                       const SizedBox(height: AppSpacing.lg),
                       Text('Sağlık bilgileri', style: text.titleMedium),
                       const SizedBox(height: AppSpacing.lg),
@@ -133,9 +133,9 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                       if (client.note.isNotEmpty) ...[
                         const SizedBox(height: AppSpacing.lg),
                         Text(
-                          'NOT',
-                          style: text.labelSmall?.copyWith(
-                            color: palette.textMuted,
+                          'Not',
+                          style: text.bodySmall?.copyWith(
+                            color: palette.textSecondary,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -153,7 +153,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
               const SizedBox(height: AppSpacing.lg),
               _EnergyCard(client: client),
               const SizedBox(height: AppSpacing.lg),
-              Card(
+              CloudCard(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
@@ -210,7 +210,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Card(
+              CloudCard(
                 key: _weightsKey,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -234,7 +234,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                         Text(
                           'Henüz ölçüm kaydı yok.',
                           style: text.bodyMedium?.copyWith(
-                            color: palette.textMuted,
+                            color: palette.textSecondary,
                           ),
                         )
                       else ...[
@@ -262,11 +262,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                                 Flexible(
                                   child: Text(
                                     '${formatDecimal(entry.kg)} kg',
-                                    style: text.titleMedium?.copyWith(
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
+                                    style: text.titleMedium,
                                   ),
                                 ),
                               ],
@@ -279,7 +275,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                         'kendisi giriyor. Tartımı siz mi alıyorsunuz, hangi '
                         'sıklıkla?',
                         style: text.bodySmall?.copyWith(
-                          color: palette.textMuted,
+                          color: palette.textSecondary,
                         ),
                       ),
                     ],
@@ -311,7 +307,7 @@ class _MeasurementsCard extends StatelessWidget {
     final palette = context.palette;
     final rows = measurements.reversed.toList();
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -327,7 +323,9 @@ class _MeasurementsCard extends StatelessWidget {
                 if (rows.isNotEmpty)
                   Text(
                     '${rows.length} ölçüm',
-                    style: text.bodySmall?.copyWith(color: palette.textMuted),
+                    style: text.bodySmall?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
               ],
             ),
@@ -335,7 +333,7 @@ class _MeasurementsCard extends StatelessWidget {
             if (rows.isEmpty)
               Text(
                 'Bu danışan için kilo dışında ölçüm kaydı yok.',
-                style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                style: text.bodyMedium?.copyWith(color: palette.textSecondary),
               )
             else
               // Six columns do not fit a phone: the table keeps its width and
@@ -400,7 +398,7 @@ class _MeasurementsCard extends StatelessWidget {
               'hangi cihazla, ne sıklıkla alıyorsunuz? Yağsız vücut kütlesini '
               'ölçüyorsanız enerji hesabında Cunningham formülünü '
               'kullanabiliriz.',
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
           ],
         ),
@@ -425,9 +423,9 @@ class _MeasurementHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Expanded(
     child: Text(
-      trUpper(label),
-      style: Theme.of(context).textTheme.labelSmall
-          ?.copyWith(color: context.palette.textMuted),
+      label,
+      style: Theme.of(context).textTheme.bodySmall
+          ?.copyWith(color: context.palette.textSecondary),
     ),
   );
 }
@@ -446,17 +444,14 @@ class _MeasurementCell extends StatelessWidget {
         spacing: 6,
         crossAxisAlignment: WrapCrossAlignment.end,
         children: [
-          Text(
-            value,
-            style: text.bodyMedium?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
+          Text(value, style: text.bodyMedium),
           if (change != null && change != 0) ...[
             Text(
               '${change! > 0 ? '+' : '−'}'
               '${formatDecimal(change!.abs())}',
-              style: text.bodySmall?.copyWith(color: context.palette.textMuted),
+              style: text.bodySmall?.copyWith(
+                color: context.palette.textSecondary,
+              ),
             ),
           ],
         ],
@@ -479,9 +474,9 @@ class _ProgressLabel extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final progress = weightProgress(client, entries);
     final color = switch (progress.verdict) {
-      ProgressVerdict.onTrack => AppColors.primary,
+      ProgressVerdict.onTrack => AppColors.accent,
       ProgressVerdict.offTrack => palette.warning,
-      ProgressVerdict.neutral => palette.textMuted,
+      ProgressVerdict.neutral => palette.textSecondary,
     };
 
     return Row(
@@ -495,10 +490,7 @@ class _ProgressLabel extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           '${formatDecimal(progress.deltaKg.abs())} kg',
-          style: text.titleMedium?.copyWith(
-            color: color,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+          style: text.titleMedium?.copyWith(color: color),
         ),
         const SizedBox(width: 6),
         Flexible(
@@ -507,7 +499,7 @@ class _ProgressLabel extends StatelessWidget {
                 ? progress.label
                 : '${progress.label} · hedefe '
                       '${formatDecimal(progress.remainingKg!.abs())} kg',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
         ),
       ],
@@ -529,7 +521,7 @@ class _EnergyCard extends StatelessWidget {
     final bmh = basalMetabolicRate(client);
     final factor = activityFactor(client.activityLevel);
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -567,7 +559,7 @@ class _EnergyCard extends StatelessWidget {
               'formülü yağsız vücut kütlesi istiyor; onu ölçmüyoruz. Siz '
               'hangi formülü kullanıyorsunuz, biyoelektrik impedans '
               'ölçüyor musunuz?',
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
           ],
         ),
@@ -612,16 +604,13 @@ class _Fact extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            trUpper(label),
-            style: text.labelSmall?.copyWith(color: context.palette.textMuted),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: text.titleMedium?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
+            label,
+            style: text.bodySmall?.copyWith(
+              color: context.palette.textSecondary,
             ),
           ),
+          const SizedBox(height: 2),
+          Text(value, style: text.titleMedium),
         ],
       ),
     );

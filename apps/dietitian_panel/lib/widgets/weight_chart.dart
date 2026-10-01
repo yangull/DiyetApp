@@ -24,14 +24,14 @@ class WeightChart extends StatelessWidget {
         painter: _WeightPainter(
           entries: entries,
           targetKg: targetKg,
-          line: AppColors.primary,
-          grid: context.palette.borderSubtle,
-          target: context.palette.textMuted,
-          surface: AppColors.surface,
+          line: AppColors.accent,
+          grid: context.palette.divider,
+          target: context.palette.textSecondary,
+          surface: context.palette.cloudCard,
           labelStyle: Theme.of(context).textTheme.bodySmall!
-              .copyWith(color: context.palette.textMuted),
+              .copyWith(color: context.palette.textSecondary),
           valueStyle: Theme.of(context).textTheme.titleMedium!
-              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+              .copyWith(fontWeight: FontWeight.w600),
         ),
         size: Size.infinite,
       ),

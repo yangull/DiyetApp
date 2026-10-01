@@ -55,7 +55,7 @@ class PlanEditorScreen extends ConsumerWidget {
           // whether a dietitian overrides it is itself the thing to learn.
           Text(
             'Hesaplanan: $target kcal',
-            style: text.bodyMedium?.copyWith(color: palette.textMuted),
+            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
           ),
         ],
       ),
@@ -75,7 +75,7 @@ class PlanEditorScreen extends ConsumerWidget {
           'Bu ekran görüşme için hazırlanmış bir taslaktır. Bir diyet '
           'listesinde gerçekte hangi alanların bulunması gerektiğini '
           'sizden öğrenmek istiyoruz.',
-          style: text.bodySmall?.copyWith(color: palette.textMuted),
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -96,7 +96,7 @@ class _MealCard extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -173,7 +173,7 @@ class _MealCard extends ConsumerWidget {
                       icon: Icon(
                         Icons.close,
                         size: 18,
-                        color: palette.textMuted,
+                        color: palette.textSecondary,
                       ),
                     ),
                   ],

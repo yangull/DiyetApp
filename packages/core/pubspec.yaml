@@ -20,15 +20,15 @@ dev_dependencies:
 
 flutter:
   fonts:
-    - family: Fraunces
+    # The variable file (wght 100-900), unmodified as its licence requires;
+    # Flutter maps FontWeight onto its wght axis.
+    - family: Alpino
       fonts:
-        - asset: fonts/Fraunces-SemiBold.ttf
-          weight: 600
+        - asset: fonts/Alpino-Variable.ttf
+    # Only for the plan PDF: the pdf package cannot read a variable font.
     - family: Figtree
       fonts:
         - asset: fonts/Figtree-Regular.ttf
           weight: 400
         - asset: fonts/Figtree-SemiBold.ttf
           weight: 600
-        - asset: fonts/Figtree-Bold.ttf
-          weight: 700

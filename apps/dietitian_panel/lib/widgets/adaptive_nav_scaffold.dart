@@ -53,7 +53,7 @@ class AdaptiveNavScaffold extends StatelessWidget {
           bottom: false,
           child: Column(
             children: [
-              // On the ground, not a band of its own: a grey strip holding one
+              // On the canvas, not a band of its own: a strip holding one
               // button read as a second app bar.
               if (actions != null && actions.isNotEmpty)
                 Padding(
@@ -69,18 +69,20 @@ class AdaptiveNavScaffold extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: selectedIndex ?? 0,
-          onDestinationSelected: onSelected,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
-            for (final d in destinations)
-              NavigationDestination(
-                icon: Icon(d.icon),
-                selectedIcon: Icon(d.selectedIcon),
-                label: d.label,
-              ),
-          ],
+        bottomNavigationBar: FloatingNavBar(
+          child: NavigationBar(
+            selectedIndex: selectedIndex ?? 0,
+            onDestinationSelected: onSelected,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            destinations: [
+              for (final d in destinations)
+                NavigationDestination(
+                  icon: Icon(d.icon),
+                  selectedIcon: Icon(d.selectedIcon),
+                  label: d.label,
+                ),
+            ],
+          ),
         ),
       );
     }
@@ -103,6 +105,8 @@ class AdaptiveNavScaffold extends StatelessWidget {
               ],
               trailing: railTrailing,
             ),
+            // The rail and the page are both white: a hairline separates them.
+            const VerticalDivider(width: 1),
             Expanded(child: body),
           ],
         ),

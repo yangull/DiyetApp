@@ -179,8 +179,17 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
 - `ColorScheme.fromSeed` silently discards the measured palette. Set every slot.
 - Setting `AppBarTheme.titleTextStyle` cuts `foregroundColor` off from the title. Keep an
   explicit `color:` on that style.
-- An unfilled `TextTheme` slot falls back to Material's default font, not Figtree. Fill
-  any slot a new widget reads (NavigationRail uses `labelMedium`).
+- An unfilled `TextTheme` slot falls back to Material's default font, not Alpino. Fill
+  any slot a new widget reads (NavigationRail uses `labelMedium`, pickers `display*`).
+- Alpino is one variable file whose default instance is Black (900). Flutter maps
+  `FontWeight` onto its wght axis (checked in tests and on the Pixel 8a, 1 Oct 2026); if a
+  platform ever renders everything Black, add `fontVariations` in `AppTypography`. The
+  `pdf` package can't read variable fonts, so the plan PDF keeps Figtree.
+- Alpino's licence forbids sharing the font file through a public repository or server.
+  `yangull/DiyetApp` is private; before it ever goes public, take
+  `packages/core/fonts/Alpino-*` out of the repo and its history.
+- Alpino has no tabular figures: `FontFeature.tabularFigures()` does nothing. Numbers
+  that must line up go in fixed-width, right-aligned slots.
 - A field helper that returns `Expanded` can only live in a `Row`. Put flex on the row
   builder.
 - Flutter shrinks every control by 8 px on desktop (`VisualDensity.compact`), so a web
@@ -191,15 +200,20 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `DropdownButtonFormField`.
 - Dart's `toUpperCase()` turns "tipi" into "TIPI". Use `trUpper` / `formatDecimal` in
   core's `format/turkish_text.dart`.
-- The panel's density comes from the window width (`panelThemeBuilder` in
-  `lib/util/breakpoints.dart`, 600 dp). Branch phone layouts on `isPanelPhone(context)`;
-  never hard-code `AppDensity.compact` in a screen.
-- Colours are checked by `packages/core/test/core_test.dart`: a new token needs its pairs
-  added there, and text on `surfaceSubtle` uses `primaryHover` (primary is 4.47:1).
-- `OutlinedButton` is themed as the pale-green secondary pill, not an outline. A neutral
-  action (sign-out, "Danışanı aç") is a `TextButton` with `AppTheme.quietButton`; green
-  text on the ground fails AA under the focus overlay. A destructive confirm uses
-  `AppTheme.destructiveButton` (red).
+- The panel's density follows the input, not the width (PLANNING #135): compact only in a
+  browser on Windows, macOS or Linux (`panelDensity` in `lib/util/breakpoints.dart`).
+  `flutter test` is never web, so `test/flutter_test_config.dart` sets
+  `debugPanelDensity` to "wide window = computer, narrow = phone". The rail vs bottom bar
+  switch is still width-based: branch phone layouts on `isPanelPhone(context)`; never
+  hard-code `AppDensity.compact` in a screen. Card padding is `density.cardPadding`.
+- Colours are checked by `packages/core/test/core_test.dart`, including on a Cloud Card
+  under the 8 % press overlay: a new token needs its pairs added there. Keep overlays at
+  `AppTheme.hoverOverlay` / `pressOverlay`; Material's defaults (10–12 %) break the grey.
+- Cards are Cloud Card on the white canvas. Anything pale inside a card (a progress
+  track, an avatar disc, a neutral pill) is `canvas`, not `cloudCard`, or it vanishes.
+- Black does the acting: `FilledButton` is the Charcoal pill, `OutlinedButton` the pale
+  secondary pill (not an outline), `TextButton` Ink. Green is never an action colour. A
+  destructive confirm uses `AppTheme.destructiveButton` (red).
 - `Scrollable.ensureVisible` needs the target built. A lazy `ListView` doesn't build
   off-screen children, so a screen with a "jump to" link (Genel Bakış, the client
   record) is a `SingleChildScrollView`.
@@ -234,10 +248,10 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `find.byWidgetPredicate((w) => w is ButtonStyleButton)`.
 - Seed times must be relative to now, not a time of day: "today 16:30" made an
   appointment past every evening and flipped a test.
-- To see screens without the emulator, render them in a widget test with Figtree
+- To see screens without the emulator, render them in a widget test with Alpino
   loaded (as `test/screenshots_test.dart` does) and `matchesGoldenFile` to a scratch
   path; that is how the 24 Sep alignment audit was done.
-- The test font draws every glyph as a square, much wider than Figtree: a label that
+- The test font draws every glyph as a square, much wider than Alpino: a label that
   truncates at 2× in a test may fit on a device. Check real layouts on the emulator.
 - `test/screenshots_test.dart` produces captures, not regression goldens. It is tagged and
   skipped by default. Regenerate with

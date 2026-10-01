@@ -28,7 +28,7 @@ void main() {
     expect(find.text('Hesabınız yok mu? Kayıt olun'), findsOneWidget);
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-    expect(app.theme?.colorScheme.primary, AppColors.primary);
+    expect(app.theme?.colorScheme.primary, AppColors.charcoal);
   });
 
   testWidgets('a pending dietitian sees the status card, not the rail', (
@@ -132,8 +132,8 @@ void main() {
       expect(find.text('bekleyen@example.com'), findsOneWidget);
       // Active clients and invites are separate sections (direction B); the
       // invite says what became of it.
-      expect(find.text('DANIŞANLAR'), findsOneWidget);
-      expect(find.text('DAVETLER'), findsOneWidget);
+      expect(find.text('Danışanlar'), findsOneWidget);
+      expect(find.text('Davetler'), findsOneWidget);
       expect(find.text('Davet bekliyor'), findsOneWidget);
     },
   );
@@ -242,7 +242,7 @@ void main() {
       );
       expect(find.text('Henüz aktif danışanınız yok'), findsOneWidget);
       expect(find.text('1 davet yanıt bekliyor.'), findsOneWidget);
-      expect(find.text('DANIŞANLAR'), findsNothing);
+      expect(find.text('Danışanlar'), findsNothing);
     });
 
     testWidgets('names that fail to load fall back to the address', (
@@ -469,9 +469,12 @@ void main() {
         matching: find.byType(Card),
       ),
     );
-    expect(button.dx, moreOrLessEquals(card.dx - 20, epsilon: 0.5));
+    expect(
+      button.dx,
+      moreOrLessEquals(card.dx - AppDensity.compact.cardPadding, epsilon: 0.5),
+    );
     // A pending invite only: the invites have the second column.
-    final invites = tester.getTopLeft(find.text('DAVETLER'));
+    final invites = tester.getTopLeft(find.text('Davetler'));
     expect(invites.dx, greaterThan(button.dx - 400));
   });
 

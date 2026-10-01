@@ -33,9 +33,7 @@ class ProfileTab extends ConsumerWidget {
       children: [
         Row(
           children: [
-            // On the grey ground the subtle fill nearly vanishes, so this one
-            // sits on white, like the cards.
-            PersonAvatar(name: name, size: 64, background: AppColors.surface),
+            PersonAvatar(name: name, size: 64),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Text(
@@ -47,7 +45,7 @@ class ProfileTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.x3),
         _SectionHeader(
-          title: 'HEDEFLERİN',
+          title: 'Hedeflerin',
           action: EdgeButton(
             end: true,
             child: TextButton(
@@ -60,7 +58,7 @@ class ProfileTab extends ConsumerWidget {
             ),
           ),
         ),
-        Card(
+        CloudCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -73,7 +71,7 @@ class ProfileTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
-        const _SectionHeader(title: 'DİYETİSYENİN'),
+        const _SectionHeader(title: 'Diyetisyenin'),
         if (dietitians.isEmpty)
           Text(
             'Henüz bir diyetisyenin yok. Bir davet geldiğinde Bugün '
@@ -86,7 +84,7 @@ class ProfileTab extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
           ],
         const SizedBox(height: AppSpacing.xxl),
-        const _SectionHeader(title: 'YAKINDA'),
+        const _SectionHeader(title: 'Yakında'),
         Text(
           'Dosyaların: diyetisyeninle paylaşacağın rapor ve belgeler.',
           style: text.bodyMedium?.copyWith(color: palette.textSecondary),
@@ -96,7 +94,6 @@ class ProfileTab extends ConsumerWidget {
           alignment: AlignmentDirectional.centerStart,
           child: EdgeButton(
             child: TextButton.icon(
-              style: AppTheme.quietButton,
               onPressed: actions.signOut,
               icon: const Icon(Icons.logout),
               label: const Text('Çıkış yap'),
@@ -122,10 +119,12 @@ class _SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              title,
-              style: text.labelSmall?.copyWith(
-                color: context.palette.textMuted,
+            // Section headings are Title 3 in Ink (#135).
+            child: Semantics(
+              header: true,
+              child: Text(
+                title,
+                style: text.headlineSmall?.copyWith(color: context.palette.ink),
               ),
             ),
           ),
@@ -157,7 +156,7 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
           const SizedBox(height: 2),
           Text(
@@ -166,7 +165,7 @@ class _InfoRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: filled
                 ? text.bodyLarge
-                : text.bodyLarge?.copyWith(color: palette.textMuted),
+                : text.bodyLarge?.copyWith(color: palette.textSecondary),
           ),
         ],
       ),

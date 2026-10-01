@@ -144,10 +144,11 @@ class _RailUtilityButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Like a rail destination: black and bold when selected, grey otherwise.
-    final color = selected ? AppColors.textPrimary : context.palette.textMuted;
+    // Like a rail destination: black and 600 when selected, grey otherwise.
+    final color = selected ? AppColors.ink : context.palette.textSecondary;
     return TextButton(
-      style: TextButton.styleFrom(foregroundColor: color),
+      style: TextButton.styleFrom(foregroundColor: color)
+          .copyWith(overlayColor: AppTheme.overlay),
       onPressed: onPressed,
       child: SizedBox(
         width: 72,
@@ -160,7 +161,7 @@ class _RailUtilityButton extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelMedium
-                  ?.copyWith(fontWeight: selected ? FontWeight.w700 : null),
+                  ?.copyWith(fontWeight: selected ? FontWeight.w600 : null),
             ),
           ],
         ),
@@ -180,9 +181,10 @@ class _ResetDemoButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final muted = context.palette.textMuted;
+    final muted = context.palette.textSecondary;
     return TextButton(
-      style: TextButton.styleFrom(foregroundColor: muted),
+      style: TextButton.styleFrom(foregroundColor: muted)
+          .copyWith(overlayColor: AppTheme.overlay),
       onPressed: () => _confirmReset(context, ref, onReset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -211,7 +213,6 @@ Future<void> _confirmReset(
       ),
       actions: [
         TextButton(
-          style: AppTheme.quietButton,
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Vazgeç'),
         ),

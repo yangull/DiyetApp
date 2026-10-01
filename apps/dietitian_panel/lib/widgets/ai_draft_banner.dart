@@ -84,7 +84,9 @@ class AiDraftBanner extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Danışan bu planı siz onaylayana kadar göremez.',
-              style: text.bodySmall?.copyWith(color: context.palette.textMuted),
+              style: text.bodySmall?.copyWith(
+                color: context.palette.textSecondary,
+              ),
             ),
           ],
         ),

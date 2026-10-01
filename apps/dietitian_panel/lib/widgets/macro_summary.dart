@@ -24,7 +24,7 @@ class MacroSummary extends StatelessWidget {
         Text(
           'Örnek makro hedefleri · öğünlerden hesaplanmaz',
           style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: context.palette.textMuted),
+              ?.copyWith(color: context.palette.textSecondary),
         ),
         const SizedBox(height: AppSpacing.sm),
         _row(),
@@ -80,15 +80,15 @@ class _Macro extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              trUpper(label),
-              style: text.labelSmall?.copyWith(color: palette.textMuted),
+              label,
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
             const SizedBox(height: AppSpacing.sm),
             // One text run so a narrow box wraps the unit instead of
@@ -96,13 +96,13 @@ class _Macro extends StatelessWidget {
             Text.rich(
               TextSpan(
                 text: value,
-                style: text.headlineMedium?.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+                style: text.headlineMedium,
                 children: [
                   TextSpan(
                     text: ' $unit',
-                    style: text.bodySmall?.copyWith(color: palette.textMuted),
+                    style: text.bodySmall?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
                 ],
               ),

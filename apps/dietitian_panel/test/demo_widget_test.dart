@@ -8,10 +8,12 @@ import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
 import 'package:dietitian_panel/screens/overview_screen.dart';
+import 'package:dietitian_panel/util/breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'flutter_test_config.dart';
 import 'text_fits.dart';
 
 void main() {
@@ -29,7 +31,7 @@ void main() {
     expect(find.text('Ödemeler'), findsNothing);
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-    expect(app.theme?.colorScheme.primary, AppColors.primary);
+    expect(app.theme?.colorScheme.primary, AppColors.charcoal);
     expect(app.darkTheme, isNull);
   });
 
@@ -74,9 +76,9 @@ void main() {
     expect(textColours, contains(AppColors.warning));
   });
 
-  // One green action per row (Can, C29): "Görüşmeye başla", a pale pill
-  // with primaryHover text. Nothing else on Randevular is primary-green.
-  testWidgets('Randevular keeps green for "Görüşmeye başla" alone', (
+  // Black does the acting (PLANNING #135): green marks progress and
+  // "approved", never an action, so no text on Randevular is green.
+  testWidgets('Randevular has no green text: actions are black', (
     tester,
   ) async {
     tester.view.devicePixelRatio = 1;
@@ -101,18 +103,35 @@ void main() {
         // Icons are glyph text too; the pill's video icon shares its colour.
         final icon = span.style?.fontFamily == 'MaterialIcons';
         if (!icon &&
-            (colour == AppColors.primary || colour == AppColors.primaryHover)) {
+            (colour == AppColors.accent || colour == AppColors.accentStrong)) {
           green.add(span.toPlainText());
         }
         return true;
       });
     }
-    expect(green.toSet(), {'Görüşmeye başla'});
+    expect(green, isEmpty);
+    // The action is still there, in Ink.
+    final start = tester.widget<RichText>(
+      find
+          .descendant(
+            of: find
+                .ancestor(
+                  of: find.text('Görüşmeye başla'),
+                  matching: find.byWidgetPredicate(
+                    (w) => w is ButtonStyleButton,
+                  ),
+                )
+                .first,
+            matching: find.byType(RichText),
+          )
+          .last,
+    );
+    expect(start.text.style?.color, AppColors.ink);
   });
 
-  // C27 (Can): the wide thread sits on the grey ground, so the client's white
-  // bubbles read; the dietitian's are the pale green tint.
-  testWidgets('Mesajlar: a titled screen, thread on the ground, two bubbles', (
+  // C27 (Can): the client's bubbles are Cloud Card on the white canvas; the
+  // dietitian's own are Charcoal (#135).
+  testWidgets('Mesajlar: a titled screen, thread on the canvas, two bubbles', (
     tester,
   ) async {
     tester.view.devicePixelRatio = 1;
@@ -148,7 +167,7 @@ void main() {
     }
 
     const fromClient = 'Süper, teşekkürler!';
-    expect(bubbleOf(fromClient), AppColors.surface);
+    expect(bubbleOf(fromClient), AppColors.cloudCard);
     final bubble = find.byWidgetPredicate(
       (w) =>
           w is Container &&
@@ -166,7 +185,7 @@ void main() {
     await tester.enterText(inMessages(find.byType(TextField)), 'Kolay gelsin');
     await tester.tap(inMessages(find.byTooltip('Gönder')));
     await tester.pumpAndSettle();
-    expect(bubbleOf('Kolay gelsin'), AppColors.primaryTint);
+    expect(bubbleOf('Kolay gelsin'), AppColors.charcoal);
   });
 
   testWidgets('a conversation awaiting a reply says so without colour', (
@@ -468,7 +487,7 @@ void main() {
         (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dy,
     };
     expect(tops, hasLength(1));
-    expect(find.text('BUGÜNÜN ÖĞÜNLERİ'), findsOneWidget);
+    expect(find.text('Bugünün öğünleri'), findsOneWidget);
   });
 
   testWidgets('"Besin ekle" lines up with the food fields', (tester) async {
@@ -796,6 +815,48 @@ void main() {
     }
   });
 
+  // Density follows the input (#135), layout the width (#38): a tablet is wide
+  // and touch, a narrowed computer browser is narrow and compact.
+  group('density by input, layout by width', () {
+    tearDown(() => debugPanelDensity = densityByTestWidth);
+
+    testWidgets('a wide tablet gets the rail with touch sizes', (tester) async {
+      debugPanelDensity = (_) => AppDensity.comfortable;
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const ProviderScope(child: DietitianPanelDemoApp()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NavigationRail), findsOneWidget);
+      final context = tester.element(find.byType(NavigationRail));
+      expect(context.density.isCompact, isFalse);
+      expect(
+        Theme.of(context).materialTapTargetSize,
+        MaterialTapTargetSize.padded,
+      );
+    });
+
+    testWidgets('a narrow computer browser gets the bottom bar, compact', (
+      tester,
+    ) async {
+      debugPanelDensity = (_) => AppDensity.compact;
+      tester.view.physicalSize = const Size(500, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const ProviderScope(child: DietitianPanelDemoApp()),
+      );
+      await tester.pumpAndSettle();
+
+      final bar = find.byType(NavigationBar);
+      expect(bar, findsOneWidget);
+      expect(tester.element(bar).density.isCompact, isTrue);
+    });
+  });
+
   group('the demo adapts to the window width (#38)', () {
     testWidgets('wide: a rail with the utilities at its foot', (tester) async {
       tester.view.physicalSize = const Size(1600, 1000);
@@ -875,7 +936,7 @@ void main() {
             )
             .first;
         await tester.scrollUntilVisible(
-          find.text('DİKKAT GEREKENLER'),
+          find.text('Dikkat gerekenler'),
           300,
           scrollable: list,
         );

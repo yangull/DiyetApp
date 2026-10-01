@@ -114,7 +114,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         children: [
           heading,
           const SizedBox(height: AppSpacing.xl),
-          Card(
+          CloudCard(
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
@@ -156,7 +156,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                   children: [
                     SizedBox(
                       width: listWidth,
-                      child: Card(
+                      child: CloudCard(
                         clipBehavior: Clip.antiAlias,
                         // Scrolls on its own: with 40 clients a plain Column ran
                         // off the bottom and the later conversations were
@@ -177,8 +177,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.lg),
-                    // On the grey ground, not in a card, so the client's white
-                    // bubbles read (Can, C27).
+                    // On the white canvas, not in a card, so the client's Cloud
+                    // Card bubbles read (Can, C27).
                     Expanded(
                       child: _ConversationDetail(
                         clientId: selectedId,
@@ -222,12 +222,15 @@ class _ConversationRow extends StatelessWidget {
     final palette = context.palette;
     final last = conversation.lastMessage;
 
+    // The open conversation is a white band in the Cloud Card list, and says
+    // so to a screen reader.
     return Semantics(
       label: conversation.awaitsReply ? 'yanıt bekliyor' : null,
+      selected: selected,
       child: InkWell(
         onTap: onTap,
         child: Container(
-          color: selected ? palette.surfaceSubtle : null,
+          color: selected ? palette.inset : null,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
@@ -242,8 +245,8 @@ class _ConversationRow extends StatelessWidget {
                       client.name,
                       style: text.titleMedium?.copyWith(
                         fontWeight: conversation.awaitsReply
-                            ? FontWeight.w700
-                            : null,
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -252,9 +255,7 @@ class _ConversationRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall?.copyWith(
-                        color: conversation.awaitsReply
-                            ? palette.textSecondary
-                            : palette.textMuted,
+                        color: palette.textSecondary,
                         fontWeight: conversation.awaitsReply
                             ? FontWeight.w600
                             : FontWeight.normal,
@@ -270,7 +271,7 @@ class _ConversationRow extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: AppColors.textPrimary,
+                    color: AppColors.ink,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -302,7 +303,7 @@ class _ClientContextPanel extends ConsumerWidget {
 
     // Scrolls on a short window: the facts and the day's meals are taller
     // than a laptop in landscape leaves under the heading.
-    return Card(
+    return CloudCard(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -316,7 +317,7 @@ class _ClientContextPanel extends ConsumerWidget {
             Text(client.name, style: text.titleMedium),
             Text(
               client.goal,
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
             _ContextFact(
@@ -344,11 +345,11 @@ class _ClientContextPanel extends ConsumerWidget {
               warn: client.chronicConditions.isNotEmpty,
             ),
             const SizedBox(height: AppSpacing.md),
-            Divider(color: palette.borderSubtle),
+            Divider(color: palette.divider),
             const SizedBox(height: AppSpacing.md),
             Text(
-              trUpper('Bugünün öğünleri'),
-              style: text.labelSmall?.copyWith(color: palette.textMuted),
+              'Bugünün öğünleri',
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xs),
             for (final meal in plan.meals)
@@ -390,8 +391,8 @@ class _ContextFact extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            trUpper(label),
-            style: text.labelSmall?.copyWith(color: palette.textMuted),
+            label,
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
           const SizedBox(height: 2),
           Text(
@@ -403,7 +404,7 @@ class _ContextFact extends StatelessWidget {
           if (hint != null)
             Text(
               hint!,
-              style: text.bodySmall?.copyWith(color: palette.textMuted),
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
         ],
       ),
@@ -459,7 +460,9 @@ class _ConversationDetail extends ConsumerWidget {
               ? Center(
                   child: Text(
                     'Bu danışanla henüz mesajlaşmadınız.',
-                    style: text.bodyMedium?.copyWith(color: palette.textMuted),
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
                   ),
                 )
               : ListView(
@@ -528,12 +531,11 @@ class _MessageBubble extends StatelessWidget {
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.sm,
                 ),
-                // White for the client on the grey ground, the pale tint
-                // for the dietitian: both measured, both opaque (C27).
+                // Charcoal for the dietitian's own words, Cloud Card for the
+                // client's: both opaque and measured (C27). Cloud Card text on
+                // Charcoal is 14.21:1.
                 decoration: BoxDecoration(
-                  color: fromDietitian
-                      ? palette.primaryTint
-                      : AppColors.surface,
+                  color: fromDietitian ? AppColors.charcoal : palette.cloudCard,
                   borderRadius: BorderRadius.circular(
                     context.density.cardRadius,
                   ),
@@ -541,11 +543,20 @@ class _MessageBubble extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(message.text, style: text.bodyMedium),
+                    Text(
+                      message.text,
+                      style: text.bodyMedium?.copyWith(
+                        color: fromDietitian ? palette.cloudCard : palette.ink,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       formatTime(message.sentAt),
-                      style: text.bodySmall?.copyWith(color: palette.textMuted),
+                      style: text.bodySmall?.copyWith(
+                        color: fromDietitian
+                            ? palette.cloudCard
+                            : palette.textSecondary,
+                      ),
                     ),
                   ],
                 ),

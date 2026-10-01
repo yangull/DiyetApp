@@ -21,8 +21,23 @@ double textButtonWidth(
   return width;
 }
 
+/// The width [sample] needs in [style] at the current text size: the slot for
+/// numbers that must line up, since Alpino has no tabular figures (#135).
+/// Size it to the widest value ("00:00") and right-align the number in it.
+double numberSlotWidth(BuildContext context, String sample, TextStyle style) {
+  final painter = TextPainter(
+    text: TextSpan(text: sample, style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final width = painter.width.ceilToDouble() + 2;
+  painter.dispose();
+  return width;
+}
+
 /// A row in direction B (PLANNING #133): who and what on the left, its one
-/// action at the right end as green text, the label on the row's edge. When
+/// action at the right end as Ink text, the label on the row's edge. When
 /// the two can't share a line (a narrow phone, large text) the action drops
 /// under the words, its label on their left edge, so nothing squeezes a name
 /// into a column two words wide.

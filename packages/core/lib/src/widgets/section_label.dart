@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../format/turkish_text.dart';
 import '../theme/app_theme.dart';
 import '../theme/edge_button.dart';
 import '../theme/tokens/app_spacing.dart';
 import 'action_row.dart';
 
-/// A section's name in small capitals on the ground (direction B, PLANNING
-/// #133): quiet, so the screen's one focal card leads. [count] follows in
-/// grey; [actionLabel] is a grey link with a chevron at the right end, its
-/// text on the edge, and drops under the name when both don't fit.
+/// A section heading (PLANNING #135): Title 3 (`headlineSmall`, 600) in Ink,
+/// left-aligned, as Bevel sets its section labels. [count] follows in grey;
+/// [actionLabel] is an Ink link with a chevron at the right end, its text on
+/// the edge, and drops under the name when both don't fit.
 class SectionLabel extends StatelessWidget {
   const SectionLabel(
     this.title, {
@@ -37,17 +36,17 @@ class SectionLabel extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            trUpper(title),
-            style: text.labelSmall?.copyWith(
-              color: palette.textSecondary,
-              fontWeight: FontWeight.w700,
-            ),
+            title,
+            style: text.headlineSmall?.copyWith(color: palette.ink),
           ),
         ),
         if (count != null)
           Text(
-            trUpper(count),
-            style: text.labelSmall?.copyWith(color: palette.textMuted),
+            count,
+            style: text.headlineSmall?.copyWith(
+              color: palette.textSecondary,
+              fontWeight: FontWeight.w400,
+            ),
           ),
       ],
     );
@@ -91,10 +90,8 @@ class SectionLabel extends StatelessWidget {
   }
 }
 
-/// A grey link with a chevron that leads to a whole section ("Tüm
-/// randevular"). Grey because it often sits on the ground, where green text
-/// fails AA under the focus overlay; its text sits on the edge ([end] for a
-/// right edge).
+/// An Ink link with a chevron that leads to a whole section ("Tüm
+/// randevular"); its text sits on the edge ([end] for a right edge).
 class SectionLink extends StatelessWidget {
   const SectionLink({
     super.key,
@@ -112,7 +109,6 @@ class SectionLink extends StatelessWidget {
     return EdgeButton(
       end: end,
       child: TextButton.icon(
-        style: AppTheme.quietButton,
         onPressed: onPressed,
         iconAlignment: IconAlignment.end,
         icon: const Icon(Icons.chevron_right, size: 18),

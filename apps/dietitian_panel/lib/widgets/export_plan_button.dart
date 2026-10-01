@@ -72,7 +72,7 @@ class _ExportPlanButtonState extends State<ExportPlanButton> {
         if (!widget.enabled)
           Text(
             'Plan onaylanmadan danışana verilemez.',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
       ],
     );

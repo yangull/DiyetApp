@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'client_widgets.dart';
 import 'goals_edit_screen.dart';
 
-/// Bugün, the client's first tab ("Sade", PLANNING #133): black type on a
-/// light-grey ground, white cards, and the brand green only where the client
-/// can act or sees progress. Until plans exist it shows only what is real:
+/// Bugün, the client's first tab (PLANNING #135): Ink type on the white
+/// canvas, Cloud Card cards, black actions, and green only for progress.
+/// Until plans exist it shows only what is real:
 /// the goal, a pending invite, the connected dietitian, and one quiet
 /// "Yakında" note (rules 4 and 5). The steps come from saved data.
 class TodayTab extends ConsumerWidget {
@@ -46,7 +46,7 @@ class TodayTab extends ConsumerWidget {
       children: [
         Text(
           formatTodayLabel(DateTime.now()),
-          style: text.bodyMedium?.copyWith(color: palette.textMuted),
+          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
         ),
         const SizedBox(height: 2),
         Text(
@@ -99,7 +99,7 @@ class _StartCard extends StatelessWidget {
     final done = [goal != null, dietitianId != null, false];
     final count = done.where((d) => d).length;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -129,7 +129,7 @@ class _StartCard extends StatelessWidget {
                         style: AppTypography.figures(
                           15,
                           20,
-                        ).copyWith(color: palette.textMuted),
+                        ).copyWith(color: palette.textSecondary),
                       ),
                     ],
                   ),
@@ -164,7 +164,7 @@ class _StartCard extends StatelessWidget {
               subtitle: 'Diyetisyenin onayladığında burada görünür.',
               trailing: Text(
                 'Yakında',
-                style: text.bodySmall?.copyWith(color: palette.textMuted),
+                style: text.bodySmall?.copyWith(color: palette.textSecondary),
               ),
             ),
           ],
@@ -195,8 +195,8 @@ class _ProgressBar extends StatelessWidget {
           curve: AppMotion.curve,
           builder: (context, v, _) => LinearProgressIndicator(
             value: v,
-            backgroundColor: palette.surfaceSubtle,
-            color: AppColors.primary,
+            backgroundColor: palette.inset,
+            color: AppColors.accent,
           ),
         ),
       ),
@@ -236,7 +236,7 @@ class _StepRow extends StatelessWidget {
               height: 26,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: done ? AppColors.textPrimary : null,
+                color: done ? AppColors.ink : null,
                 border: done
                     ? null
                     : Border.all(color: palette.borderStrong, width: 1.5),
@@ -293,7 +293,7 @@ class _DietitianName extends ConsumerWidget {
   }
 }
 
-/// The theme's secondary pill (pale green, see AppTheme), drawn 40 tall to sit
+/// The theme's secondary pill (pale, see AppTheme), drawn 40 tall to sit
 /// inside a row. Its tap target is still at least 48 tall.
 class _TintButton extends StatelessWidget {
   const _TintButton({required this.label, required this.onPressed});
@@ -332,7 +332,7 @@ class _InviteCard extends ConsumerWidget {
         ?.value
         .fullName;
 
-    return Card(
+    return CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -376,11 +376,7 @@ class _InviteCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: palette.surfaceSubtle,
-                      foregroundColor: AppColors.textPrimary,
-                    ),
+                  child: OutlinedButton(
                     onPressed: () => _respond(context, ref, accept: false),
                     child: const Text('Reddet'),
                   ),
@@ -428,9 +424,12 @@ class _ComingSoon extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'YAKINDA',
-          style: text.labelSmall?.copyWith(color: palette.textMuted),
+        Semantics(
+          header: true,
+          child: Text(
+            'Yakında',
+            style: text.headlineSmall?.copyWith(color: palette.ink),
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text('Diyetisyen bul: sana uygun diyetisyeni kendin seç.', style: body),

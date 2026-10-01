@@ -53,8 +53,8 @@ void main() {
     );
     // Column 2 and 3 of each group share an edge, the energy line too.
     for (final column in [
-      ['BOY', 'ALERJİ / HASSASİYET', 'AKTİVİTE KATSAYISI'],
-      ['GÜNCEL KİLO', 'KRONİK RAHATSIZLIK', 'GÜNLÜK HEDEF'],
+      ['Boy', 'Alerji / hassasiyet', 'Aktivite katsayısı'],
+      ['Güncel kilo', 'Kronik rahatsızlık', 'Günlük hedef'],
     ]) {
       expect({for (final l in column) left(t, label(l))}, hasLength(1));
     }
@@ -66,9 +66,9 @@ void main() {
       const Size(412, 2400),
       const ClientDetailScreen(clientId: 'c1'),
     );
-    expect(left(t, label('YAŞ')), left(t, label('GÜNCEL KİLO')));
-    expect(left(t, label('BOY')), left(t, label('HEDEF')));
-    expect(left(t, label('BMH')), left(t, label('GÜNLÜK HEDEF')));
+    expect(left(t, label('Yaş')), left(t, label('Güncel kilo')));
+    expect(left(t, label('Boy')), left(t, label('Hedef')));
+    expect(left(t, label('BMH')), left(t, label('Günlük hedef')));
   });
 
   testWidgets('the intake form sits on one grid, fields one height', (t) async {
@@ -141,7 +141,11 @@ void main() {
     expect(pill.left - title.right, inInclusiveRange(0, 24));
   });
 
-  testWidgets('"Vazgeç" is grey next to a red confirm', (t) async {
+  // Black does the acting (#135): cancel is an Ink text action beside the
+  // red confirm, never green.
+  testWidgets('"Vazgeç" is an Ink text action next to a red confirm', (
+    t,
+  ) async {
     t.view.devicePixelRatio = 1;
     t.view.physicalSize = const Size(1600, 1000);
     addTearDown(t.view.reset);
@@ -149,12 +153,12 @@ void main() {
     await t.pumpAndSettle();
     await t.tap(find.text('Sıfırla'));
     await t.pumpAndSettle();
-    final cancel = t.widget<TextButton>(
-      find.widgetWithText(TextButton, 'Vazgeç'),
+    final label = t.widget<RichText>(
+      find.descendant(
+        of: find.widgetWithText(TextButton, 'Vazgeç'),
+        matching: find.byType(RichText),
+      ),
     );
-    expect(
-      cancel.style?.foregroundColor?.resolve(const <WidgetState>{}),
-      AppColors.textSecondary,
-    );
+    expect(label.text.style?.color, AppColors.ink);
   });
 }

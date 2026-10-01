@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 enum AppDensityProfile { comfortable, compact }
 
-/// Metrics that differ between touch layouts and dense wide-screen layouts.
+/// Metrics that differ between touch layouts and dense pointer layouts.
 ///
 /// Colors, font families and semantic meanings deliberately do NOT live here:
 /// they are identical on both sides, and that is what makes the two apps read
@@ -12,6 +13,8 @@ class AppDensity extends ThemeExtension<AppDensity> {
   const AppDensity({
     required this.profile,
     required this.pagePadding,
+    required this.cardPadding,
+    required this.sectionGap,
     required this.cardRadius,
     required this.controlRadius,
     required this.controlHeight,
@@ -20,34 +23,55 @@ class AppDensity extends ThemeExtension<AppDensity> {
     required this.avatarSize,
   });
 
-  /// Touch layouts: the client app, and the dietitian panel on phones.
+  /// Touch: the client app, and the panel on phones and tablets. HIG's iOS
+  /// sizes with 48 px targets (#135).
   static const comfortable = AppDensity(
     profile: AppDensityProfile.comfortable,
     pagePadding: 20,
-    cardRadius: 20,
-    controlRadius: 14,
+    cardPadding: 20,
+    sectionGap: 32,
+    cardRadius: 24,
+    controlRadius: 12,
     controlHeight: 48,
     inputHeight: 52,
     rowHeight: 72,
     avatarSize: 40,
   );
 
-  /// The dietitian panel on wide screens, where a screenful of clients matters
-  /// more than air. Cards are rounder than the controls since direction B
-  /// (PLANNING #133): 10 read as a business form next to the pill buttons.
+  /// The panel in a computer browser (#135): HIG's macOS sizes, a draft Can
+  /// judges on the real panel.
   static const compact = AppDensity(
     profile: AppDensityProfile.compact,
     pagePadding: 24,
+    cardPadding: 16,
+    sectionGap: 24,
     cardRadius: 16,
     controlRadius: 8,
-    controlHeight: 36,
-    inputHeight: 38,
-    rowHeight: 44,
+    controlHeight: 32,
+    inputHeight: 32,
+    rowHeight: 40,
     avatarSize: 28,
   );
 
+  /// Density by input, not width (#135): compact only in a browser on
+  /// Windows, macOS or Linux. Flutter's web engine reports an iPad's Safari
+  /// as iOS when it has touch points.
+  static AppDensity forPlatform({
+    bool isWeb = kIsWeb,
+    TargetPlatform? platform,
+  }) {
+    final target = platform ?? defaultTargetPlatform;
+    final pointer =
+        target == TargetPlatform.windows ||
+        target == TargetPlatform.macOS ||
+        target == TargetPlatform.linux;
+    return isWeb && pointer ? compact : comfortable;
+  }
+
   final AppDensityProfile profile;
   final double pagePadding;
+  final double cardPadding;
+  final double sectionGap;
   final double cardRadius;
   final double controlRadius;
   final double controlHeight;
@@ -61,6 +85,8 @@ class AppDensity extends ThemeExtension<AppDensity> {
   AppDensity copyWith({
     AppDensityProfile? profile,
     double? pagePadding,
+    double? cardPadding,
+    double? sectionGap,
     double? cardRadius,
     double? controlRadius,
     double? controlHeight,
@@ -71,6 +97,8 @@ class AppDensity extends ThemeExtension<AppDensity> {
     return AppDensity(
       profile: profile ?? this.profile,
       pagePadding: pagePadding ?? this.pagePadding,
+      cardPadding: cardPadding ?? this.cardPadding,
+      sectionGap: sectionGap ?? this.sectionGap,
       cardRadius: cardRadius ?? this.cardRadius,
       controlRadius: controlRadius ?? this.controlRadius,
       controlHeight: controlHeight ?? this.controlHeight,

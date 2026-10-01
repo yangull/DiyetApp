@@ -3,82 +3,68 @@
 > Where the project stands and what is waiting on whom. Rewrite this file (don't append)
 > at the end of a session. Decisions live in `PLANNING.md`; open questions in
 > `QUESTIONS.md`; traps in `CLAUDE.md` ("Gotchas"); vocabulary in `CONTEXT.md`.
-> Updated 1 October 2026 (evening).
+> Updated 1 October 2026 (night).
 
 ## Where things stand
 
 - Phase 0 is done (auth, invites, real client list, interview demo on fake data; money UI
   hidden, P6).
-- **Visual redesign from zero, decided and planned; no code yet** (PLANNING #134–#135).
-  - Survives: the safeguards (AI-draft marking, approval gate, no money UI, Turkish copy
-    with sen/siz, labelled actions) and the honesty, safety and access rules listed in
-    #134, including how weight may be named in copy.
-  - **Style: Bevel.** Its DESIGN.md is in `docs/design/2026-10-01-bevel/DESIGN.md`,
-    verbatim. It describes a marketing website, so #135 adapts it: HIG type sizes and
-    44/48 touch targets, Bevel's character (white canvas, pale borderless cards, 600
-    headings, grey supporting text), black pill buttons with one accent, measured red,
-    amber and AI-draft violet, a solid floating tab bar, panel density by input.
-  - **Font: Alpino** (Fontshare). Turkish complete, licence allows apps, **no tabular
-    figures**: numbers that must line up get fixed-width, right-aligned slots.
-  - Still open: accent hue green vs blue (C36) and sky gradient vs flat (C40), both
-    picked on the canvas; dark mode (C43); density details (C44); Alpino in artifacts
-    (C45).
-- The code still ships Sade/direction B. `docs/design-system.md` describes it until the
-  theme slice; the target goes into `docs/design-system-next.md` first.
-- Direction B's rollout is **paused**. B1 and B2 (Genel Bakış) are committed and pushed;
-  their core widgets (`SectionLabel`, `ActionRow`, `PersonAvatar`) and screen states are
-  code to reuse. The 24 Sep Randevular agenda is in `git stash` (`stash@{0}` today; find
-  it by its message "Randevular agenda (WIP, 24 Sep)").
-- Tests at the last code commit: core 21, client 18, panel 195.
+- **The redesign is coded** (PLANNING #134–#135, `docs/design-system.md`). Both apps
+  and the panel demo now ship "Bevel adapted for an app":
+  - Alpino from its variable file (Figtree only for the plan PDF), HIG type sizes.
+  - White canvas with Cloud Card cards (core `CloudCard`), black pill buttons, Ink text
+    actions, and green only for progress, "approved" and data.
+  - Red #B43622, amber #8F5F00, AI-draft violet #514196, one grey #606266, and overlays
+    capped at 8 %.
+  - A floating white capsule bottom bar in both apps.
+  - Panel density by input: compact only in a computer browser. Rail vs bottom bar still
+    switches by width.
+- Decided by Can on 1 Oct 2026:
+  - Accent green (was C36) and a flat Bugün top (was C40).
+  - The copy study and the Bugün canvas (old slices 2–3) were skipped.
+  - The green "Onaylı" pill, the one darker grey, and the wording of rules 9 and 11.
+  - The compact panel scale is coded as drafted; Can judges it on the real panel.
+- Checked:
+  - Analyze clean. Tests: core 25, client 18, panel 197.
+  - Alpino weights render correctly on the Pixel 8a emulator (panel demo).
+  - A subagent reviewed the doc and the code; all its findings were fixed or recorded
+    (C47).
+- Captures: `C:\Users\jhana\Pictures\Wellkit revamp\2026-10-01 Bevel theme\` and
+  `…\2026-10-01 Bevel review fixes\`.
+- Direction B's 24 Sep Randevular agenda is still in `git stash` ("Randevular agenda (WIP,
+  24 Sep)"); it predates the redesign, so treat it as reference, not code to pop.
 
-## Next steps (the redesign plan, one slice per step)
+## Next steps
 
-Every slice: small; `dart run melos run analyze` and `… test` when code changes; a
-subagent review; results shown to Can (an artifact page or `C:\Users\jhana\Pictures\`,
-since chat images don't reach Can); commit only on Can's word; push only on "push".
-
-1. **Design system target (docs, no code).** Write `docs/design-system-next.md` from
-   the DESIGN.md and PLANNING #134–#135: the HIG type scale in Alpino (touch) plus a
-   compact draft for the panel (C44), spacing, radii, the black pill button, the darker
-   grey for text on Cloud Card, a new red and amber, the AI-draft violet (re-measure
-   #514196 against Bevel's palette), both accent candidates (C36), every colour
-   measured (WCAG AA and HIG, stricter wins), light only (C43). Rewrite rule 15's
-   checklist and state each numbered rule's status as in #134. Then install it as a
-   Design System artifact; ask C45 before uploading Alpino to it.
-2. **Copy study (docs).** Hooks, empty states and buttons from Diyetkolik, Hiwell,
-   NutriMobi, Diyetisyen Oflaz and YAZIO's Turkish version, quoted with sources, into
-   `docs/research/`; client app only, filtered by #134's weight rule. Store listings are
-   the first source; ask Can for screenshots of empty screens.
-3. **Bugün canvas.** A Design artifact on that system: phone (iPhone and Android) and
-   wide artboards; Bugün with a plan (main, labelled not built yet) and a new client's
-   setup (today's flow, C23); green vs blue (C36), gradient vs flat (C40). Can picks;
-   ask C43 again.
-4. **Flutter theme.** Alpino into `packages/core/fonts/` with its `FFL.txt` (no
-   subsetting or conversion). Source: `/mnt/c/Users/jhana/Desktop/Alpino_Complete.zip`,
-   `Fonts/OTF/` statics and `Fonts/TTF/Alpino-Variable.ttf`. Note: the variable file's
-   default instance is Black (900) and its named Regular is ~422, so check how Flutter's
-   `FontWeight` maps onto it before choosing statics vs variable. New tokens in core's
-   theme, font and contrast tests updated, Figtree and Fraunces removed,
-   `design-system-next.md` replaces `design-system.md`. Check on the emulator.
-5. **Flutter screens:** Bugün as drawn, then the client app's other screens, then the
-   panel (density by input, C44), screen by screen.
-6. Outside the redesign, unchanged: data features (weigh-ins first; until step 4 they
-   use today's design-system.md), C17 dev project + CI + RLS tests; DT3 and C13 remain
-   Can's most blocking product answers.
+1. **Web check:** run the panel with `flutter run -d web-server` and open it in the
+   Windows browser. Confirm Alpino weights (headings must not look Black) and judge the
+   compact scale (13 px body, 32 px controls). Adjust `AppDensity.compact` /
+   `AppTypography` if Can wants it larger.
+2. **Real client app on the emulator:** the emulator has no DNS (Supabase host lookup
+   fails). Toggle Wi-Fi in the emulator or cold-boot it, then check Bugün, Profil and the
+   login on the phone.
+3. **Artifact pages:**
+   - Add `CloudCard` / `inset` to the private Design System artifact
+     (https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV).
+   - Refresh the panel tour (still pre-Sade).
+4. **Screen polish found on the captures:** the Danışanlar filter field still floats its
+   label inside the border (the doc wants the label above, via a core wrapper), and
+   number columns other than the agenda times (kg, kcal, measurements) don't use fixed
+   slots yet (`numberSlotWidth` in core).
+5. Outside the redesign, unchanged: data features (weigh-ins first), C17 dev project + CI +
+   RLS tests; DT3 and C13 remain Can's most blocking product answers.
 
 ## Pages (Claude artifacts)
 
 | Page | For | Link |
 |---|---|---|
-| Genel Bakış revamp canvas | Direction B proposals and results (history now) | https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4 |
-| Wellkit design system | Sade tokens (history once the new system lands) | https://claude.ai/artifact/GKBbEfa4zHLzjQtQ6ZZpYh |
+| Wellkit Bevel system | The design system now in the code (private: Alpino's licence) | https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV |
+| Genel Bakış revamp canvas | Direction B proposals and results (history) | https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4 |
+| Wellkit design system (Sade) | History | https://claude.ai/artifact/GKBbEfa4zHLzjQtQ6ZZpYh |
 | Redesign canvas (23 Sep) | The three older directions | https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn |
 | Interview guide | Can and Kadir during interviews | https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB |
 | Project overview (EN / TR) | The whole project | https://claude.ai/artifact/AoDqhG54mg7jngZ3Ensj6y · https://claude.ai/artifact/La1Na7aVy1weCr9VpTRLad |
 | Panel tour | 11 demo screens (**pre-Sade**, refresh after the redesign) | https://claude.ai/code/artifact/002e0c24-01e2-4d49-a693-6261bcb414de |
-
-Captures: `C:\Users\jhana\Pictures\Wellkit revamp\`. Device captures:
-`apps/dietitian_panel/test/device_captures_test.dart` (tagged, see its header comment).
 
 ## Sources and how to read them
 
@@ -86,13 +72,13 @@ Captures: `C:\Users\jhana\Pictures\Wellkit revamp\`. Device captures:
   read single pages with WebFetch only; values come only from the DESIGN.md file Can
   provides.
 - Apple's HIG pages come as exact text from
-  `https://developer.apple.com/tutorials/data/design/human-interface-guidelines/<page>.json`
-  (typography, accessibility, buttons, tab-bars, materials, color, dark-mode, layout).
-- Font checks: `uv run --with fonttools python …` (cmap for Turkish glyphs, GSUB for
-  `tnum`, `fvar` for axes, `hhea` and glyph bounds for line height).
+  `https://developer.apple.com/tutorials/data/design/human-interface-guidelines/<page>.json`.
+- Font checks: `uv run --with fonttools python …`. Alpino's zip:
+  `/mnt/c/Users/jhana/Desktop/Alpino_Complete.zip`.
 
 ## What Can needs to do
 
-- Answer C44 (density details) and C45 (Alpino in a private artifact) before slice 1's
-  artifact; C36, C40 and C43 come up on the canvas.
-- Still open from before: C23 (interaction half), DT3, C13, C21, C17, DT7, C4, C46.
+- The web check (next step 1) and fixing the emulator's network (step 2).
+- C47 (tablets in "desktop site" mode), when the panel goes to tablets.
+- Still open from before: C43 (dark mode), C23 (interaction half), DT3, C13, C21, C17,
+  DT7, C4, C46.

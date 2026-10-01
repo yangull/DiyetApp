@@ -1,169 +1,202 @@
 import 'package:flutter/material.dart';
 
-/// Palette "Sade" (PLANNING #133), light theme: neutral greys, white cards and
-/// one accent, the brand green, for actions and progress only. Every value below was measured
-/// against WCAG AA (4.5:1 for text) and WCAG 1.4.11 (3:1 for graphics and
-/// interactive boundaries); the ratios are recorded next to each token and
-/// checked by `core_test.dart`. Do not edit a value without re-measuring it.
-///
-/// There is deliberately no separate `success` color: a distinct success green
-/// sat at 1.19:1 against [primary], which is indistinguishable. Approved states
-/// use [primary]. Every other color in the app carries a meaning.
+/// Bevel adapted for an app (PLANNING #134–#135, `docs/design-system.md`),
+/// light theme: a white canvas, borderless Cloud Card surfaces, black actions,
+/// one green accent for progress, "approved" and data, and three status
+/// colours with one meaning each. Every value was measured against WCAG AA
+/// (4.5:1 for all text, 3:1 for graphics and input boundaries), also on a
+/// Cloud Card under the 8 % Ink press overlay (`#DBE0E7`); the ratios are
+/// recorded next to each token and checked by `core_test.dart`. Do not edit a
+/// value without re-measuring it.
 abstract final class AppColors {
-  /// App background: a neutral light grey that white cards lift off without
-  /// borders. Text, brand and status colours keep AA on it (14.98 / 7.30 /
-  /// 5.04 for the three text tokens, 4.84 for [primary]).
-  static const ground = Color(0xFFF2F4F3);
+  /// Page background, app bar, bottom bar, sheets, dialogs, input fill.
+  static const canvas = Color(0xFFFFFFFF);
 
-  /// Card and sheet background.
-  static const surface = Color(0xFFFFFFFF);
+  /// Cards and inset surfaces: no border, no shadow. 1.14:1 on [canvas]; the
+  /// change of tone is the separation.
+  static const cloudCard = Color(0xFFEBF0F8);
 
-  /// Table headers, progress tracks, neutral status pills and disabled
-  /// secondary buttons.
-  /// [primary] is 4.58:1 here, [primaryHover] 6.51:1; [borderStrong] is below
-  /// 3:1, so no essential boundary sits on it.
-  static const surfaceSubtle = Color(0xFFEBEEEC);
+  /// Headings, body text, icons and text actions. 15.71:1 on [canvas],
+  /// 13.73:1 on [cloudCard], 11.84:1 on a pressed Cloud Card.
+  static const ink = Color(0xFF222326);
 
-  /// Dividers inside a card. 1.24:1 on white: never used to convey state.
-  /// Cards themselves have no border; the ground separates them.
-  static const borderSubtle = Color(0xFFE4E8E6);
+  /// The filled button and the selected chip. Its label is [cloudCard],
+  /// 14.21:1.
+  static const charcoal = Color(0xFF1F2025);
 
-  /// Input and control boundaries. 3.51:1 on [surface], 3.18:1 on [ground].
-  static const borderStrong = Color(0xFF7E8C86);
+  /// Pressed or hovered filled button. [cloudCard] on it is 10.52:1.
+  static const charcoalHover = Color(0xFF35363C);
 
-  /// 16.54:1 on [surface], 14.98:1 on [ground], 14.16:1 on [surfaceSubtle].
-  static const textPrimary = Color(0xFF16211D);
+  /// All supporting text, on any surface: 6.11:1 on [canvas], 5.34:1 on
+  /// [cloudCard], 4.61:1 on a pressed Cloud Card. Bevel's own grey (#747679)
+  /// fails on its Cloud Card (3.98:1).
+  static const textSecondary = Color(0xFF606266);
 
-  /// 7.30:1 on [ground], 6.90:1 on [surfaceSubtle].
-  static const textSecondary = Color(0xFF46534D);
+  /// Input and checkbox boundaries: 3.65:1 on [canvas], 3.19:1 on
+  /// [cloudCard]. Inputs never sit inside a pressable area (2.75:1 there).
+  static const borderStrong = Color(0xFF83868B);
 
-  /// 5.56:1 on [surface], 5.04:1 on [ground], 4.76:1 on [surfaceSubtle].
-  static const textMuted = Color(0xFF5F6B64);
+  /// Dividers between touching rows. 1.24:1: never carries state.
+  static const divider = Color(0xFFE3E7EE);
 
-  /// The single brand hue. 5.35:1 both ways against white, so it works as
-  /// button fill and as text. Also means "approved".
-  static const primary = Color(0xFF18795C);
+  /// Progress fills, "approved" and the one data colour. 5.35:1 on [canvas],
+  /// 4.67:1 on [cloudCard]; white on it 5.35:1. Not an action colour.
+  static const accent = Color(0xFF18795C);
 
-  /// Pressed and hovered state, and text on tinted fills. 7.61:1 against
-  /// white, 6.53:1 on [primaryTint].
-  static const primaryHover = Color(0xFF135F49);
+  /// Accent text on [accentTint] (6.60:1): the "Onaylı" pill.
+  static const accentStrong = Color(0xFF135F49);
 
-  static const onPrimary = Color(0xFFFFFFFF);
+  static const accentTint = Color(0xFFE4F2EC);
 
-  /// The tinted fill of a secondary action ("Düzenle", "Yaz"): the one place
-  /// the accent appears as a background. [primaryHover] on it is 6.53:1.
-  static const primaryTint = Color(0xFFE3F1EA);
+  /// Waiting, needs attention. 5.52:1 on [canvas], 4.82:1 on [cloudCard],
+  /// 4.97:1 on [warningTint].
+  static const warning = Color(0xFF8F5F00);
 
-  /// Pending review, needs attention. 5.92:1 on [surface], 5.36:1 on [ground].
-  static const warning = Color(0xFF8A5A0B);
+  static const warningTint = Color(0xFFFFF2D6);
 
-  /// Fill behind [warning] text. [warning] on it is 5.19:1.
-  static const warningTint = Color(0xFFFBEFD5);
+  /// Failed, rejected, destructive. 6.01:1 on [canvas], 5.26:1 on
+  /// [cloudCard] and [errorTint]; white on it 6.01:1.
+  static const error = Color(0xFFB43622);
 
-  /// Rejected and failures. 7.56:1 on [surface], 6.85:1 on [ground].
-  static const error = Color(0xFFA32017);
+  static const errorTint = Color(0xFFFDECEB);
 
   /// Reserved exclusively for AI-drafted, not-yet-approved content, so that
-  /// violet always means exactly that. 8.25:1 on [surface].
+  /// violet always means exactly that. 8.25:1 on [canvas], 7.21:1 on
+  /// [cloudCard], 7.01:1 on [aiDraftTint].
   static const aiDraft = Color(0xFF514196);
 
-  /// Fill behind [aiDraft] text in a status pill. [aiDraft] on it is 7.01:1.
   static const aiDraftTint = Color(0xFFEEEBF6);
+
+  /// Star shapes only, always beside the rating number in [ink] (1.53:1).
+  static const gold = Color(0xFFFFCA00);
+
+  /// Text on [accent] and [error] fills.
+  static const onFilled = Color(0xFFFFFFFF);
 }
 
 /// Tokens Material's [ColorScheme] has no slot for. Read with `context.palette`.
 @immutable
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
-    required this.ground,
-    required this.surfaceSubtle,
-    required this.borderSubtle,
-    required this.borderStrong,
+    required this.canvas,
+    required this.cloudCard,
+    required this.ink,
     required this.textSecondary,
-    required this.textMuted,
-    required this.primaryHover,
-    required this.primaryTint,
+    required this.borderStrong,
+    required this.divider,
+    required this.accent,
+    required this.accentStrong,
+    required this.accentTint,
     required this.warning,
     required this.warningTint,
+    required this.error,
+    required this.errorTint,
     required this.aiDraft,
     required this.aiDraftTint,
+    required this.inset,
   });
 
   static const light = AppPalette(
-    ground: AppColors.ground,
-    surfaceSubtle: AppColors.surfaceSubtle,
-    borderSubtle: AppColors.borderSubtle,
-    borderStrong: AppColors.borderStrong,
+    canvas: AppColors.canvas,
+    cloudCard: AppColors.cloudCard,
+    ink: AppColors.ink,
     textSecondary: AppColors.textSecondary,
-    textMuted: AppColors.textMuted,
-    primaryHover: AppColors.primaryHover,
-    primaryTint: AppColors.primaryTint,
+    borderStrong: AppColors.borderStrong,
+    divider: AppColors.divider,
+    accent: AppColors.accent,
+    accentStrong: AppColors.accentStrong,
+    accentTint: AppColors.accentTint,
     warning: AppColors.warning,
     warningTint: AppColors.warningTint,
+    error: AppColors.error,
+    errorTint: AppColors.errorTint,
     aiDraft: AppColors.aiDraft,
     aiDraftTint: AppColors.aiDraftTint,
+    inset: AppColors.cloudCard,
   );
 
-  final Color ground;
-  final Color surfaceSubtle;
-  final Color borderSubtle;
-  final Color borderStrong;
+  final Color canvas;
+  final Color cloudCard;
+  final Color ink;
   final Color textSecondary;
-  final Color textMuted;
-  final Color primaryHover;
-  final Color primaryTint;
+  final Color borderStrong;
+  final Color divider;
+  final Color accent;
+  final Color accentStrong;
+  final Color accentTint;
   final Color warning;
   final Color warningTint;
+  final Color error;
+  final Color errorTint;
   final Color aiDraft;
   final Color aiDraftTint;
 
+  /// The pale fill for something set into the surface it sits on (a neutral
+  /// pill, an avatar disc, a progress track, a selected row): Cloud Card on
+  /// the canvas, the canvas inside a Cloud Card. `CloudCard` swaps it, so a
+  /// widget never has to know where it sits.
+  final Color inset;
+
   @override
   AppPalette copyWith({
-    Color? ground,
-    Color? surfaceSubtle,
-    Color? borderSubtle,
-    Color? borderStrong,
+    Color? canvas,
+    Color? cloudCard,
+    Color? ink,
     Color? textSecondary,
-    Color? textMuted,
-    Color? primaryHover,
-    Color? primaryTint,
+    Color? borderStrong,
+    Color? divider,
+    Color? accent,
+    Color? accentStrong,
+    Color? accentTint,
     Color? warning,
     Color? warningTint,
+    Color? error,
+    Color? errorTint,
     Color? aiDraft,
     Color? aiDraftTint,
+    Color? inset,
   }) {
     return AppPalette(
-      ground: ground ?? this.ground,
-      surfaceSubtle: surfaceSubtle ?? this.surfaceSubtle,
-      borderSubtle: borderSubtle ?? this.borderSubtle,
-      borderStrong: borderStrong ?? this.borderStrong,
+      canvas: canvas ?? this.canvas,
+      cloudCard: cloudCard ?? this.cloudCard,
+      ink: ink ?? this.ink,
       textSecondary: textSecondary ?? this.textSecondary,
-      textMuted: textMuted ?? this.textMuted,
-      primaryHover: primaryHover ?? this.primaryHover,
-      primaryTint: primaryTint ?? this.primaryTint,
+      borderStrong: borderStrong ?? this.borderStrong,
+      divider: divider ?? this.divider,
+      accent: accent ?? this.accent,
+      accentStrong: accentStrong ?? this.accentStrong,
+      accentTint: accentTint ?? this.accentTint,
       warning: warning ?? this.warning,
       warningTint: warningTint ?? this.warningTint,
+      error: error ?? this.error,
+      errorTint: errorTint ?? this.errorTint,
       aiDraft: aiDraft ?? this.aiDraft,
       aiDraftTint: aiDraftTint ?? this.aiDraftTint,
+      inset: inset ?? this.inset,
     );
   }
 
   @override
   AppPalette lerp(AppPalette? other, double t) {
     if (other == null) return this;
+    Color l(Color a, Color b) => Color.lerp(a, b, t)!;
     return AppPalette(
-      ground: Color.lerp(ground, other.ground, t)!,
-      surfaceSubtle: Color.lerp(surfaceSubtle, other.surfaceSubtle, t)!,
-      borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
-      borderStrong: Color.lerp(borderStrong, other.borderStrong, t)!,
-      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
-      textMuted: Color.lerp(textMuted, other.textMuted, t)!,
-      primaryHover: Color.lerp(primaryHover, other.primaryHover, t)!,
-      primaryTint: Color.lerp(primaryTint, other.primaryTint, t)!,
-      warning: Color.lerp(warning, other.warning, t)!,
-      warningTint: Color.lerp(warningTint, other.warningTint, t)!,
-      aiDraft: Color.lerp(aiDraft, other.aiDraft, t)!,
-      aiDraftTint: Color.lerp(aiDraftTint, other.aiDraftTint, t)!,
+      canvas: l(canvas, other.canvas),
+      cloudCard: l(cloudCard, other.cloudCard),
+      ink: l(ink, other.ink),
+      textSecondary: l(textSecondary, other.textSecondary),
+      borderStrong: l(borderStrong, other.borderStrong),
+      divider: l(divider, other.divider),
+      accent: l(accent, other.accent),
+      accentStrong: l(accentStrong, other.accentStrong),
+      accentTint: l(accentTint, other.accentTint),
+      warning: l(warning, other.warning),
+      warningTint: l(warningTint, other.warningTint),
+      error: l(error, other.error),
+      errorTint: l(errorTint, other.errorTint),
+      aiDraft: l(aiDraft, other.aiDraft),
+      aiDraftTint: l(aiDraftTint, other.aiDraftTint),
+      inset: l(inset, other.inset),
     );
   }
 }

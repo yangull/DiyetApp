@@ -31,7 +31,7 @@ class SettingsScreen extends ConsumerWidget {
             style: text.bodyMedium?.copyWith(color: palette.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xl),
-          Card(
+          CloudCard(
             child: Column(
               children: [
                 SwitchListTile(
@@ -42,7 +42,7 @@ class SettingsScreen extends ConsumerWidget {
                     'Danışan randevusunu unutmasın diye akşamdan hatırlatılır.',
                   ),
                 ),
-                Divider(height: 1, color: palette.borderSubtle),
+                Divider(height: 1, color: palette.divider),
                 SwitchListTile(
                   value: r.hoursBefore,
                   onChanged: (v) => notifier.toggleReminder('hoursBefore', v),
@@ -50,7 +50,7 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: const Text('Son dakika iptallerini azaltır.'),
                 ),
                 if (kShowMoney) ...[
-                  Divider(height: 1, color: palette.borderSubtle),
+                  Divider(height: 1, color: palette.divider),
                   SwitchListTile(
                     value: r.paymentReminder,
                     onChanged: (v) => notifier.toggleReminder('payment', v),
@@ -75,7 +75,7 @@ class SettingsScreen extends ConsumerWidget {
             'Bu ekran görüşme için hazırlanmıştır. Hangi hatırlatmaların işinize '
             'yaradığını, hangilerinin danışanı rahatsız ettiğini sizden '
             'öğrenmek istiyoruz.',
-            style: text.bodySmall?.copyWith(color: palette.textMuted),
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
         ],
       ),

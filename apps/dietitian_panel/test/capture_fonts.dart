@@ -13,12 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> loadAppFonts() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   const dir = '../../packages/core/fonts';
-  const files = [
-    'Figtree-Regular.ttf',
-    'Figtree-SemiBold.ttf',
-    'Figtree-Bold.ttf',
-  ];
-  for (final family in ['Figtree', 'packages/core/Figtree']) {
+  // One variable file: Flutter maps FontWeight onto its wght axis.
+  const files = ['Alpino-Variable.ttf'];
+  for (final family in ['Alpino', 'packages/core/Alpino']) {
     final loader = FontLoader(family);
     for (final file in files) {
       final bytes = File('$dir/$file').readAsBytesSync();
