@@ -3,85 +3,117 @@
 > Where the project stands and what is waiting on whom. Rewrite this file (don't append)
 > at the end of a session. Decisions live in `PLANNING.md`; open questions in
 > `QUESTIONS.md`; traps in `CLAUDE.md` ("Gotchas"); vocabulary in `CONTEXT.md`.
-> Updated 1 October 2026 (night).
+> Updated 1 October 2026 (late night).
 
 ## Where things stand
 
-- Phase 0 is done (auth, invites, real client list, interview demo on fake data; money UI
-  hidden, P6).
-- **The redesign is coded** (PLANNING #134–#135, `docs/design-system.md`). Both apps
-  and the panel demo now ship "Bevel adapted for an app":
-  - Alpino from its variable file (Figtree only for the plan PDF), HIG type sizes.
-  - White canvas with Cloud Card cards (core `CloudCard`), black pill buttons, Ink text
-    actions, and green only for progress, "approved" and data.
-  - Red #B43622, amber #8F5F00, AI-draft violet #514196, one grey #606266, and overlays
-    capped at 8 %.
-  - A floating white capsule bottom bar in both apps.
-  - Panel density by input: compact only in a computer browser. Rail vs bottom bar still
-    switches by width.
-- **Dark mode** (was C43, same night): both apps, "Sistem / Açık / Koyu" in Profil
-  (client, real panel) and Ayarlar (demo), saved on the device; measured dark palette in
-  `docs/design-system.md`.
-- Decided by Can on 1 Oct 2026:
-  - Accent green (was C36) and a flat Bugün top (was C40).
-  - The copy study and the Bugün canvas (old slices 2–3) were skipped.
-  - The green "Onaylı" pill, the one darker grey, and the wording of rules 9 and 11.
-  - The compact panel scale is coded as drafted; Can judges it on the real panel.
-- Checked:
-  - Analyze clean. Tests: core 25, client 18, panel 197.
-  - Alpino weights render correctly on the Pixel 8a emulator (panel demo).
-  - A subagent reviewed the doc and the code; all its findings were fixed or recorded
-    (C47).
-- Captures: `C:\Users\jhana\Pictures\Wellkit revamp\2026-10-01 Bevel theme\` and
-  `…\2026-10-01 Bevel review fixes\`.
-- Direction B's 24 Sep Randevular agenda is still in `git stash` ("Randevular agenda (WIP,
-  24 Sep)"); it predates the redesign, so treat it as reference, not code to pop.
+- **Phase 0 is done**: monorepo, EU Supabase, real auth in both apps, invites, the real
+  client list, and the interview demo on fake data (money UI hidden, P6).
+- **The redesign is done and pushed** (PLANNING #134–#135, `docs/design-system.md`):
+  - Bevel adapted for an app, Alpino, and a green accent.
+  - Black pill buttons, Cloud Card cards (core `CloudCard`) and a floating bottom bar.
+  - Panel density by input.
+  - **Dark mode** (Sistem / Açık / Koyu).
+  - Seen on the Pixel 8a, light and dark, with the real client app logged in.
+  - Commits `ff89fbe`, `3134b9b`, `2f67827`.
+- **Decided tonight**:
+  - Foundation before features: a dev Supabase project, CI and RLS tests (#136, was C17).
+  - Plans written by hand at launch, AI drafts later (P10, was C13).
+- **Tests**: core 28, client 18, panel 197; analyze clean.
+- The Codex worktree (`../dietician-app-codex`) has not been fast-forwarded to these
+  commits yet: `git -C ../dietician-app-codex merge --ff-only main`.
 
-## Next steps
+## To-do, in order
 
-1. **Web check:** run the panel with `flutter run -d web-server` and open it in the
-   Windows browser. Confirm Alpino weights (headings must not look Black), judge the
-   compact scale (13 px body, 32 px controls) and look at dark mode. Adjust `AppDensity.compact` /
-   `AppTypography` if Can wants it larger.
-2. **Real client app on the emulator:** the emulator has no DNS (Supabase host lookup
-   fails). Toggle Wi-Fi in the emulator or cold-boot it, then check Bugün, Profil and the
-   login on the phone.
-3. **Artifact pages:**
-   - Add `CloudCard` / `inset` to the private Design System artifact
-     (https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV).
-   - Refresh the panel tour (still pre-Sade).
-4. **Screen polish found on the captures:** the Danışanlar filter field still floats its
-   label inside the border (the doc wants the label above, via a core wrapper), and
-   number columns other than the agenda times (kg, kcal, measurements) don't use fixed
-   slots yet (`numberSlotWidth` in core).
-5. Outside the redesign, unchanged: data features (weigh-ins first), C17 dev project + CI +
-   RLS tests; DT3 and C13 remain Can's most blocking product answers.
+Every slice: small; plan mode for anything bigger than one screen; analyze + test; a
+subagent review; results shown to Can (artifact page or `C:\Users\jhana\Pictures\`);
+commit on Can's word, push on "push".
+
+### A. Close the redesign (small)
+
+1. **Web check (Can).** Panel demo at http://localhost:8080 (`flutter run -d web-server
+   … -t lib/main_demo.dart`). Do headings look right (not Black)? Is the compact size (13 px
+   text, 32 px buttons) too small? Does dark mode look right?
+2. **Artifacts.** Add dark mode, `CloudCard` and `inset` to the private Design System
+   artifact (https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV); refresh the panel tour
+   (pre-Sade screenshots).
+3. **Screen polish.**
+   - Field labels above the field: a core wrapper, starting with the Danışanlar filter.
+   - Fixed-width number slots (`numberSlotWidth`) for kg, kcal and the measurement
+     columns.
+   - The plan PDF still uses Figtree (Alpino's static files would fix it).
+
+### B. Foundation (#136): the next build
+
+4. **Dev Supabase project (Can, dashboard).** Free tier, EU region. Claude writes a
+   step-by-step wizard. Then push all migrations to it and copy the dashboard auth settings
+   (email confirmation, #21).
+5. **Two config files.** `env/dev.json` points at dev; a new gitignored `env/prod.json`
+   points at today's project. Document which one `flutter run` and Codemagic use.
+6. **CI.** A GitHub Actions workflow running `melos analyze` and `melos test` on every
+   push. On the private repo it uses free Actions minutes (2,000 a month).
+7. **RLS tests.** Prove that a client can't read another client's data, a dietitian
+   only sees their own clients, and the projections leak nothing (#90, #103). There is no
+   local Docker, so they run against the dev project; plan the approach first.
+
+### C. Phase 1 features (one slice each, plan mode first)
+
+8. **Weigh-ins and measurements** (P8). The client logs weight, the dietitian adds
+   measurements, both see a chart. P9 (hide numbers per client) applies. DT8 placeholder:
+   weight, waist, hip.
+9. **Plan editor + `diet_plans`** (P4, P10, #121–#123). Exchange list first, weekly,
+   copied from last week, written by hand. **Needs DT3.**
+10. **Meal ticks on Bugün** (P7). One tap per meal, time recorded, "Bu hafta 5/7 gün".
+    Needs plans.
+11. **Chat** (Supabase Realtime, P2).
+12. **Dietitian verification upload and file attachments** (#125).
+13. **Diyetisyen bul** (the marketplace listing). Needs C7 and C8.
+14. **Video:** choose an SDK (Agora / 100ms / Daily), then embed it.
+15. Later: AI drafts (P1, P10), then the AI-only tier (Phase 2).
+
+### D. Release prep (start early, it has waiting times)
+
+16. **Google Play.** A developer account ($25). New personal accounts need a **14-day
+    closed test with 12+ testers**, so start it as soon as one app is worth testing.
+17. **Apple.** Developer Program ($99/yr), then Codemagic for iOS builds (not set up yet).
+18. **Before any real user:**
+    - Privacy policy, health-data disclosure and KVKK texts (legal help).
+    - In-app account deletion (Q22), password reset and custom SMTP. Without SMTP,
+      confirmation emails only reach Supabase org members.
+
+## Waiting on Can (and Kadir)
+
+Most blocking first. Details in QUESTIONS.md.
+
+- **DT3**: which exchange table and values. Blocks the plan editor (to-do 9).
+- **C4**: when does B2B enter the roadmap? Does the pilot start with one company?
+- **C23**: should clients choose things themselves (foods, dietitian, goals), and where
+  first?
+- **C21**: how much plan editing on a phone?
+- **C14 / C15 / C16**: launch surfaces, what counts as a successful pilot, who runs
+  operations.
+- **C47**: tablets in "desktop site" mode; **C46**: the names rule.
+- **C6–C12**: marketplace flow details.
+- **§0**: inherited decisions to confirm or correct (I1, I3, I4, …).
+- **§2**: Kadir's questions. **DT8**: which measurements.
 
 ## Pages (Claude artifacts)
 
 | Page | For | Link |
 |---|---|---|
 | Wellkit Bevel system | The design system now in the code (private: Alpino's licence) | https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV |
-| Genel Bakış revamp canvas | Direction B proposals and results (history) | https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4 |
-| Wellkit design system (Sade) | History | https://claude.ai/artifact/GKBbEfa4zHLzjQtQ6ZZpYh |
-| Redesign canvas (23 Sep) | The three older directions | https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn |
 | Interview guide | Can and Kadir during interviews | https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB |
 | Project overview (EN / TR) | The whole project | https://claude.ai/artifact/AoDqhG54mg7jngZ3Ensj6y · https://claude.ai/artifact/La1Na7aVy1weCr9VpTRLad |
-| Panel tour | 11 demo screens (**pre-Sade**, refresh after the redesign) | https://claude.ai/code/artifact/002e0c24-01e2-4d49-a693-6261bcb414de |
+| Panel tour | 11 demo screens (**pre-Sade**, refresh: to-do 2) | https://claude.ai/code/artifact/002e0c24-01e2-4d49-a693-6261bcb414de |
+| History | Sade system, direction B canvas, 23 Sep directions | https://claude.ai/artifact/GKBbEfa4zHLzjQtQ6ZZpYh · https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4 · https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn |
+
+Captures: `C:\Users\jhana\Pictures\Wellkit revamp\` (Bevel theme, review fixes, dark mode).
 
 ## Sources and how to read them
 
-- styles.refero.design's robots.txt disallows Claude agents and its API has a bot check:
-  read single pages with WebFetch only; values come only from the DESIGN.md file Can
-  provides.
 - Apple's HIG pages come as exact text from
   `https://developer.apple.com/tutorials/data/design/human-interface-guidelines/<page>.json`.
 - Font checks: `uv run --with fonttools python …`. Alpino's zip:
   `/mnt/c/Users/jhana/Desktop/Alpino_Complete.zip`.
-
-## What Can needs to do
-
-- The web check (next step 1) and fixing the emulator's network (step 2).
-- C47 (tablets in "desktop site" mode), when the panel goes to tablets.
-- Still open from before: C23 (interaction half), DT3, C13, C21, C17,
-  DT7, C4, C46.
+- refero.design: single pages with WebFetch only; values only from DESIGN.md files Can
+  provides.

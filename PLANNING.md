@@ -4,8 +4,8 @@
 > open. Not a session log — history lives in git (`git log -p PLANNING.md`).
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
-> **Decision IDs are stable.** Product decisions are P1–P9; technical decisions keep
-> their original numbers (#1–#135). Code comments cite them as `PLANNING.md #N` (older
+> **Decision IDs are stable.** Product decisions are P1–P10; technical decisions keep
+> their original numbers (#1–#136). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
 > Last restructured: 23 September 2026.
@@ -77,6 +77,10 @@ with a way to reopen it.
 - **P9** **The dietitian can hide numbers from one client** (Can, 23 Sep 2026): the week
   count, the weight chart and kcal can be turned off per client, e.g. for an
   eating-disorder history. Kcal is off for clients by default.
+- **P10** **Plans are written by hand at launch** (Can, 1 Oct 2026, was C13). The first
+  release ships the real plan editor without AI; AI drafts (P1's flow, an Edge Function
+  calling Claude) follow once the editor works and Kadir and the dietitians have tried
+  drafts. P1 still governs how AI drafts behave when they arrive.
 
 ### 2.1 What the dietitian interviews said
 
@@ -146,6 +150,11 @@ C2). Each ID names the interview question it came from.
   iOS `PRODUCT_BUNDLE_IDENTIFIER`). The panel is **`com.wellkit.panel`** (Can,
   23 Sep 2026; its `android/` and `ios/` runners were generated with it, #38).
 - **No Mac:** iOS builds go through **Codemagic** (cloud CI).
+- **#136** **A separate Supabase dev project** (Can, 1 Oct 2026, was C17): free tier, EU
+  region, the same migrations pushed to both. Development, test signups and CI point at
+  dev; the current project `jpkvulcszsutacritttk` becomes the live one. Built before
+  any new health-data feature, together with CI and RLS tests ("foundation first",
+  Can, 1 Oct 2026).
 - **Agent skills** (#85): mattpocock-skills configured. **GitHub Issues is the tracker**
   (confirmed 23 Sep 2026); triage and `wayfinder:*` labels exist on the repo. Domain
   docs are single-context (`CONTEXT.md`, `docs/adr/`).
@@ -549,7 +558,7 @@ is built to be corrected, not admired.
 
 | Layer | Choice | Note |
 |---|---|---|
-| Client app | Flutter (iOS + Android) | |
+| Client app | Bevel redesign with dark mode (#134–#135, `docs/design-system.md`). Login → Bugün (date and greeting, any invite first, a Başlangıç card with a progress bar and three real steps, one Yakında section) and Profil (summary, Hedeflerim on its own screen, Görünüm: Sistem / Açık / Koyu). All copy in "sen". No plan, meal log, weigh-in or chat yet. Seen on the Pixel 8a, light and dark. |
 | Dietitian panel | Flutter (web, iOS, Android) | Shared `core` package; its own store app |
 | Backend | Supabase, EU (eu-central-1) | Auth, Postgres, Storage, Realtime. EU for KVKK — EU hosting alone is not KVKK compliance |
 | AI calls | Supabase Edge Functions | LLM keys never in the client |
@@ -559,19 +568,19 @@ is built to be corrected, not admired.
 
 ---
 
-## 5. Current state (1 Oct 2026)
+## 5. Current state (1 Oct 2026, night)
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green (core 21, client 18, panel 195). No CI yet. Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
+| Monorepo, tooling | Done. Analyzer clean, all tests green (core 28, client 18, panel 197). No CI yet (next, #136). Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
-| Client app | "Sade" design (#133). Login → Bugün (date and greeting, any invite first, a white Başlangıç card with a progress bar and three real steps, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |
-| Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). Phone layout below 600 dp: bottom bar, comfortable density, stacked client rows (#38). Takes Sade through the shared theme; not yet checked on the emulator (needs an approved dietitian account, #35). |
-| Interview demo | Fully Sade screen by screen (24 Sep 2026, #133); below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
+| Client app | Bevel redesign with dark mode (#134–#135, `docs/design-system.md`). Login → Bugün (date and greeting, any invite first, a Başlangıç card with a progress bar and three real steps, one Yakında section) and Profil (summary, Hedeflerim on its own screen, Görünüm: Sistem / Açık / Koyu). All copy in "sen". No plan, meal log, weigh-in or chat yet. Seen on the Pixel 8a, light and dark. |
+| Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only), Profil with the theme choice. Bevel theme; compact density only in a computer browser, rail vs bottom bar by width (#135). Not yet checked with an approved dietitian account (#35). |
+| Interview demo | All screens in the Bevel theme and dark mode; 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" (with Görünüm) at the foot of the rail; both plan editors, energy card, PDF export (still Figtree), anamnez form, measurements. Money screens hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
-| Brand | Name settled. Palette, type and layout are being redesigned from zero (#134; the code still ships "Sade"). **Logo: placeholder "W" mark** until one is designed with Claude later. |
-| Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123). |
+| Brand | Name settled. Bevel adapted for an app, Alpino, green accent, light and dark (#134–#135). **Logo: placeholder "W" mark** until one is designed with Claude later. |
+| Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123); written by hand at launch (P10). DT3 (which exchange table and values) decides its data. |
 | Interviews | Held; most answers in §2.1, five questions still open (QUESTIONS.md §3). |
 
 ---

@@ -176,13 +176,6 @@ needs a clear rule. Related: I8, DT9.
 _Was: Q3, Q4, q3–q4._
 >
 
-### C13. Is AI needed in the first release?
-Must plan drafts be AI-generated at launch, or can dietitians write plans by hand while
-the AI is validated? Your note calls AI drafts "gayet iyi, hatta iyi bir feature".
-Related: I11.
-_Was: q21._
->
-
 ### C14. Launch surfaces and addresses
 Android, iOS, and/or client web? A domain? The dietitian panel's public URL?
 _Was: Q13, Q21._
@@ -197,11 +190,6 @@ a month, dietitians who stay. With numbers and a review date.
 Who approves dietitians, handles complaints, and what support address does a rejected
 dietitian see?
 _Was: Q20._
->
-
-### C17. Separate Supabase dev project?
-Today every dev signup lands in the one live project. A second project is free on the
-Supabase free tier.
 >
 
 ### C21. How much plan editing on a phone?

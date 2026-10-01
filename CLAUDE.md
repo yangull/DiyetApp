@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Read these files at the start of every session:
 
 - **`HANDOFF.md`**: where things stand, next steps, and the most blocking questions.
-- **`PLANNING.md`**: the product, locked decisions (stable IDs P1–P9 and #1–#135, which
+- **`PLANNING.md`**: the product, locked decisions (stable IDs P1–P10 and #1–#136, which
   code comments cite), current state and roadmap. Edit it in place when a
   decision changes; never append session logs to it.
 - **`CONTEXT.md`**: the domain glossary (değişim listesi, BMH, danışan, …).
