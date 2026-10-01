@@ -97,54 +97,31 @@ Product decisions nobody else can make. The most blocking come first. Money ques
 (commission, packages, pricing, payouts) are parked until later (§5, PLANNING P6).
 
 **Redesign: what is still open (PLANNING #134, #135).** Bevel's DESIGN.md
-(`docs/design/2026-10-01-bevel/DESIGN.md`) describes a website; C31–C35, C37–C39, C41 and
-C42 were asked and answered on 1 Oct 2026 (now PLANNING #134–#135). Still open:
-
-### C36. Which hue is the accent?
-Buttons are black pills (#135); one accent marks progress and "approved" and is the one
-data colour. Candidates: our green #18795C (5.35:1 on white, the old brand) or Bevel's
-own Metric Blue #415eee (5.17:1). On Cloud Card (#ebf0f8) they measure 4.67:1 and
-4.52:1, both barely AA. Proposal: show both on the canvas and choose there.
-_Blocks: the canvas's final look, not its first draft._
->
-
-### C40. Bevel's sky gradient
-Bevel's signature is a pale sky-to-warm gradient (#d2e5ff to #fff9ee) behind its hero;
-design-system.md's rule 1 bans gradients. Agreed (1 Oct 2026): draw Bugün with it once
-at the top and with a flat Cloud Card instead; Can picks on the canvas. On its top colour
-(#d2e5ff) Body Gray measures 3.56:1, the green 4.17:1 and the blue 4.04:1, so text there
-must be Ink.
->
+(`docs/design/2026-10-01-bevel/DESIGN.md`) describes a website; C31–C42, C44 and C45 were
+asked and answered on 1 Oct 2026 (now PLANNING #134–#135 and
+`docs/design-system.md`). Still open:
 
 ### C43. Light only, or dark mode too?
 Bevel is light only. HIG asks for contrast checks in both modes if an app supports dark.
 Can (1 Oct 2026): decide after the DESIGN.md is adapted and the font is chosen. The font
-is chosen; the adaptation is redesign slice 1, which measures light only. Ask again with
-the Bugün canvas (slice 3).
+is chosen; the adaptation (`docs/design-system.md`) measures light only, and the
+canvas was skipped. Ask again once the redesigned client app runs on the phone.
 >
 
-### C44. Panel density by input: how exactly?
-PLANNING #135 makes the panel compact only for pointer use. Proposal: compact when the
-panel runs in a browser on Windows, macOS or Linux; touch sizes on iOS, Android and
-tablet browsers. Navigation still switches between rail and bottom bar by width at
-600 dp. The compact type scale is drafted in slice 1 from HIG's macOS numbers (body 13,
-targets 28) and shown to Can.
-_Blocks: the panel's redesign, not the client app._
->
-
-### C45. May Alpino go into a Claude design artifact?
-Alpino's licence (FFL §02) forbids making the font "available for use by third parties
-through any … design tool, template editor or similar service". Embedding it in our own
-apps is fine. A private claude.ai design-system or canvas artifact that only Can and
-Claude open is probably our own use, but a shared one is closer to the line. Options:
-(a) upload it to private artifacts only; (b) draw the artifacts with Inter and see
-Alpino only in Flutter and in screenshots. Proposal: (a), never shared publicly.
-_Blocks: slice 1's artifact and the canvas._
+### C47. Tablets in "desktop site" mode get the compact panel
+The panel is compact in a browser on Windows, macOS or Linux (#135). Chrome and Samsung
+Internet on Android tablets default to "desktop site", which reports Linux, so such a
+tablet gets the 28 px computer sizes. Options: (a) accept it like touch laptops and
+Chromebooks; (b) also ask the browser whether its pointer is a mouse
+(`(pointer: fine)`), which needs the small `web` package in core. Proposal: (b) before
+the panel ships to dietitians on tablets.
+_Blocks: nothing today; the panel on tablet browsers._
 >
 
 ### C46. Direction B's narrowed names rule
 Under direction B a name opened the person's record only in lists of people. Moot until
-the redesign draws rows; decide when the first list is redesigned.
+the redesign draws rows; Can agreed (1 Oct 2026) to decide when the first list is
+redesigned.
 >
 
 ### C4. B2B is the main plan: when does it enter the roadmap?

@@ -1,275 +1,350 @@
 # Wellkit design system
 
-The source of truth for how Wellkit looks. Written from the code in
-`packages/core/lib/src/theme/` on 23 Sep 2026; if this file and the code disagree, the
-code is right and this file gets fixed. The older design-system artifact on claude.ai
-(28 Aug 2026) is history, not a source.
+How Wellkit looks: Bevel's DESIGN.md (`docs/design/2026-10-01-bevel/DESIGN.md`) adapted
+for an app with Apple's HIG numbers and the Alpino font (PLANNING #134–#135). Written
+1 Oct 2026 and coded the same day in `packages/core/lib/src/theme/`; if this file and the
+code disagree, the code is right and this file gets fixed. The Sade / direction B system
+it replaced is in git history (before 1 Oct 2026). The private Design System artifact
+(https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV) mirrors it.
 
-Short version of the locked decisions: PLANNING.md #54–#67, #131–#133; the redesign's
-target is #134–#135.
-
-**Being replaced (PLANNING #134, 1 Oct 2026).** A redesign from zero takes its style
-from Bevel's DESIGN.md (`docs/design/2026-10-01-bevel/DESIGN.md`), the Alpino font and
-Apple's HIG numbers. This file keeps describing the code as it ships until the theme
-slice lands; the target is written to `docs/design-system-next.md` (redesign slice 1),
-which then replaces this file. New UI built before then uses this file. What carries
-over: the safeguards and the rules listed in PLANNING #134.
+Decided on 1 Oct 2026: the accent is **green #18795C** (C36), the top of Bugün is
+**flat**, with no sky gradient (C40), and the redesign went from this file straight to
+Flutter, with no copy study and no canvas. Still open: dark mode (C43); this file
+measures **light only**.
 
 ## Direction
 
-**"Sade"** (plain; Can, 23 Sep 2026, PLANNING #133), modelled on how MyFitnessPal's
-current app reads, not copied from it: black type on a neutral light-grey ground, white
-cards without borders or shadows, bold sans headings and numbers, and **one accent**, the
-brand green, only where the user can act or sees progress. Everything else is black,
-white and grey; the only other colours are status colours with a fixed meaning (waiting,
-error, AI draft). The client app is calm; the dietitian panel is dense enough to replace
-Excel. One token set, two densities.
+Bevel's character, adapted for an app: a **white canvas**, **pale borderless Cloud
+Card surfaces** at radius 24, near-black **600-weight headings** with slightly tight
+tracking, **grey supporting text**, **black pill buttons**, and colour only where it
+means something. Green marks progress, "approved" and data. Red and amber are statuses.
+Violet means an unapproved AI draft. Everything else is black, white, Cloud Card and
+grey.
 
-Premium here means restraint: few colours, generous space, rows of equal rhythm, and
-nothing drawn that is not data, a status or an action (rule 15).
+Bevel's DESIGN.md describes a marketing website. What the app takes from it and what it
+does not:
 
-**Direction B** (Can, 25 Sep 2026, PLANNING #133) keeps Sade's colour and takes its
-hierarchy from Lifesum (references in `docs/design/references/2026-09-25-lifesum/`,
-mockups on https://claude.ai/artifact/UUMWcZotJ72TkxgpabCHo4). It applies to every panel
-screen and to the client app:
+| From Bevel | In Wellkit |
+|---|---|
+| Paper White canvas, Cloud Card surfaces, Ink headings | Kept as tokens |
+| Body Gray `#747679` copy | Darkened to `#606266`: Bevel's grey fails AA on its own Cloud Card and under a hover |
+| Charcoal download pill with a Cloud Card label | The one filled button, label and all |
+| SF Pro, 600 headings, −0.03 em tracking at 40–80 px | Alpino, 600 headings, tracking scaled down to HIG sizes |
+| Type sizes 12–80 px | HIG's sizes (touch) and HIG macOS sizes (compact panel) |
+| Floating capsule navigation (radius 32, blur, no shadow) | The bottom bar: a solid floating white capsule, no blur, so it takes a shadow instead (#135) |
+| 80 px section gaps, 32 px card padding | Scaled to app sizes (below) |
+| Recovery Green, Sleep Lilac, Coral Signal | Not used: 1.8–2.1:1 on white, too pale for text or data |
+| Metric Blue #415eee | Was the other accent candidate; not used (C36) |
+| Signal Gold | Star ratings only, always next to the number |
+| Hero Sky gradient | Not used (C40) |
+| Device renders, laurels, partner logos, QR card | Website-only; nothing in the app |
+| Backdrop blur on the nav | Not used (#135, was C41) |
 
-- **One focal card per screen**, led by the screen's one big number in `figures`
-  (Genel Bakış: "3 plan onayınızı bekliyor"). The greeting and date are small.
-- **Quiet section labels**: the section's name in small capitals (`labelSmall`, 700,
-  `textSecondary`, through `trUpper`) on the ground, a grey count after it and a grey
-  link with a chevron at the right end (core `SectionLabel`).
-- **Rows** (core `ActionRow`): an initials avatar or a time first (core `PersonAvatar`),
-  who and what, then the row's **one action as green text at the right end** (a
-  `TextButton`, its label on the edge). When they can't share a line the action drops
-  under the words. In a list of people (triage, clients) the name line opens the
-  person's record, with a grey chevron; in a row about a thing (a draft, an
-  appointment) the action does the thing and the name is plain text. On a
-  phone, labels may be short ("Yanıtla", "Ölçümler") and say the full task to a screen
-  reader. A client appears once per section, their reasons under the name.
-- **Width carries content**: a dashboard stops at `kDashboardWidth` (1200) and puts
-  secondary content (the agenda) in a second column from 1000 px; lists and forms keep
-  `kReadableWidth` (1100).
-- Cards are rounder on wide screens (16) and pad 20 (16 on phones), so rows in
-  neighbouring cards share one text edge and one action edge.
-
-## How we got here (23 Sep 2026)
-
-Can found the first client app "dull, like a form". Three directions were mocked up
-(https://claude.ai/artifact/GZU5DJaeaECPpMUM32MDTn; copies in
-`docs/design/2026-09-23-redesign/`) and he picked **"Sıcak"**: warm cream, a green hero
-block, a colour per exchange group, a sun-yellow highlight (#131). Two outside reviews
-(`docs/research/2026-09-23-sicak-redesign-review-*.md`) corrected it and it was coded in
-slices 1–5b. Seeing it on the phone the same night, Can found it had **too many colours to
-feel clean and premium**, and moved to "Sade" (#133): green only, neutral grey, all sans.
-Dropped: the cream ground, the green hero block, the yellow highlight, the eight group
-colours, Fraunces. Kept from Sıcak and the reviews:
-
-- **Numbers** are `AppTypography.figures`: Figtree 700 with tabular figures.
-- **Touch and text size.** Every tappable thing is at least 48 × 48; rows have a minimum
-  height (72) and grow with their text; nav labels may wrap. Layouts are tested at 360
-  and 412 dp with text scale 1.0, 1.3 and 2.0.
-- **Motion** only when a value changes, never because a screen opened; instant under
-  reduced motion (`AppMotion`).
-- **The week count, not a streak** (P7): "Bu hafta 5/7 gün", starting again each Monday;
-  the client can hide it, the dietitian can turn it (and weight and kcal) off per client
-  (P9). Copy never praises or blames weight or a missed meal.
-- **The bottom bar only navigates**; tabs arrive when a feature ships for everyone.
-- **AI-draft cards show what was checked, not a verdict** (#126).
-- The panel on phones has a slim header, not a hero.
-
-**Client home ("Bugün") today:** the date and "Merhaba, <ad>" in large bold type, any
-pending invite first, then one white "Başlangıç" card: the count ("1 / 3") and a thick
-grey progress bar with a green fill, and three rows with a black tick when done or an
-empty ring when not. A row's action is a pale-green pill ("Yaz", "Düzenle"). When plans
-exist, the same card pattern carries today's meals ("3 / 5 öğün", P7).
+What Bevel has no pattern for (inputs, lists, tab bar, dialogs, sheets, chips, progress,
+empty states) follows HIG, drawn in Bevel's tone.
 
 ## Colour
 
-Light theme only (#59). Every value was measured; don't change one without
-re-measuring. Ratios are also written next to each token in `app_colors.dart`.
+Light only. Every value is measured (WCAG 2 contrast). The bar for **all text is 4.5:1**:
+HIG would accept 3:1 for 18 pt+ or bold text, but WCAG only allows that from 24 px
+regular or 18.66 px bold, so the stricter rule wins and we don't rely on the exception.
+Graphics that carry meaning and input boundaries need 3:1 (WCAG 1.4.11).
 
-| Token | Hex | Contrast | Means |
-|---|---|---|---|
-| `ground` | `#F2F4F3` | — | App background: neutral light grey |
-| `surface` | `#FFFFFF` | — | Cards, sheets; no border, the ground separates them |
-| `surfaceSubtle` | `#EBEEEC` | — | Table headers, progress tracks, neutral status pills, disabled secondary buttons |
-| `borderSubtle` | `#E4E8E6` | 1.24:1 | Dividers inside a card; never carries state |
-| `borderStrong` | `#7E8C86` | 3.51:1 | Input and control boundaries |
-| `textPrimary` | `#16211D` | 16.54:1 | Main text |
-| `textSecondary` | `#46534D` | 7.62:1 | Supporting text |
-| `textMuted` | `#5F6B64` | 5.56:1 | Captions, hints, quiet controls |
-| `primary` | `#18795C` | 5.35:1 | **The brand.** Buttons, links, and "approved" |
-| `primaryHover` | `#135F49` | 7.61:1 | Pressed / hovered primary |
-| `warning` | `#8A5A0B` | 5.92:1 | Pending, waiting, needs attention |
-| `error` | `#A32017` | 7.56:1 | Rejected, failed, destructive |
-| `aiDraft` | `#514196` | 8.25:1 | **Only** AI-written content no dietitian has approved |
-| `primaryTint` | `#E3F1EA` | primaryHover 6.53:1 | Pale-green fill of a secondary action pill; the one place the accent is a background |
-| `warningTint` | `#FBEFD5` | warning 5.19:1 | Fill behind warning text |
-| `aiDraftTint` | `#EEEBF6` | aiDraft 7.01:1 | Fill behind violet text in a draft status pill |
+### Tokens
 
-Contrast on the grey ground: textPrimary 14.98, textSecondary 7.30, textMuted 5.04,
-primary 4.84, warning 5.36, error 6.85, aiDraft 7.47, borderStrong 3.18. Contrast is measured against the surface the token sits on (white unless
-stated) and checked by `packages/core/test/core_test.dart`.
+| Token | Hex | On white | On Cloud Card | Means |
+|---|---|---|---|---|
+| `canvas` | `#FFFFFF` | — | — | Page background, app bar, bottom bar, sheets, dialogs, inputs |
+| `cloudCard` | `#EBF0F8` | 1.14 | — | Cards and inset surfaces; no border, no shadow |
+| `ink` | `#222326` | 15.71 | 13.73 | Headings, body text, icons, text actions |
+| `charcoal` | `#1F2025` | 16.26 | 14.21 | Filled button, selected chip; Cloud Card label on it 14.21 |
+| `charcoalHover` | `#35363C` | 12.04 | — | Pressed/hovered filled button |
+| `textSecondary` | `#606266` | 6.11 | 5.34 | All supporting text, on any surface (#135's darker grey) |
+| `borderStrong` | `#83868B` | 3.65 | 3.19 | Input and checkbox boundaries |
+| `divider` | `#E3E7EE` | 1.24 | — | Dividers inside a list; never carries state |
+| `accent` | `#18795C` | 5.35 | 4.67 | Progress fills, "approved", the one data colour; white on it 5.35 |
+| `accentStrong` | `#135F49` | 7.61 | 6.65 | Accent text on `accentTint` |
+| `accentTint` | `#E4F2EC` | 1.15 | — | Fill of the "Onaylı" pill; accentStrong on it 6.60 |
+| `warning` | `#8F5F00` | 5.52 | 4.82 | Waiting, needs attention |
+| `warningTint` | `#FFF2D6` | — | — | Fill behind warning text: warning on it 4.97 |
+| `error` | `#B43622` | 6.01 | 5.26 | Failed, rejected, destructive; white on it 6.01 |
+| `errorTint` | `#FDECEB` | — | — | Fill behind error text: error on it 5.26 |
+| `aiDraft` | `#514196` | 8.25 | 7.21 | **Only** AI-written content no dietitian has approved |
+| `aiDraftTint` | `#EEEBF6` | — | — | Fill of a draft status pill: aiDraft on it 7.01 |
+| `gold` | `#FFCA00` | 1.53 ✗ | — | Star shapes only, always beside the number |
+| `onFilled` | `#FFFFFF` | — | — | Text on accent and error fills |
+| `inset` | Cloud Card / white | — | — | The pale fill of something set into its surface (neutral pill, avatar, progress track, selected row): Cloud Card on the canvas, white inside a card |
 
-Rules:
-- **One brand hue, used sparingly** (#55, #133). Green marks what you can press, what
-  fills (progress) and "approved"; headings, ticks, selected navigation and body text are
-  black or grey. No decorative second accent, no colour per category: groups and macros
-  are told apart by name.
-- **Buttons are pills** (Can, 24 Sep 2026). `FilledButton` (green) is the one main
-  action; `OutlinedButton` is themed as the pale-green pill and is every secondary
-  action (it has no outline, the name is Material's). Quiet or neutral actions, like
-  signing out or "Danışanı aç", use `TextButton` with `AppTheme.quietButton` (grey:
-  green text on the ground fails AA under the focus overlay). A destructive dialog confirms with
-  `AppTheme.destructiveButton` (red).
-- **One green action per row.** A row's main task keeps the green; every other action
-  in it is grey. In lists (direction B) the task is green text at the row's right end,
-  not a pale pill, so a column of rows doesn't become a column of pills; the pale pill
-  stays for a standalone secondary action.
-- **Cancel is grey.** "Vazgeç" next to a green or red button is a quiet button.
-- **Filter chips** have no border: white on the grey ground when off, pale green with a
-  green tick when on.
-- **Status pills** are text on a tint without a border. "Onaylı" is grey with a black
-  tick, never green: a green pill is a button.
-- **No separate success colour.** A success green measured 1.19:1 against the brand
-  green, so "approved" uses `primary` (#56).
-- **Violet is reserved for unapproved AI drafts** (#57). Genel Bakış shows it once, as the
-  "Yapay zekâ taslağı" label on the drafts card (Can, 25 Sep 2026, replacing C30's
-  wording-only drafts). A draft *container* (the AI
-  banner) is violet + a 1.5 px dashed border + a text label; a draft *status pill* is
-  violet text on `aiDraftTint` with its label, no border. It appears nowhere else, so violet always means "a
-  machine wrote this and nobody approved it". Other statuses (invites, appointments)
-  must not reuse it.
-- **`ColorScheme.fromSeed` is never used.** It would regenerate the palette (#65).
-- **Exception:** the video-call mockup uses a near-black stage (`#15181A`), as every call
-  app does. It is the only hard-coded colour.
+On a pressed Cloud Card (`#DBE0E7`): ink 11.84, textSecondary 4.61, error 4.53, aiDraft 6.22, accent 4.03, borderStrong 2.75. Accent passes there as a graphic (3:1) only, and `borderStrong` drops below 3:1, so inputs never sit inside a pressable area.
 
-Known tension, open for review: `primary` means both "you can press this" and
-"approved"; `warning` means both "pending" and "needs attention".
+Ink on every tint stays above 13:1 (accentTint 13.63, warningTint 14.16, aiDraftTint
+13.36).
+
+**Overlays.** Hover, focus and press darken whatever they sit on, and text must keep
+4.5:1 in every state. So the theme caps every overlay at Ink **4 % for hover and 8 % for
+focus and press** (Material's defaults go to 10–12 %), and the ratios below were checked
+on the darkest case, Cloud Card under 8 % Ink (`#DBE0E7`). A status pill's tint sits
+above the overlay, so its text is unaffected.
+
+**Why each new value:**
+- `textSecondary` `#606266`: Bevel's Body Gray `#747679` is 4.56 on white but 3.98 on
+  its own Cloud Card and 3.43 on Cloud Card under a hover. `#606266` keeps its hue (the
+  same small blue lean) and is the lightest grey that holds 4.5 on a pressed Cloud Card
+  (4.61). One grey everywhere, so no widget has to know which surface it sits on. It is
+  visibly darker than Bevel's; that is the price of AA on Bevel's own cards (Can, 1 Oct
+  2026).
+- `error` `#B43622`: a red pulled towards Bevel's coral (hue about 9°, Coral Signal is
+  13°) and dark enough for white text on a destructive button. Sade's `#A32017` read
+  brown-red next to the cool greys.
+- `warning` `#8F5F00`: an amber pulled towards Signal Gold's hue, with a step of margin
+  above 4.5 on Cloud Card (4.82; Sade's `#8A5A0B` was browner). Amber and green text sit
+  on their tints or on white, never as plain text on a pressable Cloud Card (4.16 and
+  4.03 there under the press overlay).
+- `aiDraft`: Sade's `#514196` was re-measured against Bevel's palette. It sits at hue
+  251°, next to Sleep Lilac's 253°, so it belongs to the palette rather than clashing
+  with it, and it is 7.21:1 on Cloud Card. It stays.
+- `accent` (C36): green `#18795C` won over Metric Blue `#415eee` (5.17 on white, 4.52 on
+  Cloud Card, 4.04 on the sky). Both were barely AA on Cloud Card; green is 4.67.
+- `borderStrong` `#83868B`: 3.65 on white and 3.19 on Cloud Card, so an input keeps a
+  visible boundary on either.
+
+### Colour rules
+
+- **Black does the acting.** Filled buttons are Charcoal pills with a Cloud Card label
+  (Bevel's own pairing), text actions are Ink.
+  Green is no longer an action colour: it marks what fills (progress, the meals ring,
+  the week count, the weight line) and "approved".
+- **One accent, one data colour.** Charts and rings use green on a Cloud Card or white
+  track. A second data series is Ink or grey, told apart by a label, never a second hue.
+- **Status colours have one meaning each.** Amber is waiting or needs attention, red is
+  failure or destructive, violet is an unapproved AI draft and nothing else (#57).
+- **Colour never carries meaning alone** (rule 10): every status has a word or an icon.
+- **"Onaylı" is a green pill** (Can, 1 Oct 2026, reversing the 24 Sep grey pill, #55).
+  Under Sade a green pill would have looked like a button; buttons are black now, so the
+  approved status is `accentStrong` text and a tick on `accentTint`, matching "green
+  means approved". Neutral pills are Cloud Card on white and white on Cloud Card.
+- No `ColorScheme.fromSeed` (#65); every slot is set by hand.
+- Exception kept: the video-call mockup's near-black stage `#15181A`.
 
 ## Type
 
-**One family, Figtree** (#60, changed by #133): headings bold (700, slightly tight),
-body regular, labels and buttons semibold, every number `AppTypography.figures` (700,
-tabular figures). Bundled in `packages/core/fonts/`, never fetched at runtime (#63); all
-twelve Turkish glyphs verified in the font files. `Fraunces-SemiBold.ttf` is still
-bundled but unused (remove it once Sade is settled).
+**Alpino only**, from the single variable file `Alpino-Variable.ttf` (wght 100–900),
+bundled unmodified with its `FFL.txt` (no subsetting or conversion, as the licence
+requires). Checked on 1 Oct 2026:
+- **Flutter maps `FontWeight` onto the wght axis** of the variable file: in a test,
+  `FontWeight.w600` measured exactly like `FontVariation.weight(600)` (and the same for
+  400, 500, 700, 900). So one file gives 400, 500 and 600 with no `fontVariations` code.
+  The emulator and web checks happen in the theme slice.
+- Alpino's own "Regular" instance is wght 422; we use 400, a hair lighter.
+- **Gate for the theme slice:** the file's default instance is Black (900). The mapping
+  above was measured in `flutter test`; if CanvasKit (web) or a device build ignores it,
+  every weight renders Black. The theme slice checks web and the emulator first; if
+  either fails, every style sets `fontVariations: [FontVariation.weight(n)]` as well.
+- Turkish glyphs reach 0.88 em above the baseline (İ Ğ Ş Ç Ö Ü at 700) and 0.26 em
+  below (ş ç g); the font's own line is 1.3 em (ascent 1.0, descent 0.3). Every line
+  height below is at least 1.18 em, and Flutter's default proportional leading then
+  leaves 0.91 em above the baseline and 0.27 em below, so nothing clips. Keep it
+  proportional: `TextLeadingDistribution.even` would clip descenders by about 0.02 em.
+- **No tabular figures** (no `tnum`). Numbers that must line up (agenda times, columns
+  of kcal or kg in the panel) sit in a fixed-width, right-aligned slot sized to the
+  widest value, e.g. "00:00" (#135, was C39).
 
-| Slot | Face | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
+Weights: headings and numbers **600**, buttons and navigation **500**, body **400**.
+Nothing above 600 (Bevel's own rule). Tracking tightens with size, as Bevel's −0.03 em
+does at display sizes; body text keeps 0.
+
+### Touch scale (client app; panel on phones and tablets)
+
+HIG iOS at the default text size (Large/default Dynamic Type). Text grows with the
+system setting to at least 200 % (#135). Nothing under 11.
+
+| HIG style | Flutter slot | Size / line | Weight | Tracking | Used for |
+|---|---|---|---|---|---|
+| Large Title | `displaySmall` | 34 / 41 | 600 | −0.7 | The hero number, a screen's big title |
+| Title 1 | `headlineLarge` | 28 / 34 | 600 | −0.5 | Greeting, a screen heading |
+| Title 2 | `headlineMedium` | 22 / 28 | 600 | −0.3 | App bar titles |
+| Title 3 | `headlineSmall` | 20 / 25 | 600 | −0.2 | Section headings, dialog titles |
+| Headline | `titleLarge` | 17 / 22 | 600 | 0 | Card titles, a row's name |
+| Callout (emphasised) | `titleMedium` | 16 / 21 | 600 | 0 | Smaller titles, form section names |
+| Subhead (emphasised) | `titleSmall` | 15 / 20 | 600 | 0 | Field labels, list subheads |
+| Body | `bodyLarge` | 17 / 22 | 400 | 0 | Reading text, input text |
+| Subhead | `bodyMedium` | 15 / 20 | 400 | 0 | Default `Text`: row second lines, supporting copy; reading text uses `bodyLarge` explicitly |
+| Footnote | `bodySmall` | 13 / 18 | 400 | 0 | Helper text, captions under rows |
+| Callout | `labelLarge` | 16 / 21 | 500 | 0 | Buttons, chips |
+| Caption 1 | `labelMedium` | 12 / 16 | 500 | 0 | Bottom bar and rail labels |
+| Caption 1 (emphasised) | `labelSmall` | 12 / 16 | 600 | +0.2 | Status pills, `Badge` |
+
+Slots Flutter reads that need setting by hand in the theme: the app bar title (Flutter
+defaults it to `titleLarge`; set `titleTextStyle` to `headlineMedium` with an explicit
+colour), the `ListTile` title (defaults to `bodyLarge`; set it to `titleLarge`) and
+`displayLarge` / `displayMedium`, which the date and time pickers read (fill them with
+Large Title so nothing falls back to Material's font). Dialog titles read
+`headlineSmall`, the rail and bottom bar `labelMedium`, buttons `labelLarge`.
+
+### Compact scale (panel in a computer browser), draft for Can
+
+HIG's macOS styles, with the 10-point styles raised to 11 (#135's floor). **A draft**:
+Can saw it on 1 Oct 2026 and will judge it on the real panel in a browser, so it is
+coded as written and adjusted then.
+
+| HIG macOS style | Flutter slot | Size / line | Weight |
 |---|---|---|---|
-| displaySmall | Figtree 700 | 32 / 38 | 32 / 38 |
-| headlineLarge | Figtree 700 | 28 / 34 | 22 / 28 |
-| headlineMedium | Figtree 700 | 22 / 28 | 18 / 24 |
-| headlineSmall | Figtree 700 | 20 / 26 | 18 / 24 |
-| titleLarge | Figtree 600 | 18 / 24 | 16 / 22 |
-| titleMedium | Figtree 600 | 16 / 24 | 14 / 20 |
-| bodyLarge | Figtree 400 | 16 / 24 | 14 / 20 |
-| bodyMedium | Figtree 400 | 14 / 20 | 13 / 18 |
-| bodySmall | Figtree 400 | 13 / 18 | 12 / 16 |
-| labelLarge (buttons) | Figtree 600 | 15 / 20 | 13.5 / 18 |
-| labelMedium (rail) | Figtree 600 | 13 / 18 | 12 / 16 |
-| labelSmall | Figtree 600, +0.88 spacing | 11 / 16 | 11 / 16 |
+| Large Title | `displaySmall` | 26 / 32 | 600 |
+| Title 1 | `headlineLarge` | 22 / 26 | 600 |
+| Title 2 | `headlineMedium` | 17 / 22 | 600 |
+| Title 3 | `headlineSmall` | 15 / 20 | 600 |
+| Headline | `titleLarge` | 13 / 16 | 600 |
+| Callout (emphasised) | `titleMedium` | 12 / 15 | 600 |
+| Subheadline (emphasised) | `titleSmall` | 11 / 14 | 600 |
+| Body | `bodyLarge` | 13 / 16 | 400 |
+| Callout | `bodyMedium` | 12 / 15 | 400 |
+| Subheadline / Footnote | `bodySmall` | 11 / 14 | 400 |
+| Body (buttons) | `labelLarge` | 13 / 16 | 500 |
+| Caption 1 | `labelMedium` | 11 / 14 | 500 |
+| Caption 1 (emphasised) | `labelSmall` | 11 / 14 | 600 |
 
-Size / line height in logical pixels. Numbers that line up (kcal, g, kg, dates, ₺)
-use tabular figures. Fill every `TextTheme` slot a widget reads; an empty slot falls
-back to Material's font, not Figtree.
+The shortest line here is 22 / 26 (1.18 em), still above Alpino's 1.14 em of ink.
 
-## Density and spacing
+## Density
 
-One token set, two profiles (`AppDensity`, #64). Colours, fonts and meanings never
-change between them; only measurements do.
+**By input, not width** (#135, Can 1 Oct 2026, was C44): the panel is compact when it
+runs in a browser on Windows, macOS or Linux, and uses the touch profile on iOS, Android
+and tablet browsers. Navigation still switches between rail and bottom bar by width at
+600 dp. The client app is always touch. In Flutter: compact when `kIsWeb` and
+`defaultTargetPlatform` is Windows, macOS or Linux. Flutter's web engine already reports
+an iPad's Safari (which claims to be a Mac) as iOS when the browser has touch points
+(`browser_detection.dart`). Known edge: a Windows touch laptop or a Chromebook (reports
+Linux) gets compact; accepted, since both have a pointer too. This replaces
+`panelThemeBuilder`'s width test and `isPanelPhone` stays only for layout (rail vs
+bottom bar at 600 dp).
 
-| Metric | Comfortable (client app, panel on phones) | Compact (panel on wide screens) |
-|---|---|---|
-| Page padding | 20 | 24 |
-| Card radius | 20 | 16 |
-| Control radius | 14 | 8 |
-| Button height | 48 | 36 |
-| Input height | 52 | 38 |
-| Row height | 72 | 44 |
-| Avatar | 40 | 28 |
+| Metric | Touch | Compact (draft) | Source |
+|---|---|---|---|
+| Minimum hit target | 48 × 48 | 28 × 28 | Android 48 / HIG iOS 44; HIG macOS 28 (compact is a draft) |
+| Button height | 48 | 32 | |
+| Input height | 52 | 32 | |
+| Row minimum height | 72 | 40 | rows grow with their text |
+| Avatar | 40 | 28 | |
+| Page padding | 20 | 24 | |
+| Card padding | 20 | 16 | Bevel's 32 at its 24 px body, scaled to 17 |
+| Gap between cards | 12 | 12 | |
+| Gap between sections | 32 | 24 | Chosen, not scaled: 80 × 17/24 would be 57, too airy for a phone screen |
+| Card radius | 24 | 16 | Bevel's 24 |
+| Input radius | 12 | 8 | |
+| Buttons, chips, pills, bottom bar | full pill | full pill | Bevel's 128 / 9999 |
+| Sheets and dialogs | 24 | 16 | |
 
-In the compact profile, buttons and chips are 36 tall and text fields and dropdowns 38, side by
-side on one line. Flutter's own `VisualDensity` is pinned to standard in the theme:
-`AppDensity` is the only density system.
+Around controls: about 12 pt from a filled control to its neighbour and about 24 pt
+around an unfilled one (HIG). Spacing scale: 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48,
+Bevel's 8-pt base with the half steps an app needs. `VisualDensity` stays pinned to
+standard; `AppDensity` is the only density system.
 
-Spacing scale (`AppSpacing`): 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48.
+**Elevation:** two levels. Cards have no shadow and no border; Cloud Card on white is
+the separation. Only floating things get a shadow: the bottom bar, menus, sheets and
+snackbars, all with `rgba(0,0,0,0.15) 0 2 16` (the shadow of Bevel's elevated QR card;
+Bevel's own nav has blur instead, which #135 rules out).
 
-**Alignment (24 Sep 2026).** Rows of related cards share one column grid, with a fixed
-column for every action, so nothing drifts with the width of its neighbour
-(Randevular, Genel Bakış). Forms and text pages stop at `kReadableWidth` (1100 px) and
-centre; lists and tables use the full width. Form fields sit on a six-column grid; facts
-use fixed-width columns. Tests measure these edges, so keep them measurable.
-A text button that must sit on an edge (a link under a form, "Çıkış yap", "Düzenle" in a
-section header) is wrapped in core's `EdgeButton`: its text is on the edge and its pill
-hangs into the margin. Never zero a pill's padding. On wide screens a row groups its
-actions at the right end; columns that spread actions across the window look scattered
-(Can, 24 Sep 2026).
-Navigation: the client app uses a bottom bar; the panel uses a `NavigationRail` with
-labels on wide screens and a bottom bar on phones. The panel runs on web, phones and
-tablets (PLANNING #38): wide screens use the compact density, phones the comfortable
-one, so touch targets stay large. Cards and app bars have no elevation and no border; white on the grey ground does the
-separating. The bottom bar is white; its selected item is black and bold, the rest grey,
-with no coloured pill.
+## Components
+
+- **Filled button:** Charcoal pill, Cloud Card label (Callout 500), `charcoalHover`
+  when pressed. One per screen region: the main action.
+- **Secondary button:** a pale pill with an Ink label: Cloud Card on white, white on a
+  Cloud Card. No outline.
+- **Text action:** Ink, 500, no fill (a row's action at its right end, "Tümünü gör").
+  Neutral actions (sign out, cancel) use the same; there is no separate grey quiet
+  button any more, because green is no longer the action colour.
+- **Destructive confirm:** red pill, white label, only inside a confirmation dialog.
+- **Disabled:** a pale pill with a `textSecondary` label (Cloud Card on white, white on
+  a Cloud Card), so it looks like a secondary button gone grey; a disabled control says
+  why next to it (rule 4).
+- **Chips (filters):** off: Cloud Card pill, Ink label (white on a Cloud Card); on:
+  Charcoal pill, Cloud Card label, a tick. They only appear in a row of chips, which is
+  what tells them apart from secondary buttons.
+- **Status pills:** tint fill, coloured text, a word, no border. Neutral is Cloud Card.
+  "Onaylı" is `accentStrong` + tick on `accentTint`; a draft is violet on `aiDraftTint`.
+- **Inputs:** white fill, 1 px `borderStrong`, radius 12 (8 compact); focused: 2 px Ink.
+  Label above the field in `titleSmall` (a small core wrapper widget, since
+  `InputDecoration` only floats labels inside), helper in `bodySmall` grey, error in red
+  with an icon.
+- **Cards:** Cloud Card, radius 24, padding 20, no border, no shadow. Always core's
+  `CloudCard`, never a bare `Card`: it re-themes its contents so the secondary pill, a
+  disabled button, an off chip, a progress track and `inset` turn white instead of
+  vanishing into the card.
+- **Lists:** rows on the canvas or inside a Cloud Card, dividers in `divider` only when
+  rows touch. A person row: avatar, name (`titleLarge`), second line (`bodyMedium` grey),
+  one text action at the right end.
+- **Section heading:** `headlineSmall` (Title 3, 600) in Ink, left-aligned, an optional
+  count in grey and a text link at the right end. No small capitals (Bevel's section
+  label is a 600 heading, not a caps label).
+- **App bar:** white, no elevation, title `headlineMedium` left-aligned (iOS large-title
+  feel without the collapsing behaviour).
+- **Bottom bar:** a solid white floating capsule, 16 from the screen edges and above the
+  safe area, the floating shadow, no blur, no press ripple (as on iOS). Selected item Ink
+  600, others `textSecondary` 500, no indicator pill. Labels always shown.
+- **Navigation rail (wide panel):** white, selected Ink 600, others `textSecondary`, no
+  pill.
+- **Progress:** a 8 px rounded bar or a ring, green fill on a Cloud Card track (white
+  track inside a Cloud Card). It animates only when its value changes (rule 12).
+- **Dialogs and sheets:** white, radius 24, title `headlineSmall`, actions right-aligned:
+  cancel as a text action, confirm as a filled (or red) pill.
+- **Empty states:** a heading that says what will appear here, one line of grey text,
+  one action if there is one. No illustration until the icon pack exists.
+- **AI draft container:** the card keeps its surface and gets a 1.5 px dashed violet
+  border and the "Yapay zekâ taslağı" label (#57).
+- **Star rating:** gold stars, always followed by the number in Ink ("4,8").
+- **Numbers:** Alpino 600, the hero number in `displaySmall`; aligned columns use
+  fixed-width right-aligned slots.
 
 ## Rules
 
-What keeps Wellkit from looking generated, and honest. Each rule says what to do
-instead.
+Status of each numbered rule from `docs/design-system.md` (PLANNING #134), and the rule
+as it stands in the new system.
 
-1. **No gradients.** Flat fills; depth comes from white on grey, not shadows or washes.
-2. **No emoji as icons.** One icon set (Material outlined). Emoji only inside text a
-   user wrote.
-3. **No "✨ AI-powered" badges.** Say what happened: "Yapay zekâ taslağı · onay
-   bekliyor", and what the dietitian must do.
-4. **Only what exists is drawn.** Real data or a real action on every screen; something
-   unbuilt is named once with "Yakında", never drawn as clickable UI (PLANNING #50).
-   A control that does nothing is disabled and says why.
-5. **No invented numbers presented as real.** Example values are labelled "örnek" or
-   "tahminimiz"; no progress bar without a real target behind it.
-6. **Left-aligned, one grid.** Centre only a single short message (e.g. the "under
-   review" card).
-7. **One radius scale per density.** Don't mix 4, 8, 16 and 24 on one screen. Buttons
-   and status pills are full pills; cards, inputs and chips use the density's radii.
-8. **At most two elevation levels.** Borders and surface tone do the separating. Only
-   floating elements (the bottom bar, sheets) get a shadow (#132).
-9. **No stock photos.** A real dietitian's photo or none (QUESTIONS Q23 parked). One
-   consistent illustration set for the eight exchange groups may come later
-   (QUESTIONS C20); until then, group chips are text on a tint.
-10. **Colour never carries meaning alone.** Every status has a label or icon too.
-11. **Numbering only for real sequences.** 01 / 02 / 03 only where order matters.
-12. **Motion only on a change of state,** and never when the OS asks for reduced
-    motion. A ring or bar animates when its value changes (including a change since
-    the screen was last seen), never just because a screen opened (#132). No fade-ins,
-    staggered lists or parallax.
-13. **Label actions.** In the panel, an action gets a visible text label, and every
-    destructive action (cancel, delete, reset) gets text plus a confirmation step.
-    Icon-only buttons are allowed only for universal icons (back, close a search,
-    send, +/−, remove a row ×), and each must have a Turkish tooltip.
-14. **Money is off.** No fee, price, commission or ₺ figure is shown while PLANNING P6
-    holds; the demo gates them behind `kShowMoney`.
-15. **It must not look AI-generated** (Can, 23 Sep 2026). Rules 1–3 and 12 already
-    cover gradients, emoji, "✨ AI" badges and animate-everything. Check every new screen
-    against this list:
-    - Every block shows something real from our data: a food, a person, a time, a number.
-    - No tinted icon tile or coloured shape without a meaning; no grid of identical
-      icon cards.
-    - No colour outside its token's meaning: green for action, progress and approval,
-      amber and red for status, violet only for AI drafts. Count the colours on a
-      screen; more than green plus one status colour needs a reason.
-    - Numbers are `AppTypography.figures`.
-    - No glass or blur, no oversized marketing headlines inside the app.
-    - Cover the logo: if the screen could belong to any wellness app, it fails.
+| # | Rule | Status |
+|---|---|---|
+| 1 | **No gradients.** Flat fills; depth comes from Cloud Card on white. | Survives (C40 decided flat, 1 Oct 2026) |
+| 2 | **No emoji as icons;** one icon set (Material outlined until the icon pack). | Waits for the icon pack |
+| 3 | **No "✨ AI" badges.** Say what happened: "Yapay zekâ taslağı · onay bekliyor". | Survives, as part of the AI-draft safeguard |
+| 4 | **Only what exists is drawn;** something unbuilt is named once with "Yakında". | Survives |
+| 5 | **No invented numbers presented as real.** | Survives |
+| 6 | **Left-aligned.** Centre only a single short message. | Replaced by #135 (HIG); same in practice |
+| 7 | **One radius scale per density:** card 24/16, input 12/8, everything else a pill. | Replaced by #135 and the table above |
+| 8 | **Two elevation levels;** shadow only on floating things. | Replaced by #135 (Bevel's floating shadow) |
+| 9 | **No stock photos or illustrations.** A real person's photo or their initials. | Replaced; new wording (Can, 1 Oct 2026) |
+| 10 | **Colour never carries meaning alone.** | Survives |
+| 11 | **Numbering only for real sequences.** 01 / 02 / 03 only where order matters. | Kept as worded (Can, 1 Oct 2026) |
+| 12 | **Motion only on a change of state,** none under Reduce Motion; native screen transitions stay. | Survives |
+| 13 | **Label actions;** destructive ones get text and a confirmation. Icon-only only for universal icons, each with a Turkish tooltip. | Survives |
+| 14 | **Money is off** while P6 holds (`kShowMoney`). | Survives |
+| 15 | **It must not look AI-generated.** | Rewritten (checklist below) |
+
+Rules carried by #134 beyond the numbered list: copy never praises or blames weight and
+there is no streak (P7); "sen" in the client app, "siz" in the panel; no glass or blur.
+
+### Rule 15 checklist (rewritten for Bevel)
+
+Check every new screen:
+- Every block shows something real from our data: a food, a person, a time, a number.
+- Count the colours: black, white, Cloud Card and grey, plus green for progress or
+  approval, plus at most one status colour. More needs a reason.
+- No tinted icon tiles, no coloured shapes without a meaning, no grid of identical
+  icon cards, no multicolour rings (Bevel's data rings are website art).
+- Headings are 600 and stop at Large Title (34); Bevel's 40–80 px display sizes are for
+  a website, not inside an app.
+- Cards have no border and no shadow; a shadow means it floats.
+- No gradient, glass or blur.
+- Numbers are Alpino 600; columns of numbers sit in fixed slots, so they don't wobble.
+- It must not read as "Bevel with our name": no sky gradient, no device renders, no
+  laurels.
+- Cover the logo: if the screen could belong to any wellness app, it fails.
 
 ## Language
 
-Turkish UI. "Sen" in the client app, "siz" in the panel; always "danışan", never
-"müşteri" (#47–#49). Auth errors stay in English until l10n (#44).
+Unchanged from Sade: Turkish UI; "sen" in the client app, "siz" in
+the panel; "danışan", never "müşteri"; short button labels ("Kaydet", "Vazgeç");
+`trUpper` and `formatDecimal` for Turkish casing and decimals; "Yapay zekâ taslağı".
 
-- **Buttons use the short form:** "Kaydet", "Vazgeç", "İptal et", "Davet gönder", "Tekrar
-  dene". Sentences, hints and dialog text use "siz" (#120).
-- **Turkish casing and numbers.** Uppercase labels go through `trUpper` (so "tipi" becomes
-  "TİPİ", not "TIPI") and decimals through `formatDecimal` (72,4 kg, not 72.4), both in
-  core's `format/turkish_text.dart`.
-- "Yapay zekâ taslağı", not "AI taslağı". No English product words ("Marketplace") in
-  UI text: the section is "Diyetisyen bul".
+## Open
+
+- **C43:** dark mode. Light only until Can decides.
+- **Compact scale and sizes:** coded as the draft, judged by Can on the real panel.
