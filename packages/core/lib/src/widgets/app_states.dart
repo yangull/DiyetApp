@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/edge_button.dart';
 import '../theme/tokens/app_spacing.dart';
 import 'cloud_card.dart';
+import 'wellkit_mark.dart';
 
 /// The one waiting state: a spinner with an optional line under it, centred.
 /// [AppLoading.card] reserves a card's height instead, so the page doesn't
@@ -24,6 +25,10 @@ class AppLoading extends StatelessWidget {
     final body = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (!card) ...[
+          const WellkitMark(size: 40),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         // The visible line is what a screen reader reads, once.
         CircularProgressIndicator(
           semanticsLabel: label == null ? 'Yükleniyor' : null,

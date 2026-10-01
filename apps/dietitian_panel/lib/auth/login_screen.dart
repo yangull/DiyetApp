@@ -63,6 +63,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: WellkitMark(),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     Text('Wellkit Paneli', style: text.headlineLarge),
                     const SizedBox(height: AppSpacing.xs),
                     Text(

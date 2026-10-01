@@ -33,3 +33,4 @@ export 'src/widgets/floating_nav_bar.dart';
 export 'src/widgets/labeled_field.dart';
 export 'src/widgets/person_avatar.dart';
 export 'src/widgets/section_label.dart';
+export 'src/widgets/wellkit_mark.dart';

@@ -70,6 +70,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: WellkitMark(),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     Text(
                       'Wellkit Paneli\'ne katılın',
                       style: text.headlineLarge,
