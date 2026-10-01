@@ -45,21 +45,20 @@ Captures: `C:\Users\jhana\Pictures\Wellkit revamp\01 before\`. New captures:
 
 ## Next steps
 
-1. **Validation pass on Genel Bakış** (the tests cover 360/412 × 1.0/1.3/2.0 and widths up
-   to 1600): check it on the Android emulator and in the Windows browser, then an
-   accessibility pass (contrast, labels, focus, tap targets) with the design plugin's
-   accessibility-review method.
-2. **Roll B out screen by screen**, one commit each, review subagent before each commit:
-   Randevular first (pop `stash@{1}`, the 24 Sep agenda, and redraw it in B), then
-   Danışanlar, client record, Mesajlar, Takip, plan editors, settings, real Profil and
-   client detail (both still lack the 1100 px cap), then the client app (Bugün, Profil).
-3. Refresh the panel tour artifact after the rollout.
-4. Unchanged: data features (Claude recommends weigh-ins first), C17 dev project + CI +
+1. **A visual redesign from zero** (Can, 1 Oct 2026), started from Can's prompt in a new
+   session: a style from styles.refero.design (its DESIGN.md), a Fontshare font, Apple's
+   Human Interface Guidelines as the rulebook, the client app first. Features and the
+   safeguards (AI-draft marking, approval gate, no money UI, Turkish copy, labelled
+   actions) stay; colours, fonts and layout are open. Record those decisions in PLANNING
+   and QUESTIONS first. The rollout of direction B to other screens is **paused**: the
+   new design replaces it. B's structure (core `SectionLabel`, `ActionRow`,
+   `PersonAvatar`, the screen states and their tests) is code to reuse, not a look to keep.
+2. `stash@{1}` (24 Sep Randevular agenda) is still parked; decide after the new style.
+3. Unchanged: data features (Claude recommends weigh-ins first), C17 dev project + CI +
    RLS tests; DT3 and C13 are Can's most blocking answers.
 
 ## What Can needs to do
 
 - Nothing blocks B2. Look at the canvas when the result row is up.
 - Confirm the narrowed names rule above (or ask for every name to open its record).
-- Say "push" when you want the revamp commits on GitHub.
 - Still open for you: C23 (interaction half), DT3, C13, C21, C17, DT7, C4.
