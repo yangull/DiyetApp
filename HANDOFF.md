@@ -102,6 +102,7 @@ Most blocking first. Details in QUESTIONS.md.
 
 | Page | For | Link |
 |---|---|---|
+| Wellkit status report (TR/EN) | Can's general showcase: where we are, screens, flow, next, easy-to-miss, questions. Update it when the state changes | https://claude.ai/artifact/8XtstTkUXxgnup4Q4Ywy5Z |
 | Wellkit Bevel system | The design system now in the code (private: Alpino's licence) | https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV |
 | Interview guide | Can and Kadir during interviews | https://claude.ai/artifact/8YW5uFvqQpWEBaG3ahBrgB |
 | Project overview (EN / TR) | The whole project | https://claude.ai/artifact/AoDqhG54mg7jngZ3Ensj6y · https://claude.ai/artifact/La1Na7aVy1weCr9VpTRLad |
