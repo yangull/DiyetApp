@@ -17,7 +17,8 @@
   - Seen on the Pixel 8a, light and dark, with the real client app logged in.
   - Commits `ff89fbe`, `3134b9b`, `2f67827`.
 - **Decided tonight**:
-  - Foundation before features: a dev Supabase project, CI and RLS tests (#136, was C17).
+  - A dev Supabase project, CI and RLS tests come **before launch, not now** (#136, was
+    C17). Until then no real client data in the project, test accounts only.
   - Plans written by hand at launch, AI drafts later (P10, was C13).
 - **Tests**: core 28, client 18, panel 197; analyze clean.
 - The Codex worktree (`../dietician-app-codex`) has not been fast-forwarded to these
@@ -43,33 +44,33 @@ commit on Can's word, push on "push".
      columns.
    - The plan PDF still uses Figtree (Alpino's static files would fix it).
 
-### B. Foundation (#136): the next build
+### B. Phase 1 features: the next build (one slice each, plan mode first)
 
-4. **Dev Supabase project (Can, dashboard).** Free tier, EU region. Claude writes a
-   step-by-step wizard. Then push all migrations to it and copy the dashboard auth settings
-   (email confirmation, #21).
-5. **Two config files.** `env/dev.json` points at dev; a new gitignored `env/prod.json`
-   points at today's project. Document which one `flutter run` and Codemagic use.
-6. **CI.** A GitHub Actions workflow running `melos analyze` and `melos test` on every
-   push. On the private repo it uses free Actions minutes (2,000 a month).
-7. **RLS tests.** Prove that a client can't read another client's data, a dietitian
-   only sees their own clients, and the projections leak nothing (#90, #103). There is no
-   local Docker, so they run against the dev project; plan the approach first.
-
-### C. Phase 1 features (one slice each, plan mode first)
-
-8. **Weigh-ins and measurements** (P8). The client logs weight, the dietitian adds
+4. **Weigh-ins and measurements** (P8). The client logs weight, the dietitian adds
    measurements, both see a chart. P9 (hide numbers per client) applies. DT8 placeholder:
    weight, waist, hip.
-9. **Plan editor + `diet_plans`** (P4, P10, #121–#123). Exchange list first, weekly,
+5. **Plan editor + `diet_plans`** (P4, P10, #121–#123). Exchange list first, weekly,
    copied from last week, written by hand. **Needs DT3.**
-10. **Meal ticks on Bugün** (P7). One tap per meal, time recorded, "Bu hafta 5/7 gün".
+6. **Meal ticks on Bugün** (P7). One tap per meal, time recorded, "Bu hafta 5/7 gün".
     Needs plans.
-11. **Chat** (Supabase Realtime, P2).
-12. **Dietitian verification upload and file attachments** (#125).
-13. **Diyetisyen bul** (the marketplace listing). Needs C7 and C8.
-14. **Video:** choose an SDK (Agora / 100ms / Daily), then embed it.
-15. Later: AI drafts (P1, P10), then the AI-only tier (Phase 2).
+7. **Chat** (Supabase Realtime, P2).
+8. **Dietitian verification upload and file attachments** (#125).
+9. **Diyetisyen bul** (the marketplace listing). Needs C7 and C8.
+10. **Video:** choose an SDK (Agora / 100ms / Daily), then embed it.
+11. Later: AI drafts (P1, P10), then the AI-only tier (Phase 2).
+
+### C. Foundation (#136): before launch, after the features
+
+12. **Dev Supabase project (Can, dashboard).** Free tier, EU region. Claude writes a
+   step-by-step wizard. Then push all migrations to it and copy the dashboard auth settings
+   (email confirmation, #21).
+13. **Two config files.** `env/dev.json` points at dev; a new gitignored `env/prod.json`
+   points at today's project. Document which one `flutter run` and Codemagic use.
+14. **CI.** A GitHub Actions workflow running `melos analyze` and `melos test` on every
+   push. On the private repo it uses free Actions minutes (2,000 a month).
+15. **RLS tests.** Prove that a client can't read another client's data, a dietitian
+   only sees their own clients, and the projections leak nothing (#90, #103). There is no
+   local Docker, so they run against the dev project; plan the approach first.
 
 ### D. Release prep (start early, it has waiting times)
 
@@ -85,7 +86,7 @@ commit on Can's word, push on "push".
 
 Most blocking first. Details in QUESTIONS.md.
 
-- **DT3**: which exchange table and values. Blocks the plan editor (to-do 9).
+- **DT3**: which exchange table and values. Blocks the plan editor (to-do 5).
 - **C4**: when does B2B enter the roadmap? Does the pilot start with one company?
 - **C23**: should clients choose things themselves (foods, dietitian, goals), and where
   first?

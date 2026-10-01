@@ -152,9 +152,11 @@ C2). Each ID names the interview question it came from.
 - **No Mac:** iOS builds go through **Codemagic** (cloud CI).
 - **#136** **A separate Supabase dev project** (Can, 1 Oct 2026, was C17): free tier, EU
   region, the same migrations pushed to both. Development, test signups and CI point at
-  dev; the current project `jpkvulcszsutacritttk` becomes the live one. Built before
-  any new health-data feature, together with CI and RLS tests ("foundation first",
-  Can, 1 Oct 2026).
+  dev; the current project `jpkvulcszsutacritttk` becomes the live one. Built together
+  with CI and RLS tests **before launch, not before features** (Can, 1 Oct 2026: no
+  launch soon, so features come first). Until then **no real client data** goes into
+  the project, only test accounts with made-up data; every new table still gets its RLS
+  policies in its own migration.
 - **Agent skills** (#85): mattpocock-skills configured. **GitHub Issues is the tracker**
   (confirmed 23 Sep 2026); triage and `wayfinder:*` labels exist on the repo. Domain
   docs are single-context (`CONTEXT.md`, `docs/adr/`).
