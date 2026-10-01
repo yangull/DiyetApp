@@ -66,27 +66,21 @@ class _GoalsEditScreenState extends ConsumerState<GoalsEditScreen> {
               style: text.bodyMedium?.copyWith(color: palette.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xl),
-            TextField(
+            LabeledField(
+              label: 'Hedefim',
               controller: _goal,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Hedefim'),
             ),
             const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _budget,
-              decoration: const InputDecoration(labelText: 'Bütçe aralığım'),
-            ),
+            LabeledField(label: 'Bütçe aralığım', controller: _budget),
             const SizedBox(height: AppSpacing.md),
-            TextField(
+            LabeledField(
+              label: 'Sağlık notlarım',
+              hint: 'Alerji, hastalık, kullandığın ilaçlar…',
               controller: _notes,
               minLines: 3,
               maxLines: 6,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Sağlık notlarım',
-                hintText: 'Alerji, hastalık, kullandığın ilaçlar…',
-                alignLabelWithHint: true,
-              ),
             ),
             const SizedBox(height: AppSpacing.xxl),
             FilledButton(

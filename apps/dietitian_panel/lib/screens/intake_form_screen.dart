@@ -406,10 +406,11 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     int maxLines = 1,
     bool required = false,
   }) {
-    return TextFormField(
+    return LabeledField(
+      label: label,
       controller: controller,
       maxLines: maxLines,
-      decoration: InputDecoration(labelText: label, hintText: hint),
+      hint: hint,
       validator: required
           ? (v) => (v == null || v.trim().isEmpty) ? 'Zorunlu alan' : null
           : null,
@@ -423,10 +424,10 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     required num max,
     bool optional = false,
   }) {
-    return TextFormField(
+    return LabeledField(
+      label: label,
       controller: controller,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(labelText: label),
       validator: (v) {
         final raw = (v ?? '').trim().replaceAll(',', '.');
         if (raw.isEmpty) return optional ? null : 'Zorunlu alan';
@@ -444,20 +445,9 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     required Map<T, String> entries,
     required ValueChanged<T> onChanged,
   }) {
-    // Expanded, so a long choice ("Orta hareketli") at large text is cut
-    // with an ellipsis inside the field instead of overflowing it.
-    return DropdownButtonFormField<T>(
-      initialValue: value,
-      isExpanded: true,
-      // A dropdown's content has a 24 px floor, taller than a text line, so
-      // its padding is trimmed to land on the text fields' height.
-      decoration: InputDecoration(
-        labelText: label,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: (context.density.inputHeight - 24) / 2,
-        ),
-      ),
+    return LabeledDropdown<T>(
+      label: label,
+      value: value,
       items: [
         for (final entry in entries.entries)
           DropdownMenuItem(
@@ -465,9 +455,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
             child: Text(entry.value, overflow: TextOverflow.ellipsis),
           ),
       ],
-      onChanged: (v) {
-        if (v != null) onChanged(v);
-      },
+      onChanged: onChanged,
     );
   }
 }

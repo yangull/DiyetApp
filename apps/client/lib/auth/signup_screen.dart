@@ -77,36 +77,34 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
-                    TextFormField(
+                    LabeledField(
+                      label: 'Ad soyad',
                       controller: _fullName,
                       autofillHints: const [AutofillHints.name],
-                      decoration: const InputDecoration(labelText: 'Ad soyad'),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? 'Adını gir.' : null,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
+                    LabeledField(
+                      label: 'E-posta',
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(labelText: 'E-posta'),
                       validator: (v) => (v == null || !v.contains('@'))
                           ? 'Geçerli bir e-posta gir.'
                           : null,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
+                    LabeledField(
+                      label: 'Parola',
+                      helper: 'En az 8 karakter.',
                       controller: _password,
-                      obscureText: true,
+                      password: true,
                       autofillHints: const [AutofillHints.newPassword],
-                      decoration: const InputDecoration(
-                        labelText: 'Parola',
-                        helperText: 'En az 8 karakter.',
-                      ),
                       validator: (v) => (v == null || v.length < 8)
                           ? 'Parola en az 8 karakter olmalı.'
                           : null,
-                      onFieldSubmitted: (_) => _submit(),
+                      onSubmitted: (_) => _submit(),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: AppSpacing.md),

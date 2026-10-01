@@ -28,5 +28,6 @@ export 'src/theme/tokens/app_typography.dart';
 export 'src/widgets/action_row.dart';
 export 'src/widgets/cloud_card.dart';
 export 'src/widgets/floating_nav_bar.dart';
+export 'src/widgets/labeled_field.dart';
 export 'src/widgets/person_avatar.dart';
 export 'src/widgets/section_label.dart';

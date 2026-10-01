@@ -591,13 +591,11 @@ class _InviteDialogState extends State<_InviteDialog> {
         children: [
           SizedBox(
             width: 360,
-            child: TextField(
+            child: LabeledField(
+              label: 'Danışanın e-posta adresi',
               controller: _controller,
               autofocus: true,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Danışanın e-posta adresi',
-              ),
               onSubmitted: (_) => _submit(context),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:dietitian_panel/main_demo.dart';
 import 'package:dietitian_panel/screens/client_detail_screen.dart';
+import 'package:dietitian_panel/screens/clients_screen.dart';
 import 'package:dietitian_panel/screens/intake_form_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/reports_screen.dart';
@@ -79,7 +80,10 @@ void main() {
       find.byType(IntakeFormScreen),
     );
     Finder box(String l) => find
-        .ancestor(of: find.text(l), matching: find.byType(InputDecorator))
+        .descendant(
+          of: find.widgetWithText(FieldFrame, l),
+          matching: find.byType(InputDecorator),
+        )
         .first;
     expect(
       left(t, box('Yaş')),
@@ -104,6 +108,27 @@ void main() {
         t.getSize(box(l)).height.roundToDouble(),
     };
     expect(heights, hasLength(1));
+  });
+
+  testWidgets('the Danışanlar filter row shares one bottom edge', (t) async {
+    t.view.devicePixelRatio = 1;
+    t.view.physicalSize = const Size(1400, 900);
+    addTearDown(t.view.reset);
+    await t.pumpWidget(const ProviderScope(child: DietitianPanelDemoApp()));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Danışanlar'));
+    await t.pumpAndSettle();
+    final inClients = find.byType(ClientsScreen);
+    Finder within(Finder f) => find.descendant(of: inClients, matching: f);
+    final bottoms = {
+      for (final f in [
+        within(find.byType(TextField)),
+        within(find.byType(DropdownButtonFormField<String?>)),
+        within(find.byType(FilterChip)).first,
+      ])
+        t.getRect(f).bottom.roundToDouble(),
+    };
+    expect(bottoms, hasLength(1));
   });
 
   testWidgets('Takip centres inside the tab area', (t) async {

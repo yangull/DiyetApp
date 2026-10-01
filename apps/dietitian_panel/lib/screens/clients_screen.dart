@@ -109,26 +109,16 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           Wrap(
             spacing: AppSpacing.md,
             runSpacing: AppSpacing.md,
-            crossAxisAlignment: WrapCrossAlignment.center,
+            // The dropdown carries a label above it; the others sit on its
+            // box, so they line up at the bottom.
+            crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               SizedBox(width: 260, child: _searchField(query)),
-              // Not DropdownMenu: its arrow button is a fixed 48 px, which
-              // the theme can't reach, so it stood taller than the search
-              // field beside it. This one has a 24 px content floor instead,
-              // so its padding is trimmed to land on the same 38 px.
               SizedBox(
                 width: 220,
-                child: DropdownButtonFormField<String?>(
-                  initialValue: _goal,
-                  isExpanded: true,
-                  iconSize: 20,
-                  decoration: const InputDecoration(
-                    labelText: 'Hedef',
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 7,
-                    ),
-                  ),
+                child: LabeledDropdown<String?>(
+                  label: 'Hedef',
+                  value: _goal,
                   onChanged: (value) => setState(() => _goal = value),
                   items: [
                     const DropdownMenuItem(

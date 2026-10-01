@@ -11,6 +11,12 @@ Finder _steps(int done) => find.byWidgetPredicate(
       w.properties.label == 'Başlangıç: 3 adımdan $done tamamlandı',
 );
 
+/// The text field under a [LabeledField] with this label.
+Finder _fieldLabelled(String label) => find.descendant(
+  of: find.widgetWithText(LabeledField, label),
+  matching: find.byType(TextField),
+);
+
 void main() {
   testWidgets('signed out shows the login form with the shared brand palette', (
     tester,
@@ -209,11 +215,11 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextField, 'Hedefim'),
+      _fieldLabelled('Hedefim'),
       '5 kilo vermek',
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Sağlık notlarım'),
+      _fieldLabelled('Sağlık notlarım'),
       'Laktoz intoleransı',
     );
     await tester.ensureVisible(find.text('Kaydet'));
@@ -265,7 +271,7 @@ void main() {
     await tester.tap(button);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Hedeflerim'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Hedefim'), findsOneWidget);
+    expect(_fieldLabelled('Hedefim'), findsOneWidget);
   });
 
   for (final width in [360.0, 412.0]) {
@@ -402,7 +408,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       double fieldLeft() =>
-          tester.getTopLeft(find.byType(TextFormField).first).dx;
+          tester.getTopLeft(find.byType(TextField).first).dx;
 
       expect(
         tester.getTopLeft(find.text('Hesabın yok mu? Kayıt ol')).dx,

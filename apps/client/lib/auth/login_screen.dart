@@ -72,24 +72,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
-                    TextFormField(
+                    LabeledField(
+                      label: 'E-posta',
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(labelText: 'E-posta'),
                       validator: (v) => (v == null || !v.contains('@'))
                           ? 'Geçerli bir e-posta gir.'
                           : null,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
+                    LabeledField(
+                      label: 'Parola',
                       controller: _password,
-                      obscureText: true,
+                      password: true,
                       autofillHints: const [AutofillHints.password],
-                      decoration: const InputDecoration(labelText: 'Parola'),
                       validator: (v) =>
                           (v == null || v.isEmpty) ? 'Parolanı gir.' : null,
-                      onFieldSubmitted: (_) => _submit(),
+                      onSubmitted: (_) => _submit(),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: AppSpacing.md),

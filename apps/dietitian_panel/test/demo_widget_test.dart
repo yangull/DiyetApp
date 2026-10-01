@@ -629,7 +629,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Ad soyad'),
+      find.descendant(
+        of: find.widgetWithText(LabeledField, 'Ad soyad'),
+        matching: find.byType(TextField),
+      ),
       'Ayşe Demir',
     );
     // A focused field scrolls itself back into view on every frame, which
