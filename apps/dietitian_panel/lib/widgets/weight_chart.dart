@@ -24,7 +24,7 @@ class WeightChart extends StatelessWidget {
         painter: _WeightPainter(
           entries: entries,
           targetKg: targetKg,
-          line: AppColors.accent,
+          line: context.palette.accent,
           grid: context.palette.divider,
           target: context.palette.textSecondary,
           surface: context.palette.cloudCard,

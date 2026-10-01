@@ -188,7 +188,7 @@ class _ApproveBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.canvas,
+        color: context.palette.canvas,
         border: Border(top: BorderSide(color: palette.divider)),
       ),
       child: SafeArea(

@@ -28,9 +28,12 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Both tabs sit on the white canvas, so the status bar keeps dark icons.
+      // No app bar here, so the status bar icons follow the theme by hand:
+      // dark on the light canvas, light on the dark one.
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
+        value: Theme.of(context).brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         child: SafeArea(
           child: _tab == 0
               ? TodayTab(identity: widget.identity)

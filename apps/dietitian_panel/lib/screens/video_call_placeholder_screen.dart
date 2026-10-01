@@ -116,7 +116,7 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
                   _CallControl(
                     icon: Icons.call_end,
                     tooltip: 'Görüşmeyi bitir',
-                    background: AppColors.error,
+                    background: context.palette.error,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],

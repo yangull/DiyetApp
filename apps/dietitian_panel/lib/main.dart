@@ -30,15 +30,17 @@ Future<void> main() async {
 /// Assumes Supabase is already initialized — `main()` only builds this once
 /// it is, so tests can wrap it in a `ProviderScope` with fake repositories
 /// and never touch the network.
-class DietitianPanelApp extends StatelessWidget {
+class DietitianPanelApp extends ConsumerWidget {
   const DietitianPanelApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Wellkit Panel',
       theme: AppTheme.light(AppDensity.compact),
-      // Phones get the comfortable density; wide screens keep compact (#38).
+      darkTheme: AppTheme.dark(AppDensity.compact),
+      themeMode: ref.watch(themeModeProvider),
+      // The density follows the input (#135); the builder picks it.
       builder: panelThemeBuilder,
       home: AuthGate(
         expectedRole: UserRole.dietitian,

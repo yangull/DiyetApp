@@ -19,6 +19,9 @@
   - A floating white capsule bottom bar in both apps.
   - Panel density by input: compact only in a computer browser. Rail vs bottom bar still
     switches by width.
+- **Dark mode** (was C43, same night): both apps, "Sistem / Açık / Koyu" in Profil
+  (client, real panel) and Ayarlar (demo), saved on the device; measured dark palette in
+  `docs/design-system.md`.
 - Decided by Can on 1 Oct 2026:
   - Accent green (was C36) and a flat Bugün top (was C40).
   - The copy study and the Bugün canvas (old slices 2–3) were skipped.
@@ -37,8 +40,8 @@
 ## Next steps
 
 1. **Web check:** run the panel with `flutter run -d web-server` and open it in the
-   Windows browser. Confirm Alpino weights (headings must not look Black) and judge the
-   compact scale (13 px body, 32 px controls). Adjust `AppDensity.compact` /
+   Windows browser. Confirm Alpino weights (headings must not look Black), judge the
+   compact scale (13 px body, 32 px controls) and look at dark mode. Adjust `AppDensity.compact` /
    `AppTypography` if Can wants it larger.
 2. **Real client app on the emulator:** the emulator has no DNS (Supabase host lookup
    fails). Toggle Wi-Fi in the emulator or cold-boot it, then check Bugün, Profil and the
@@ -80,5 +83,5 @@
 
 - The web check (next step 1) and fixing the emulator's network (step 2).
 - C47 (tablets in "desktop site" mode), when the panel goes to tablets.
-- Still open from before: C43 (dark mode), C23 (interaction half), DT3, C13, C21, C17,
+- Still open from before: C23 (interaction half), DT3, C13, C21, C17,
   DT7, C4, C46.

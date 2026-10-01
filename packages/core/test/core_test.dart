@@ -147,10 +147,7 @@ void main() {
       theme.textButtonTheme.style!.foregroundColor!.resolve(none),
       AppColors.ink,
     );
-    expect(
-      AppTheme.destructiveButton.backgroundColor!.resolve(none),
-      AppColors.error,
-    );
+    expect(theme.extension<AppPalette>()!.error, AppColors.error);
   });
 
   test('overlays stay at or under 8 % Ink', () {
@@ -306,6 +303,55 @@ void main() {
       Theme.of(inside).filledButtonTheme.style!.backgroundColor!.resolve(none),
       AppColors.charcoal,
     );
+  });
+
+  group('measured dark palette (C43)', () {
+    const p = AppPalette.dark;
+    final pressedCard = Color.alphaBlend(
+      p.ink.withValues(alpha: 0x14 / 255),
+      p.cloudCard,
+    );
+
+    void atLeast(Color fg, Color bg, double min, String what) {
+      expect(contrast(fg, bg), greaterThanOrEqualTo(min), reason: what);
+    }
+
+    test('text keeps 4.5:1 on the canvas, a card and a pressed card', () {
+      for (final bg in [p.canvas, p.cloudCard, pressedCard]) {
+        for (final (fg, what) in [
+          (p.ink, 'ink'),
+          (p.textSecondary, 'textSecondary'),
+          (p.accent, 'accent'),
+          (p.warning, 'warning'),
+          (p.error, 'error'),
+          (p.aiDraft, 'aiDraft'),
+        ]) {
+          atLeast(fg, bg, 4.5, what);
+        }
+      }
+      atLeast(p.borderStrong, p.canvas, 3, 'border on canvas');
+      atLeast(p.borderStrong, p.cloudCard, 3, 'border on card');
+    });
+
+    test('labels on fills and status text on tints keep 4.5:1', () {
+      atLeast(p.onCharcoal, p.charcoal, 4.5, 'filled pill');
+      atLeast(p.onCharcoal, p.charcoalHover, 4.5, 'pressed pill');
+      atLeast(p.onFilled, p.accent, 4.5, 'on accent');
+      atLeast(p.onFilled, p.error, 4.5, 'destructive');
+      atLeast(p.accentStrong, p.accentTint, 4.5, 'Onaylı');
+      atLeast(p.warning, p.warningTint, 4.5, 'warning');
+      atLeast(p.error, p.errorTint, 4.5, 'error');
+      atLeast(p.aiDraft, p.aiDraftTint, 4.5, 'aiDraft');
+    });
+
+    test('the dark theme is dark and carries the dark palette', () {
+      final theme = AppTheme.dark(AppDensity.comfortable);
+      expect(theme.brightness, Brightness.dark);
+      expect(theme.colorScheme.brightness, Brightness.dark);
+      expect(theme.scaffoldBackgroundColor, p.canvas);
+      expect(theme.extension<AppPalette>()!.ink, p.ink);
+      expect(theme.cardTheme.color, p.cloudCard);
+    });
   });
 
   test('numbers are Alpino 600', () {

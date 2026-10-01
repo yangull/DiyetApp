@@ -19,10 +19,13 @@ AppDensity panelDensity(BuildContext context) =>
     debugPanelDensity?.call(context) ?? AppDensity.forPlatform();
 
 /// `MaterialApp.builder` for both panel entry points, so every route and
-/// dialog below it gets the panel's density.
+/// dialog below it gets the panel's density, in the light or dark theme
+/// MaterialApp already resolved.
 Widget panelThemeBuilder(BuildContext context, Widget? child) {
+  final density = panelDensity(context);
+  final dark = Theme.of(context).brightness == Brightness.dark;
   return Theme(
-    data: AppTheme.light(panelDensity(context)),
+    data: dark ? AppTheme.dark(density) : AppTheme.light(density),
     child: child ?? const SizedBox.shrink(),
   );
 }

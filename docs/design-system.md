@@ -9,8 +9,8 @@ it replaced is in git history (before 1 Oct 2026). The private Design System art
 
 Decided on 1 Oct 2026: the accent is **green #18795C** (C36), the top of Bugün is
 **flat**, with no sky gradient (C40), and the redesign went from this file straight to
-Flutter, with no copy study and no canvas. Still open: dark mode (C43); this file
-measures **light only**.
+Flutter, with no copy study and no canvas. Dark mode followed the same day (was C43):
+"Sistem / Açık / Koyu", measured below.
 
 ## Direction
 
@@ -45,7 +45,8 @@ empty states) follows HIG, drawn in Bevel's tone.
 
 ## Colour
 
-Light only. Every value is measured (WCAG 2 contrast). The bar for **all text is 4.5:1**:
+Light and dark, one token set (`AppPalette.light` / `.dark`); widgets read every colour
+through `context.palette`, never from `AppColors`. Every value is measured (WCAG 2 contrast). The bar for **all text is 4.5:1**:
 HIG would accept 3:1 for 18 pt+ or bold text, but WCAG only allows that from 24 px
 regular or 18.66 px bold, so the stricter rule wins and we don't rely on the exception.
 Graphics that carry meaning and input boundaries need 3:1 (WCAG 1.4.11).
@@ -79,6 +80,30 @@ On a pressed Cloud Card (`#DBE0E7`): ink 11.84, textSecondary 4.61, error 4.53, 
 
 Ink on every tint stays above 13:1 (accentTint 13.63, warningTint 14.16, aiDraftTint
 13.36).
+
+### Dark (Can, 1 Oct 2026, was C43)
+
+Near-black, cards one step lighter, a near-white filled pill, lightened accent and
+status colours, and Bevel's Sleep Lilac for AI drafts. The user picks **Sistem / Açık /
+Koyu** in Profil (client app, real panel) or Ayarlar (panel demo); the default follows
+the phone and the choice is saved on the device (`themeModeProvider` in core). The
+overlay is Ink at 4 % / 8 % here too, which lightens. Ratios on canvas / card / pressed
+card (`#2F3035`):
+
+| Token | Hex | Ratios | Note |
+|---|---|---|---|
+| `canvas` | `#121316` | — | |
+| `cloudCard` | `#1E2025` | 1.14 on canvas | Also the floating bottom bar, where a shadow can't show |
+| `ink` | `#EDEEF0` | 16.00 / 14.04 / 11.34 | |
+| `charcoal` (filled pill) | `#EDEEF0` | label `onCharcoal` `#121316` 16.00, pressed `#D5D7DB` 12.89 | |
+| `textSecondary` | `#9A9DA3` | 6.83 / 6.00 / 4.84 | |
+| `borderStrong` | `#74777E` | 4.14 / 3.63 | |
+| `divider` | `#2C2F35` | 1.38 / 1.21 | |
+| `accent` | `#4CC38A` | 8.39 / 7.36 / 5.94 | `onFilled` `#121316` on it 8.39 |
+| `accentStrong` on `accentTint` | `#7FD9AE` on `#173327` | 8.08 | "Onaylı" |
+| `warning` / tint | `#E6B04A` / `#3A2E12` | 9.44 / 8.28 / 6.69; on tint 6.76 | |
+| `error` / tint | `#FF8A7A` / `#3D1E1B` | 8.11 / 7.12 / 5.75; on tint 6.55; `onFilled` on it 8.11 | |
+| `aiDraft` / tint | `#B9A6FF` / `#2A2445` | 8.81 / 7.73 / 6.25; on tint 6.93 | Bevel's Sleep Lilac |
 
 **Overlays.** Hover, focus and press darken whatever they sit on, and text must keep
 4.5:1 in every state. So the theme caps every overlay at Ink **4 % for hover and 8 % for
@@ -346,5 +371,4 @@ the panel; "danışan", never "müşteri"; short button labels ("Kaydet", "Vazge
 
 ## Open
 
-- **C43:** dark mode. Light only until Can decides.
 - **Compact scale and sizes:** coded as the draft, judged by Can on the real panel.

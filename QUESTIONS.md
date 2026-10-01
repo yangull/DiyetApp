@@ -98,15 +98,8 @@ Product decisions nobody else can make. The most blocking come first. Money ques
 
 **Redesign: what is still open (PLANNING #134, #135).** Bevel's DESIGN.md
 (`docs/design/2026-10-01-bevel/DESIGN.md`) describes a website; C31–C42, C44 and C45 were
-asked and answered on 1 Oct 2026 (now PLANNING #134–#135 and
-`docs/design-system.md`). Still open:
-
-### C43. Light only, or dark mode too?
-Bevel is light only. HIG asks for contrast checks in both modes if an app supports dark.
-Can (1 Oct 2026): decide after the DESIGN.md is adapted and the font is chosen. The font
-is chosen; the adaptation (`docs/design-system.md`) measures light only, and the
-canvas was skipped. Ask again once the redesigned client app runs on the phone.
->
+asked and answered on 1 Oct 2026, and C43 (dark mode) the same night (now PLANNING
+#134–#135 and `docs/design-system.md`). Still open:
 
 ### C47. Tablets in "desktop site" mode get the compact panel
 The panel is compact in a browser on Windows, macOS or Linux (#135). Chrome and Samsung

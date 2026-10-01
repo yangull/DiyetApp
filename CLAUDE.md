@@ -211,6 +211,9 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   `AppTheme.hoverOverlay` / `pressOverlay`; Material's defaults (10–12 %) break the grey.
 - Cards are Cloud Card on the white canvas. Anything pale inside a card (a progress
   track, an avatar disc, a neutral pill) is `canvas`, not `cloudCard`, or it vanishes.
+- Widgets read colours through `context.palette`, never `AppColors.*`: the constants
+  are light-only, so a widget using them stays light in dark mode. Text on the filled
+  pill (`charcoal`) is `onCharcoal`, which flips to near-black in dark.
 - Black does the acting: `FilledButton` is the Charcoal pill, `OutlinedButton` the pale
   secondary pill (not an outline), `TextButton` Ink. Green is never an action colour. A
   destructive confirm uses `AppTheme.destructiveButton` (red).

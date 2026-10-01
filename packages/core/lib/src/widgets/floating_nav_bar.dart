@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/tokens/app_colors.dart';
 import '../theme/tokens/app_spacing.dart';
 
 /// The bottom bar as a solid white floating capsule (PLANNING #135): 16 from
@@ -33,10 +32,10 @@ class FloatingNavBar extends StatelessWidget {
           0,
         ),
         child: DecoratedBox(
-          decoration: const ShapeDecoration(
-            color: AppColors.canvas,
-            shape: StadiumBorder(),
-            shadows: [shadow],
+          decoration: ShapeDecoration(
+            color: NavigationBarTheme.of(context).backgroundColor,
+            shape: const StadiumBorder(),
+            shadows: const [shadow],
           ),
           child: ClipPath(
             clipper: const ShapeBorderClipper(shape: StadiumBorder()),

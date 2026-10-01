@@ -270,8 +270,8 @@ class _ConversationRow extends StatelessWidget {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.ink,
+                  decoration: BoxDecoration(
+                    color: context.palette.ink,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -535,7 +535,9 @@ class _MessageBubble extends StatelessWidget {
                 // client's: both opaque and measured (C27). Cloud Card text on
                 // Charcoal is 14.21:1.
                 decoration: BoxDecoration(
-                  color: fromDietitian ? AppColors.charcoal : palette.cloudCard,
+                  color: fromDietitian
+                      ? context.palette.charcoal
+                      : palette.cloudCard,
                   borderRadius: BorderRadius.circular(
                     context.density.cardRadius,
                   ),
@@ -546,7 +548,7 @@ class _MessageBubble extends StatelessWidget {
                     Text(
                       message.text,
                       style: text.bodyMedium?.copyWith(
-                        color: fromDietitian ? palette.cloudCard : palette.ink,
+                        color: fromDietitian ? palette.onCharcoal : palette.ink,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -554,7 +556,7 @@ class _MessageBubble extends StatelessWidget {
                       formatTime(message.sentAt),
                       style: text.bodySmall?.copyWith(
                         color: fromDietitian
-                            ? palette.cloudCard
+                            ? palette.onCharcoal
                             : palette.textSecondary,
                       ),
                     ),

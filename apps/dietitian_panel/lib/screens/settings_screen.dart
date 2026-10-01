@@ -70,7 +70,14 @@ class SettingsScreen extends ConsumerWidget {
             'kullanılmaz.',
             style: text.bodyMedium?.copyWith(color: palette.textSecondary),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.x3),
+          Text('Görünüm', style: text.headlineSmall),
+          const SizedBox(height: AppSpacing.md),
+          const Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: ThemeChoiceSelector(),
+          ),
+          const SizedBox(height: AppSpacing.x3),
           Text(
             'Bu ekran görüşme için hazırlanmıştır. Hangi hatırlatmaların işinize '
             'yaradığını, hangilerinin danışanı rahatsız ettiğini sizden '

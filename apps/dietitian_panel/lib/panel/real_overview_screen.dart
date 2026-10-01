@@ -249,7 +249,7 @@ class _ClientsFocalCard extends StatelessWidget {
                   style: AppTypography.figures(
                     wide ? 48 : 56,
                     wide ? 52 : 60,
-                  ).copyWith(color: AppColors.ink, letterSpacing: -1),
+                  ).copyWith(color: context.palette.ink, letterSpacing: -1),
                 ),
               ),
               const SizedBox(width: 14),

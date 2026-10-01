@@ -84,6 +84,12 @@ class ProfileTab extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
           ],
         const SizedBox(height: AppSpacing.xxl),
+        const _SectionHeader(title: 'Görünüm'),
+        const Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: ThemeChoiceSelector(),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
         const _SectionHeader(title: 'Yakında'),
         Text(
           'Dosyaların: diyetisyeninle paylaşacağın rapor ve belgeler.',

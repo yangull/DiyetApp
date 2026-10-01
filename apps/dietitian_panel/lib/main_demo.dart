@@ -19,18 +19,20 @@ void main() {
   runApp(const ProviderScope(child: DietitianPanelDemoApp()));
 }
 
-class DietitianPanelDemoApp extends StatelessWidget {
+class DietitianPanelDemoApp extends ConsumerWidget {
   const DietitianPanelDemoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Wellkit Panel (Demo)',
       // This is driven in front of dietitians and captured for screenshots;
       // the debug ribbon in the corner is noise in both settings.
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(AppDensity.compact),
-      // Phones get the comfortable density; wide screens keep compact (#38).
+      darkTheme: AppTheme.dark(AppDensity.compact),
+      themeMode: ref.watch(themeModeProvider),
+      // The density follows the input (#135); the builder picks it.
       builder: panelThemeBuilder,
       home: const PanelShell(),
     );

@@ -24,14 +24,16 @@ Future<void> main() async {
 /// Assumes Supabase is already initialized — `main()` only builds this once
 /// it is, so tests can wrap it in a `ProviderScope` with fake repositories
 /// and never touch the network.
-class ClientApp extends StatelessWidget {
+class ClientApp extends ConsumerWidget {
   const ClientApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Wellkit',
       theme: AppTheme.light(AppDensity.comfortable),
+      darkTheme: AppTheme.dark(AppDensity.comfortable),
+      themeMode: ref.watch(themeModeProvider),
       home: AuthGate(
         expectedRole: UserRole.client,
         signedOutBuilder: (context) => const AuthFlowScreen(),

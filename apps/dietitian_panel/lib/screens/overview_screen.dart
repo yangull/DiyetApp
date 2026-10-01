@@ -220,7 +220,7 @@ class _DraftsCard extends StatelessWidget {
         style: AppTypography.figures(
           wide ? 48 : 56,
           wide ? 52 : 60,
-        ).copyWith(color: AppColors.ink, letterSpacing: -1),
+        ).copyWith(color: context.palette.ink, letterSpacing: -1),
       ),
     );
     final title = Semantics(
@@ -565,9 +565,9 @@ class _AgendaCard extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: '${later.length}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.ink,
+                      color: context.palette.ink,
                     ),
                   ),
                   TextSpan(
@@ -645,7 +645,7 @@ class _AgendaRow extends ConsumerWidget {
     final timeStyle = AppTypography.figures(
       name.fontSize!,
       name.height! * name.fontSize!,
-    ).copyWith(color: AppColors.ink);
+    ).copyWith(color: context.palette.ink);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -674,7 +674,7 @@ class _AgendaRow extends ConsumerWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check, size: 16, color: AppColors.ink),
+                  Icon(Icons.check, size: 16, color: context.palette.ink),
                   const SizedBox(width: AppSpacing.xs),
                   Flexible(
                     child: Text(

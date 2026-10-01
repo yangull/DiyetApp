@@ -1,44 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'tokens/app_colors.dart';
 import 'tokens/app_density.dart';
 import 'tokens/app_spacing.dart';
 import 'tokens/app_typography.dart';
 
-/// The app ships light-only for now (C43).
+/// Light and dark (Can, 1 Oct 2026, was C43), built from one function over
+/// the measured [AppPalette.light] and [AppPalette.dark].
 ///
 /// [ColorScheme.fromSeed] is deliberately NOT used. It derives its own tonal
 /// ramps from one seed and would not reproduce the measured values in
-/// [AppColors]; every slot below is set explicitly instead.
+/// [AppPalette]; every slot below is set explicitly instead.
 abstract final class AppTheme {
-  /// The confirm button of a destructive dialog ("İptal et", "Sıfırla"): red.
-  /// White on it is 6.01:1.
-  static final destructiveButton = FilledButton.styleFrom(
-    backgroundColor: AppColors.error,
-    foregroundColor: AppColors.onFilled,
-  ).copyWith(overlayColor: overlay);
+  /// The confirm button of a destructive dialog ("İptal et", "Sıfırla"): red,
+  /// with a label measured at 6.01:1 (light) and 8.11:1 (dark).
+  static ButtonStyle destructive(BuildContext context) {
+    final p = Theme.of(context).extension<AppPalette>()!;
+    return ButtonStyle(
+      backgroundColor: WidgetStatePropertyAll(p.error),
+      foregroundColor: WidgetStatePropertyAll(p.onFilled),
+    );
+  }
 
-  /// Hover, focus and press darken whatever sits below, and text must keep
-  /// 4.5:1 in every state. Capped at Ink 4 % (hover) and 8 % (focus, press):
-  /// every ratio in [AppColors] was measured on a Cloud Card under 8 %.
+  /// Hover, focus and press darken (or, in dark, lighten) whatever sits
+  /// below, and text must keep 4.5:1 in every state. Capped at Ink 4 %
+  /// (hover) and 8 % (focus, press): every ratio in [AppPalette] was measured
+  /// on a card under 8 %. These are the light values.
   static const hoverOverlay = Color(0x0A222326);
   static const pressOverlay = Color(0x14222326);
 
-  /// The capped Ink overlay, for a button styled at the call site:
-  /// `TextButton.styleFrom(...).copyWith(overlayColor: AppTheme.overlay)`.
-  static final WidgetStateProperty<Color?> overlay =
-      WidgetStateProperty.resolveWith((states) {
+  static ThemeData light(AppDensity density) =>
+      _build(density, AppPalette.light, Brightness.light);
+
+  static ThemeData dark(AppDensity density) =>
+      _build(density, AppPalette.dark, Brightness.dark);
+
+  static ThemeData _build(AppDensity density, AppPalette p, Brightness b) {
+    final hover = p.ink.withValues(alpha: 0x0A / 255);
+    final press = p.ink.withValues(alpha: 0x14 / 255);
+    final WidgetStateProperty<Color?> overlay = WidgetStateProperty.resolveWith(
+      (states) {
         if (states.contains(WidgetState.pressed) ||
             states.contains(WidgetState.focused)) {
-          return pressOverlay;
+          return press;
         }
-        if (states.contains(WidgetState.hovered)) return hoverOverlay;
+        if (states.contains(WidgetState.hovered)) return hover;
         return null;
-      });
-
-  static ThemeData light(AppDensity density) {
+      },
+    );
     final text = AppTypography.textTheme(density);
-    final pill = const StadiumBorder();
+    final pill = StadiumBorder();
     final inputRadius = BorderRadius.circular(density.controlRadius);
     final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(density.cardRadius),
@@ -53,41 +65,43 @@ abstract final class AppTheme {
         (density.inputHeight - inputText.fontSize! * inputText.height!) / 2;
 
     return ThemeData(
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme(
+        brightness: b,
         // Black does the acting: Material's "primary" drives checkboxes,
         // focus, the cursor and pickers, so it is Charcoal. The green accent
         // is "secondary" and only reaches progress through its own theme.
-        primary: AppColors.charcoal,
-        onPrimary: AppColors.cloudCard,
-        primaryContainer: AppColors.cloudCard,
-        onPrimaryContainer: AppColors.ink,
-        secondary: AppColors.accent,
-        onSecondary: AppColors.onFilled,
-        secondaryContainer: AppColors.accentTint,
-        onSecondaryContainer: AppColors.accentStrong,
-        tertiary: AppColors.aiDraft,
-        onTertiary: AppColors.onFilled,
-        surface: AppColors.canvas,
-        onSurface: AppColors.ink,
-        onSurfaceVariant: AppColors.textSecondary,
-        surfaceContainerLowest: AppColors.canvas,
-        surfaceContainerLow: AppColors.canvas,
-        surfaceContainer: AppColors.canvas,
-        surfaceContainerHigh: AppColors.canvas,
-        surfaceContainerHighest: AppColors.cloudCard,
+        primary: p.charcoal,
+        onPrimary: p.onCharcoal,
+        primaryContainer: p.cloudCard,
+        onPrimaryContainer: p.ink,
+        secondary: p.accent,
+        onSecondary: p.onFilled,
+        secondaryContainer: p.accentTint,
+        onSecondaryContainer: p.accentStrong,
+        tertiary: p.aiDraft,
+        onTertiary: p.onFilled,
+        surface: p.canvas,
+        onSurface: p.ink,
+        onSurfaceVariant: p.textSecondary,
+        surfaceContainerLowest: p.canvas,
+        surfaceContainerLow: p.canvas,
+        surfaceContainer: p.canvas,
+        surfaceContainerHigh: p.canvas,
+        surfaceContainerHighest: p.cloudCard,
         surfaceTint: Colors.transparent,
-        error: AppColors.error,
-        onError: AppColors.onFilled,
-        errorContainer: AppColors.errorTint,
-        onErrorContainer: AppColors.error,
-        outline: AppColors.borderStrong,
-        outlineVariant: AppColors.divider,
+        error: p.error,
+        onError: p.onFilled,
+        errorContainer: p.errorTint,
+        onErrorContainer: p.error,
+        outline: p.borderStrong,
+        outlineVariant: p.divider,
         shadow: Colors.black,
-        inverseSurface: AppColors.charcoal,
-        onInverseSurface: AppColors.cloudCard,
+        inverseSurface: p.charcoal,
+        onInverseSurface: p.onCharcoal,
       ),
-      scaffoldBackgroundColor: AppColors.canvas,
-      canvasColor: AppColors.canvas,
+      brightness: b,
+      scaffoldBackgroundColor: p.canvas,
+      canvasColor: p.canvas,
       // AppDensity is the density system. Left alone, Flutter adds its own
       // on desktop (VisualDensity.compact), which took 8 px off every
       // control in a Windows browser.
@@ -96,34 +110,38 @@ abstract final class AppTheme {
           ? MaterialTapTargetSize.shrinkWrap
           : MaterialTapTargetSize.padded,
       textTheme: text,
-      extensions: [AppPalette.light, density],
-      hoverColor: hoverOverlay,
-      focusColor: pressOverlay,
+      extensions: [p, density],
+      hoverColor: hover,
+      focusColor: press,
       // The splash carries the press; a highlight on top of it would double
       // the overlay past 8 %.
       highlightColor: Colors.transparent,
-      splashColor: pressOverlay,
-      dividerColor: AppColors.divider,
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: AppColors.ink,
+      splashColor: press,
+      dividerColor: p.divider,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: p.ink,
         // Ink at 20 %: Cloud Card (1.14:1) was invisible on a white field.
-        selectionColor: Color(0x33222326),
-        selectionHandleColor: AppColors.ink,
+        selectionColor: p.ink.withValues(alpha: 0.2),
+        selectionHandleColor: p.ink,
       ),
-      iconTheme: const IconThemeData(color: AppColors.ink),
+      iconTheme: IconThemeData(color: p.ink),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.canvas,
-        foregroundColor: AppColors.ink,
+        // Status bar icons dark on the light canvas, light on the dark one.
+        systemOverlayStyle: b == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        backgroundColor: p.canvas,
+        foregroundColor: p.ink,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
         // The colour has to be restated: supplying titleTextStyle at all
         // stops foregroundColor from reaching the title.
-        titleTextStyle: text.headlineMedium?.copyWith(color: AppColors.ink),
+        titleTextStyle: text.headlineMedium?.copyWith(color: p.ink),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.cloudCard,
+        color: p.cloudCard,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
@@ -131,37 +149,37 @@ abstract final class AppTheme {
         shape: cardShape,
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: text.titleLarge?.copyWith(color: AppColors.ink),
-        subtitleTextStyle: text.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+        titleTextStyle: text.titleLarge?.copyWith(color: p.ink),
+        subtitleTextStyle: text.bodyMedium?.copyWith(color: p.textSecondary),
         leadingAndTrailingTextStyle: text.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
+          color: p.textSecondary,
         ),
-        iconColor: AppColors.ink,
-        textColor: AppColors.ink,
+        iconColor: p.ink,
+        textColor: p.ink,
       ),
       // The floating capsule (FloatingNavBar) carries the shape and shadow;
       // the bar itself is white with no indicator pill.
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.canvas,
+        // The floating capsule: white on white with a shadow in light; one
+        // step lighter than the canvas in dark, where a shadow can't show.
+        backgroundColor: b == Brightness.dark ? p.cloudCard : p.canvas,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: 64,
         indicatorColor: Colors.transparent,
-        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        overlayColor: WidgetStatePropertyAll(Colors.transparent),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
-                ? AppColors.ink
-                : AppColors.textSecondary,
+                ? p.ink
+                : p.textSecondary,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => text.labelMedium?.copyWith(
             color: states.contains(WidgetState.selected)
-                ? AppColors.ink
-                : AppColors.textSecondary,
+                ? p.ink
+                : p.textSecondary,
             fontWeight: states.contains(WidgetState.selected)
                 ? FontWeight.w600
                 : FontWeight.w500,
@@ -169,18 +187,16 @@ abstract final class AppTheme {
         ),
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: AppColors.canvas,
+        backgroundColor: p.canvas,
         indicatorColor: Colors.transparent,
-        selectedIconTheme: const IconThemeData(color: AppColors.ink),
-        unselectedIconTheme: const IconThemeData(
-          color: AppColors.textSecondary,
-        ),
+        selectedIconTheme: IconThemeData(color: p.ink),
+        unselectedIconTheme: IconThemeData(color: p.textSecondary),
         selectedLabelTextStyle: text.labelMedium?.copyWith(
-          color: AppColors.ink,
+          color: p.ink,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelTextStyle: text.labelMedium?.copyWith(
-          color: AppColors.textSecondary,
+          color: p.textSecondary,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -191,23 +207,23 @@ abstract final class AppTheme {
           padding: WidgetStatePropertyAll(buttonPadding),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return AppColors.cloudCard;
+              return p.cloudCard;
             }
             if (states.contains(WidgetState.pressed) ||
                 states.contains(WidgetState.hovered) ||
                 states.contains(WidgetState.focused)) {
-              return AppColors.charcoalHover;
+              return p.charcoalHover;
             }
-            return AppColors.charcoal;
+            return p.charcoal;
           }),
           foregroundColor: WidgetStateProperty.resolveWith(
             (states) => states.contains(WidgetState.disabled)
-                ? AppColors.textSecondary
-                : AppColors.cloudCard,
+                ? p.textSecondary
+                : p.onCharcoal,
           ),
           // The fill itself lifts to charcoalHover; no veil on top.
-          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-          elevation: const WidgetStatePropertyAll(0),
+          overlayColor: WidgetStatePropertyAll(Colors.transparent),
+          elevation: WidgetStatePropertyAll(0),
           textStyle: WidgetStatePropertyAll(text.labelLarge),
           shape: WidgetStatePropertyAll(pill),
         ),
@@ -218,14 +234,13 @@ abstract final class AppTheme {
         style: ButtonStyle(
           minimumSize: WidgetStatePropertyAll(Size(64, density.controlHeight)),
           padding: WidgetStatePropertyAll(buttonPadding),
-          backgroundColor: const WidgetStatePropertyAll(AppColors.cloudCard),
+          backgroundColor: WidgetStatePropertyAll(p.cloudCard),
           foregroundColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.disabled)
-                ? AppColors.textSecondary
-                : AppColors.ink,
+            (states) =>
+                states.contains(WidgetState.disabled) ? p.textSecondary : p.ink,
           ),
           overlayColor: overlay,
-          side: const WidgetStatePropertyAll(BorderSide.none),
+          side: WidgetStatePropertyAll(BorderSide.none),
           textStyle: WidgetStatePropertyAll(text.labelLarge),
           shape: WidgetStatePropertyAll(pill),
         ),
@@ -236,9 +251,8 @@ abstract final class AppTheme {
             Size(density.isCompact ? 28 : 48, density.controlHeight),
           ),
           foregroundColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.disabled)
-                ? AppColors.textSecondary
-                : AppColors.ink,
+            (states) =>
+                states.contains(WidgetState.disabled) ? p.textSecondary : p.ink,
           ),
           overlayColor: overlay,
           textStyle: WidgetStatePropertyAll(text.labelLarge),
@@ -247,13 +261,13 @@ abstract final class AppTheme {
       ),
       iconButtonTheme: IconButtonThemeData(
         style: ButtonStyle(
-          foregroundColor: const WidgetStatePropertyAll(AppColors.ink),
+          foregroundColor: WidgetStatePropertyAll(p.ink),
           overlayColor: overlay,
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.charcoal,
-        foregroundColor: AppColors.cloudCard,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: p.charcoal,
+        foregroundColor: p.onCharcoal,
         elevation: 0,
         shape: StadiumBorder(),
       ),
@@ -262,26 +276,22 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         shape: pill,
         side: BorderSide.none,
-        backgroundColor: AppColors.cloudCard,
-        selectedColor: AppColors.charcoal,
-        disabledColor: AppColors.cloudCard,
-        checkmarkColor: AppColors.cloudCard,
+        backgroundColor: p.cloudCard,
+        selectedColor: p.charcoal,
+        disabledColor: p.cloudCard,
+        checkmarkColor: p.onCharcoal,
         // Material 3 reads the selected label's colour from labelStyle, so
         // the colour itself resolves the state.
         labelStyle: text.labelLarge?.copyWith(
           color: WidgetStateColor.resolveWith(
-            (states) => states.contains(WidgetState.selected)
-                ? AppColors.cloudCard
-                : AppColors.ink,
+            (states) =>
+                states.contains(WidgetState.selected) ? p.onCharcoal : p.ink,
           ),
         ),
-        secondaryLabelStyle: text.labelLarge?.copyWith(
-          color: AppColors.cloudCard,
-        ),
+        secondaryLabelStyle: text.labelLarge?.copyWith(color: p.onCharcoal),
         color: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? AppColors.charcoal
-              : AppColors.cloudCard,
+          (states) =>
+              states.contains(WidgetState.selected) ? p.charcoal : p.cloudCard,
         ),
         // The chip adds 2 px of its own above and below the label.
         padding: EdgeInsets.symmetric(
@@ -295,7 +305,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.canvas,
+        fillColor: p.canvas,
         // A non-dense field has a 48 px floor of its own, above inputHeight.
         isDense: density.isCompact,
         constraints: BoxConstraints(minHeight: density.inputHeight),
@@ -313,84 +323,82 @@ abstract final class AppTheme {
           horizontal: 14,
           vertical: inputVertical,
         ),
-        hintStyle: text.bodyLarge?.copyWith(color: AppColors.textSecondary),
-        helperStyle: text.bodySmall?.copyWith(color: AppColors.textSecondary),
-        labelStyle: text.bodyLarge?.copyWith(color: AppColors.textSecondary),
-        floatingLabelStyle: text.bodyLarge?.copyWith(color: AppColors.ink),
-        prefixIconColor: AppColors.textSecondary,
-        suffixIconColor: AppColors.textSecondary,
+        hintStyle: text.bodyLarge?.copyWith(color: p.textSecondary),
+        helperStyle: text.bodySmall?.copyWith(color: p.textSecondary),
+        labelStyle: text.bodyLarge?.copyWith(color: p.textSecondary),
+        floatingLabelStyle: text.bodyLarge?.copyWith(color: p.ink),
+        prefixIconColor: p.textSecondary,
+        suffixIconColor: p.textSecondary,
         border: OutlineInputBorder(
           borderRadius: inputRadius,
-          borderSide: const BorderSide(color: AppColors.borderStrong),
+          borderSide: BorderSide(color: p.borderStrong),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: inputRadius,
-          borderSide: const BorderSide(color: AppColors.borderStrong),
+          borderSide: BorderSide(color: p.borderStrong),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: inputRadius,
-          borderSide: const BorderSide(color: AppColors.ink, width: 2),
+          borderSide: BorderSide(color: p.ink, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: inputRadius,
-          borderSide: const BorderSide(color: AppColors.error),
+          borderSide: BorderSide(color: p.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: inputRadius,
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: BorderSide(color: p.error, width: 2),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? AppColors.charcoal
+              ? p.charcoal
               : Colors.transparent,
         ),
-        checkColor: const WidgetStatePropertyAll(AppColors.cloudCard),
-        side: const BorderSide(color: AppColors.borderStrong, width: 1.5),
+        checkColor: WidgetStatePropertyAll(p.onCharcoal),
+        side: BorderSide(color: p.borderStrong, width: 1.5),
         overlayColor: overlay,
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? AppColors.charcoal
-              : AppColors.borderStrong,
+              ? p.charcoal
+              : p.borderStrong,
         ),
         overlayColor: overlay,
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? AppColors.canvas
-              : AppColors.borderStrong,
+          (states) =>
+              states.contains(WidgetState.selected) ? p.canvas : p.borderStrong,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? AppColors.charcoal
-              : AppColors.cloudCard,
+          (states) =>
+              states.contains(WidgetState.selected) ? p.charcoal : p.cloudCard,
         ),
         trackOutlineColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? AppColors.charcoal
-              : AppColors.borderStrong,
+              ? p.charcoal
+              : p.borderStrong,
         ),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.accent,
-        linearTrackColor: AppColors.cloudCard,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: p.accent,
+        linearTrackColor: p.cloudCard,
         circularTrackColor: Colors.transparent,
         linearMinHeight: 8,
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.canvas,
+        backgroundColor: p.canvas,
         surfaceTintColor: Colors.transparent,
         shape: cardShape,
-        titleTextStyle: text.headlineSmall?.copyWith(color: AppColors.ink),
-        contentTextStyle: text.bodyLarge?.copyWith(color: AppColors.ink),
+        titleTextStyle: text.headlineSmall?.copyWith(color: p.ink),
+        contentTextStyle: text.bodyLarge?.copyWith(color: p.ink),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: AppColors.canvas,
+        backgroundColor: p.canvas,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
@@ -399,44 +407,59 @@ abstract final class AppTheme {
         ),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: AppColors.canvas,
+        color: p.canvas,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        textStyle: text.bodyLarge?.copyWith(color: AppColors.ink),
+        textStyle: text.bodyLarge?.copyWith(color: p.ink),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.charcoal,
-        contentTextStyle: text.bodyMedium?.copyWith(color: AppColors.cloudCard),
-        actionTextColor: AppColors.cloudCard,
+        backgroundColor: p.charcoal,
+        contentTextStyle: text.bodyMedium?.copyWith(color: p.onCharcoal),
+        actionTextColor: p.onCharcoal,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: AppColors.charcoal,
+          color: p.charcoal,
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: text.bodySmall?.copyWith(color: AppColors.cloudCard),
+        textStyle: text.bodySmall?.copyWith(color: p.onCharcoal),
       ),
       tabBarTheme: TabBarThemeData(
-        labelColor: AppColors.ink,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.ink,
-        dividerColor: AppColors.divider,
+        labelColor: p.ink,
+        unselectedLabelColor: p.textSecondary,
+        indicatorColor: p.ink,
+        dividerColor: p.divider,
         labelStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: text.labelLarge,
         overlayColor: overlay,
       ),
       badgeTheme: BadgeThemeData(
-        backgroundColor: AppColors.charcoal,
-        textColor: AppColors.cloudCard,
+        backgroundColor: p.charcoal,
+        textColor: p.onCharcoal,
         textStyle: text.labelSmall,
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.divider,
-        thickness: 1,
-        space: 1,
+      // The theme choice and any other segmented control: the selected
+      // segment is the filled pill's colours, never green.
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStatePropertyAll(Size(48, density.controlHeight)),
+          textStyle: WidgetStatePropertyAll(text.labelLarge),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? p.charcoal
+                : Colors.transparent,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (states) =>
+                states.contains(WidgetState.selected) ? p.onCharcoal : p.ink,
+          ),
+          side: WidgetStatePropertyAll(BorderSide(color: p.borderStrong)),
+          overlayColor: overlay,
+        ),
       ),
+      dividerTheme: DividerThemeData(color: p.divider, thickness: 1, space: 1),
     );
   }
 }
@@ -447,38 +470,38 @@ abstract final class AppTheme {
 /// vanish into the card. Used by `CloudCard`.
 ThemeData onCloudCard(ThemeData base) {
   final palette = base.extension<AppPalette>()!;
+  final canvas = palette.canvas;
   final filled = base.filledButtonTheme.style!;
   final filledBackground = filled.backgroundColor!;
   return base.copyWith(
     extensions: [
       ...base.extensions.values.where((e) => e is! AppPalette),
-      palette.copyWith(inset: AppColors.canvas),
+      palette.copyWith(inset: canvas),
     ],
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: base.outlinedButtonTheme.style!.copyWith(
-        backgroundColor: const WidgetStatePropertyAll(AppColors.canvas),
+        backgroundColor: WidgetStatePropertyAll(canvas),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: filled.copyWith(
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.disabled)
-              ? AppColors.canvas
+              ? canvas
               : filledBackground.resolve(states),
         ),
       ),
     ),
     chipTheme: base.chipTheme.copyWith(
-      backgroundColor: AppColors.canvas,
-      disabledColor: AppColors.canvas,
+      backgroundColor: canvas,
+      disabledColor: canvas,
       color: WidgetStateProperty.resolveWith(
-        (states) => states.contains(WidgetState.selected)
-            ? AppColors.charcoal
-            : AppColors.canvas,
+        (states) =>
+            states.contains(WidgetState.selected) ? palette.charcoal : canvas,
       ),
     ),
     progressIndicatorTheme: base.progressIndicatorTheme.copyWith(
-      linearTrackColor: AppColors.canvas,
+      linearTrackColor: canvas,
     ),
   );
 }

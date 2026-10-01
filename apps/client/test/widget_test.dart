@@ -31,7 +31,7 @@ void main() {
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.theme?.colorScheme.primary, AppColors.charcoal);
-    expect(app.darkTheme, isNull);
+    expect(app.darkTheme?.brightness, Brightness.dark);
   });
 
   testWidgets('signed in as a client shows Bugün with only real steps', (

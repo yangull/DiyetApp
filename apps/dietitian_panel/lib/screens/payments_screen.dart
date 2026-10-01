@@ -121,7 +121,7 @@ class _SummaryCard extends StatelessWidget {
                 color: muted
                     ? palette.textSecondary
                     : emphasise
-                    ? AppColors.accent
+                    ? context.palette.accent
                     : Theme.of(context).colorScheme.onSurface,
               ),
             ),
@@ -183,7 +183,9 @@ class _PayoutRow extends ConsumerWidget {
           Text(
             appointment.paid ? 'Tahsil edildi' : 'Bekliyor',
             style: text.bodySmall?.copyWith(
-              color: appointment.paid ? AppColors.accent : palette.warning,
+              color: appointment.paid
+                  ? context.palette.accent
+                  : palette.warning,
               fontWeight: FontWeight.w600,
             ),
           ),

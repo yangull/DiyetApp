@@ -96,7 +96,7 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
             child: const Text('Düzenlemeye dön'),
           ),
           FilledButton(
-            style: AppTheme.destructiveButton,
+            style: AppTheme.destructive(context),
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Sil ve çık'),
           ),

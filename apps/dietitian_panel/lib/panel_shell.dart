@@ -145,10 +145,11 @@ class _RailUtilityButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Like a rail destination: black and 600 when selected, grey otherwise.
-    final color = selected ? AppColors.ink : context.palette.textSecondary;
+    final color = selected
+        ? context.palette.ink
+        : context.palette.textSecondary;
     return TextButton(
-      style: TextButton.styleFrom(foregroundColor: color)
-          .copyWith(overlayColor: AppTheme.overlay),
+      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(color)),
       onPressed: onPressed,
       child: SizedBox(
         width: 72,
@@ -183,8 +184,7 @@ class _ResetDemoButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final muted = context.palette.textSecondary;
     return TextButton(
-      style: TextButton.styleFrom(foregroundColor: muted)
-          .copyWith(overlayColor: AppTheme.overlay),
+      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(muted)),
       onPressed: () => _confirmReset(context, ref, onReset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -217,7 +217,7 @@ Future<void> _confirmReset(
           child: const Text('Vazgeç'),
         ),
         FilledButton(
-          style: AppTheme.destructiveButton,
+          style: AppTheme.destructive(context),
           onPressed: () => Navigator.of(context).pop(true),
           child: const Text('Sıfırla'),
         ),

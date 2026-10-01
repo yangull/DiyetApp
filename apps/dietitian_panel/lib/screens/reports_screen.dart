@@ -92,7 +92,7 @@ class _Delta extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final progress = weightProgress(client, entries);
     final color = switch (progress.verdict) {
-      ProgressVerdict.onTrack => AppColors.accent,
+      ProgressVerdict.onTrack => context.palette.accent,
       ProgressVerdict.offTrack => palette.warning,
       ProgressVerdict.neutral => palette.textSecondary,
     };

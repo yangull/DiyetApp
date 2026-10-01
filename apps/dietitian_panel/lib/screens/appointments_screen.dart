@@ -198,7 +198,7 @@ class _AppointmentRow extends ConsumerWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check, size: 16, color: AppColors.ink),
+                Icon(Icons.check, size: 16, color: context.palette.ink),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -239,7 +239,7 @@ class _AppointmentRow extends ConsumerWidget {
                       child: const Text('Vazgeç'),
                     ),
                     FilledButton(
-                      style: AppTheme.destructiveButton,
+                      style: AppTheme.destructive(context),
                       onPressed: () => Navigator.of(context).pop(true),
                       child: const Text('İptal et'),
                     ),

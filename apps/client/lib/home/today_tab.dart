@@ -196,7 +196,7 @@ class _ProgressBar extends StatelessWidget {
           builder: (context, v, _) => LinearProgressIndicator(
             value: v,
             backgroundColor: palette.inset,
-            color: AppColors.accent,
+            color: context.palette.accent,
           ),
         ),
       ),
@@ -236,13 +236,13 @@ class _StepRow extends StatelessWidget {
               height: 26,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: done ? AppColors.ink : null,
+                color: done ? context.palette.ink : null,
                 border: done
                     ? null
                     : Border.all(color: palette.borderStrong, width: 1.5),
               ),
               child: done
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  ? Icon(Icons.check, size: 16, color: context.palette.onFilled)
                   : null,
             ),
             const SizedBox(width: AppSpacing.md),

@@ -285,7 +285,9 @@ Full reference, including type scale, density numbers and the design rules:
   state and text label, not necessarily its violet), the approval gate (#98, #126), no
   money UI (P6), Turkish copy with "sen" in the client app and "siz" in the panel
   (#47–#49, #120), and labelled actions (design rule 13). Colours, font, sizes and
-  shapes are set by #135 and `docs/design-system.md`; still open: dark mode (C43).
+  shapes are set by #135 and `docs/design-system.md`. **Dark mode** (Can, 1 Oct 2026,
+  was C43): both apps, "Sistem / Açık / Koyu" saved on the device, near-black with
+  cards one step lighter, every colour measured like light.
   **Rules that also survive** (Can, 1 Oct 2026, was C32), because they are about
   honesty, safety or access rather than looks:
   - Only real data or a "Yakında" label (#50); no invented numbers shown as real.
