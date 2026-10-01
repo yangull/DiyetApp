@@ -5,12 +5,15 @@ The source of truth for how Wellkit looks. Written from the code in
 code is right and this file gets fixed. The older design-system artifact on claude.ai
 (28 Aug 2026) is history, not a source.
 
-Short version of the locked decisions: PLANNING.md #54–#67, #131–#133.
+Short version of the locked decisions: PLANNING.md #54–#67, #131–#133; the redesign's
+target is #134–#135.
 
 **Being replaced (PLANNING #134, 1 Oct 2026).** A redesign from zero takes its style
-from Bevel's DESIGN.md (`docs/design/2026-10-01-bevel/DESIGN.md`), a Fontshare font and
-Apple's HIG numbers. Until it is decided and coded, this file describes the code as it
-ships. What carries over: the safeguards and the rules listed in PLANNING #134.
+from Bevel's DESIGN.md (`docs/design/2026-10-01-bevel/DESIGN.md`), the Alpino font and
+Apple's HIG numbers. This file keeps describing the code as it ships until the theme
+slice lands; the target is written to `docs/design-system-next.md` (redesign slice 1),
+which then replaces this file. New UI built before then uses this file. What carries
+over: the safeguards and the rules listed in PLANNING #134.
 
 ## Direction
 

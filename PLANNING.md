@@ -5,7 +5,7 @@
 > Edit this file when a decision changes; rewrite a section rather than appending one.
 >
 > **Decision IDs are stable.** Product decisions are P1–P9; technical decisions keep
-> their original numbers (#1–#133). Code comments cite them as `PLANNING.md #N` (older
+> their original numbers (#1–#135). Code comments cite them as `PLANNING.md #N` (older
 > comments say `§2 #1` for P1). Never renumber; a retired ID stays unused.
 >
 > Last restructured: 23 September 2026.
@@ -253,7 +253,7 @@ C2). Each ID names the interview question it came from.
 - **#49** The word is **"danışan"**, never "müşteri".
 - **#50** **Everything visible is real data or a real action.** Unbuilt things are named once
   with a "Yakında" label, never drawn as clickable fake UI.
-- **#51** Client home: 2 tabs (**Bugün**, Profil). Since the "Sıcak" redesign (#131, slice 2,
+- **#51** _(code today; target #134–#135)_ Client home: 2 tabs (**Bugün**, Profil). Since the "Sıcak" redesign (#131, slice 2,
   23 Sep 2026) Bugün opens on a green hero with the greeting and three real steps (goals →
   dietitian → first plan, derived from saved data; the plan step says "yakında"), then a
   pending invite, the goal row (one tap target into Profil), the connected dietitian, and
@@ -275,39 +275,46 @@ C2). Each ID names the interview question it came from.
 Full reference, including type scale, density numbers and the design rules:
 **`docs/design-system.md`** (the source; the 28 Aug artifact is history).
 
+> **Since #134 (1 Oct 2026)** the entries #38 (its density rule), #51, #54–#57, #59,
+> #60, #64, #67 and #131–#133 describe the code **as it ships, not the target**. The
+> target is #134–#135 and, from redesign slice 1, `docs/design-system-next.md`.
+
 - **#134** **Visual redesign from zero** (Can, 1 Oct 2026). Features stay; the look of
   Sade and direction B (#131–#133) is replaced. **Only the safeguards survive:** AI
   drafts clearly marked and never shown to clients unapproved (P1; #57's own visual
   state and text label, not necessarily its violet), the approval gate (#98, #126), no
   money UI (P6), Turkish copy with "sen" in the client app and "siz" in the panel
-  (#47–#49, #120), and labelled actions (design rule 13). **Open:** every colour (the
-  brand green too), fonts, layout and shapes. Until a new value is decided and coded,
-  the entries below (#54–#57, #60, #64, #131–#133) describe the code, not the target.
+  (#47–#49, #120), and labelled actions (design rule 13). Colours, font, sizes and
+  shapes are set by #135; still open: the accent hue (C36), the sky gradient (C40) and
+  dark mode (C43).
   **Rules that also survive** (Can, 1 Oct 2026, was C32), because they are about
   honesty, safety or access rather than looks:
   - Only real data or a "Yakında" label (#50); no invented numbers shown as real.
   - Copy never praises or blames weight, and there is no streak (P7). Naming the
     client's own goal is fine ("Hedefin: 68 kg"); judging a result is not ("Harika, 2
     kilo verdin!"). Wellkit's own hooks lead with the dietitian and the plan, not kilos.
-  - Colour never carries meaning alone; contrast is measured (WCAG AA and HIG).
+  - Colour never carries meaning alone; contrast is measured against WCAG AA and HIG,
+    and the stricter applies (HIG allows 3:1 for bold text at any size; WCAG doesn't).
   - Motion only on a change and none under Reduce Motion; native screen transitions
     are platform habits and stay.
   - "It must not look AI-generated" (rule 15); its checklist is rewritten once the
     DESIGN.md is adapted, because parts of it were Sade-specific.
-  - No glass or blur on content. Whether bars (tab bar, toolbars) may use it is decided
-    with the DESIGN.md (QUESTIONS C41).
-  - Light only or dark mode too: decided after the DESIGN.md and the font (C43).
+  - No glass or blur, on content or on bars (#135, was C41).
+  - From `docs/design-system.md`'s numbered rules: 4, 5, 10, 12, 13 and 14 survive;
+    2 (one icon set) waits for the icon pack; 3 survives as part of the AI-draft
+    safeguard; 15 is rewritten; 1 (no gradients) is open (C40); 6, 7, 8, 9 and 11 are
+    replaced by #135 and the new system.
 
   How the work runs:
   - **Style: Bevel** (Can, 1 Oct 2026, was C31), after a shortlist and Can's own search:
     https://styles.refero.design/style/c0717d1a-b446-4166-a445-6497fe287fea. Its
     Extended DESIGN.md is copied verbatim to `docs/design/2026-10-01-bevel/DESIGN.md`;
     values come only from that file, never from a web summary. It describes Bevel's
-    **marketing website**, not an app, so its clashes with HIG and with these rules are
-    QUESTIONS C35–C43. A second style may still supply type or colour if Can says so.
-  - **Fonts:** Can picks from Fontshare and uploads the TTF/OTF files. A script checks
-    Turkish glyphs (ı İ ğ ş ç ö ü â), the licence, tabular figures and weights before
-    use. Bundled, never fetched at runtime (#63).
+    **marketing website**, not an app; its clashes with HIG and with these rules were
+    settled in #135 (was C35–C42).
+  - **Fonts** come from Fontshare as TTF/OTF files from Can; a script checks Turkish
+    glyphs, the licence, tabular figures and weights before use. Bundled, never fetched
+    at runtime (#63). Chosen: Alpino (#135).
   - **Apple HIG** is the rulebook for measurable things (tap targets, type sizes and
     line height, spacing, contrast, large-text support) in both apps on iOS, Android and
     the wide panel. Platform habits stay native: Android keeps its back button and
@@ -321,20 +328,18 @@ Full reference, including type scale, density numbers and the design rules:
   - **Graphics:** any generated graphic or icon is SVG. The icon pack and a tone-of-voice
     document come later.
   - **Order:** the client app first, starting with one reference screen (Bugün) on a
-    Design canvas with phone and wide artboards and the DESIGN.md installed as the
-    design system, before any Flutter. Bugün is drawn in two states (was C33): with a
+    Design canvas with phone and wide artboards, built on the adapted design system
+    (not the raw DESIGN.md), before any Flutter. Bugün is drawn in two states (was C33): with a
     plan (today's meals with one-tap ticks, the week count, weigh-ins; the main
     artboard, labelled as not built yet) and a new client's setup. Flutter builds only
     what exists (#50).
   - **One system for both apps** (was C34): the panel takes the same style later,
     denser on wide screens (#64), so the style must also work for a work tool.
-  - **Working:** small slices, ask instead of assuming, `melos analyze` and `test`, a
-    subagent review per slice, commit only when Can says so, push only on "push".
   - Direction B's rollout is **paused**. Its structure (core `SectionLabel`,
     `ActionRow`, `PersonAvatar`, the screen states and their tests) is code to reuse,
     not a look to keep.
-- **#135** **Bevel adapted for an app** (Can, 1 Oct 2026, accepting Claude's proposals
-  in C35–C38, C41, C42). Bevel's DESIGN.md describes a website, so:
+- **#135** **Bevel adapted for an app** (Can, 1 Oct 2026, accepting Claude's proposals;
+  was C35, C37, C38, C41, C42; C39 below). Bevel's DESIGN.md describes a website, so:
   - **Sizes come from HIG** (iOS, default text size): Large Title 34/41, Title 1 28/34,
     Title 2 22/28, Title 3 20/25, Headline 17/22 semibold, Body 17/22, Callout 16/21,
     Subhead 15/20, Footnote 13/18, Caption 1 12/16; no text under 11; text grows to at
@@ -348,58 +353,60 @@ Full reference, including type scale, density numbers and the design rules:
     empty states) is built from HIG's patterns in Bevel's tone.
   - **Colour:** buttons are black (Charcoal) pills. One accent marks progress and
     "approved" and is also the one data colour (meals ring, week count, weight chart);
-    its hue is C36. Bevel's per-category data colours are not used: on white they
-    measure 1.5–2.1:1. Star ratings are gold and always show the number. Text on Cloud
+    its hue is C36. Recovery Green, Sleep Lilac and Coral Signal are not used (1.8–2.1:1
+    on white); Metric Blue (5.17:1) only as a C36 candidate. Star ratings are gold and always show the number. Text on Cloud
     Card uses a darker grey (Body Gray measures 3.98:1 there). A new red and amber are
-    measured in Bevel's tone. Violet stays for AI drafts only, darkened to pass 4.5:1;
-    Sleep Lilac is dropped.
+    measured in Bevel's tone. Violet stays for AI drafts only: today's #514196 (8.25:1) unless
+    slice 1 finds it clashes with Bevel's palette, re-measured either way.
   - **Bottom bar:** a solid floating white capsule on both platforms, no blur; Android's
     back button and gestures stay native.
   - **Panel density by input, not width:** the compact profile only for pointer use
     (web on a computer); tablets and phones get the touch sizes. This replaces the
-    width rule in #38 and #64 when the panel is redesigned.
+    width rule in #38 and #64 when the panel is redesigned. How "pointer" is detected,
+    whether navigation still switches at 600 dp, and the compact type scale are C44.
   - Bevel's sky gradient is drawn both ways on the canvas (C40).
   - **Font: Alpino** (Can, 1 Oct 2026, from Fontshare; files in Can's
     `Alpino_Complete.zip`). Checked by script: all Turkish letters (ı İ ğ ş ç ö ü â î û)
     in every weight; ITF Free Font License allows embedding in apps but not modifying
-    the files; static Thin, Light, Regular, Medium, Bold, Black plus one variable file
+    the files (no subsetting or format conversion) and forbids making it available to
+    third parties through a design tool (C45); static Thin, Light, Regular, Medium, Bold, Black plus one variable file
     (wght 100–900), so 600 needs the variable file or becomes 500/700. **No tabular
     figures**, so (Can, 1 Oct 2026, was C39) Alpino is used everywhere and numbers that
     must line up (agenda times, panel tables) sit in fixed-width, right-aligned slots;
     revisited when the panel's tables are redesigned.
 
-- **#54** Brand green `#18795C`, surface `#FFFFFF`. Ground since #133: neutral light grey
+- **#54** _(code today; target #134–#135)_ Brand green `#18795C`, surface `#FFFFFF`. Ground since #133: neutral light grey
   `#F2F4F3` (was cool `#F7F9F8` in palette "Serin", then warm `#F6F1E8` in "Sıcak").
-- **#55** **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
+- **#55** _(code today; target #134–#135)_ **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
   draft); no decorative second accent, no colour per category (#133 removed the group
   colours and the yellow highlight Sıcak had added). The one tinted fill is `primaryTint`
   behind a secondary action. "Onaylı" is a grey pill with a black tick (Can, 24 Sep
   2026), so a green pill always means a button. Buttons are pills; destructive confirms
   are red.
-- **#56** **No separate `success` colour** — it measured 1.19:1 against brand green. Approved
+- **#56** _(code today; target #134–#135)_ **No separate `success` colour** — it measured 1.19:1 against brand green. Approved
   states use brand green.
-- **#57** **An AI draft has its own visual state:** violet `#514196` + 1.5px dashed border + a
+- **#57** _(code today; target #134–#135)_ **An AI draft has its own visual state:** violet `#514196` + 1.5px dashed border + a
   text label on a draft container; a draft status pill is violet text on `aiDraftTint`
   with its label and no border (Can, 24 Sep 2026). Violet is used nowhere else. Colour
   never carries meaning alone.
 - **#58** Every value is **measured**: WCAG AA 4.5:1 for text, 3:1 for interactive boundaries.
   Ratios are written next to each token in `app_colors.dart`. **Don't change a value
   without re-measuring.**
-- **#59** **Light theme only** for now; the dark palette is measured and documented, not coded.
-- **#60** **Figtree only** since #133 (Can, 23 Sep 2026): bold headings, regular body, every
+- **#59** _(code today; target #134–#135)_ **Light theme only** for now; the dark palette is measured and documented, not coded.
+- **#60** _(code today; target #134–#135)_ **Figtree only** since #133 (Can, 23 Sep 2026): bold headings, regular body, every
   number Figtree 700 with tabular figures. Fraunces (the old heading serif) is still
   bundled but unused.
 - **#61** Turkish glyph coverage verified from the font files' `cmap` tables.
 - **#63** Fonts are **bundled assets** in `packages/core/fonts/`; no `google_fonts` runtime fetch.
   A core test asserts the resolved family.
-- **#64** One token set, two density profiles: `AppDensity.comfortable` (the client app, and
+- **#64** _(code today; target #134–#135)_ One token set, two density profiles: `AppDensity.comfortable` (the client app, and
   the panel on phones) and `AppDensity.compact` (the panel on wide screens; #38). Only
   spacing, radius, control and line height differ.
 - **#65** **No `ColorScheme.fromSeed`** — it discards the measured palette. Every slot is set
   explicitly.
 - **#66** Non-Material tokens travel as `AppPalette` / `AppDensity` ThemeExtensions
   (`context.palette`, `context.density`).
-- **#67** The design rules in `docs/design-system.md` apply to every screen (15 since 23 Sep
+- **#67** _(code today; target #134–#135)_ The design rules in `docs/design-system.md` apply to every screen (15 since 23 Sep
   2026: no gradients, no emoji icons, no "✨ AI" badges, no mixed radii, labelled and
   confirmed actions, no money while P6 holds, nothing that looks AI-generated, …).
 - **#133** **Direction "Sade" replaces Sıcak's colour** (Can, late 23 Sep 2026, after seeing
@@ -543,11 +550,11 @@ is built to be corrected, not admired.
 
 ---
 
-## 5. Current state (24 Sep 2026)
+## 5. Current state (1 Oct 2026)
 
 | Area | State |
 |---|---|
-| Monorepo, tooling | Done. Analyzer clean, all tests green (core 14, client 18, panel 181). No CI yet. Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
+| Monorepo, tooling | Done. Analyzer clean, all tests green (core 21, client 18, panel 195). No CI yet. Both apps build and run on the Android emulator (#3) and show as "Wellkit" and "Wellkit Panel". |
 | Supabase | Project `jpkvulcszsutacritttk`, 4 migrations applied: identity + RLS, grant tightening, dietitian public projection, relationships. One shared project — no dev/prod split. |
 | Auth | Real in both apps: sign up / in / out, role routing, wrong-app screen, pending/approved dietitian. Email confirmation on (#21). No password reset, no custom SMTP. |
 | Client app | "Sade" design (#133). Login → Bugün (date and greeting, any invite first, a white Başlangıç card with a progress bar and three real steps, one Yakında note) and Profil (a summary; Hedeflerim edited on its own screen). All copy in "sen". No plan, meal log, weigh-in or chat yet, so Bugün is honestly sparse. |
