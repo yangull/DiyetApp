@@ -85,27 +85,17 @@ class ProfileTab extends ConsumerWidget {
           ],
         const SizedBox(height: AppSpacing.xxl),
         const _SectionHeader(title: 'Görünüm'),
-        const Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: ThemeChoiceSelector(),
-        ),
+        const ThemeChoiceSelector(),
         const SizedBox(height: AppSpacing.xxl),
         const _SectionHeader(title: 'Yakında'),
-        Text(
-          'Dosyaların: diyetisyeninle paylaşacağın rapor ve belgeler.',
-          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-        ),
-        const SizedBox(height: AppSpacing.x4),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: EdgeButton(
-            child: TextButton.icon(
-              onPressed: actions.signOut,
-              icon: const Icon(Icons.logout),
-              label: const Text('Çıkış yap'),
-            ),
+        CloudCard(
+          child: _InfoRow(
+            label: 'Dosyaların',
+            value: 'Diyetisyeninle paylaşacağın rapor ve belgeler.',
           ),
         ),
+        const SizedBox(height: AppSpacing.x3),
+        SignOutRow(onPressed: actions.signOut),
       ],
     );
   }

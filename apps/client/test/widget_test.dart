@@ -240,6 +240,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('5 kilo vermek'), findsOneWidget);
     expect(_steps(1), findsOneWidget);
+    // Once written, editing is a quiet text action, not the first-step pill.
+    expect(find.widgetWithText(OutlinedButton, 'Yaz'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Düzenle'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Düzenle'), findsNothing);
   });
 
   testWidgets('the goal step button opens the goals editor', (tester) async {
@@ -355,7 +359,9 @@ void main() {
       expect(tester.getTopLeft(find.text('Merhaba, Elif')).dx, cardLeft);
     });
 
-    testWidgets('Profil: "Çıkış yap" starts on the page edge', (tester) async {
+    testWidgets('Profil: "Çıkış yap" is a card row as wide as the cards', (
+      tester,
+    ) async {
       await pumpSignedIn(tester);
       await tester.tap(find.text('Profil'));
       await tester.pumpAndSettle();
@@ -364,17 +370,35 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).last,
       );
-      final edge = tester.getTopLeft(find.text('Yakında')).dx;
-      final signOut = find.ancestor(
+      final row = find.ancestor(
         of: find.text('Çıkış yap'),
-        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+        matching: find.byType(Card),
       );
-      final icon = find.descendant(
-        of: signOut,
-        matching: find.byIcon(Icons.logout),
+      final cards = tester.getRect(find.byType(Card).first);
+      expect(tester.getRect(row).left, cards.left);
+      expect(tester.getRect(row).right, cards.right);
+      expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('Profil: the Görünüm control is as wide as the cards', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(412, 900);
+      addTearDown(tester.view.reset);
+      await pumpSignedIn(tester);
+      await tester.tap(find.text('Profil'));
+      await tester.pumpAndSettle();
+      final control = find.byType(SegmentedButton<ThemeMode>);
+      await tester.scrollUntilVisible(
+        control,
+        200,
+        scrollable: find.byType(Scrollable).last,
       );
-      expect(tester.getTopLeft(icon).dx, edge);
-      expect(tester.getSize(signOut).height, greaterThanOrEqualTo(48));
+      expect(
+        tester.getSize(control).width,
+        tester.getSize(find.byType(Card).first).width,
+      );
     });
 
     testWidgets('Profil: "Düzenle" ends on the card\'s right edge', (

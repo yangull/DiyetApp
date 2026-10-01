@@ -123,15 +123,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           : const Text('Kayıt ol'),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    // Left on the fields' edge (Can, rule 6), not centred.
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: EdgeButton(
-                        child: TextButton(
-                          onPressed: widget.onSwitchToLogin,
-                          child: const Text('Zaten hesabın var mı? Giriş yap'),
-                        ),
-                      ),
+                    AuthSwitchLink(
+                      label: 'Zaten hesabın var mı? Giriş yap',
+                      onPressed: widget.onSwitchToLogin,
                     ),
                   ],
                 ),

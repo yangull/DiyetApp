@@ -25,6 +25,7 @@ export 'src/theme/tokens/app_density.dart';
 export 'src/theme/tokens/app_motion.dart';
 export 'src/theme/tokens/app_spacing.dart';
 export 'src/theme/tokens/app_typography.dart';
+export 'src/widgets/account_actions.dart';
 export 'src/widgets/action_row.dart';
 export 'src/widgets/app_states.dart';
 export 'src/widgets/cloud_card.dart';

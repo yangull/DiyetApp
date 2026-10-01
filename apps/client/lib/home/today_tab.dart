@@ -143,10 +143,17 @@ class _StartCard extends StatelessWidget {
               done: done[0],
               title: 'Hedeflerin',
               subtitle: goal ?? 'Diyetisyenin buradan başlar.',
-              trailing: _TintButton(
-                label: goal == null ? 'Yaz' : 'Düzenle',
-                onPressed: onEditGoals,
-              ),
+              // The pill is for the first step; once written, editing is a
+              // quiet text action, as on Profil.
+              trailing: goal == null
+                  ? _TintButton(label: 'Yaz', onPressed: onEditGoals)
+                  : EdgeButton(
+                      end: true,
+                      child: TextButton(
+                        onPressed: onEditGoals,
+                        child: const Text('Düzenle'),
+                      ),
+                    ),
             ),
             _StepRow(
               done: done[1],

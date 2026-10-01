@@ -68,21 +68,9 @@ class RealProfileScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         Text('Görünüm', style: text.headlineSmall),
         const SizedBox(height: AppSpacing.md),
-        const Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: ThemeChoiceSelector(),
-        ),
+        const ThemeChoiceSelector(),
         const SizedBox(height: AppSpacing.xl),
-        // Quiet, as in the client app's Profil: signing out is not the
-        // secondary action of this screen.
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: actions.signOut,
-            icon: const Icon(Icons.logout),
-            label: const Text('Çıkış yap'),
-          ),
-        ),
+        SignOutRow(onPressed: actions.signOut),
       ],
     );
   }

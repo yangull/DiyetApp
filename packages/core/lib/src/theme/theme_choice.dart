@@ -46,16 +46,24 @@ class ThemeChoiceSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
-    return SegmentedButton<ThemeMode>(
-      showSelectedIcon: false,
-      segments: const [
-        ButtonSegment(value: ThemeMode.system, label: Text('Sistem')),
-        ButtonSegment(value: ThemeMode.light, label: Text('Açık')),
-        ButtonSegment(value: ThemeMode.dark, label: Text('Koyu')),
-      ],
-      selected: {mode},
-      onSelectionChanged: (choice) =>
-          ref.read(themeModeProvider.notifier).choose(choice.single),
+    // Fills the width it is given, up to a cap, instead of hugging its words.
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: SegmentedButton<ThemeMode>(
+          expandedInsets: EdgeInsets.zero,
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(value: ThemeMode.system, label: Text('Sistem')),
+            ButtonSegment(value: ThemeMode.light, label: Text('Açık')),
+            ButtonSegment(value: ThemeMode.dark, label: Text('Koyu')),
+          ],
+          selected: {mode},
+          onSelectionChanged: (choice) =>
+              ref.read(themeModeProvider.notifier).choose(choice.single),
+        ),
+      ),
     );
   }
 }

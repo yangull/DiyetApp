@@ -130,9 +130,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           : const Text('Kayıt ol'),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextButton(
+                    AuthSwitchLink(
+                      label: 'Zaten hesabınız var mı? Giriş yapın',
                       onPressed: widget.onSwitchToLogin,
-                      child: const Text('Zaten hesabınız var mı? Giriş yapın'),
                     ),
                   ],
                 ),
