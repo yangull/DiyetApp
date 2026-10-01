@@ -275,6 +275,99 @@ C2). Each ID names the interview question it came from.
 Full reference, including type scale, density numbers and the design rules:
 **`docs/design-system.md`** (the source; the 28 Aug artifact is history).
 
+- **#134** **Visual redesign from zero** (Can, 1 Oct 2026). Features stay; the look of
+  Sade and direction B (#131–#133) is replaced. **Only the safeguards survive:** AI
+  drafts clearly marked and never shown to clients unapproved (P1; #57's own visual
+  state and text label, not necessarily its violet), the approval gate (#98, #126), no
+  money UI (P6), Turkish copy with "sen" in the client app and "siz" in the panel
+  (#47–#49, #120), and labelled actions (design rule 13). **Open:** every colour (the
+  brand green too), fonts, layout and shapes. Until a new value is decided and coded,
+  the entries below (#54–#57, #60, #64, #131–#133) describe the code, not the target.
+  **Rules that also survive** (Can, 1 Oct 2026, was C32), because they are about
+  honesty, safety or access rather than looks:
+  - Only real data or a "Yakında" label (#50); no invented numbers shown as real.
+  - Copy never praises or blames weight, and there is no streak (P7). Naming the
+    client's own goal is fine ("Hedefin: 68 kg"); judging a result is not ("Harika, 2
+    kilo verdin!"). Wellkit's own hooks lead with the dietitian and the plan, not kilos.
+  - Colour never carries meaning alone; contrast is measured (WCAG AA and HIG).
+  - Motion only on a change and none under Reduce Motion; native screen transitions
+    are platform habits and stay.
+  - "It must not look AI-generated" (rule 15); its checklist is rewritten once the
+    DESIGN.md is adapted, because parts of it were Sade-specific.
+  - No glass or blur on content. Whether bars (tab bar, toolbars) may use it is decided
+    with the DESIGN.md (QUESTIONS C41).
+  - Light only or dark mode too: decided after the DESIGN.md and the font (C43).
+
+  How the work runs:
+  - **Style: Bevel** (Can, 1 Oct 2026, was C31), after a shortlist and Can's own search:
+    https://styles.refero.design/style/c0717d1a-b446-4166-a445-6497fe287fea. Its
+    Extended DESIGN.md is copied verbatim to `docs/design/2026-10-01-bevel/DESIGN.md`;
+    values come only from that file, never from a web summary. It describes Bevel's
+    **marketing website**, not an app, so its clashes with HIG and with these rules are
+    QUESTIONS C35–C43. A second style may still supply type or colour if Can says so.
+  - **Fonts:** Can picks from Fontshare and uploads the TTF/OTF files. A script checks
+    Turkish glyphs (ı İ ğ ş ç ö ü â), the licence, tabular figures and weights before
+    use. Bundled, never fetched at runtime (#63).
+  - **Apple HIG** is the rulebook for measurable things (tap targets, type sizes and
+    line height, spacing, contrast, large-text support) in both apps on iOS, Android and
+    the wide panel. Platform habits stay native: Android keeps its back button and
+    system behaviours, iOS its own. Every place HIG's numbers conflict with
+    `docs/design-system.md` goes to Can before anything changes.
+  - **Copy:** how five Turkish diet or dietitian apps or coaches write hooks, empty
+    states and buttons shapes the **client app's** texts only, with sources shown.
+    Picked by Claude (1 Oct 2026): Diyetkolik, Hiwell, NutriMobi, Diyetisyen Oflaz and
+    YAZIO's Turkish version (not Turkish-made; the quality bar). Their App Store
+    listings are the first source.
+  - **Graphics:** any generated graphic or icon is SVG. The icon pack and a tone-of-voice
+    document come later.
+  - **Order:** the client app first, starting with one reference screen (Bugün) on a
+    Design canvas with phone and wide artboards and the DESIGN.md installed as the
+    design system, before any Flutter. Bugün is drawn in two states (was C33): with a
+    plan (today's meals with one-tap ticks, the week count, weigh-ins; the main
+    artboard, labelled as not built yet) and a new client's setup. Flutter builds only
+    what exists (#50).
+  - **One system for both apps** (was C34): the panel takes the same style later,
+    denser on wide screens (#64), so the style must also work for a work tool.
+  - **Working:** small slices, ask instead of assuming, `melos analyze` and `test`, a
+    subagent review per slice, commit only when Can says so, push only on "push".
+  - Direction B's rollout is **paused**. Its structure (core `SectionLabel`,
+    `ActionRow`, `PersonAvatar`, the screen states and their tests) is code to reuse,
+    not a look to keep.
+- **#135** **Bevel adapted for an app** (Can, 1 Oct 2026, accepting Claude's proposals
+  in C35–C38, C41, C42). Bevel's DESIGN.md describes a website, so:
+  - **Sizes come from HIG** (iOS, default text size): Large Title 34/41, Title 1 28/34,
+    Title 2 22/28, Title 3 20/25, Headline 17/22 semibold, Body 17/22, Callout 16/21,
+    Subhead 15/20, Footnote 13/18, Caption 1 12/16; no text under 11; text grows to at
+    least 200 %. Touch targets 48 (meets HIG's 44 and Android's 48), with about 12 pt
+    around filled controls and 24 pt around unfilled ones. Screens are left-aligned.
+    Line heights never go below HIG's, so Turkish marks (İ Ğ Ş Ç Ö Ü) don't clip.
+  - **Bevel's character stays:** one sans family, 600-weight headings with slightly
+    tight tracking, grey supporting text, a white canvas, borderless pale (Cloud Card)
+    cards at radius 24 without shadow, full pill buttons, shadows only on floating
+    things. What Bevel lacks (inputs, lists, tab bar, dialogs, sheets, chips, progress,
+    empty states) is built from HIG's patterns in Bevel's tone.
+  - **Colour:** buttons are black (Charcoal) pills. One accent marks progress and
+    "approved" and is also the one data colour (meals ring, week count, weight chart);
+    its hue is C36. Bevel's per-category data colours are not used: on white they
+    measure 1.5–2.1:1. Star ratings are gold and always show the number. Text on Cloud
+    Card uses a darker grey (Body Gray measures 3.98:1 there). A new red and amber are
+    measured in Bevel's tone. Violet stays for AI drafts only, darkened to pass 4.5:1;
+    Sleep Lilac is dropped.
+  - **Bottom bar:** a solid floating white capsule on both platforms, no blur; Android's
+    back button and gestures stay native.
+  - **Panel density by input, not width:** the compact profile only for pointer use
+    (web on a computer); tablets and phones get the touch sizes. This replaces the
+    width rule in #38 and #64 when the panel is redesigned.
+  - Bevel's sky gradient is drawn both ways on the canvas (C40).
+  - **Font: Alpino** (Can, 1 Oct 2026, from Fontshare; files in Can's
+    `Alpino_Complete.zip`). Checked by script: all Turkish letters (ı İ ğ ş ç ö ü â î û)
+    in every weight; ITF Free Font License allows embedding in apps but not modifying
+    the files; static Thin, Light, Regular, Medium, Bold, Black plus one variable file
+    (wght 100–900), so 600 needs the variable file or becomes 500/700. **No tabular
+    figures**, so (Can, 1 Oct 2026, was C39) Alpino is used everywhere and numbers that
+    must line up (agenda times, panel tables) sit in fixed-width, right-aligned slots;
+    revisited when the panel's tables are redesigned.
+
 - **#54** Brand green `#18795C`, surface `#FFFFFF`. Ground since #133: neutral light grey
   `#F2F4F3` (was cool `#F7F9F8` in palette "Serin", then warm `#F6F1E8` in "Sıcak").
 - **#55** **One brand hue.** Every non-green colour carries a meaning (waiting / error / AI
@@ -461,7 +554,7 @@ is built to be corrected, not admired.
 | Real panel | Client list with pending invites, invite dialog, client detail (goal / budget / health note only). Phone layout below 600 dp: bottom bar, comfortable density, stacked client rows (#38). Takes Sade through the shared theme; not yet checked on the emulator (needs an approved dietitian account, #35). |
 | Interview demo | Fully Sade screen by screen (24 Sep 2026, #133); below 600 dp a bottom bar, stacked screens and a "Demo" button for reminder settings and reset. 6 rail tabs on fake data (overview + triage, clients, appointments, messages, payments, tracking) and "Hatırlatma ayarları" at the bottom of the rail; both plan editors, energy card, PDF export, anamnez form, measurements. Every money screen (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is hidden behind `kShowMoney = false` (P6). |
 | Marketplace | **Nothing real yet** — no public profile, "Diyetisyen bul" section or request/accept flow. |
-| Brand | Name and palette settled ("Sade", 23 Sep 2026). **Logo: placeholder "W" mark** until one is designed with Claude later. |
+| Brand | Name settled. Palette, type and layout are being redesigned from zero (#134; the code still ships "Sade"). **Logo: placeholder "W" mark** until one is designed with Claude later. |
 | Plan editor, `diet_plans` | Not built. Unblocked: exchange list first, weekly, from templates (P4, #121–#123). |
 | Interviews | Held; most answers in §2.1, five questions still open (QUESTIONS.md §3). |
 

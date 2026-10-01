@@ -96,6 +96,28 @@ is deferred, now PLANNING P6) and I9 (Kutay's Excel dropped).
 Product decisions nobody else can make. The most blocking come first. Money questions
 (commission, packages, pricing, payouts) are parked until later (§5, PLANNING P6).
 
+### Redesign: what is still open (PLANNING #134, #135)
+Bevel's DESIGN.md (`docs/design/2026-10-01-bevel/DESIGN.md`) describes a website; Can
+accepted the proposals for its clashes on 1 Oct 2026 (now PLANNING #135). Still open:
+
+### C36. Which hue is the accent?
+Buttons are black pills (#135); one accent marks progress and "approved" and is the one
+data colour. Candidates: our green #18795C (5.35:1 on white, the old brand) or Bevel's
+own Metric Blue #415eee (5.17:1). Proposal: show both on the canvas and choose there.
+_Blocks: the canvas's final look, not its first draft._
+>
+
+### C40. Bevel's sky gradient
+Bevel's signature is a pale sky-to-warm gradient (#d2e5ff to #fff9ee) behind its hero;
+the old rule 1 banned gradients. Agreed (1 Oct 2026): draw Bugün with it once at the top
+and with a flat Cloud Card instead; Can picks on the canvas.
+>
+
+### C43. Light only, or dark mode too?
+Bevel is light only. HIG asks for contrast checks in both modes if an app supports dark.
+Can (1 Oct 2026): decide after the DESIGN.md is adapted and the font is chosen.
+>
+
 ### C4. B2B is the main plan: when does it enter the roadmap?
 You said clients will come mainly through corporate deals, plus our own digital ads.
 Today B2B sits in Phase 3+ (I14), after the marketplace and the AI tier. If it is the
@@ -192,8 +214,8 @@ _Blocks: the mobile plan screen (redesign slice 5 onward)._
 
 ### C23. How should clients choose things themselves?
 Can (24 Sep 2026): the client app should feel modern, "hooky", the client choosing
-everything simply and openly. The look is settled: direction B, the same as the panel
-(Can, 25 Sep 2026, PLANNING #133). Still open, the interaction half: should clients pick
+everything simply and openly. The look is being redesigned from zero (PLANNING #134,
+1 Oct 2026). Still open, the interaction half: should clients pick
 things themselves (foods from the exchange list, the dietitian, goals) with simple
 choices instead of forms, and where first?
 _Blocks: the client app's feature design, not its look._
