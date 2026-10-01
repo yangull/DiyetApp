@@ -119,11 +119,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     FilledButton(
                       onPressed: _submitting ? null : _submit,
                       child: _submitting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const ButtonSpinner()
                           : const Text('Kayıt ol'),
                     ),
                     const SizedBox(height: AppSpacing.md),

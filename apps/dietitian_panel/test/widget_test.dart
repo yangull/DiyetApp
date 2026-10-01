@@ -218,9 +218,11 @@ void main() {
       await pumpList(tester, () => _FlakyRelationships(failures: 1), (_, _) {});
       expect(find.text('Danışan listesi yüklenemedi'), findsOneWidget);
       expect(
-        find.widgetWithText(FilledButton, 'Danışan davet et'),
+        find.widgetWithText(TextButton, 'Danışan davet et'),
         findsOneWidget,
       );
+      // After a failure the main action is retry.
+      expect(find.widgetWithText(FilledButton, 'Tekrar dene'), findsOneWidget);
     });
 
     testWidgets('only invites: no active client yet, one waiting', (
@@ -366,6 +368,33 @@ void main() {
     expect(find.text('Henüz danışanınız yok'), findsNothing);
   });
 
+  testWidgets('a failed profile load is told in Turkish, formally', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(FakeProfileRepository()),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hesap bilgileri yüklenemedi'), findsOneWidget);
+    expect(
+      find.text('Bağlantınızı kontrol edip tekrar deneyin.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Bad state'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Tekrar dene'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'Çıkış yap'), findsOneWidget);
+  });
+
   testWidgets('a client-role account sees the mismatch screen, not the panel', (
     tester,
   ) async {
@@ -385,7 +414,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Bu giriş bu uygulama için değil.'), findsOneWidget);
+    expect(find.text('Bu hesap bir danışan hesabı.'), findsOneWidget);
+    // It says which app to use instead.
+    expect(find.textContaining('Wellkit uygulamasını'), findsOneWidget);
+    expect(find.text('Çıkış yap'), findsOneWidget);
     expect(find.text('Genel Bakış'), findsNothing);
   });
 

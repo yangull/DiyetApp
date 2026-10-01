@@ -37,6 +37,13 @@ class ClientApp extends ConsumerWidget {
       home: AuthGate(
         expectedRole: UserRole.client,
         signedOutBuilder: (context) => const AuthFlowScreen(),
+        mismatchBuilder: (context, role, actions) => AuthMismatchScreen(
+          title: 'Bu hesap bir diyetisyen hesabı.',
+          message:
+              'Diyetisyenler Wellkit Panel uygulamasını kullanır. '
+              'Oradan giriş yapabilirsin.',
+          actions: actions,
+        ),
         authenticatedBuilder: (context, identity, actions) =>
             ClientHomeScreen(identity: identity, actions: actions),
       ),

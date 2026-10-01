@@ -104,11 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     FilledButton(
                       onPressed: _submitting ? null : _submit,
                       child: _submitting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
+                          ? const ButtonSpinner()
                           : const Text('Giriş yap'),
                     ),
                     const SizedBox(height: AppSpacing.md),

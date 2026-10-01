@@ -29,10 +29,10 @@ class RealClientDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(fallbackName ?? 'Danışan')),
       body: detail.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Message(
+        loading: () => const AppLoading(label: 'Yükleniyor'),
+        error: (_, _) => AppErrorView(
           title: 'Danışan bilgileri yüklenemedi',
-          body: 'Bağlantınızı kontrol edip tekrar deneyin.',
+          message: 'Bağlantınızı kontrol edip tekrar deneyin.',
           onRetry: () => ref.invalidate(_clientDetailProvider(clientId)),
         ),
         data: (data) => _Detail(detail: data),
@@ -119,49 +119,6 @@ class _Fact extends StatelessWidget {
               : text.titleMedium,
         ),
       ],
-    );
-  }
-}
-
-class _Message extends StatelessWidget {
-  const _Message({
-    required this.title,
-    required this.body,
-    required this.onRetry,
-  });
-
-  final String title;
-  final String body;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 40, color: palette.textSecondary),
-            const SizedBox(height: AppSpacing.md),
-            Text(title, style: text.titleLarge, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              body,
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            OutlinedButton(
-              onPressed: onRetry,
-              child: const Text('Tekrar dene'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

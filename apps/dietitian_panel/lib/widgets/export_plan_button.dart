@@ -61,11 +61,7 @@ class _ExportPlanButtonState extends State<ExportPlanButton> {
         OutlinedButton.icon(
           onPressed: widget.enabled && !_busy ? _export : null,
           icon: _busy
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+              ? const ButtonSpinner(size: 16)
               : const Icon(Icons.picture_as_pdf_outlined, size: 18),
           label: const Text('PDF olarak ver'),
         ),

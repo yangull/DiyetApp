@@ -214,10 +214,7 @@ void main() {
     await tester.tap(find.text('Düzenle'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      _fieldLabelled('Hedefim'),
-      '5 kilo vermek',
-    );
+    await tester.enterText(_fieldLabelled('Hedefim'), '5 kilo vermek');
     await tester.enterText(
       _fieldLabelled('Sağlık notlarım'),
       'Laktoz intoleransı',
@@ -407,8 +404,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      double fieldLeft() =>
-          tester.getTopLeft(find.byType(TextField).first).dx;
+      double fieldLeft() => tester.getTopLeft(find.byType(TextField).first).dx;
 
       expect(
         tester.getTopLeft(find.text('Hesabın yok mu? Kayıt ol')).dx,
@@ -450,8 +446,63 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Bu giriş bu uygulama için değil.'), findsOneWidget);
+      expect(find.text('Bu hesap bir diyetisyen hesabı.'), findsOneWidget);
+      // It says which app to use instead.
+      expect(find.textContaining('Wellkit Panel'), findsOneWidget);
+      expect(find.text('Çıkış yap'), findsOneWidget);
       expect(find.text('Merhaba, Elif'), findsNothing);
     },
   );
+
+  testWidgets('a failed profile load says so in Turkish and retries', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    await auth.signIn(email: 'x@example.com', password: 'sifresifre');
+    final profiles = FakeProfileRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+        ],
+        child: const ClientApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hesap bilgileri yüklenemedi'), findsOneWidget);
+    expect(find.textContaining('Bad state'), findsNothing);
+    expect(find.textContaining('No seeded'), findsNothing);
+    expect(find.text('Bağlantını kontrol edip tekrar dene.'), findsOneWidget);
+
+    // Retry is the main action; the account can be left from here.
+    profiles.seedClient(auth.currentSession!.userId, fullName: 'Elif Aydın');
+    await tester.tap(find.widgetWithText(FilledButton, 'Tekrar dene'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hesap bilgileri yüklenemedi'), findsNothing);
+    expect(find.text('Merhaba, Elif'), findsOneWidget);
+  });
+
+  testWidgets('a failed profile load offers sign out', (tester) async {
+    final auth = FakeAuthRepository();
+    await auth.signIn(email: 'x@example.com', password: 'sifresifre');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(FakeProfileRepository()),
+        ],
+        child: const ClientApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, 'Çıkış yap'));
+    await tester.pumpAndSettle();
+    expect(find.text('Giriş yap'), findsWidgets);
+    expect(find.text('Hesap bilgileri yüklenemedi'), findsNothing);
+  });
 }

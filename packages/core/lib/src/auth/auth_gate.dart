@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../widgets/app_states.dart';
 import 'auth_providers.dart';
 import 'models.dart';
 
@@ -30,6 +31,7 @@ class AuthGate extends ConsumerWidget {
     required this.signedOutBuilder,
     required this.authenticatedBuilder,
     this.mismatchBuilder,
+    this.formal = false,
   });
 
   final UserRole expectedRole;
@@ -47,13 +49,23 @@ class AuthGate extends ConsumerWidget {
   )?
   mismatchBuilder;
 
+  /// Addresses the person as "siz" in the failure messages (the panel).
+  final bool formal;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionAsync = ref.watch(sessionProvider);
 
     return sessionAsync.when(
-      loading: () => const _CenteredSpinner(),
-      error: (error, _) => _CenteredError(message: '$error'),
+      loading: () => const _Loading(),
+      error: (_, _) => _Failed(
+        title: 'Oturum bilgisi alınamadı',
+        formal: formal,
+        onRetry: () => ref.invalidate(sessionProvider),
+        // Retrying can replay the same stored error; a local sign-out
+        // replaces it.
+        onSignOut: () => ref.read(authRepositoryProvider).signOut(),
+      ),
       data: (session) {
         if (session == null) return signedOutBuilder(context);
 
@@ -65,10 +77,12 @@ class AuthGate extends ConsumerWidget {
 
         final identityAsync = ref.watch(identityProvider(session.userId));
         return identityAsync.when(
-          loading: () => const _CenteredSpinner(),
-          error: (error, _) => _CenteredError(
-            message: '$error',
+          loading: () => const _Loading(),
+          error: (_, _) => _Failed(
+            title: 'Hesap bilgileri yüklenemedi',
+            formal: formal,
             onRetry: actions.refreshIdentity,
+            onSignOut: actions.signOut,
           ),
           data: (identity) {
             if (identity.profile.role != expectedRole) {
@@ -87,68 +101,75 @@ class AuthGate extends ConsumerWidget {
     UserRole actualRole,
     AuthGateActions actions,
   ) {
+    return AuthMismatchScreen(
+      title: 'Bu giriş bu uygulama için değil.',
+      actions: actions,
+    );
+  }
+}
+
+/// A signed-in account that belongs to the other app. Names the app to use
+/// instead in [message]; signing out is the only way on, so it is the one
+/// action (no auto sign-out, PLANNING #39).
+class AuthMismatchScreen extends StatelessWidget {
+  const AuthMismatchScreen({
+    super.key,
+    required this.title,
+    this.message,
+    required this.actions,
+  });
+
+  final String title;
+  final String? message;
+  final AuthGateActions actions;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.block, size: 40),
-              const SizedBox(height: 16),
-              const Text(
-                'Bu giriş bu uygulama için değil.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              // Quiet: signing out is an Ink text action, not a pill to invite.
-              TextButton.icon(
-                onPressed: actions.signOut,
-                icon: const Icon(Icons.logout),
-                label: const Text('Çıkış yap'),
-              ),
-            ],
-          ),
-        ),
+      body: AppErrorView(
+        icon: Icons.info_outline,
+        title: title,
+        message: message,
+        actionLabel: 'Çıkış yap',
+        onAction: actions.signOut,
       ),
     );
   }
 }
 
-class _CenteredSpinner extends StatelessWidget {
-  const _CenteredSpinner();
+class _Loading extends StatelessWidget {
+  const _Loading();
 
   @override
   Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: CircularProgressIndicator()));
+      const Scaffold(body: AppLoading(label: 'Yükleniyor'));
 }
 
-class _CenteredError extends StatelessWidget {
-  const _CenteredError({required this.message, this.onRetry});
+class _Failed extends StatelessWidget {
+  const _Failed({
+    required this.title,
+    required this.formal,
+    required this.onRetry,
+    this.onSignOut,
+  });
 
-  final String message;
-  final VoidCallback? onRetry;
+  final String title;
+  final bool formal;
+  final VoidCallback onRetry;
+  final Future<void> Function()? onSignOut;
 
   @override
   Widget build(BuildContext context) {
+    final signOut = onSignOut;
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(message, textAlign: TextAlign.center),
-              if (onRetry != null) ...[
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: onRetry,
-                  child: const Text('Tekrar dene'),
-                ),
-              ],
-            ],
-          ),
-        ),
+      body: AppErrorView(
+        title: title,
+        message: formal
+            ? 'Bağlantınızı kontrol edip tekrar deneyin.'
+            : 'Bağlantını kontrol edip tekrar dene.',
+        onRetry: onRetry,
+        actionLabel: signOut == null ? null : 'Çıkış yap',
+        onAction: signOut,
       ),
     );
   }

@@ -44,7 +44,15 @@ class DietitianPanelApp extends ConsumerWidget {
       builder: panelThemeBuilder,
       home: AuthGate(
         expectedRole: UserRole.dietitian,
+        formal: true,
         signedOutBuilder: (context) => const AuthFlowScreen(),
+        mismatchBuilder: (context, role, actions) => AuthMismatchScreen(
+          title: 'Bu hesap bir danışan hesabı.',
+          message:
+              'Danışanlar Wellkit uygulamasını kullanır. '
+              'Oradan giriş yapabilirsiniz.',
+          actions: actions,
+        ),
         authenticatedBuilder: (context, identity, actions) {
           // Safe: AuthGate only calls this once identity.profile.role ==
           // expectedRole (dietitian), and identityProvider always populates

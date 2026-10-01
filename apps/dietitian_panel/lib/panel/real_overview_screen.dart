@@ -38,17 +38,15 @@ class RealOverviewScreen extends ConsumerWidget {
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= _twoColumnsFrom;
         final content = relationships.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.all(AppSpacing.x4),
-            child: Center(
-              child: CircularProgressIndicator(
-                semanticsLabel: 'Danışanlar yükleniyor',
-              ),
-            ),
-          ),
-          error: (_, _) => _ErrorCard(
+          loading: () => const AppLoading.card(label: 'Danışanlar yükleniyor'),
+          error: (_, _) => AppErrorView.card(
+            title: 'Danışan listesi yüklenemedi',
+            message: 'Bağlantınızı kontrol edip tekrar deneyin.',
             onRetry: () => ref.invalidate(dietitianClientsProvider(profile.id)),
-            onInvite: invite,
+            // Inviting doesn't need the list, so a failed load doesn't take
+            // it away.
+            actionLabel: 'Danışan davet et',
+            onAction: invite,
           ),
           data: (rows) {
             final active = rows.where((r) => r.isActive).toList();
@@ -74,7 +72,9 @@ class RealOverviewScreen extends ConsumerWidget {
                 // Without this, a failed name lookup looked the same as
                 // clients who have no name.
                 if (names.hasError) ...[
-                  _NamesErrorNotice(
+                  AppErrorView.notice(
+                    message:
+                        'Danışan adları yüklenemedi; adreslerle gösteriliyor.',
                     onRetry: () => ref.invalidate(
                       dietitianClientNamesProvider(profile.id),
                     ),
@@ -624,89 +624,5 @@ class _InviteDialogState extends State<_InviteDialog> {
     final email = _controller.text.trim();
     if (email.isEmpty) return;
     Navigator.of(context).pop(email);
-  }
-}
-
-/// The raw exception used to be printed here. A dietitian can't act on a
-/// PostgrestException; what they can do is try again.
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.onRetry, required this.onInvite});
-
-  final VoidCallback onRetry;
-
-  /// Inviting doesn't need the list, so a failed load doesn't take it away.
-  final VoidCallback onInvite;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-
-    return CloudCard(
-      child: Padding(
-        padding: EdgeInsets.all(_cardPadding(context)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.error_outline, size: 28, color: palette.textSecondary),
-            const SizedBox(height: AppSpacing.md),
-            Text('Danışan listesi yüklenemedi', style: text.headlineSmall),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Bağlantınızı kontrol edip tekrar deneyin.',
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                OutlinedButton(
-                  onPressed: onRetry,
-                  child: const Text('Tekrar dene'),
-                ),
-                FilledButton.icon(
-                  onPressed: onInvite,
-                  icon: const Icon(Icons.person_add_alt, size: 18),
-                  label: const Text('Danışan davet et'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NamesErrorNotice extends StatelessWidget {
-  const _NamesErrorNotice({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
-
-    return Row(
-      children: [
-        Icon(Icons.error_outline, size: 18, color: palette.warning),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            'Danışan adları yüklenemedi; adreslerle gösteriliyor.',
-            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-          ),
-        ),
-        EdgeButton(
-          end: true,
-          child: TextButton(
-            onPressed: onRetry,
-            child: const Text('Tekrar dene'),
-          ),
-        ),
-      ],
-    );
   }
 }
