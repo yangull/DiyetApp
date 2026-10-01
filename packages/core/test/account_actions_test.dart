@@ -49,9 +49,19 @@ void main() {
         ),
       ),
     );
-    final size = tester.getSize(find.byType(SignOutRow));
+    final size = tester.getSize(find.byType(Card));
     expect(size.width, 360);
     expect(size.height, greaterThanOrEqualTo(48));
+    expect(
+      tester.getSemantics(find.text('Çıkış yap')),
+      matchesSemantics(
+        label: 'Çıkış yap',
+        isButton: true,
+        isFocusable: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+      ),
+    );
     await tester.tap(find.text('Çıkış yap'));
     expect(out, 1);
   });
