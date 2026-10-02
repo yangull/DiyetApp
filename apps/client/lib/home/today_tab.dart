@@ -8,8 +8,8 @@ import 'goals_edit_screen.dart';
 /// Bugün, the client's first tab (PLANNING #135): Ink type on the white
 /// canvas, Cloud Card cards, black actions, and green only for progress.
 /// Until plans exist it shows only what is real:
-/// the goal, a pending invite, the connected dietitian, and one quiet
-/// "Yakında" note (rules 4 and 5). The steps come from saved data.
+/// the goal, a pending invite, the connected dietitian, and one small
+/// "Yakında" card (rules 4 and 5). The steps come from saved data.
 class TodayTab extends ConsumerWidget {
   const TodayTab({super.key, required this.identity});
 
@@ -66,7 +66,7 @@ class TodayTab extends ConsumerWidget {
           onEditGoals: () =>
               GoalsEditScreen.open(context, userId: profile.id, detail: detail),
         ),
-        const SizedBox(height: AppSpacing.x3),
+        const SizedBox(height: AppSpacing.md),
         const _ComingSoon(),
       ],
     );
@@ -98,6 +98,7 @@ class _StartCard extends StatelessWidget {
     final palette = context.palette;
     final done = [goal != null, dietitianId != null, false];
     final count = done.where((d) => d).length;
+    final current = done.indexOf(false);
 
     return CloudCard(
       child: Padding(
@@ -141,22 +142,39 @@ class _StartCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             _StepRow(
               done: done[0],
+              current: current == 0,
               title: 'Hedeflerin',
               subtitle: goal ?? 'Diyetisyenin buradan başlar.',
-              // The pill is for the first step; once written, editing is a
-              // quiet text action, as on Profil.
-              trailing: goal == null
-                  ? _TintButton(label: 'Yaz', onPressed: onEditGoals)
-                  : EdgeButton(
-                      end: true,
-                      child: TextButton(
-                        onPressed: onEditGoals,
-                        child: const Text('Düzenle'),
+              // The pill is for the first step; once written, or while an
+              // invite is the main action, it is a quiet text action, as on
+              // Profil.
+              action: (stacked) => goal == null && !hasInvite
+                  ? Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          top: stacked ? AppSpacing.sm : 0,
+                        ),
+                        child: _TintButton(
+                          label: 'Yaz',
+                          onPressed: onEditGoals,
+                        ),
+                      ),
+                    )
+                  : Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: EdgeButton(
+                        end: !stacked,
+                        child: TextButton(
+                          onPressed: onEditGoals,
+                          child: Text(goal == null ? 'Yaz' : 'Düzenle'),
+                        ),
                       ),
                     ),
             ),
             _StepRow(
               done: done[1],
+              current: current == 1,
               title: 'Diyetisyenin',
               subtitleWidget: dietitianId == null
                   ? null
@@ -164,15 +182,15 @@ class _StartCard extends StatelessWidget {
               subtitle: hasInvite
                   ? 'Bir davetin var, yukarıda.'
                   : 'Bir diyetisyen seni davet ettiğinde burada görünür.',
+              trailing: dietitianId == null
+                  ? null
+                  : _DietitianAvatar(dietitianId: dietitianId!),
             ),
             _StepRow(
               done: done[2],
+              current: current == 2,
               title: 'İlk planın',
               subtitle: 'Diyetisyenin onayladığında burada görünür.',
-              trailing: Text(
-                'Yakında',
-                style: text.bodySmall?.copyWith(color: palette.textSecondary),
-              ),
             ),
           ],
         ),
@@ -202,8 +220,8 @@ class _ProgressBar extends StatelessWidget {
           curve: AppMotion.curve,
           builder: (context, v, _) => LinearProgressIndicator(
             value: v,
-            backgroundColor: palette.inset,
-            color: context.palette.accent,
+            backgroundColor: palette.track,
+            color: palette.accent,
           ),
         ),
       ),
@@ -214,66 +232,111 @@ class _ProgressBar extends StatelessWidget {
 class _StepRow extends StatelessWidget {
   const _StepRow({
     required this.done,
+    required this.current,
     required this.title,
     required this.subtitle,
     this.subtitleWidget,
     this.trailing,
+    this.action,
   });
 
   final bool done;
+
+  /// The first step not done yet: its ring is drawn in Ink.
+  final bool current;
   final String title;
   final String subtitle;
   final Widget? subtitleWidget;
+
+  /// A small, fixed-size element at the row's end (an avatar).
   final Widget? trailing;
+
+  /// A button, built for the row's end or, at large text, under the text so
+  /// it does not squeeze it.
+  final Widget Function(bool stacked)? action;
+
+  static const _ring = 26.0;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
+    final scaler = MediaQuery.textScalerOf(context);
+    final stacked = action != null && scaler.scale(10) > 13;
+    final titleStyle = text.titleMedium;
+    // The ring is centred on the title's first line, not on the whole row.
+    final firstLine =
+        scaler.scale(titleStyle?.fontSize ?? 16) * (titleStyle?.height ?? 1.3);
+    final ringBox = firstLine > _ring ? firstLine : _ring;
+    final textTop = (ringBox - firstLine) / 2;
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 64),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Row(
-          children: [
-            // Black when done, an empty ring when not: colour is not the
-            // signal, the tick is (rule 10).
-            Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: done ? context.palette.ink : null,
-                border: done
-                    ? null
-                    : Border.all(color: palette.borderStrong, width: 1.5),
-              ),
-              child: done
-                  ? Icon(Icons.check, size: 16, color: context.palette.onFilled)
-                  : null,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(title, style: text.titleMedium),
-                  subtitleWidget ??
-                      Text(
-                        subtitle,
-                        style: text.bodyMedium?.copyWith(
-                          color: palette.textSecondary,
-                        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Black when done, an empty ring when not: colour is not the
+              // signal, the tick is (rule 10).
+              Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  height: ringBox,
+                  child: Center(
+                    child: Container(
+                      width: _ring,
+                      height: _ring,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: done ? palette.ink : null,
+                        border: done
+                            ? null
+                            : Border.all(
+                                color: current
+                                    ? palette.ink
+                                    : palette.borderStrong,
+                                width: current ? 2 : 1.5,
+                              ),
                       ),
-                ],
+                      child: done
+                          ? Icon(Icons.check, size: 16, color: palette.onFilled)
+                          : null,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            if (trailing != null) ...[
-              const SizedBox(width: AppSpacing.sm),
-              trailing!,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(top: textTop),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(title, style: titleStyle),
+                      subtitleWidget ??
+                          Text(
+                            subtitle,
+                            style: text.bodyMedium?.copyWith(
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                      if (stacked) action!(true),
+                    ],
+                  ),
+                ),
+              ),
+              if (action != null && !stacked) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Align(alignment: Alignment.center, child: action!(false)),
+              ],
+              if (trailing != null) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Align(alignment: Alignment.center, child: trailing!),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -296,6 +359,26 @@ class _DietitianName extends ConsumerWidget {
       name ?? '',
       style: Theme.of(context).textTheme.bodyMedium
           ?.copyWith(color: context.palette.textSecondary),
+    );
+  }
+}
+
+class _DietitianAvatar extends ConsumerWidget {
+  const _DietitianAvatar({required this.dietitianId});
+
+  final String dietitianId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final name = ref
+        .watch(dietitianProfileProvider(dietitianId))
+        .asData
+        ?.value
+        .fullName;
+    return PersonAvatar(
+      name: name,
+      size: 36,
+      background: context.palette.inset,
     );
   }
 }
@@ -419,7 +502,8 @@ class _InviteCard extends ConsumerWidget {
   }
 }
 
-/// Unbuilt paths, named once and never drawn as buttons (rule 4).
+/// Unbuilt paths, named once in one quiet card and never drawn as buttons
+/// (rule 4).
 class _ComingSoon extends StatelessWidget {
   const _ComingSoon();
 
@@ -428,24 +512,29 @@ class _ComingSoon extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
     final body = text.bodyMedium?.copyWith(color: palette.textSecondary);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(
-            'Yakında',
-            style: text.headlineSmall?.copyWith(color: palette.ink),
-          ),
+    return CloudCard(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              header: true,
+              child: Text('Yakında', style: text.titleMedium),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Diyetisyen bul: sana uygun diyetisyeni kendin seç.',
+              style: body,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Yapay zekâ ile ilerle: diyetisyensiz beslenme planı.',
+              style: body,
+            ),
+          ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Text('Diyetisyen bul: sana uygun diyetisyeni kendin seç.', style: body),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          'Yapay zekâ ile ilerle: diyetisyensiz beslenme planı.',
-          style: body,
-        ),
-      ],
+      ),
     );
   }
 }

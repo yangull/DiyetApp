@@ -29,7 +29,6 @@ class DietitianRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
-    final palette = context.palette;
     final density = context.density;
     final name = ref
         .watch(dietitianProfileProvider(dietitianId))
@@ -49,21 +48,7 @@ class DietitianRow extends ConsumerWidget {
             children: [
               PersonAvatar(name: name, size: context.density.avatarSize + 4),
               const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Diyetisyenin',
-                      style: text.bodySmall?.copyWith(
-                        color: palette.textSecondary,
-                      ),
-                    ),
-                    Text(name ?? '', style: text.titleMedium),
-                  ],
-                ),
-              ),
+              Expanded(child: Text(name ?? '', style: text.titleMedium)),
             ],
           ),
         ),

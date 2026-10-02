@@ -27,6 +27,13 @@ class ProfileTab extends ConsumerWidget {
         ref.watch(myActiveRelationshipsProvider).asData?.value ??
         const <ClientRelationship>[];
     final name = profile.fullName.trim();
+    final nothingWritten = [
+      detail?.goal,
+      detail?.budgetRange,
+      detail?.healthNotes,
+    ].every((v) => v?.trim().isEmpty ?? true);
+    void editGoals() =>
+        GoalsEditScreen.open(context, userId: profile.id, detail: detail);
 
     return ListView(
       padding: EdgeInsets.all(density.pagePadding),
@@ -46,29 +53,35 @@ class ProfileTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.x3),
         _SectionHeader(
           title: 'Hedeflerin',
-          action: EdgeButton(
-            end: true,
-            child: TextButton(
-              onPressed: () => GoalsEditScreen.open(
-                context,
-                userId: profile.id,
-                detail: detail,
-              ),
-              child: const Text('Düzenle'),
-            ),
-          ),
+          action: nothingWritten
+              ? null
+              : EdgeButton(
+                  end: true,
+                  child: TextButton(
+                    onPressed: editGoals,
+                    child: const Text('Düzenle'),
+                  ),
+                ),
         ),
         CloudCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _InfoRow(label: 'Hedefim', value: detail?.goal),
-              const Divider(),
-              _InfoRow(label: 'Bütçe aralığım', value: detail?.budgetRange),
-              const Divider(),
-              _InfoRow(label: 'Sağlık notlarım', value: detail?.healthNotes),
-            ],
-          ),
+          child: nothingWritten
+              ? _EmptyGoals(onWrite: editGoals)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _InfoRow(label: 'Hedefim', value: detail?.goal),
+                    const Divider(),
+                    _InfoRow(
+                      label: 'Bütçe aralığım',
+                      value: detail?.budgetRange,
+                    ),
+                    const Divider(),
+                    _InfoRow(
+                      label: 'Sağlık notlarım',
+                      value: detail?.healthNotes,
+                    ),
+                  ],
+                ),
         ),
         const SizedBox(height: AppSpacing.xxl),
         const _SectionHeader(title: 'Diyetisyenin'),
@@ -152,9 +165,9 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: text.bodySmall?.copyWith(color: palette.textSecondary),
+            style: text.bodyMedium?.copyWith(color: palette.textSecondary),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             filled ? value!.trim() : 'Yazılmadı',
             maxLines: 3,
@@ -163,6 +176,36 @@ class _InfoRow extends StatelessWidget {
                 ? text.bodyLarge
                 : text.bodyLarge?.copyWith(color: palette.textSecondary),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One empty state for the whole card, with the action that fills it, instead
+/// of three "Yazılmadı" rows.
+class _EmptyGoals extends StatelessWidget {
+  const _EmptyGoals({required this.onWrite});
+
+  final VoidCallback onWrite;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Henüz bir şey yazmadın. Hedefin, bütçen ve sağlık notların '
+            'diyetisyenine yol gösterir.',
+            style: text.bodyMedium?.copyWith(
+              color: context.palette.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          OutlinedButton(onPressed: onWrite, child: const Text('Yaz')),
         ],
       ),
     );

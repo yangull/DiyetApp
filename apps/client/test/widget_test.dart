@@ -17,6 +17,28 @@ Finder _fieldLabelled(String label) => find.descendant(
   matching: find.byType(TextField),
 );
 
+class _FlakyProfiles extends FakeProfileRepository {
+  var failing = true;
+  var saves = 0;
+
+  @override
+  Future<void> updateClientDetail({
+    required String userId,
+    String? goal,
+    String? budgetRange,
+    String? healthNotes,
+  }) {
+    if (failing) return Future.error(StateError('offline'));
+    saves++;
+    return super.updateClientDetail(
+      userId: userId,
+      goal: goal,
+      budgetRange: budgetRange,
+      healthNotes: healthNotes,
+    );
+  }
+}
+
 void main() {
   testWidgets('signed out shows the login form with the shared brand palette', (
     tester,
@@ -62,9 +84,8 @@ void main() {
     expect(find.text('Merhaba, Elif'), findsOneWidget);
     expect(_steps(0), findsOneWidget);
     expect(find.text('Diyetisyenin buradan başlar.'), findsOneWidget);
-    // Unbuilt paths are named once, as text, never as buttons (rule 4): one
-    // "Yakında" section, and the first plan's step says it inline.
-    expect(find.text('Yakında'), findsNWidgets(2));
+    // Unbuilt paths are named once, in one card, never as buttons (rule 4).
+    expect(find.text('Yakında'), findsOneWidget);
     expect(find.widgetWithText(InkWell, 'Diyetisyen bul'), findsNothing);
   });
 
@@ -98,6 +119,38 @@ void main() {
     expect(find.text('Dyt. Deniz seni davet etti'), findsOneWidget);
     // The client's own address is not identifying information here.
     expect(find.text('elif@example.com'), findsNothing);
+  });
+
+  testWidgets('with an invite waiting, "Kabul et" is the only pill action', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
+    final clientId = auth.currentSession!.userId;
+    profiles.seedClient(clientId, fullName: 'Elif Aydın');
+    profiles.seedDietitian('dyt-1', fullName: 'Dyt. Deniz');
+    final relationships = FakeClientRelationshipRepository(
+      currentUserId: clientId,
+      currentEmail: 'elif@example.com',
+    )..seedRelationship(dietitianId: 'dyt-1', invitedEmail: 'elif@example.com');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(relationships),
+        ],
+        child: const ClientApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FilledButton), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Kabul et'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Yaz'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Yaz'), findsOneWidget);
   });
 
   testWidgets('accepting an invite activates it and clears the card', (
@@ -210,8 +263,10 @@ void main() {
     await tester.pumpAndSettle();
     // Profil is a summary; editing opens its own screen.
     expect(find.byType(TextField), findsNothing);
-    expect(find.text('Yazılmadı'), findsNWidgets(3));
-    await tester.tap(find.text('Düzenle'));
+    // One empty state, not three; its action opens the editor.
+    expect(find.text('Yazılmadı'), findsNothing);
+    expect(find.text('Düzenle'), findsNothing);
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Yaz'));
     await tester.pumpAndSettle();
 
     await tester.enterText(_fieldLabelled('Hedefim'), '5 kilo vermek');
@@ -244,6 +299,76 @@ void main() {
     expect(find.widgetWithText(OutlinedButton, 'Yaz'), findsNothing);
     expect(find.widgetWithText(TextButton, 'Düzenle'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, 'Düzenle'), findsNothing);
+  });
+
+  testWidgets('Hedeflerim: a failed save offers a retry that saves once', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = _FlakyProfiles();
+    await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
+    final clientId = auth.currentSession!.userId;
+    profiles.seedClient(clientId, fullName: 'Elif Aydın');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(
+            FakeClientRelationshipRepository(),
+          ),
+        ],
+        child: const ClientApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Yaz'));
+    await tester.pumpAndSettle();
+    await tester.enterText(_fieldLabelled('Hedefim'), 'yazıldı');
+    await tester.ensureVisible(find.text('Kaydet'));
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kaydedilemedi.'), findsOneWidget);
+    expect(find.text('Hedeflerim'), findsOneWidget);
+    profiles.failing = false;
+    await tester.tap(find.text('Tekrar dene'));
+    await tester.pumpAndSettle();
+
+    expect(profiles.saves, 1);
+    expect((await profiles.fetchClientDetail(clientId)).goal, 'yazıldı');
+    expect(find.text('Hedeflerim'), findsNothing);
+  });
+
+  testWidgets('Hedeflerim: "Vazgeç" leaves without saving', (tester) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
+    final clientId = auth.currentSession!.userId;
+    profiles.seedClient(clientId, fullName: 'Elif Aydın');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(
+            FakeClientRelationshipRepository(),
+          ),
+        ],
+        child: const ClientApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Yaz'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    await tester.enterText(_fieldLabelled('Hedefim'), 'yazıldı');
+    await tester.ensureVisible(find.text('Vazgeç'));
+    await tester.tap(find.text('Vazgeç'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hedeflerim'), findsNothing);
+    expect((await profiles.fetchClientDetail(clientId)).goal, isNull);
   });
 
   testWidgets('the goal step button opens the goals editor', (tester) async {
@@ -330,11 +455,17 @@ void main() {
   // Slice 12: every block starts on the page's one left edge (rule 6), so a
   // button's padding must not push its icon or label inward.
   group('one left edge', () {
-    Future<void> pumpSignedIn(WidgetTester tester) async {
+    Future<void> pumpSignedIn(WidgetTester tester, {String? goal}) async {
       final auth = FakeAuthRepository();
       final profiles = FakeProfileRepository();
       await auth.signIn(email: 'elif@example.com', password: 'sifresifre');
       profiles.seedClient(auth.currentSession!.userId, fullName: 'Elif Aydın');
+      if (goal != null) {
+        await profiles.updateClientDetail(
+          userId: auth.currentSession!.userId,
+          goal: goal,
+        );
+      }
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -350,13 +481,35 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('Bugün: "Yakında" starts where the cards start', (
+    testWidgets('Bugün: the "Yakında" card starts where the cards start', (
       tester,
     ) async {
       await pumpSignedIn(tester);
       final cardLeft = tester.getTopLeft(find.byType(Card).first).dx;
-      expect(tester.getTopLeft(find.text('Yakında').last).dx, cardLeft);
+      final soon = find.ancestor(
+        of: find.text('Yakında'),
+        matching: find.byType(Card),
+      );
+      expect(tester.getTopLeft(soon).dx, cardLeft);
       expect(tester.getTopLeft(find.text('Merhaba, Elif')).dx, cardLeft);
+    });
+
+    testWidgets('Bugün at 200%: "Yaz" moves under the text, on its edge', (
+      tester,
+    ) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpSignedIn(tester);
+      final yaz = find.widgetWithText(OutlinedButton, 'Yaz');
+      expect(yaz, findsOneWidget);
+      expect(
+        tester.getTopLeft(yaz).dx,
+        tester.getTopLeft(find.text('Hedeflerin')).dx,
+      );
+      expect(
+        tester.getTopLeft(yaz).dy,
+        greaterThan(tester.getBottomLeft(find.text('Hedeflerin')).dy),
+      );
     });
 
     testWidgets('Profil: "Çıkış yap" is a card row as wide as the cards', (
@@ -401,10 +554,27 @@ void main() {
       );
     });
 
+    testWidgets('Profil at 200%: the Görünüm control grows with the text', (
+      tester,
+    ) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpSignedIn(tester);
+      await tester.tap(find.text('Profil'));
+      await tester.pumpAndSettle();
+      final control = find.byType(SegmentedButton<ThemeMode>);
+      await tester.scrollUntilVisible(
+        control,
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(tester.getSize(control).height, greaterThanOrEqualTo(80));
+    });
+
     testWidgets('Profil: "Düzenle" ends on the card\'s right edge', (
       tester,
     ) async {
-      await pumpSignedIn(tester);
+      await pumpSignedIn(tester, goal: 'Kilo vermek');
       await tester.tap(find.text('Profil'));
       await tester.pumpAndSettle();
       expect(
