@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
 import '../util/breakpoints.dart';
+import '../widgets/status_pill.dart';
 import '../widgets/tone_pill.dart';
 import 'client_detail_screen.dart';
 
@@ -42,6 +45,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   /// one client into the next conversation, where "Gönder" sent it to the
   /// wrong person.
   final _drafts = <String, TextEditingController>{};
+
+  /// True on a phone, and on a window where the thread beside the list would
+  /// be narrower than [_minThreadWidth] (a narrow laptop window, large text):
+  /// then the list stands alone and a conversation opens as its own page.
+  var _singleColumn = false;
 
   @override
   void dispose() {
@@ -108,35 +116,33 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     // selected conversation opens as its own page (#38), whoever selected it:
     // a row here or "Mesajı yanıtla" on Genel Bakış. Drafts stay per client.
     ref.listen(selectedConversationProvider, (previous, next) {
-      if (next != null && isPanelPhone(context)) _openThread(next);
+      if (next != null && _singleColumn) _openThread(next);
     });
-    if (isPanelPhone(context)) {
-      return ListView(
-        padding: EdgeInsets.all(context.density.pagePadding),
-        children: [
-          heading,
-          const SizedBox(height: AppSpacing.xl),
-          CloudCard(
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (final client in demo.clients)
-                  _ConversationRow(
-                    client: client,
-                    conversation: demo.conversationOf(client.id),
-                    selected: false,
-                    // Selecting opens the page (the listener above), the
-                    // same way "Mesajı yanıtla" on Genel Bakış does.
-                    onTap: () => ref
-                        .read(selectedConversationProvider.notifier)
-                        .select(client.id),
-                  ),
-              ],
-            ),
+    Widget single() => ListView(
+      padding: EdgeInsets.all(context.density.pagePadding),
+      children: [
+        heading,
+        const SizedBox(height: AppSpacing.xl),
+        CloudCard(
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              for (final client in demo.clients)
+                _ConversationRow(
+                  client: client,
+                  conversation: demo.conversationOf(client.id),
+                  selected: false,
+                  // Selecting opens the page (the listener above), the
+                  // same way "Mesajı yanıtla" on Genel Bakış does.
+                  onTap: () => ref
+                      .read(selectedConversationProvider.notifier)
+                      .select(client.id),
+                ),
+            ],
           ),
-        ],
-      );
-    }
+        ),
+      ],
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -144,6 +150,16 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         // panel is the one that goes: the thread is the screen's job.
         final showContext = constraints.maxWidth >= 980;
         final listWidth = constraints.maxWidth >= 720 ? 320.0 : 240.0;
+        final threadWidth =
+            constraints.maxWidth -
+            2 * context.density.pagePadding -
+            listWidth -
+            AppSpacing.lg;
+        _singleColumn =
+            isPanelPhone(context) ||
+            threadWidth <
+                _minThreadWidth * MediaQuery.textScalerOf(context).scale(1);
+        if (_singleColumn) return single();
 
         return Padding(
           padding: EdgeInsets.all(context.density.pagePadding),
@@ -225,9 +241,8 @@ class _ConversationRow extends StatelessWidget {
     final last = conversation.lastMessage;
 
     // The open conversation is a white band in the Cloud Card list, and says
-    // so to a screen reader.
+    // so to a screen reader; "Yanıt bekliyor" is read from its pill.
     return Semantics(
-      label: conversation.awaitsReply ? 'yanıt bekliyor' : null,
       selected: selected,
       child: InkWell(
         onTap: onTap,
@@ -289,9 +304,23 @@ class _ConversationRow extends StatelessWidget {
                     // eye finds without reading the preview.
                     if (conversation.awaitsReply) ...[
                       const SizedBox(height: AppSpacing.xs),
-                      const TonePill(
-                        label: 'Yanıt bekliyor',
-                        tone: PillTone.neutral,
+                      // The selected row is the card's inset colour, so its
+                      // neutral pill takes the card's colour instead, or it
+                      // vanishes into the band.
+                      Theme(
+                        data: selected
+                            ? Theme.of(context).copyWith(
+                                extensions: [
+                                  ...Theme.of(context).extensions.values
+                                      .where((e) => e is! AppPalette),
+                                  palette.copyWith(inset: palette.cloudCard),
+                                ],
+                              )
+                            : Theme.of(context),
+                        child: const TonePill(
+                          label: 'Yanıt bekliyor',
+                          tone: PillTone.neutral,
+                        ),
                       ),
                     ],
                   ],
@@ -305,10 +334,8 @@ class _ConversationRow extends StatelessWidget {
   }
 }
 
-/// The thread is bottom-anchored like every chat app, which left the top of
-/// the panel empty. Rather than move the messages, the space now carries what
-/// you need in order to answer one: the day's target, what the plan says, and
-/// what this client cannot eat. Answering "mercimek çorbası + salata olur mu?"
+/// Beside the thread, what you need in order to answer a message: the day's
+/// target, what the plan says, and what this client cannot eat. Answering "mercimek çorbası + salata olur mu?"
 /// should not mean leaving the screen.
 class _ClientContextPanel extends ConsumerWidget {
   const _ClientContextPanel({required this.clientId});
@@ -347,10 +374,14 @@ class _ClientContextPanel extends ConsumerWidget {
               value: '${plan.kcal} kcal',
               hint: 'hesaplanan ${targetEnergy(client)} kcal',
             ),
-            _ContextFact(
-              label: 'Plan durumu',
-              value: plan.isDraft ? 'Onay bekliyor' : 'Onaylandı',
+            Text(
+              'Plan durumu',
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
+            const SizedBox(height: AppSpacing.xs),
+            // A status, so the same pill as the client list and record.
+            StatusPill(state: plan.state),
+            const SizedBox(height: AppSpacing.md),
             _ContextFact(label: 'Beslenme tipi', value: client.dietType),
             // What to be careful about, as pills, not amber words in a grid.
             if (client.allergies.isNotEmpty ||
@@ -429,6 +460,21 @@ class _ContextFact extends StatelessWidget {
   }
 }
 
+void _openClient(BuildContext context, String clientId) => Navigator.of(context)
+    .push(
+      MaterialPageRoute<void>(
+        builder: (_) => ClientDetailScreen(clientId: clientId),
+      ),
+    );
+
+/// Narrower than this (at 1× text) the thread's header and composer don't fit
+/// beside the list, so the list stands alone.
+const _minThreadWidth = 320.0;
+
+/// The message field never gets narrower than this (at 1× text) to make room
+/// for the button's label.
+const _minFieldWidth = 160.0;
+
 class _ConversationDetail extends ConsumerWidget {
   const _ConversationDetail({
     required this.clientId,
@@ -463,6 +509,8 @@ class _ConversationDetail extends ConsumerWidget {
         // Who this is and where to go from here: the avatar, the name and
         // goal, and a way to the client's record. On a phone the page's app
         // bar already names them.
+        // When the column is narrow the action drops under the name instead
+        // of pushing the row off the edge.
         if (showName)
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -471,40 +519,28 @@ class _ConversationDetail extends ConsumerWidget {
               0,
               AppSpacing.sm,
             ),
-            child: Row(
-              children: [
-                PersonAvatar(name: client.name),
-                const SizedBox(width: ActionRow.gap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(client.name, style: text.titleMedium),
-                      Text(
-                        client.goal,
-                        style: text.bodySmall?.copyWith(
-                          color: palette.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                EdgeButton(
-                  end: true,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => ClientDetailScreen(clientId: clientId),
-                      ),
+            child: ActionRow(
+              lead: PersonAvatar(name: client.name),
+              leadWidth: context.density.avatarSize,
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(client.name, style: text.titleMedium),
+                  Text(
+                    client.goal,
+                    style: text.bodySmall?.copyWith(
+                      color: palette.textSecondary,
                     ),
-                    child: const Text('Danışanı aç'),
                   ),
-                ),
-              ],
+                ],
+              ),
+              actionLabel: 'Danışanı aç',
+              onAction: () => _openClient(context, clientId),
             ),
           ),
         // On a phone the page's app bar names the client; the way to their
-        // record is a line of its own under it.
+        // record is a line of its own under it (an app bar action overflowed
+        // beside a long name at large text).
         if (!showName)
           Align(
             alignment: AlignmentDirectional.centerStart,
@@ -512,11 +548,7 @@ class _ConversationDetail extends ConsumerWidget {
               padding: const EdgeInsets.only(left: AppSpacing.md),
               child: EdgeButton(
                 child: TextButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ClientDetailScreen(clientId: clientId),
-                    ),
-                  ),
+                  onPressed: () => _openClient(context, clientId),
                   child: const Text('Danışanı aç'),
                 ),
               ),
@@ -543,7 +575,10 @@ class _ConversationDetail extends ConsumerWidget {
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - 2 * AppSpacing.lg,
+                        minHeight: math.max(
+                          0,
+                          constraints.maxHeight - 2 * AppSpacing.lg,
+                        ),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -559,26 +594,44 @@ class _ConversationDetail extends ConsumerWidget {
         ),
         Padding(
           padding: EdgeInsets.all(showName ? 0 : AppSpacing.md),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: draft,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    hintText: 'Mesaj yazın…',
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // A word with the icon: a lone paper plane is a guess. Where the
+              // word would squeeze the field (a narrow column, large text) the
+              // button falls back to the icon with a tooltip (rule 13).
+              final labelWidth =
+                  textButtonWidth(context, 'Gönder', icon: true) +
+                  2 * AppSpacing.lg;
+              final labelled =
+                  constraints.maxWidth - labelWidth - AppSpacing.sm >=
+                  _minFieldWidth * MediaQuery.textScalerOf(context).scale(1);
+              return Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: draft,
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        hintText: 'Mesaj yazın…',
+                      ),
+                      onSubmitted: (_) => _send(ref),
+                    ),
                   ),
-                  onSubmitted: (_) => _send(ref),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              // A word with the icon: a lone paper plane is a guess.
-              FilledButton.icon(
-                onPressed: () => _send(ref),
-                icon: const Icon(AppIcons.send, size: 18),
-                label: const Text('Gönder'),
-              ),
-            ],
+                  const SizedBox(width: AppSpacing.sm),
+                  labelled
+                      ? FilledButton.icon(
+                          onPressed: () => _send(ref),
+                          icon: const Icon(AppIcons.send, size: 18),
+                          label: const Text('Gönder'),
+                        )
+                      : IconButton.filled(
+                          tooltip: 'Gönder',
+                          onPressed: () => _send(ref),
+                          icon: const Icon(AppIcons.send, size: 18),
+                        ),
+                ],
+              );
+            },
           ),
         ),
       ],

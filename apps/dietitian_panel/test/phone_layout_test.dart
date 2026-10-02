@@ -44,6 +44,50 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  // The review of D9 found the thread header, the labelled "Gönder" and the
+  // thread's minimum height overflowing between a phone and a laptop.
+  for (final size in const [
+    Size(600, 900),
+    Size(640, 900),
+    Size(800, 900),
+    Size(1024, 768),
+  ]) {
+    for (final scale in [1.0, 1.3, 2.0]) {
+      testWidgets('Mesajlar fits a ${size.width.toInt()}×'
+          '${size.height.toInt()} window at $scale×', (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = size;
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await tester.pumpWidget(
+          const ProviderScope(child: DietitianPanelDemoApp()),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.descendant(
+            of: find.byType(NavigationRail),
+            matching: find.text('Mesajlar'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(MessagesScreen), findsOneWidget);
+        // Wherever the thread lives (beside the list or as its own page),
+        // opening one overflows nothing.
+        await tester.tap(
+          find
+              .descendant(
+                of: find.byType(MessagesScreen),
+                matching: find.text('Merve Yılmaz'),
+              )
+              .first,
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsOneWidget);
+      });
+    }
+  }
+
   testWidgets('the wide client table grows with 2× text', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(800, 1600);
@@ -144,7 +188,7 @@ void main() {
         tester.view.viewInsets = const FakeViewPadding(bottom: 320 * 3);
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), 'Kolay gelsin');
-        await tester.tap(find.widgetWithText(FilledButton, 'Gönder'));
+        await tester.tap(find.byIcon(AppIcons.send));
         await tester.pumpAndSettle();
         expect(find.text('Kolay gelsin'), findsOneWidget);
         expect(find.byType(TextField).hitTestable(), findsOneWidget);

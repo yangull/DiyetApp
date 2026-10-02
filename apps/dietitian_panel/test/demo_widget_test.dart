@@ -3,11 +3,13 @@ import 'package:dietitian_panel/demo/demo_models.dart';
 import 'package:dietitian_panel/demo/demo_repository.dart';
 import 'package:dietitian_panel/main_demo.dart';
 import 'package:dietitian_panel/screens/appointments_screen.dart';
+import 'package:dietitian_panel/screens/client_detail_screen.dart';
 import 'package:dietitian_panel/screens/clients_screen.dart';
 import 'package:dietitian_panel/screens/exchange_plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/messages_screen.dart';
 import 'package:dietitian_panel/screens/overview_screen.dart';
+import 'package:dietitian_panel/screens/video_call_placeholder_screen.dart';
 import 'package:dietitian_panel/util/breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -197,15 +199,123 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Mesajlar'));
     await tester.pumpAndSettle();
-    final handle = tester.ensureSemantics();
+    Finder pillsIn(String name) => find.descendant(
+      of: find.ancestor(
+        of: find
+            .descendant(
+              of: find.byType(MessagesScreen),
+              matching: find.text(name),
+            )
+            .first,
+        matching: find.byType(InkWell),
+      ),
+      matching: find.text('Yanıt bekliyor'),
+    );
+    expect(pillsIn('Merve Yılmaz'), findsOneWidget);
+    // No messages yet, so nothing waits.
+    expect(pillsIn('Ahmet Demir'), findsNothing);
+
+    // The open conversation's band is the inset colour; its pill must not
+    // share it.
+    final selectedPill = pillsIn('Elif Aydın');
+    final pillFill =
+        (tester
+                    .widget<Container>(
+                      find
+                          .ancestor(
+                            of: selectedPill,
+                            matching: find.byType(Container),
+                          )
+                          .first,
+                    )
+                    .decoration!
+                as BoxDecoration)
+            .color;
+    final band = tester
+        .widget<Container>(
+          find
+              .ancestor(of: selectedPill, matching: find.byType(Container))
+              .last,
+        )
+        .color;
+    expect(band, isNotNull);
+    expect(pillFill, isNot(band));
+  });
+
+  testWidgets('the thread opens at the top and links to the record', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1600, 1000);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mesajlar'));
+    await tester.pumpAndSettle();
+
+    final screen = find.byType(MessagesScreen);
+    final firstBubble = find.descendant(
+      of: screen,
+      matching: find.textContaining('mercimek çorbası'),
+    );
+    final field = find.descendant(of: screen, matching: find.byType(TextField));
+    // Top-anchored: the first message sits near the header, not above the
+    // composer with an empty half over it.
+    expect(
+      tester.getTopLeft(firstBubble).dy,
+      lessThan(tester.getTopLeft(field).dy / 2),
+    );
     expect(
       find.descendant(
-        of: find.byType(MessagesScreen),
-        matching: find.bySemanticsLabel(RegExp('yanıt bekliyor')),
+        of: screen,
+        matching: find.widgetWithText(FilledButton, 'Gönder'),
       ),
-      findsWidgets,
+      findsOneWidget,
     );
-    handle.dispose();
+
+    await tester.tap(
+      find.descendant(of: screen, matching: find.text('Danışanı aç')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(ClientDetailScreen), findsOneWidget);
+  });
+
+  testWidgets('Görüşme: back arrow, Turkish tooltips, no document names', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(AppDensity.comfortable),
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    const VideoCallPlaceholderScreen(clientName: 'Elif Aydın'),
+              ),
+            ),
+            child: const Text('aç'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('aç'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('PLANNING'), findsNothing);
+    for (final tip in ['Mikrofon', 'Kamera', 'Görüşmeyi bitir', 'Geri']) {
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Tooltip && (w.message ?? '').startsWith(tip),
+        ),
+        findsOneWidget,
+        reason: tip,
+      );
+    }
+    await tester.tap(find.byTooltip('Geri'));
+    await tester.pumpAndSettle();
+    expect(find.byType(VideoCallPlaceholderScreen), findsNothing);
   });
 
   // Fields were keyed by row index: after deleting the first food, the

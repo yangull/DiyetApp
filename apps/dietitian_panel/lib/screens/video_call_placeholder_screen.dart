@@ -121,12 +121,12 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
                   // exactly the fake UI PLANNING #50 rules out.
                   const _CallControl(
                     icon: AppIcons.mic,
-                    tooltip: 'Mikrofon — video henüz bağlı değil',
+                    tooltip: 'Mikrofon: video henüz bağlı değil',
                   ),
                   const SizedBox(width: 16),
                   const _CallControl(
                     icon: AppIcons.video,
-                    tooltip: 'Kamera — video henüz bağlı değil',
+                    tooltip: 'Kamera: video henüz bağlı değil',
                   ),
                   const SizedBox(width: 16),
                   _CallControl(
