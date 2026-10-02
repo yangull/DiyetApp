@@ -385,7 +385,7 @@ abstract final class AppTheme {
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: p.accent,
-        linearTrackColor: p.cloudCard,
+        linearTrackColor: p.track,
         circularTrackColor: Colors.transparent,
         linearMinHeight: 8,
         borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -417,6 +417,8 @@ abstract final class AppTheme {
         contentTextStyle: text.bodyMedium?.copyWith(color: p.onCharcoal),
         actionTextColor: p.onCharcoal,
         behavior: SnackBarBehavior.floating,
+        // Off the screen edge, like the bottom bar.
+        insetPadding: const EdgeInsets.all(AppSpacing.lg),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       tooltipTheme: TooltipThemeData(
@@ -466,7 +468,7 @@ abstract final class AppTheme {
 
 /// The theme for everything inside a Cloud Card: whatever was a pale Cloud
 /// Card fill on the canvas (the secondary pill, a disabled button, an off
-/// chip, a progress track, [AppPalette.inset]) becomes white, or it would
+/// chip, [AppPalette.inset]) becomes white, or it would
 /// vanish into the card. Used by `CloudCard`.
 ThemeData onCloudCard(ThemeData base) {
   final palette = base.extension<AppPalette>()!;
@@ -499,9 +501,6 @@ ThemeData onCloudCard(ThemeData base) {
         (states) =>
             states.contains(WidgetState.selected) ? palette.charcoal : canvas,
       ),
-    ),
-    progressIndicatorTheme: base.progressIndicatorTheme.copyWith(
-      linearTrackColor: canvas,
     ),
   );
 }

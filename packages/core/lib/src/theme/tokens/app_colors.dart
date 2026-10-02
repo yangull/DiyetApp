@@ -74,6 +74,10 @@ abstract final class AppColors {
   /// Star shapes only, always beside the rating number in [ink] (1.53:1).
   static const gold = Color(0xFFFFCA00);
 
+  /// The empty part of a progress bar (see [AppPalette.track]): [borderStrong]
+  /// at 35 % over [cloudCard]. [accent] on it 3.28:1 (dark 5.08).
+  static const track = Color(0xFFC7CBD2);
+
   /// Text on [accent] and [error] fills.
   static const onFilled = Color(0xFFFFFFFF);
 }
@@ -104,6 +108,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.gold,
     required this.onFilled,
     required this.inset,
+    required this.track,
   });
 
   static const light = AppPalette(
@@ -128,6 +133,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     gold: AppColors.gold,
     onFilled: AppColors.onFilled,
     inset: AppColors.cloudCard,
+    track: AppColors.track,
   );
 
   /// Dark (Can, 1 Oct 2026, was C43): a near-black canvas, cards one step
@@ -162,6 +168,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     gold: Color(0xFFFFCA00),
     onFilled: Color(0xFF121316),
     inset: Color(0xFF1E2025),
+    track: Color(0xFF383B40),
   );
 
   final Color canvas;
@@ -198,6 +205,11 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// widget never has to know where it sits.
   final Color inset;
 
+  /// The empty part of a progress bar: one grey step darker than a card and
+  /// the same on the canvas and inside a card, so an empty bar is still a bar.
+  /// The accent fill keeps 3:1 on it.
+  final Color track;
+
   @override
   AppPalette copyWith({
     Color? canvas,
@@ -221,6 +233,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? gold,
     Color? onFilled,
     Color? inset,
+    Color? track,
   }) {
     return AppPalette(
       canvas: canvas ?? this.canvas,
@@ -244,6 +257,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       gold: gold ?? this.gold,
       onFilled: onFilled ?? this.onFilled,
       inset: inset ?? this.inset,
+      track: track ?? this.track,
     );
   }
 
@@ -273,6 +287,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       gold: l(gold, other.gold),
       onFilled: l(onFilled, other.onFilled),
       inset: l(inset, other.inset),
+      track: l(track, other.track),
     );
   }
 }

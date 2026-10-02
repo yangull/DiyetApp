@@ -209,8 +209,9 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
 - Colours are checked by `packages/core/test/core_test.dart`, including on a Cloud Card
   under the 8 % press overlay: a new token needs its pairs added there. Keep overlays at
   `AppTheme.hoverOverlay` / `pressOverlay`; Material's defaults (10–12 %) break the grey.
-- Cards are Cloud Card on the white canvas. Anything pale inside a card (a progress
-  track, an avatar disc, a neutral pill) is `canvas`, not `cloudCard`, or it vanishes.
+- Cards are Cloud Card on the white canvas. Anything pale inside a card (an avatar
+  disc, a neutral pill) is `canvas`, not `cloudCard`, or it vanishes. A progress bar's
+  empty part is `palette.track`, the same everywhere.
 - Widgets read colours through `context.palette`, never `AppColors.*`: the constants
   are light-only, so a widget using them stays light in dark mode. Text on the filled
   pill (`charcoal`) is `onCharcoal`, which flips to near-black in dark.

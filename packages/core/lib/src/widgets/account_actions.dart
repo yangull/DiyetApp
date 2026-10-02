@@ -53,7 +53,11 @@ class SignOutRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.logout, size: 22, color: palette.ink),
+                  Icon(
+                    Icons.logout,
+                    size: MediaQuery.textScalerOf(context).scale(22),
+                    color: palette.ink,
+                  ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(

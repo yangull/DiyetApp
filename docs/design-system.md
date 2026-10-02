@@ -74,7 +74,8 @@ Graphics that carry meaning and input boundaries need 3:1 (WCAG 1.4.11).
 | `aiDraftTint` | `#EEEBF6` | — | — | Fill of a draft status pill: aiDraft on it 7.01 |
 | `gold` | `#FFCA00` | 1.53 ✗ | — | Star shapes only, always beside the number |
 | `onFilled` | `#FFFFFF` | — | — | Text on accent and error fills |
-| `inset` | Cloud Card / white | — | — | The pale fill of something set into its surface (neutral pill, avatar, progress track, selected row): Cloud Card on the canvas, white inside a card |
+| `track` | `#C7CBD2` (dark `#383B40`) | — | — | The empty part of a progress bar, the same on the canvas and inside a card; accent on it 3.28 (dark 5.08) |
+| `inset` | Cloud Card / white | — | — | The pale fill of something set into its surface (neutral pill, avatar, selected row): Cloud Card on the canvas, white inside a card |
 
 On a pressed Cloud Card (`#DBE0E7`): ink 11.84, textSecondary 4.61, error 4.53, aiDraft 6.22, accent 4.03, borderStrong 2.75. Accent passes there as a graphic (3:1) only, and `borderStrong` drops below 3:1, so inputs never sit inside a pressable area.
 
@@ -139,8 +140,7 @@ above the overlay, so its text is unaffected.
   (Bevel's own pairing), text actions are Ink.
   Green is no longer an action colour: it marks what fills (progress, the meals ring,
   the week count, the weight line) and "approved".
-- **One accent, one data colour.** Charts and rings use green on a Cloud Card or white
-  track. A second data series is Ink or grey, told apart by a label, never a second hue.
+- **One accent, one data colour.** Charts and rings use green on the `track` grey. A second data series is Ink or grey, told apart by a label, never a second hue.
 - **Status colours have one meaning each.** Amber is waiting or needs attention, red is
   failure or destructive, violet is an unapproved AI draft and nothing else (#57).
 - **Colour never carries meaning alone** (rule 10): every status has a word or an icon.
@@ -293,7 +293,7 @@ Bevel's own nav has blur instead, which #135 rules out).
   with an icon.
 - **Cards:** Cloud Card, radius 24, padding 20, no border, no shadow. Always core's
   `CloudCard`, never a bare `Card`: it re-themes its contents so the secondary pill, a
-  disabled button, an off chip, a progress track and `inset` turn white instead of
+  disabled button, an off chip and `inset` turn white instead of
   vanishing into the card.
 - **Lists:** rows on the canvas or inside a Cloud Card, dividers in `divider` only when
   rows touch. A person row: avatar, name (`titleLarge`), second line (`bodyMedium` grey),
@@ -308,8 +308,8 @@ Bevel's own nav has blur instead, which #135 rules out).
   600, others `textSecondary` 500, no indicator pill. Labels always shown.
 - **Navigation rail (wide panel):** white, selected Ink 600, others `textSecondary`, no
   pill.
-- **Progress:** a 8 px rounded bar or a ring, green fill on a Cloud Card track (white
-  track inside a Cloud Card). It animates only when its value changes (rule 12).
+- **Progress:** a 8 px rounded bar or a ring, green fill on the `track` grey (the same on the canvas
+  and inside a card). It animates only when its value changes (rule 12).
 - **Dialogs and sheets:** white, radius 24, title `headlineSmall`, actions right-aligned:
   cancel as a text action, confirm as a filled (or red) pill.
 - **Empty states:** a heading that says what will appear here, one line of grey text,

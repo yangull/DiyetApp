@@ -228,6 +228,7 @@ void main() {
         atLeast(AppColors.warning, bg, 4.5, 'warning');
         atLeast(AppColors.borderStrong, bg, 3, 'borderStrong');
       }
+      atLeast(AppColors.accent, AppColors.track, 3, 'progress fill on track');
       // Accent as a graphic (a bar, a ring) on a pressed card.
       atLeast(AppColors.accent, pressedCard, 3, 'accent graphic');
     });
@@ -295,9 +296,11 @@ void main() {
     expect(inside.palette.inset, AppColors.canvas);
     expect(secondary(outside), AppColors.cloudCard);
     expect(secondary(inside), AppColors.canvas);
+    expect(outside.palette.track, AppColors.track);
+    expect(inside.palette.track, AppColors.track);
     expect(
       Theme.of(inside).progressIndicatorTheme.linearTrackColor,
-      AppColors.canvas,
+      AppColors.track,
     );
     expect(
       Theme.of(inside).filledButtonTheme.style!.backgroundColor!.resolve(none),
@@ -331,6 +334,7 @@ void main() {
       }
       atLeast(p.borderStrong, p.canvas, 3, 'border on canvas');
       atLeast(p.borderStrong, p.cloudCard, 3, 'border on card');
+      atLeast(p.accent, p.track, 3, 'progress fill on track');
     });
 
     test('labels on fills and status text on tints keep 4.5:1', () {

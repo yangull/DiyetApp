@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app_theme.dart';
+
 /// Light, dark or the phone's setting (Can, 1 Oct 2026, was C43). Follows
 /// the system until the user picks; the pick is saved on the device, not in
 /// the account.
@@ -46,6 +48,9 @@ class ThemeChoiceSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
+    // The control grows with the text, not only its words.
+    final height = MediaQuery.textScalerOf(context)
+        .scale(context.density.controlHeight);
     // Fills the width it is given, up to a cap, instead of hugging its words.
     return Align(
       alignment: AlignmentDirectional.centerStart,
@@ -53,6 +58,9 @@ class ThemeChoiceSelector extends ConsumerWidget {
         constraints: const BoxConstraints(maxWidth: 480),
         child: SegmentedButton<ThemeMode>(
           expandedInsets: EdgeInsets.zero,
+          style: ButtonStyle(
+            minimumSize: WidgetStatePropertyAll(Size(48, height)),
+          ),
           showSelectedIcon: false,
           segments: const [
             ButtonSegment(value: ThemeMode.system, label: Text('Sistem')),
