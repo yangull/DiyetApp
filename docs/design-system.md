@@ -246,7 +246,7 @@ bottom bar at 600 dp).
 | Metric | Touch | Compact (draft) | Source |
 |---|---|---|---|
 | Minimum hit target | 48 × 48 | 28 × 28 | Android 48 / HIG iOS 44; HIG macOS 28 (compact is a draft) |
-| Button height | 48 | 32 | |
+| Button height | 48 | 32 | The Görünüm control is the exception: never under 40 (a 32 px segmented control looked tiny on a roomy Profil page) |
 | Input height | 52 | 32 | |
 | Row minimum height | 72 | 40 | rows grow with their text |
 | Avatar | 40 | 28 | |

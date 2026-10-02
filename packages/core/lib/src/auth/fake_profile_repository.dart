@@ -22,6 +22,7 @@ class FakeProfileRepository implements ProfileRepository {
     String userId, {
     String fullName = 'Test Diyetisyen',
     VerificationStatus status = VerificationStatus.pending,
+    List<String> specialties = const [],
   }) {
     _profiles[userId] = AppProfile(
       id: userId,
@@ -30,7 +31,7 @@ class FakeProfileRepository implements ProfileRepository {
     );
     _dietitians[userId] = DietitianDetail(
       userId: userId,
-      specialties: const [],
+      specialties: specialties,
       verificationStatus: status,
     );
   }

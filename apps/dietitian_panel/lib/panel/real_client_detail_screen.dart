@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../widgets/readable_width.dart';
+
 /// What a dietitian may read about a matched client, and nothing more. The
 /// read succeeds because of migration 4's "clients: read via active
 /// relationship" policy — before it, this screen could not have existed.
@@ -58,51 +60,79 @@ class _Detail extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
     final density = context.density;
+    final facts = [
+      ('Hedef', detail.goal),
+      ('Bütçe aralığı', detail.budgetRange),
+      ('Sağlık notları', detail.healthNotes),
+    ];
+    final nothingYet = facts.every((f) => _isEmpty(f.$2));
 
-    return ListView(
-      padding: EdgeInsets.all(density.pagePadding),
-      children: [
-        CloudCard(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Danışan bilgileri', style: text.titleLarge),
-                const SizedBox(height: AppSpacing.lg),
-                _Fact(label: 'Hedef', value: detail.goal),
-                const SizedBox(height: AppSpacing.lg),
-                _Fact(label: 'Bütçe aralığı', value: detail.budgetRange),
-                const SizedBox(height: AppSpacing.lg),
-                _Fact(label: 'Sağlık notları', value: detail.healthNotes),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) => ListView(
+        padding: readablePadding(
+          constraints.maxWidth,
+          density.pagePadding,
+          maxWidth: 720,
+        ),
+        children: [
+          CloudCard(
+            child: Padding(
+              padding: EdgeInsets.all(density.cardPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Danışan bilgileri', style: text.titleLarge),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (nothingYet)
+                    Text(
+                      'Danışanınız henüz bilgi girmedi.',
+                      style: text.bodyMedium?.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    )
+                  else
+                    for (final (i, fact) in facts.indexed) ...[
+                      if (i > 0) const SizedBox(height: AppSpacing.lg),
+                      _Fact(
+                        label: fact.$1,
+                        value: fact.$2,
+                        long: fact.$1 == 'Sağlık notları',
+                      ),
+                    ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          'Bu bilgileri danışanınız kendi uygulamasından giriyor. Ölçüm '
-          'takibi ve diyet planı henüz bu ekranda yok.',
-          style: text.bodySmall?.copyWith(color: palette.textSecondary),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Bu bilgileri danışanınız kendi uygulamasından giriyor. Ölçüm '
+            'takibi ve diyet planı henüz bu ekranda yok.',
+            style: text.bodySmall?.copyWith(color: palette.textSecondary),
+          ),
+        ],
+      ),
     );
   }
 }
 
+bool _isEmpty(String? value) => value == null || value.trim().isEmpty;
+
 class _Fact extends StatelessWidget {
-  const _Fact({required this.label, required this.value});
+  const _Fact({required this.label, required this.value, this.long = false});
 
   final String label;
   final String? value;
+
+  /// A free-text note: read as a paragraph, not as a bold value.
+  final bool long;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
-    // Null is the expected state for a client who hasn't filled in their own
-    // form yet, so it gets a plain label rather than looking like a failure.
-    final empty = value == null || value!.trim().isEmpty;
+    // A field its owner left blank shows a dash; when all three are blank the
+    // card says so once instead.
+    final empty = _isEmpty(value);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,9 +143,12 @@ class _Fact extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          empty ? 'Bilgi girilmemiş' : value!,
+          empty ? '—' : value!,
+          semanticsLabel: empty ? 'Girilmemiş' : null,
           style: empty
               ? text.bodyMedium?.copyWith(color: palette.textSecondary)
+              : long
+              ? text.bodyLarge
               : text.titleMedium,
         ),
       ],

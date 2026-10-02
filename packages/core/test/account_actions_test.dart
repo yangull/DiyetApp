@@ -72,4 +72,21 @@ void main() {
     await tester.pumpWidget(_host(const ThemeChoiceSelector(), width: 900));
     expect(tester.getSize(find.byType(SegmentedButton<ThemeMode>)).width, 480);
   });
+
+  testWidgets('the theme choice is never under 40 tall, even in compact', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(AppDensity.compact),
+          home: const Scaffold(body: ThemeChoiceSelector()),
+        ),
+      ),
+    );
+    expect(
+      tester.getSize(find.byType(SegmentedButton<ThemeMode>)).height,
+      greaterThanOrEqualTo(40),
+    );
+  });
 }

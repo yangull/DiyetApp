@@ -1,6 +1,10 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../util/breakpoints.dart';
+import '../widgets/readable_width.dart';
+import '../widgets/tone_pill.dart';
+
 class RealProfileScreen extends StatelessWidget {
   const RealProfileScreen({
     super.key,
@@ -18,60 +22,86 @@ class RealProfileScreen extends StatelessWidget {
     final density = context.density;
     final detail = identity.dietitianDetail;
 
-    return ListView(
-      padding: EdgeInsets.all(density.pagePadding),
-      children: [
-        Text('Profil', style: text.headlineLarge),
-        const SizedBox(height: AppSpacing.xl),
-        CloudCard(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ad soyad',
-                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
-                ),
-                const SizedBox(height: 2),
-                Text(identity.profile.fullName, style: text.titleMedium),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Onay durumu',
-                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _verificationLabel(detail?.verificationStatus),
-                  style: text.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Uzmanlık alanları',
-                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  detail == null || detail.specialties.isEmpty
-                      ? 'Yakında'
-                      : detail.specialties.join(', '),
-                  style: text.bodyMedium?.copyWith(
-                    color: detail == null || detail.specialties.isEmpty
-                        ? palette.textSecondary
-                        : null,
+    final name = identity.profile.fullName.trim();
+    final status = detail?.verificationStatus;
+    final specialties = detail?.specialties ?? const <String>[];
+
+    return LayoutBuilder(
+      builder: (context, constraints) => ListView(
+        padding: readablePadding(
+          constraints.maxWidth,
+          density.pagePadding,
+          maxWidth: 720,
+        ),
+        children: [
+          Row(
+            children: [
+              PersonAvatar(name: name, size: 64),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    name.isEmpty ? 'Profil' : name,
+                    style: isPanelPhone(context)
+                        ? text.headlineMedium
+                        : text.headlineLarge,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.x3),
+          CloudCard(
+            child: Padding(
+              padding: EdgeInsets.all(density.cardPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Onay durumu',
+                    style: text.bodySmall?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TonePill(
+                      label: _verificationLabel(status),
+                      tone: status == VerificationStatus.approved
+                          ? PillTone.approved
+                          : PillTone.neutral,
+                    ),
+                  ),
+                  // Shown once there is something to show: "Yakında" in a row
+                  // of real data read as a value.
+                  if (specialties.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Uzmanlık alanları',
+                      style: text.bodySmall?.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(specialties.join(', '), style: text.titleMedium),
+                  ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        Text('Görünüm', style: text.headlineSmall),
-        const SizedBox(height: AppSpacing.md),
-        const ThemeChoiceSelector(),
-        const SizedBox(height: AppSpacing.xl),
-        SignOutRow(onPressed: actions.signOut),
-      ],
+          const SizedBox(height: AppSpacing.xl),
+          Semantics(
+            header: true,
+            child: Text('Görünüm', style: text.headlineSmall),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const ThemeChoiceSelector(),
+          const SizedBox(height: AppSpacing.xl),
+          SignOutRow(onPressed: actions.signOut),
+        ],
+      ),
     );
   }
 }

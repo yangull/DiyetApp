@@ -29,14 +29,55 @@ class RealPanelShell extends StatefulWidget {
   State<RealPanelShell> createState() => _RealPanelShellState();
 }
 
+/// Where the rail's icons start, so the mark and the name line up with them.
+const _railInset = 28.0;
+
 class _RealPanelShellState extends State<RealPanelShell> {
   int _index = 0;
+  final _overviewNavigator = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
     return AdaptiveNavScaffold(
+      extendedRail: true,
+      railLeading: const Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: _railInset,
+          top: AppSpacing.lg,
+          bottom: AppSpacing.xl,
+        ),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: WellkitMark(size: 40),
+        ),
+      ),
+      railTrailing: Align(
+        alignment: AlignmentDirectional.bottomStart,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: _railInset,
+            end: AppSpacing.lg,
+            bottom: AppSpacing.lg,
+          ),
+          child: Text(
+            widget.identity.profile.fullName,
+            style: text.bodyMedium?.copyWith(
+              color: context.palette.textSecondary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
       selectedIndex: _index,
-      onSelected: (i) => setState(() => _index = i),
+      onSelected: (i) {
+        // Tapping the current tab again returns to its first screen.
+        if (i == _index) {
+          _overviewNavigator.currentState?.popUntil((r) => r.isFirst);
+        }
+        setState(() => _index = i);
+      },
       destinations: const [
         PanelDestination(
           icon: Icons.dashboard_outlined,
@@ -52,7 +93,21 @@ class _RealPanelShellState extends State<RealPanelShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          RealOverviewScreen(profile: widget.identity.profile),
+          // A client's record opens inside this tab, so the rail or the bottom
+          // bar stays on screen and Profil is one tap away.
+          NavigatorPopHandler(
+            // Only while this tab is showing: a hidden tab must not eat the
+            // system back press.
+            enabled: _index == 0,
+            onPopWithResult: (_) => _overviewNavigator.currentState?.maybePop(),
+            child: Navigator(
+              key: _overviewNavigator,
+              onGenerateRoute: (_) => MaterialPageRoute<void>(
+                builder: (_) =>
+                    RealOverviewScreen(profile: widget.identity.profile),
+              ),
+            ),
+          ),
           RealProfileScreen(identity: widget.identity, actions: widget.actions),
         ],
       ),

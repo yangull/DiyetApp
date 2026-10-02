@@ -121,14 +121,24 @@ class RealOverviewScreen extends ConsumerWidget {
                 ],
               );
             }
+            // A waiting invite needs an answer sooner than the client list
+            // needs scrolling, so it comes first on a phone.
+            final invitesBlock = [
+              if (invites.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.x3),
+                ...invitesSection,
+              ],
+            ];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 focal,
-                ...clients,
-                if (invites.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.x3),
-                  ...invitesSection,
+                if (invites.any((r) => r.isPending)) ...[
+                  ...invitesBlock,
+                  ...clients,
+                ] else ...[
+                  ...clients,
+                  ...invitesBlock,
                 ],
               ],
             );
@@ -166,16 +176,19 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final first = _firstName(name);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           formatTodayLabel(DateTime.now()),
-          style: text.bodySmall?.copyWith(color: context.palette.textSecondary),
+          style: text.bodyMedium?.copyWith(
+            color: context.palette.textSecondary,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Hoş geldiniz, $name',
+          first.isEmpty ? 'Hoş geldiniz' : 'Hoş geldiniz, $first',
           style: isPanelPhone(context)
               ? text.headlineMedium
               : text.headlineLarge,
@@ -185,9 +198,25 @@ class _Header extends StatelessWidget {
   }
 }
 
+/// "Dyt. Deniz Arslan" greets as "Deniz": the title and the surname make a
+/// heading too long for a phone.
+String _firstName(String fullName) {
+  final words = fullName
+      .split(RegExp(r'\s+'))
+      .where(
+        (w) =>
+            w.isNotEmpty &&
+            !RegExp(
+              r'^(dyt|dt|uzm|dr|prof|doç|doc)\.?$',
+              caseSensitive: false,
+            ).hasMatch(w),
+      )
+      .toList();
+  return words.isEmpty ? '' : words.first;
+}
+
 /// The screen's focal card and its one filled action. With no clients yet it
-/// is the empty state: what to do first, and how "Diyetisyen bul" will add to
-/// it.
+/// is the empty state: what to do first.
 class _ClientsFocalCard extends StatelessWidget {
   const _ClientsFocalCard({
     required this.active,
@@ -215,8 +244,7 @@ class _ClientsFocalCard extends StatelessWidget {
       waiting > 0
           ? '$waiting davet yanıt bekliyor.'
           : active == 0
-          ? 'Bir danışanı e-posta adresiyle davet edebilirsiniz. "Diyetisyen '
-                'bul" açıldığında eşleşmeleriniz de burada görünecek.'
+          ? 'Bir danışanı e-posta adresiyle davet ederek başlayın.'
           : 'Yeni bir danışanı e-posta adresiyle davet edebilirsiniz.',
       style: (wide ? text.bodyLarge : text.bodyMedium)?.copyWith(
         color: palette.textSecondary,
@@ -239,25 +267,25 @@ class _ClientsFocalCard extends StatelessWidget {
               caption,
             ],
           )
-        : Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ExcludeSemantics(
-                child: Text(
-                  '$active',
-                  style: AppTypography.figures(
-                    wide ? 48 : 56,
-                    wide ? 52 : 60,
-                  ).copyWith(color: context.palette.ink, letterSpacing: -1),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Semantics(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  ExcludeSemantics(
+                    child: Text(
+                      '$active',
+                      style: AppTypography.figures(
+                        wide ? 48 : 56,
+                        wide ? 52 : 60,
+                      ).copyWith(color: context.palette.ink, letterSpacing: -1),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Semantics(
                       header: true,
                       child: Text(
                         'aktif danışan',
@@ -265,11 +293,11 @@ class _ClientsFocalCard extends StatelessWidget {
                         style: text.headlineSmall,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    caption,
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const SizedBox(height: AppSpacing.xs),
+              caption,
             ],
           );
 
@@ -353,7 +381,7 @@ class _ClientRow extends StatelessWidget {
     final title = name ?? row.invitedEmail;
 
     final content = ConstrainedBox(
-      constraints: BoxConstraints(minHeight: context.density.rowHeight),
+      constraints: BoxConstraints(minHeight: context.density.rowHeight + 16),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: pad, vertical: AppSpacing.sm),
         child: Row(
@@ -443,7 +471,7 @@ class _InvitesCard extends StatelessWidget {
                           width: avatar,
                           height: avatar,
                           decoration: BoxDecoration(
-                            color: palette.inset,
+                            color: palette.canvas,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -455,24 +483,44 @@ class _InvitesCard extends StatelessWidget {
                       ),
                       const SizedBox(width: ActionRow.gap),
                       Expanded(
-                        child: Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.xs,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(
+                        child: LayoutBuilder(
+                          builder: (context, c) {
+                            // The pill beside the address when both fit, under
+                            // it on a narrow phone or at large text.
+                            final stacked =
+                                c.maxWidth <
+                                200 * MediaQuery.textScalerOf(context).scale(1);
+                            final declined =
+                                row.status == RelationshipStatus.declined;
+                            final pill = TonePill(
+                              label: declined ? 'Reddedildi' : 'Bekliyor',
+                              tone: declined
+                                  ? PillTone.warning
+                                  : PillTone.neutral,
+                            );
+                            final email = Text(
                               row.invitedEmail,
-                              style: text.bodyMedium?.copyWith(
-                                color: palette.textSecondary,
-                              ),
-                            ),
-                            TonePill(
-                              label: row.status == RelationshipStatus.declined
-                                  ? 'Davet reddedildi'
-                                  : 'Davet bekliyor',
-                              tone: PillTone.neutral,
-                            ),
-                          ],
+                              style: text.bodyLarge,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                            if (stacked) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  email,
+                                  const SizedBox(height: AppSpacing.xs),
+                                  pill,
+                                ],
+                              );
+                            }
+                            return Row(
+                              children: [
+                                Expanded(child: email),
+                                const SizedBox(width: AppSpacing.sm),
+                                pill,
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -571,6 +619,15 @@ class _InviteDialog extends StatefulWidget {
 
 class _InviteDialogState extends State<_InviteDialog> {
   final _controller = TextEditingController();
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if (_error != null) setState(() => _error = null);
+    });
+  }
 
   @override
   void dispose() {
@@ -584,28 +641,33 @@ class _InviteDialogState extends State<_InviteDialog> {
     final palette = context.palette;
 
     return AlertDialog(
+      // The field opens the keyboard at once; on a phone the content scrolls
+      // instead of overflowing.
+      scrollable: true,
       title: const Text('Danışan davet et'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 360,
-            child: LabeledField(
+      content: SizedBox(
+        width: 420,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LabeledField(
               label: 'Danışanın e-posta adresi',
               controller: _controller,
               autofocus: true,
               keyboardType: TextInputType.emailAddress,
+              errorText: _error,
               onSubmitted: (_) => _submit(context),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Davet, danışanınız aynı e-posta ile Wellkit\'e kayıt olup '
-            'uygulamayı açtığında görünür. Şimdilik e-posta gönderilmiyor.',
-            style: text.bodySmall?.copyWith(color: palette.textSecondary),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Danışanınız bu adresle Wellkit\'e kayıt olup uygulamayı açtığında '
+              'daveti görür. '
+              'Ona ayrıca haber vermeniz gerekir.',
+              style: text.bodySmall?.copyWith(color: palette.textSecondary),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -622,7 +684,17 @@ class _InviteDialogState extends State<_InviteDialog> {
 
   void _submit(BuildContext context) {
     final email = _controller.text.trim();
-    if (email.isEmpty) return;
+    if (!_looksLikeEmail(email)) {
+      setState(
+        () => _error = email.isEmpty
+            ? 'E-posta adresini girin.'
+            : 'Geçerli bir e-posta adresi girin.',
+      );
+      return;
+    }
     Navigator.of(context).pop(email);
   }
 }
+
+bool _looksLikeEmail(String value) =>
+    RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);

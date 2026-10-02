@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:core/core.dart';
+import 'package:dietitian_panel/auth/verification_status_screen.dart';
 import 'package:dietitian_panel/main.dart';
 import 'package:dietitian_panel/panel/real_client_detail_screen.dart';
+import 'package:dietitian_panel/panel/real_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,7 +53,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Başvurunuz İnceleniyor'), findsOneWidget);
+    expect(find.text('Durumu yenile'), findsOneWidget);
     expect(find.text('Genel Bakış'), findsNothing);
+  });
+
+  testWidgets('a rejected dietitian is told where to write, with no refresh', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    profiles.seedDietitian(
+      auth.currentSession!.userId,
+      status: VerificationStatus.rejected,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Başvurunuz Onaylanmadı'), findsOneWidget);
+    expect(find.text(kSupportEmail), findsOneWidget);
+    expect(find.text('Çıkış yap'), findsOneWidget);
+    expect(find.text('Durumu yenile'), findsNothing);
   });
 
   testWidgets(
@@ -134,7 +165,7 @@ void main() {
       // invite says what became of it.
       expect(find.text('Danışanlar'), findsOneWidget);
       expect(find.text('Davetler'), findsOneWidget);
-      expect(find.text('Davet bekliyor'), findsOneWidget);
+      expect(find.text('Bekliyor'), findsOneWidget);
     },
   );
 
@@ -186,8 +217,52 @@ void main() {
         ),
       );
 
-      expect(find.text('Davet reddedildi'), findsOneWidget);
-      expect(find.text('Davet bekliyor'), findsNothing);
+      expect(find.text('Reddedildi'), findsOneWidget);
+      expect(find.text('Bekliyor'), findsNothing);
+    });
+
+    testWidgets('a phone puts a waiting invite above the clients, and it fits '
+        'a small phone at 200% text', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(320, 700);
+      addTearDown(tester.view.reset);
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await pumpList(
+        tester,
+        FakeClientRelationshipRepository.new,
+        (repo, dietitianId) => repo
+          ..seedRelationship(
+            dietitianId: dietitianId,
+            invitedEmail: 'bekleyen.davet@example.com',
+          )
+          ..seedRelationship(
+            dietitianId: dietitianId,
+            invitedEmail: 'elif@example.com',
+            clientId: 'c0',
+            status: RelationshipStatus.active,
+          )
+          ..seedClientName('c0', 'Elif Aydın'),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getTopLeft(find.text('Davetler')).dy,
+        lessThan(tester.getTopLeft(find.text('Danışanlar')).dy),
+      );
+    });
+
+    testWidgets('the greeting uses the first name without the title', (
+      tester,
+    ) async {
+      await pumpList(
+        tester,
+        FakeClientRelationshipRepository.new,
+        (repo, dietitianId) {},
+      );
+
+      expect(find.text('Hoş geldiniz, Deniz'), findsOneWidget);
     });
 
     testWidgets('a failed load explains itself in Turkish and retries', (
@@ -366,6 +441,87 @@ void main() {
     // accept policy makes later.
     expect(find.text('yeni@example.com'), findsOneWidget);
     expect(find.text('Henüz danışanınız yok'), findsNothing);
+  });
+
+  testWidgets('the invite dialog says what is wrong with the address', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    profiles.seedDietitian(
+      auth.currentSession!.userId,
+      fullName: 'Dyt. Deniz',
+      status: VerificationStatus.approved,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(
+            FakeClientRelationshipRepository(),
+          ),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Danışan davet et'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Davet gönder'));
+    await tester.pumpAndSettle();
+    expect(find.text('E-posta adresini girin.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'elif@');
+    await tester.tap(find.text('Davet gönder'));
+    await tester.pumpAndSettle();
+    expect(find.text('Geçerli bir e-posta adresi girin.'), findsOneWidget);
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'elif@example.com');
+    await tester.pump();
+    expect(find.text('Geçerli bir e-posta adresi girin.'), findsNothing);
+  });
+
+  testWidgets('Profil shows who the dietitian is, and no placeholder', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final profiles = FakeProfileRepository();
+    await auth.signIn(email: 'dyt@example.com', password: 'sifresifre');
+    profiles.seedDietitian(
+      auth.currentSession!.userId,
+      fullName: 'Dyt. Deniz Arslan',
+      status: VerificationStatus.approved,
+      specialties: const ['Spor beslenmesi', 'Diyabet'],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          profileRepositoryProvider.overrideWithValue(profiles),
+          clientRelationshipRepositoryProvider.overrideWithValue(
+            FakeClientRelationshipRepository(),
+          ),
+        ],
+        child: const DietitianPanelApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PersonAvatar), findsOneWidget);
+    final profile = find.byType(RealProfileScreen);
+    expect(
+      find.descendant(of: profile, matching: find.text('Dyt. Deniz Arslan')),
+      findsOneWidget,
+    );
+    expect(find.text('Onaylı'), findsOneWidget);
+    expect(find.text('Spor beslenmesi, Diyabet'), findsOneWidget);
+    expect(find.text('Yakında'), findsNothing);
   });
 
   testWidgets('a failed profile load is told in Turkish, formally', (
@@ -554,6 +710,7 @@ void main() {
       fullName: 'Dyt. Deniz',
       status: VerificationStatus.approved,
     );
+    profiles.seedClient('client-1', fullName: 'Elif Aydın');
     final relationships = FakeClientRelationshipRepository()
       ..seedRelationship(
         dietitianId: dietitianId,
@@ -587,6 +744,11 @@ void main() {
     await tester.tap(find.text('Elif Aydın'));
     await tester.pumpAndSettle();
     expect(find.byType(RealClientDetailScreen), findsOneWidget);
+    // The record opens inside the tab: Profil stays one tap away, and a
+    // client who has filled nothing in gets one message, not three dashes.
+    expect(find.text('Profil'), findsWidgets);
+    expect(find.text('Danışanınız henüz bilgi girmedi.'), findsOneWidget);
+    expect(find.text('Bilgi girilmemiş'), findsNothing);
   });
 
   testWidgets('the client and invite cards grow with 2× text', (tester) async {

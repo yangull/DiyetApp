@@ -9,7 +9,7 @@ Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFv
 - One session = one new chat in this folder (no worktree). Inside a session Claude works in small slices: analyze + tests, a subagent review, before/after captures in `C:\Users\jhana\Pictures\Wellkit polish\<slice>\`, then stops and shows Can. Commit only when Can says "commit", push only on "push".
 - Some items are decisions, not code. Claude asks them at the start of the session (listed under each session).
 - The model that writes the code is the one selected in the app's model picker. Reviews run as separate subagents on a stronger model.
-- Baseline tests (after Session 2): core 51, client 21 (+1 skipped capture), panel 199 (+3 skipped captures). Analyze must stay clean.
+- Baseline tests (after Session 4): core 52, client 26 (+1 skipped capture), panel 204 (+3 skipped captures). Analyze must stay clean.
 
 ## Session 1: labelled fields and shared states (core)
 To-do:
@@ -36,23 +36,25 @@ To-do:
 Done when: login, Bugün, Profil, Genel Bakış shown on phone and computer, light and dark.
 
 ## Session 3: client app screens (all C items not done above)
+Status: **done, committed (59578ab, c987d6e) and pushed.**
+Decisions (Can, 2 Oct 2026): Yakında merged into one small card; the bottom bar stays fixed at 200% text. The progress bar's empty part is a new `track` palette token.
 To-do:
-- [ ] **Bugün** (C3.1-C3.8): fill or remove the empty lower half; "Yakında" as a small card or merged into the steps; the first step stands out; step rows aligned to the title; 0/3 bar visible in dark; one main action when an invite is waiting; the dietitian row with an avatar and something to tap or no false affordance; remove the duplicate "Yakında" tag.
-- [ ] **Bugün at 200% text** (C4.1-C4.3): ring alignment, the "Düzenle" action, bottom bar scaling (decision).
-- [ ] **Profil** (C5.1, C5.4, C5.6, C5.7): one empty state, no duplicated "Diyetisyenin", label contrast, 200% layout of the control and the logout icon.
-- [ ] **Hedeflerim** (C6.2-C6.4): privacy line as a proper note, hints for the empty fields, snackbar theme in `app_theme.dart` (floating, margin, no heavy outline, retry), a way to cancel.
-Ask Can: what should fill Bugün's lower half (client app features don't exist yet; rule 4 allows only real things); the bottom bar at 200%.
+- [x] **Bugün** (C3.1-C3.8): fill or remove the empty lower half; "Yakında" as a small card or merged into the steps; the first step stands out; step rows aligned to the title; 0/3 bar visible in dark; one main action when an invite is waiting; the dietitian row with an avatar and something to tap or no false affordance; remove the duplicate "Yakında" tag.
+- [x] **Bugün at 200% text** (C4.1-C4.3): ring alignment, the "Düzenle" action, bottom bar scaling (decision).
+- [x] **Profil** (C5.1, C5.4, C5.6, C5.7): one empty state, no duplicated "Diyetisyenin", label contrast, 200% layout of the control and the logout icon.
+- [x] **Hedeflerim** (C6.2-C6.4): privacy line as a proper note, hints for the empty fields, snackbar theme in `app_theme.dart` (floating, margin, no heavy outline, retry), a way to cancel.
+Asked and answered: what should fill Bugün's lower half (client app features don't exist yet; rule 4 allows only real things); the bottom bar at 200%.
 Done when: every C screen is re-captured at normal and 200% text, light and dark.
 
 ## Session 4: real panel screens (all R items not done above)
-To-do:
-- [ ] **Auth and status** (R1.1, R2.1-R2.3): desktop card width, "Başvuru" icons, reject screen with a contact line (needs C16: ask Can for the address).
-- [ ] **Genel Bakış** (R3.1-R3.7, R3.9): shorter heading, focal card alignment, invites before clients on phone, invite row and pill alignment, a distinct pill for declined, thicker client rows, rail width and labels on desktop, empty-state copy without "Diyetisyen bul", error retry as main action.
-- [ ] **Invite dialog** (R4.2, R4.3): honest, shorter helper; an error when the email is empty or invalid.
-- [ ] **Client information** (R5.1-R5.3, R5.5): `readablePadding`, rail stays reachable, values bold only where they are data, one empty state.
-- [ ] **Profil** (R6.1-R6.3): avatar, "Uzmanlık alanları" not shown as data, card width, control size.
-Ask Can: the support address for rejected dietitians; what a desktop rail should hold.
-Done when: every R screen re-captured on phone and computer, light and dark.
+Status: **done, awaiting push.** R5.4 (the ₺ box) waits on X2 in Session 6.
+Decisions (Can, 2 Oct 2026): the rejected screen shows a placeholder address (`kSupportEmail`, C16 still open); the desktop rail is wider with the mark on top and the dietitian's name at the bottom.
+- [x] **Auth and status** (R1.1, R2.1-R2.3): login was already done; status screen has the mark, equal icon discs, a 480 px card and the contact line.
+- [x] **Genel Bakış** (R3.1-R3.7, R3.9): first-name greeting, caption under the number, invites first on a phone when one waits, pill at the row's edge (amber for declined), taller rows, extended rail, empty copy without "Diyetisyen bul".
+- [x] **Invite dialog** (R4.2, R4.3): shorter honest helper, inline error for an empty or invalid address, scrolls with the keyboard.
+- [x] **Client information** (R5.1-R5.3, R5.5): 720 px width, record opens inside the tab so the rail stays, health note regular weight, one empty message.
+- [x] **Profil** (R6.1-R6.3): avatar header, 720 px width, approval pill, no placeholder row, selector never under 40 px.
+Done when: every R screen re-captured on phone and computer, light and dark (captures in `Wellkit polish\S8-S11`).
 
 ## Session 5: demo panel, part 1 (D1-D5)
 To-do:
