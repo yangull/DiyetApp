@@ -136,8 +136,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// colour keeps 4.5:1 on the canvas, on a card and on a card under the 8 %
   /// press overlay (`#2F3035`): ink 16.00 / 14.04 / 11.34, textSecondary
   /// 6.83 / 6.00 / 4.84, accent 8.39 / 7.36 / 5.94, warning 9.44 / 8.28 / 6.69,
-  /// error 8.11 / 7.12 / 5.75, aiDraft 8.81 / 7.73 / 6.25; borderStrong 4.14 on
-  /// the canvas and 3.63 on a card; status text on its tint 6.55 or more;
+  /// error 8.11 / 7.12 / 5.75, aiDraft 8.81 / 7.73 / 6.25; borderStrong 3.53 on
+  /// the canvas and 3.10 on a card; status text on its tint 6.55 or more;
   /// the canvas-coloured label on the filled pill 16.00 (12.89 pressed), on
   /// accent 8.39 and on error 8.11. Checked in `core_test.dart`.
   static const dark = AppPalette(
@@ -148,7 +148,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     charcoalHover: Color(0xFFD5D7DB),
     onCharcoal: Color(0xFF121316),
     textSecondary: Color(0xFF9A9DA3),
-    borderStrong: Color(0xFF74777E),
+    borderStrong: Color(0xFF696C73),
     divider: Color(0xFF2C2F35),
     accent: Color(0xFF4CC38A),
     accentStrong: Color(0xFF7FD9AE),

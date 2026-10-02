@@ -97,7 +97,7 @@ card (`#2F3035`):
 | `ink` | `#EDEEF0` | 16.00 / 14.04 / 11.34 | |
 | `charcoal` (filled pill) | `#EDEEF0` | label `onCharcoal` `#121316` 16.00, pressed `#D5D7DB` 12.89 | |
 | `textSecondary` | `#9A9DA3` | 6.83 / 6.00 / 4.84 | |
-| `borderStrong` | `#74777E` | 4.14 / 3.63 | |
+| `borderStrong` | `#696C73` | 3.53 / 3.10 | Lowered from `#74777E` (4.14 / 3.63): the old outline read as heavy on a dark input |
 | `divider` | `#2C2F35` | 1.38 / 1.21 | |
 | `accent` | `#4CC38A` | 8.39 / 7.36 / 5.94 | `onFilled` `#121316` on it 8.39 |
 | `accentStrong` on `accentTint` | `#7FD9AE` on `#173327` | 8.08 | "Onaylı" |
