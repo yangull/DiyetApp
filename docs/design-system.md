@@ -206,11 +206,11 @@ colour), the `ListTile` title (defaults to `bodyLarge`; set it to `titleLarge`) 
 Large Title so nothing falls back to Material's font). Dialog titles read
 `headlineSmall`, the rail and bottom bar `labelMedium`, buttons `labelLarge`.
 
-### Compact scale (panel in a computer browser), draft for Can
+### Compact scale (panel in a computer browser)
 
-HIG's macOS styles, with the 10-point styles raised to 11 (#135's floor). **A draft**:
-Can saw it on 1 Oct 2026 and will judge it on the real panel in a browser, so it is
-coded as written and adjusted then.
+HIG's macOS styles, raised for readability. On 2 Oct 2026 Can judged the 11 px text
+too small and pixelated in a browser, so the floor is now **12** and the slots above it
+moved up one step (13 / 14), keeping the order small < medium < large.
 
 | HIG macOS style | Flutter slot | Size / line | Weight |
 |---|---|---|---|
@@ -218,15 +218,15 @@ coded as written and adjusted then.
 | Title 1 | `headlineLarge` | 22 / 26 | 600 |
 | Title 2 | `headlineMedium` | 17 / 22 | 600 |
 | Title 3 | `headlineSmall` | 15 / 20 | 600 |
-| Headline | `titleLarge` | 13 / 16 | 600 |
-| Callout (emphasised) | `titleMedium` | 12 / 15 | 600 |
-| Subheadline (emphasised) | `titleSmall` | 11 / 14 | 600 |
-| Body | `bodyLarge` | 13 / 16 | 400 |
-| Callout | `bodyMedium` | 12 / 15 | 400 |
-| Subheadline / Footnote | `bodySmall` | 11 / 14 | 400 |
-| Body (buttons) | `labelLarge` | 13 / 16 | 500 |
-| Caption 1 | `labelMedium` | 11 / 14 | 500 |
-| Caption 1 (emphasised) | `labelSmall` | 11 / 14 | 600 |
+| Headline | `titleLarge` | 14 / 18 | 600 |
+| Callout (emphasised) | `titleMedium` | 13 / 16 | 600 |
+| Subheadline (emphasised) | `titleSmall` | 12 / 15 | 600 |
+| Body | `bodyLarge` | 14 / 18 | 400 |
+| Callout | `bodyMedium` | 13 / 16 | 400 |
+| Subheadline / Footnote | `bodySmall` | 12 / 15 | 400 |
+| Body (buttons) | `labelLarge` | 14 / 18 | 500 |
+| Caption 1 | `labelMedium` | 12 / 15 | 500 |
+| Caption 1 (emphasised) | `labelSmall` | 12 / 15 | 600 |
 
 The shortest line here is 22 / 26 (1.18 em), still above Alpino's 1.14 em of ink.
 
@@ -371,4 +371,4 @@ the panel; "danışan", never "müşteri"; short button labels ("Kaydet", "Vazge
 
 ## Open
 
-- **Compact scale and sizes:** coded as the draft, judged by Can on the real panel.
+- **Compact scale and sizes:** raised on 2 Oct 2026 (12 px floor); Can judges it again on the real panel.

@@ -7,7 +7,7 @@ import 'app_density.dart';
 /// Headings and numbers 600, buttons and navigation 500, body 400; nothing
 /// above 600. All Turkish letters were verified in the file's cmap.
 ///
-/// Sizes are HIG's: iOS for touch, macOS (11 as the floor) for the compact
+/// Sizes are HIG's: iOS for touch, macOS (12 as the floor, Can 2 Oct 2026) for the compact
 /// panel. Line heights stay at or above 1.18 em, above Alpino's 1.14 em of
 /// ink, with Flutter's default proportional leading so İ and ş never clip.
 ///
@@ -48,15 +48,15 @@ abstract final class AppTypography {
         headlineLarge: _style(22, 26, FontWeight.w600, -0.3),
         headlineMedium: _style(17, 22, FontWeight.w600),
         headlineSmall: _style(15, 20, FontWeight.w600),
-        titleLarge: _style(13, 16, FontWeight.w600),
-        titleMedium: _style(12, 15, FontWeight.w600),
-        titleSmall: _style(11, 14, FontWeight.w600),
-        bodyLarge: _style(13, 16),
-        bodyMedium: _style(12, 15),
-        bodySmall: _style(11, 14),
-        labelLarge: _style(13, 16, FontWeight.w500),
-        labelMedium: _style(11, 14, FontWeight.w500),
-        labelSmall: _style(11, 14, FontWeight.w600, 0.2),
+        titleLarge: _style(14, 18, FontWeight.w600),
+        titleMedium: _style(13, 16, FontWeight.w600),
+        titleSmall: _style(12, 15, FontWeight.w600),
+        bodyLarge: _style(14, 18),
+        bodyMedium: _style(13, 16),
+        bodySmall: _style(12, 15),
+        labelLarge: _style(14, 18, FontWeight.w500),
+        labelMedium: _style(12, 15, FontWeight.w500),
+        labelSmall: _style(12, 15, FontWeight.w600, 0.2),
       );
     }
     final largeTitle = _style(34, 41, FontWeight.w600, -0.7);

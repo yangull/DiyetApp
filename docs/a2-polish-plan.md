@@ -9,7 +9,7 @@ Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFv
 - One session = one new chat in this folder (no worktree). Inside a session Claude works in small slices: analyze + tests, a subagent review, before/after captures in `C:\Users\jhana\Pictures\Wellkit polish\<slice>\`, then stops and shows Can. Commit only when Can says "commit", push only on "push".
 - Some items are decisions, not code. Claude asks them at the start of the session (listed under each session).
 - The model that writes the code is the one selected in the app's model picker. Reviews run as separate subagents on a stronger model.
-- Baseline tests: core 28, client 18, panel 197. Analyze must stay clean.
+- Baseline tests (after Session 2): core 51, client 21 (+1 skipped capture), panel 199 (+3 skipped captures). Analyze must stay clean.
 
 ## Session 1: labelled fields and shared states (core)
 To-do:
@@ -22,16 +22,16 @@ Ask Can: nothing blocking.
 Done when: analyze and tests green, captures of login, signup, Hedeflerim, invite dialog, loading and error screens shown.
 
 ## Session 2: controls, brand, dark outline, compact size
-Status: **S3 is done and committed** (b769363 plus a follow-up). S4, S5, S6 remain; do them one slice at a time.
+Status: **S3 and S4 are committed** (b769363, ee71e38). **S5 and S6 are done in the working tree, awaiting Can's commit.** Session 2 is complete.
 Decisions (Can, 2 Oct 2026):
 - **"Düzenle" rule:** an Ink text action at the row's right end; the pill only for the first-time "Yaz". Done in S3.
 - **Compact text:** in the web check (8080) the smallest writing was pixelated and too small. Secondary text in the computer layout goes from 11 to **12 px**, and everything else in the compact scale moves up a little to match, only where needed for readability (S6).
 - The selected segment of "Görünüm" stays Charcoal (design system: Black does the acting).
 To-do:
 - [x] **S3 Actions** (X9, C1.3, R1.4, C5.2, C5.3, C5.5): `AuthSwitchLink`, `SignOutRow`, full-width `ThemeChoiceSelector`, Bugün "Düzenle" as text action.
-- [ ] **S4 `WellkitMark`** (placeholder "W", drawn in code, no asset) on the 4 auth screens and in `AppLoading`. Items: X3, C1.1, C2.2.
-- [ ] **S5 dark input outline** lowered to about 3.1:1 and `core_test.dart` pairs updated. Item: X8.
-- [ ] **S6 compact scale** per the decision above: raise the 11 px secondary text to 12 px, adjust the rest of `AppTypography` compact and `docs/design-system.md` table, check panel layout tests. Item: X7.
+- [x] **S4 `WellkitMark`** (placeholder "W", drawn in code, no asset) on the 4 auth screens and in `AppLoading`. Items: X3, C1.1, C2.2.
+- [x] **S5 dark input outline**: dark `borderStrong` `#74777E` to `#696C73` (3.53 on canvas, 3.10 on a card); `core_test.dart` pairs unchanged (they only need 3:1). Item: X8.
+- [x] **S6 compact scale**: 11 px text is now 12; the slots above moved up one step (13 / 14, line heights 15 / 16 / 18); `AppTypography` and the `docs/design-system.md` table updated, all panel layout tests pass. Item: X7. Can judges it on the real panel in a browser.
 - [ ] Optional follow-up from the S3 review: `EdgeButton`'s outer 12 px is not tappable (hit-testing stops at the parent's box).
 Done when: login, Bugün, Profil, Genel Bakış shown on phone and computer, light and dark.
 
