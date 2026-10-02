@@ -395,6 +395,82 @@ void main() {
     );
   });
 
+  testWidgets('the client record opens on the plan, with its notes folded', (
+    tester,
+  ) async {
+    await pumpWide(tester, 'Danışanlar');
+    await tester.tap(find.text('Elif Aydın'));
+    await tester.pumpAndSettle();
+
+    final plan = tester.getTopLeft(find.text('Diyet planı'));
+    final info = tester.getTopLeft(find.text('Danışan bilgileri'));
+    expect(plan.dy, lessThan(info.dy));
+    expect(find.text('Görüşme notu'), findsWidgets);
+    expect(find.textContaining('bizim tahminimiz'), findsNothing);
+  });
+
+  testWidgets('the exchange plan shows the gap beside its two numbers', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 1600);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(AppDensity.compact),
+          home: const ExchangePlanEditorScreen(clientId: 'c1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Planda'), findsOneWidget);
+    expect(find.text('Hedef'), findsOneWidget);
+    expect(find.text('Fark'), findsOneWidget);
+    // The signed gap, not the old sentence.
+    expect(find.textContaining(RegExp(r'^[+−]\d+ kcal$')), findsOneWidget);
+    expect(find.textContaining('Hedefin'), findsNothing);
+  });
+
+  testWidgets('the minus button fades at zero', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 1600);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(AppDensity.compact),
+          home: const ExchangePlanEditorScreen(clientId: 'c1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The first group's minus: tap it down to zero; it then does nothing.
+    final minus = find.widgetWithIcon(IconButton, Icons.remove);
+    expect(minus, findsWidgets);
+    for (var i = 0; i < 12; i++) {
+      if (tester.widget<IconButton>(minus.first).onPressed == null) break;
+      await tester.tap(minus.first);
+      await tester.pumpAndSettle();
+    }
+    expect(tester.widget<IconButton>(minus.first).onPressed, isNull);
+  });
+
+  testWidgets('the interview question hides behind a toggle', (tester) async {
+    await pumpWide(tester);
+    expect(find.textContaining('Bu liste bizim tahminimiz'), findsNothing);
+
+    await tester.tap(find.text('Görüşme notu'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Bu liste bizim tahminimiz'), findsOneWidget);
+
+    await tester.tap(find.text('Görüşme notunu gizle'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Bu liste bizim tahminimiz'), findsNothing);
+  });
+
   testWidgets('Genel Bakış puts the agenda beside the work on wide screens', (
     tester,
   ) async {
@@ -948,7 +1024,7 @@ void main() {
           300,
           scrollable: list,
         );
-        expect(find.text('Yanıtla'), findsNWidgets(2));
+        expect(find.text('Mesajı yanıtla'), findsNWidgets(2));
         expectTextNotClipped(
           tester,
           find.descendant(

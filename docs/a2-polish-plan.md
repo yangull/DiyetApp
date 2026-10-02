@@ -9,7 +9,7 @@ Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFv
 - One session = one new chat in this folder (no worktree). Inside a session Claude works in small slices: analyze + tests, a subagent review, before/after captures in `C:\Users\jhana\Pictures\Wellkit polish\<slice>\`, then stops and shows Can. Commit only when Can says "commit", push only on "push".
 - Some items are decisions, not code. Claude asks them at the start of the session (listed under each session).
 - The model that writes the code is the one selected in the app's model picker. Reviews run as separate subagents on a stronger model.
-- Baseline tests (after Session 4): core 52, client 26 (+1 skipped capture), panel 204 (+3 skipped captures). Analyze must stay clean.
+- Baseline tests (after Session 5): core 52, client 26 (+1 skipped capture), panel 209 (+3 skipped captures). Analyze must stay clean.
 
 ## Session 1: labelled fields and shared states (core)
 To-do:
@@ -57,15 +57,15 @@ Decisions (Can, 2 Oct 2026): the rejected screen shows a placeholder address (`k
 Done when: every R screen re-captured on phone and computer, light and dark (captures in `Wellkit polish\S8-S11`).
 
 ## Session 5: demo panel, part 1 (D1-D5)
-To-do:
-- [ ] **D1 Genel Bakış**: "Demo" button no longer takes a row on phones; first card shorter; seed times that don't roll past midnight (D1.3); one name for the "Ölçümler / Ölçümleri incele" action; chevron and action don't duplicate; rail label no longer wraps; bottom bar spacing.
-- [ ] **D2 Danışanlar**: phone controls on one row; desktop table columns tighter, avatars, `numberSlotWidth` for kg; subtitle size; filter sheet ("Tüm hedefler" semantics, "Temizle" inside).
-- [ ] **D3 Danışan kartı**: primary action up, measurement and weight tables in number slots, one date format, `readablePadding`.
-- [ ] **D4 Plan editor**: phone order (plan before the macro tiles), fewer bordered boxes, a labelled time field, macro unit baseline, desktop sidebar split.
-- [ ] **D5 Değişim listesi**: steppers and kcal in number slots, no clipped second line, a clearer summary.
-- [ ] **X5, X6 for the demo**: `trMonthsShort` in core replaces the panel's private list; appointments `_when` uses `formatTime`.
-Ask Can: the interview paragraphs (D1.8, D3.5, D10.1): keep as they are because you use them live in interviews, move them behind an info toggle, or delete?
-Done when: demo screens re-captured and `demo_widget_test.dart` and `demo_codec_test.dart` pass.
+Status: **done, committed locally, not pushed.**
+Decisions (Can, 2 Oct 2026): the interview paragraphs (D1.8, D3.5, D10.1) stay but sit behind a "Görüşme notu" toggle (`InterviewNote`); the "Demo" button on a phone lives in Genel Bakış only.
+- [x] **D1 Genel Bakış**: Demo button in the header, shorter first card, seed no longer rolls past midnight, one name per triage action and no chevron, extended rail from 900 px (compact rail with stacked utilities below), note behind a toggle.
+- [x] **D2 Danışanlar**: phone controls share rows when they fit, filter sheet without "all" chips and with "Temizle", desktop table with avatars and a right-aligned kg slot.
+- [x] **D3 Danışan kartı**: plan card first, equal-column fact grid, number slots for weights and measurements, three notes folded.
+- [x] **D4 Plan editor**: phone order (meals before figures), borderless food rows, labelled time, notice and approve button separated.
+- [x] **D5 Değişim listesi**: quiet stepper discs, kcal slot, wrapped examples, Planda / Hedef / Fark in one row (gap threshold is DT20).
+- [x] **X5, X6 for the demo**: one date format (`formatDate`: "28 Eyl", year only if not current), `trMonthsShort` in core, appointments `_when` uses `formatTime`.
+Done when: demo screens re-captured (captures in `Wellkit polish\S12-S15`) and `demo_widget_test.dart` and `demo_codec_test.dart` pass.
 
 ## Session 6: demo panel, part 2 (D6-D11), lira sign, icons
 To-do:

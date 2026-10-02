@@ -252,6 +252,8 @@ DT11–DT14, DT16, DT17, part of DT3 and most of DT1 and DT15. Still open, same 
 - DT15. What is still missing?
 - DT18. Which choices should the client make alone, e.g. swapping a food for another
   from the same exchange group? Feeds C23. (Added 1 Oct 2026.)
+- DT20. In an exchange-list plan, how far from the daily target may the total be before
+  you want a warning? (Today: 100 kcal, a guess; `kExchangeGapWarningKcal`. Added 2 Oct 2026.)
 
 ---
 

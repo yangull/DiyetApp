@@ -7,6 +7,7 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../export/plan_pdf.dart';
 import '../widgets/export_plan_button.dart';
+import '../widgets/interview_note.dart';
 import '../widgets/plan_editor_layout.dart';
 
 /// The same plan as [PlanEditorScreen], built the way the research says Turkish
@@ -14,6 +15,10 @@ import '../widgets/plan_editor_layout.dart';
 /// chosen from a substitution sheet. Shown next to the freeform editor so a
 /// dietitian can point at the one that matches their practice — the question
 /// this screen exists to answer is which model is right, not which is prettier.
+/// A gap between the plan and the target past which "Fark" takes the warning
+/// colour. A guess, to ask dietitians about (QUESTIONS.md DT20).
+const kExchangeGapWarningKcal = 100;
+
 class ExchangePlanEditorScreen extends ConsumerWidget {
   const ExchangePlanEditorScreen({super.key, required this.clientId});
 
@@ -52,17 +57,26 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
       energy: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // The gap sits beside the two numbers it is the difference of, so
+          // the eye reads one row, not two places.
           Wrap(
             spacing: AppSpacing.x3,
             runSpacing: AppSpacing.md,
             children: [
               _Figure(label: 'Planda', value: '${plan.kcal} kcal'),
               _Figure(label: 'Hedef', value: '$target kcal', muted: true),
+              Semantics(
+                label: difference,
+                excludeSemantics: true,
+                child: _Figure(
+                  label: 'Fark',
+                  value: _signed(plan.kcal - target),
+                  warn: (plan.kcal - target).abs() > kExchangeGapWarningKcal,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(difference, style: text.titleMedium),
-          const SizedBox(height: AppSpacing.xs),
           Text(
             'Plan, toplam değişim sayılarından; hedef, danışanın yaş, '
             'cinsiyet, boy ve kilosundan hesaplanıyor. Grup kalorileri '
@@ -87,12 +101,11 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
       footer: [
         const _SubstitutionSheet(),
         const SizedBox(height: AppSpacing.lg),
-        Text(
+        const InterviewNote(
           'Bu ekran bir deneme: planı besin ve miktar yazarak mı, yoksa '
           'değişim listesiyle mi kuruyorsunuz? Gruplar, ölçüler ve kalori '
           'değerleri örnektir — sizin kullandığınız tabloyu öğrenmek '
           'istiyoruz.',
-          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -100,11 +113,19 @@ class ExchangePlanEditorScreen extends ConsumerWidget {
 }
 
 class _Figure extends StatelessWidget {
-  const _Figure({required this.label, required this.value, this.muted = false});
+  const _Figure({
+    required this.label,
+    required this.value,
+    this.muted = false,
+    this.warn = false,
+  });
 
   final String label;
   final String value;
   final bool muted;
+
+  /// A gap worth a second look: the figure takes the warning colour.
+  final bool warn;
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +143,21 @@ class _Figure extends StatelessWidget {
         Text(
           value,
           style: text.headlineMedium?.copyWith(
-            color: muted ? palette.textSecondary : null,
+            color: warn
+                ? palette.warning
+                : muted
+                ? palette.textSecondary
+                : null,
           ),
         ),
       ],
     );
   }
 }
+
+/// "+120 kcal" / "−746 kcal": the gap with its sign.
+String _signed(int gap) =>
+    gap == 0 ? '0 kcal' : '${gap > 0 ? '+' : '−'}${gap.abs()} kcal';
 
 /// Reading two numbers and subtracting them is work the screen can do.
 String _differenceLabel(int planned, int target) {
@@ -222,57 +251,116 @@ class _LineRow extends ConsumerWidget {
     void setCount(int value) =>
         notifier.setExchangeCount(clientId, mealIndex, lineIndex, value);
 
+    final kcalStyle = text.bodyMedium!.copyWith(color: palette.textSecondary);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 4,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  kExchangeGroupLabels[line.group] ?? line.group.name,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // The kcal column needs room: on a narrow card (or at large text)
+          // it moves under the group's name instead of squeezing it.
+          final scale = MediaQuery.textScalerOf(context).scale(1);
+          final inline = constraints.maxWidth >= 330 * scale;
+          return Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      kExchangeGroupLabels[line.group] ?? line.group.name,
+                      style: text.titleMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    // Wraps instead of being cut off: the second example is part
+                    // of what the group means.
+                    Text(
+                      examples.take(2).join(' · '),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall?.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    if (!inline) Text('${line.kcal} kcal', style: kcalStyle),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              _StepButton(
+                icon: Icons.remove,
+                tooltip: 'Azalt',
+                onPressed: line.count == 0
+                    ? null
+                    : () => setCount(line.count - 1),
+              ),
+              SizedBox(
+                width: 32,
+                child: Text(
+                  '${line.count}',
+                  textAlign: TextAlign.center,
                   style: text.titleMedium,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  examples.take(2).join(' · '),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
+              ),
+              _StepButton(
+                icon: Icons.add,
+                tooltip: 'Artır',
+                onPressed: () => setCount(line.count + 1),
+              ),
+              if (inline) ...[
+                const SizedBox(width: AppSpacing.sm),
+                // Right-aligned in a slot sized to the widest value, so the kcal
+                // column lines up row to row.
+                SizedBox(
+                  width: numberSlotWidth(context, '0000 kcal', kcalStyle),
+                  child: Text(
+                    '${line.kcal} kcal',
+                    textAlign: TextAlign.end,
+                    style: kcalStyle,
+                  ),
                 ),
               ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.remove_circle_outline),
-            tooltip: 'Azalt',
-            onPressed: line.count == 0 ? null : () => setCount(line.count - 1),
-          ),
-          SizedBox(
-            width: 32,
-            child: Text(
-              '${line.count}',
-              textAlign: TextAlign.center,
-              style: text.titleMedium,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: 'Artır',
-            onPressed: () => setCount(line.count + 1),
-          ),
-          SizedBox(
-            width: 72,
-            child: Text(
-              '${line.kcal} kcal',
-              textAlign: TextAlign.right,
-              style: text.bodySmall?.copyWith(color: palette.textSecondary),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
+    );
+  }
+}
+
+/// A round stepper button on the card: a quiet disc, no outline, 40 px to
+/// touch.
+class _StepButton extends StatelessWidget {
+  const _StepButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      // The theme sets one foreground for every state, so a disabled button
+      // looked like an enabled one: this one fades.
+      style: IconButton.styleFrom(
+        backgroundColor: palette.canvas,
+        disabledBackgroundColor: palette.canvas,
+        minimumSize: const Size(40, 40),
+      ).copyWith(
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.disabled)
+              ? palette.textSecondary.withValues(alpha: 0.45)
+              : palette.ink,
+        ),
+      ),
+      icon: Icon(icon, size: 20),
     );
   }
 }

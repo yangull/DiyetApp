@@ -579,11 +579,15 @@ List<Appointment> _seedAppointments() {
 
   return [
     // Two hours from now, on the hour: "today 16:30" turned into a past
-    // appointment every evening, and the demo and its tests with it.
+    // appointment every evening, and the demo and its tests with it. From
+    // 22:00 there is no "two hours from now" left today, and the hour would
+    // roll over to tomorrow 00:00, so it moves to tomorrow morning instead.
     Appointment(
       id: 'a1',
       clientId: 'c1',
-      at: DateTime(today.year, today.month, today.day, today.hour + 2),
+      at: today.hour + 2 > 23
+          ? at(1, 9)
+          : DateTime(today.year, today.month, today.day, today.hour + 2),
       kind: AppointmentKind.online,
       status: AppointmentStatus.planned,
       fee: 900,

@@ -7,6 +7,7 @@ import '../demo/demo_repository.dart';
 import '../demo/triage.dart';
 import '../util/breakpoints.dart';
 import '../util/panel_date.dart';
+import '../widgets/interview_note.dart';
 import '../widgets/readable_width.dart';
 import '../widgets/tone_pill.dart';
 import 'client_detail_screen.dart';
@@ -26,8 +27,12 @@ class OverviewScreen extends ConsumerWidget {
     required this.onOpenClients,
     required this.onOpenMessages,
     required this.onOpenAppointments,
+    this.onOpenDemoMenu,
   });
 
+  /// Phones only: the demo's reset and settings, which have no place in the
+  /// rail there.
+  final VoidCallback? onOpenDemoMenu;
   final VoidCallback onOpenClients;
   final VoidCallback onOpenMessages;
   final VoidCallback onOpenAppointments;
@@ -135,7 +140,7 @@ class OverviewScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _Header(),
+              _Header(onOpenDemoMenu: onOpenDemoMenu),
               const SizedBox(height: AppSpacing.xxl),
               content,
             ],
@@ -153,17 +158,37 @@ double _cardPadding(BuildContext context) => context.density.cardPadding;
 /// The date as a small label, then the greeting. It is no longer the biggest
 /// text on the page: the drafts count is.
 class _Header extends StatelessWidget {
-  const _Header();
+  const _Header({this.onOpenDemoMenu});
+
+  final VoidCallback? onOpenDemoMenu;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final menu = onOpenDemoMenu;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          formatTodayLabel(DateTime.now()),
-          style: text.bodySmall?.copyWith(color: context.palette.textSecondary),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                formatTodayLabel(DateTime.now()),
+                style: text.bodyMedium?.copyWith(
+                  color: context.palette.textSecondary,
+                ),
+              ),
+            ),
+            if (menu != null && isPanelPhone(context))
+              EdgeButton(
+                end: true,
+                child: TextButton.icon(
+                  onPressed: menu,
+                  icon: const Icon(Icons.tune),
+                  label: const Text('Demo'),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 6),
         Text(
@@ -218,8 +243,8 @@ class _DraftsCard extends StatelessWidget {
       child: Text(
         '$count',
         style: AppTypography.figures(
-          wide ? 48 : 56,
-          wide ? 52 : 60,
+          48,
+          52,
         ).copyWith(color: context.palette.ink, letterSpacing: -1),
       ),
     );
@@ -261,14 +286,25 @@ class _DraftsCard extends StatelessWidget {
             ],
           );
         }
+        // A phone: number beside the words, the label above them, so the
+        // first card leaves room for the agenda below it.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            label,
-            const SizedBox(height: AppSpacing.md),
-            number,
-            title,
-            const SizedBox(height: 2),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                number,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [label, const SizedBox(height: 6), title],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
             caption,
           ],
         );
@@ -404,10 +440,10 @@ class _TriageCard extends StatelessWidget {
   }
 }
 
-/// The name opens the client (the chevron says so); each reason's action does
-/// the task it names, so answering a message never means finding the client
-/// again in Mesajlar. On a phone the action labels are short, and a screen
-/// reader hears the full task with the client's name.
+/// The name opens the client; each reason's action does the task it names, so
+/// answering a message never means finding the client again in Mesajlar. One
+/// label per action at every width (the row stacks when it is tight), and no
+/// chevron: it sat beside an action that went somewhere else.
 class _TriageGroupTile extends ConsumerWidget {
   const _TriageGroupTile({
     required this.group,
@@ -451,11 +487,6 @@ class _TriageGroupTile extends ConsumerWidget {
                 PersonAvatar(name: client.name),
                 const SizedBox(width: ActionRow.gap),
                 Expanded(child: Text(client.name, style: text.titleMedium)),
-                Icon(
-                  Icons.chevron_right,
-                  size: phone ? 24 : 20,
-                  color: palette.textSecondary,
-                ),
               ],
             ),
           ),
@@ -464,10 +495,9 @@ class _TriageGroupTile extends ConsumerWidget {
     );
 
     Widget line(TriageSignal signal) {
-      final (full, short, task) = switch (signal.kind) {
+      final (label, task) = switch (signal.kind) {
         TriageKind.unansweredMessage => (
           'Mesajı yanıtla',
-          'Yanıtla',
           () {
             ref.read(selectedConversationProvider.notifier).select(client.id);
             // On a phone Mesajlar opens the thread itself as a page over this
@@ -475,14 +505,9 @@ class _TriageGroupTile extends ConsumerWidget {
             if (!phone) onOpenMessages();
           },
         ),
-        TriageKind.noShow => (
-          'Randevuları aç',
-          'Randevular',
-          onOpenAppointments,
-        ),
+        TriageKind.noShow => ('Randevuları aç', onOpenAppointments),
         TriageKind.staleWeighIn => (
           'Ölçümleri incele',
-          'Ölçümler',
           () => openClient(atWeights: true),
         ),
       };
@@ -498,8 +523,8 @@ class _TriageGroupTile extends ConsumerWidget {
               signal.detail,
               style: text.bodyMedium?.copyWith(color: palette.warning),
             ),
-            actionLabel: phone ? short : full,
-            actionSemantics: '${client.name}: $full',
+            actionLabel: label,
+            actionSemantics: '${client.name}: $label',
             onAction: task,
             minBodyWidth: 110,
           ),
@@ -702,24 +727,16 @@ class _AgendaRow extends ConsumerWidget {
 }
 
 /// The interview question behind the triage thresholds (#110): the list is
-/// our guess, and it says so.
+/// our guess, and it says so, behind the "Görüşme notu" toggle.
 class _Footnote extends StatelessWidget {
   const _Footnote();
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 680),
-        child: Text(
-          'Bu liste bizim tahminimiz: 7 gündür tartılmayan, 24 saattir yanıt '
-          'bekleyen ve randevusuna gelmeyen danışanlar. Siz sabah ilk neye '
-          'bakıyorsunuz, hangi eşikleri kullanıyorsunuz?',
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: context.palette.textSecondary),
-        ),
-      ),
+    return const InterviewNote(
+      'Bu liste bizim tahminimiz: 7 gündür tartılmayan, 24 saattir yanıt '
+      'bekleyen ve randevusuna gelmeyen danışanlar. Siz sabah ilk neye '
+      'bakıyorsunuz, hangi eşikleri kullanıyorsunuz?',
     );
   }
 }

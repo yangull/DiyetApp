@@ -29,9 +29,6 @@ class RealPanelShell extends StatefulWidget {
   State<RealPanelShell> createState() => _RealPanelShellState();
 }
 
-/// Where the rail's icons start, so the mark and the name line up with them.
-const _railInset = 28.0;
-
 class _RealPanelShellState extends State<RealPanelShell> {
   int _index = 0;
   final _overviewNavigator = GlobalKey<NavigatorState>();
@@ -41,22 +38,12 @@ class _RealPanelShellState extends State<RealPanelShell> {
     final text = Theme.of(context).textTheme;
     return AdaptiveNavScaffold(
       extendedRail: true,
-      railLeading: const Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: _railInset,
-          top: AppSpacing.lg,
-          bottom: AppSpacing.xl,
-        ),
-        child: Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: WellkitMark(size: 40),
-        ),
-      ),
+      railLeading: const RailMark(),
       railTrailing: Align(
         alignment: AlignmentDirectional.bottomStart,
         child: Padding(
           padding: const EdgeInsetsDirectional.only(
-            start: _railInset,
+            start: kRailInset,
             end: AppSpacing.lg,
             bottom: AppSpacing.lg,
           ),

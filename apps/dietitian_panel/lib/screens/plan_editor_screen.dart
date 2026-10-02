@@ -6,6 +6,7 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../export/plan_pdf.dart';
 import '../widgets/export_plan_button.dart';
+import '../widgets/interview_note.dart';
 import '../widgets/macro_summary.dart';
 import '../widgets/plan_editor_layout.dart';
 
@@ -70,12 +71,11 @@ class PlanEditorScreen extends ConsumerWidget {
         for (var m = 0; m < plan.meals.length; m++)
           _MealCard(clientId: clientId, mealIndex: m),
       ],
-      footer: [
-        Text(
+      footer: const [
+        InterviewNote(
           'Bu ekran görüşme için hazırlanmış bir taslaktır. Bir diyet '
           'listesinde gerçekte hangi alanların bulunması gerektiğini '
           'sizden öğrenmek istiyoruz.',
-          style: text.bodySmall?.copyWith(color: palette.textSecondary),
         ),
       ],
     );
@@ -108,77 +108,90 @@ class _MealCard extends ConsumerWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(meal.name, style: text.titleLarge),
-                SizedBox(
-                  width: 96,
-                  child: TextFormField(
-                    initialValue: meal.time,
-                    decoration: const InputDecoration(isDense: true),
-                    style: text.bodyMedium,
-                    onChanged: (v) =>
-                        notifier.setMealTime(clientId, mealIndex, v),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            for (var i = 0; i < meal.items.length; i++)
-              // Keyed by the item, not its index: after a row above is
-              // deleted, the fields move with their food instead of keeping
-              // the deleted row's text.
-              Padding(
-                key: ObjectKey(meal.items[i]),
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                // The time is a field you can change: it says "Saat" and has
+                // a clock, instead of being a bare box.
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      flex: 5,
-                      child: TextFormField(
-                        initialValue: meal.items[i].food,
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          hintText: 'Besin',
-                        ),
-                        onChanged: (v) => notifier.editItem(
-                          clientId,
-                          mealIndex,
-                          i,
-                          v,
-                          meal.items[i].amount,
-                        ),
-                      ),
+                    Icon(
+                      Icons.schedule,
+                      size: 18,
+                      color: palette.textSecondary,
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      flex: 3,
-                      child: TextFormField(
-                        initialValue: meal.items[i].amount,
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          hintText: 'Miktar',
-                        ),
-                        onChanged: (v) => notifier.editItem(
-                          clientId,
-                          mealIndex,
-                          i,
-                          meal.items[i].food,
-                          v,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Satırı sil',
-                      onPressed: () =>
-                          notifier.removeItem(clientId, mealIndex, i),
-                      icon: Icon(
-                        Icons.close,
-                        size: 18,
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'Saat',
+                      style: text.bodySmall?.copyWith(
                         color: palette.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    SizedBox(
+                      width: 96,
+                      child: TextFormField(
+                        initialValue: meal.time,
+                        decoration: const InputDecoration(isDense: true),
+                        style: text.bodyMedium,
+                        onChanged: (v) =>
+                            notifier.setMealTime(clientId, mealIndex, v),
                       ),
                     ),
                   ],
                 ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            for (var i = 0; i < meal.items.length; i++) ...[
+              // Keyed by the item, not its index: after a row above is
+              // deleted, the fields move with their food instead of keeping
+              // the deleted row's text.
+              if (i > 0) Divider(color: palette.divider, height: 1),
+              Row(
+                key: ObjectKey(meal.items[i]),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: _InlineField(
+                      initialValue: meal.items[i].food,
+                      hint: 'Besin',
+                      onChanged: (v) => notifier.editItem(
+                        clientId,
+                        mealIndex,
+                        i,
+                        v,
+                        meal.items[i].amount,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    flex: 3,
+                    child: _InlineField(
+                      initialValue: meal.items[i].amount,
+                      hint: 'Miktar',
+                      onChanged: (v) => notifier.editItem(
+                        clientId,
+                        mealIndex,
+                        i,
+                        meal.items[i].food,
+                        v,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Satırı sil',
+                    onPressed: () =>
+                        notifier.removeItem(clientId, mealIndex, i),
+                    icon: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                ],
               ),
+            ],
             // Below the rows, where the new row appears; the header has no
             // room for it on a phone.
             // The icon lines up with the fields above.
@@ -190,6 +203,47 @@ class _MealCard extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A food or an amount as plain text on the card: no box of its own, a line
+/// under it while it is being edited. A plan of twenty foods is a list, not
+/// twenty bordered boxes (audit D4.2, X8).
+class _InlineField extends StatelessWidget {
+  const _InlineField({
+    required this.initialValue,
+    required this.hint,
+    required this.onChanged,
+  });
+
+  final String initialValue;
+  final String hint;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final text = Theme.of(context).textTheme;
+    return TextFormField(
+      initialValue: initialValue,
+      onChanged: onChanged,
+      style: text.bodyLarge,
+      decoration: InputDecoration(
+        isDense: true,
+        filled: false,
+        hintText: hint,
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: palette.ink),
+        ),
+        // Row height follows the density (48 on touch, tighter on a
+        // computer), never below 8 px of air.
+        contentPadding: EdgeInsets.symmetric(
+          vertical: ((context.density.controlHeight - 24) / 2).clamp(8.0, 16.0),
         ),
       ),
     );

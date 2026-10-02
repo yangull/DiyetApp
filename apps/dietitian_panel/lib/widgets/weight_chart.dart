@@ -180,13 +180,13 @@ class _WeightPainter extends CustomPainter {
     // Read off the data rather than hard-coded, so the axis cannot go stale.
     _text(
       canvas,
-      formatDayMonthShort(entries.first.date),
+      formatDate(entries.first.date),
       Offset(leftPad, size.height - 16),
       labelStyle,
     );
     _text(
       canvas,
-      formatDayMonthShort(entries.last.date),
+      formatDate(entries.last.date),
       Offset(leftPad + plotW, size.height - 16),
       labelStyle,
       alignRight: true,

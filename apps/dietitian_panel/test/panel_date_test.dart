@@ -37,4 +37,13 @@ void main() {
       startsWith('Yarın'),
     );
   });
+
+  test(
+    'formatDate is one format: day and short month, the year only if not now',
+    () {
+      final now = DateTime(2026, 10, 2);
+      expect(formatDate(DateTime(2026, 9, 28), now: now), '28 Eyl');
+      expect(formatDate(DateTime(2025, 12, 5), now: now), '5 Ara 2025');
+    },
+  );
 }

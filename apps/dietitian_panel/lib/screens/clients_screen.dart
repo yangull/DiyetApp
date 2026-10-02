@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
+import '../widgets/readable_width.dart';
 import '../widgets/status_pill.dart';
 import 'client_detail_screen.dart';
 import 'intake_form_screen.dart';
@@ -60,195 +61,287 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       label: const Text('Danışan ekle'),
     );
 
-    return ListView(
-      padding: EdgeInsets.all(density.pagePadding),
-      children: [
-        // On a phone the button sits under the heading at full width.
-        if (phone) ...[
-          heading,
-          const SizedBox(height: AppSpacing.lg),
-          addButton,
-        ] else
-          Row(
-            children: [
-              Expanded(child: heading),
-              addButton,
-            ],
-          ),
-        const SizedBox(height: AppSpacing.xl),
-        if (phone) ...[
-          // Search stays in view; goal and plan status wait behind one button
-          // (Can, C28): four controls took 40 % of the screen before the
-          // first client.
-          _searchField(query),
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _showFilters(goals),
-                icon: const Icon(Icons.tune, size: 18),
-                label: Text(
-                  _activeFilters == 0
-                      ? 'Filtrele'
-                      : 'Filtrele · $_activeFilters',
-                ),
-              ),
-              if (_activeFilters > 0)
-                TextButton(
-                  onPressed: () => setState(() {
-                    _goal = null;
-                    _planState = null;
-                  }),
-                  child: const Text('Temizle'),
-                ),
-            ],
-          ),
-        ] else
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
-            // The dropdown carries a label above it; the others sit on its
-            // box, so they line up at the bottom.
-            crossAxisAlignment: WrapCrossAlignment.end,
-            children: [
-              SizedBox(width: 260, child: _searchField(query)),
-              SizedBox(
-                width: 220,
-                child: LabeledDropdown<String?>(
-                  label: 'Hedef',
-                  value: _goal,
-                  onChanged: (value) => setState(() => _goal = value),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Tüm hedefler'),
-                    ),
-                    for (final goal in goals)
-                      DropdownMenuItem(
-                        value: goal,
-                        child: Text(goal, overflow: TextOverflow.ellipsis),
-                      ),
-                  ],
-                ),
-              ),
-              FilterChip(
-                label: const Text('Onay bekleyen'),
-                selected: _planState == PlanState.aiDraft,
-                onSelected: (on) =>
-                    setState(() => _planState = on ? PlanState.aiDraft : null),
-              ),
-              FilterChip(
-                label: const Text('Onaylanan'),
-                selected: _planState == PlanState.approved,
-                onSelected: (on) =>
-                    setState(() => _planState = on ? PlanState.approved : null),
-              ),
-            ],
-          ),
-        const SizedBox(height: AppSpacing.lg),
-        CloudCard(
-          child: Column(
-            children: [
-              if (!phone)
-                Container(
-                  constraints: BoxConstraints(minHeight: density.rowHeight),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.sm,
+    // The weight column: a slot sized to its widest value, the number
+    // right-aligned in it so the decimals line up (#135).
+    final kgStyle = text.bodyMedium!;
+    final kgWidth = numberSlotWidth(context, '000,0 kg', kgStyle);
+
+    return LayoutBuilder(
+      builder: (context, constraints) => ListView(
+        padding: readablePadding(
+          constraints.maxWidth,
+          density.pagePadding,
+          maxWidth: kDashboardWidth,
+        ),
+        children: [
+          // On a phone the heading and its button share a row while they fit.
+          if (phone)
+            LayoutBuilder(
+              builder: (context, c) {
+                // Side by side only when the whole heading word and the button
+                // both fit, measured at the current text size.
+                final headingPainter = TextPainter(
+                  text: TextSpan(
+                    text: 'Danışanlarınız',
+                    style: text.headlineLarge,
                   ),
-                  // No band of its own inside the Cloud Card: the divider below
-                  // separates the column names from the rows.
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: palette.divider)),
+                  textDirection: Directionality.of(context),
+                  textScaler: MediaQuery.textScalerOf(context),
+                  maxLines: 1,
+                )..layout();
+                final buttonWidth =
+                    textButtonWidth(context, 'Danışan ekle', icon: true) +
+                    AppSpacing.lg;
+                final side =
+                    c.maxWidth >=
+                    headingPainter.width + AppSpacing.md + buttonWidth;
+                headingPainter.dispose();
+                return side
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: heading),
+                          const SizedBox(width: AppSpacing.md),
+                          addButton,
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          heading,
+                          const SizedBox(height: AppSpacing.lg),
+                          addButton,
+                        ],
+                      );
+              },
+            )
+          else
+            Row(
+              children: [
+                Expanded(child: heading),
+                addButton,
+              ],
+            ),
+          const SizedBox(height: AppSpacing.xl),
+          if (phone)
+            // One row while it fits: search takes what the filter button
+            // leaves. At large text the button drops under the search.
+            // Clearing the filters happens inside the sheet.
+            LayoutBuilder(
+              builder: (context, c) {
+                final filter = OutlinedButton.icon(
+                  onPressed: () => _showFilters(goals),
+                  icon: const Icon(Icons.tune, size: 18),
+                  label: Text(
+                    _activeFilters == 0
+                        ? 'Filtrele'
+                        : 'Filtrele · $_activeFilters',
                   ),
-                  child: Row(
+                );
+                final filterWidth =
+                    textButtonWidth(context, 'Filtrele · 2', icon: true) +
+                    AppSpacing.lg;
+                if (c.maxWidth < 170 + AppSpacing.sm + filterWidth) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _head(context, 'Danışan', flex: 3),
-                      _head(context, 'Hedef', flex: 3),
-                      _head(context, 'Kilo', flex: 2),
-                      _head(context, 'Plan durumu', flex: 3),
+                      _searchField(query),
+                      const SizedBox(height: AppSpacing.md),
+                      filter,
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(child: _searchField(query)),
+                    const SizedBox(width: AppSpacing.sm),
+                    filter,
+                  ],
+                );
+              },
+            )
+          else
+            Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.md,
+              // The dropdown carries a label above it; the others sit on its
+              // box, so they line up at the bottom.
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                SizedBox(width: 260, child: _searchField(query)),
+                SizedBox(
+                  width: 220,
+                  child: LabeledDropdown<String?>(
+                    label: 'Hedef',
+                    value: _goal,
+                    onChanged: (value) => setState(() => _goal = value),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Tüm hedefler'),
+                      ),
+                      for (final goal in goals)
+                        DropdownMenuItem(
+                          value: goal,
+                          child: Text(goal, overflow: TextOverflow.ellipsis),
+                        ),
                     ],
                   ),
                 ),
-              if (clients.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Text(
-                    'Bu filtrelerle eşleşen danışan yok.',
-                    style: text.bodyMedium?.copyWith(
-                      color: palette.textSecondary,
-                    ),
+                FilterChip(
+                  label: const Text('Onay bekleyen'),
+                  selected: _planState == PlanState.aiDraft,
+                  onSelected: (on) => setState(
+                    () => _planState = on ? PlanState.aiDraft : null,
                   ),
                 ),
-              for (final client in clients)
-                InkWell(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ClientDetailScreen(clientId: client.id),
-                    ),
+                FilterChip(
+                  label: const Text('Onaylanan'),
+                  selected: _planState == PlanState.approved,
+                  onSelected: (on) => setState(
+                    () => _planState = on ? PlanState.approved : null,
                   ),
-                  child: phone
-                      ? _PhoneClientRow(
-                          client: client,
-                          state: demo.planFor(client.id).state,
-                        )
-                      : Container(
-                          constraints: BoxConstraints(
-                            minHeight: density.rowHeight,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.lg,
-                            vertical: AppSpacing.sm,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(color: palette.divider),
+                ),
+              ],
+            ),
+          const SizedBox(height: AppSpacing.lg),
+          CloudCard(
+            child: Column(
+              children: [
+                if (!phone)
+                  Container(
+                    constraints: BoxConstraints(minHeight: density.rowHeight),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    // No band of its own inside the Cloud Card: the divider below
+                    // separates the column names from the rows.
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: palette.divider),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(width: density.avatarSize + ActionRow.gap),
+                        _head(context, 'Danışan', flex: 3),
+                        _head(context, 'Hedef', flex: 3),
+                        SizedBox(
+                          width: kgWidth,
+                          child: Text(
+                            'Kilo',
+                            textAlign: TextAlign.end,
+                            style: text.bodySmall?.copyWith(
+                              color: palette.textSecondary,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  client.name,
-                                  style: text.titleMedium,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  client.goal,
-                                  style: text.bodyMedium?.copyWith(
-                                    color: palette.textSecondary,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  '${formatDecimal(client.weightKg)} kg',
-                                  style: text.bodyMedium,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: StatusPill(
-                                    state: demo.planFor(client.id).state,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        ),
+                        const SizedBox(width: AppSpacing.xl),
+                        _head(context, 'Plan durumu', flex: 3),
+                      ],
+                    ),
+                  ),
+                if (clients.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _activeFilters > 0
+                              ? 'Bu filtrelerle eşleşen danışan yok.'
+                              : 'Aramanızla eşleşen danışan yok.',
+                          style: text.bodyMedium?.copyWith(
+                            color: palette.textSecondary,
                           ),
                         ),
-                ),
-            ],
+                        if (_activeFilters > 0)
+                          EdgeButton(
+                            child: TextButton(
+                              onPressed: () => setState(() {
+                                _goal = null;
+                                _planState = null;
+                              }),
+                              child: const Text('Filtreleri temizle'),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                for (final client in clients)
+                  InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ClientDetailScreen(clientId: client.id),
+                      ),
+                    ),
+                    child: phone
+                        ? _PhoneClientRow(
+                            client: client,
+                            state: demo.planFor(client.id).state,
+                          )
+                        : Container(
+                            constraints: BoxConstraints(
+                              minHeight: density.rowHeight,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg,
+                              vertical: AppSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(color: palette.divider),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                PersonAvatar(name: client.name),
+                                const SizedBox(width: ActionRow.gap),
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    client.name,
+                                    style: text.titleMedium,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    client.goal,
+                                    style: text.bodyMedium?.copyWith(
+                                      color: palette.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: kgWidth,
+                                  child: Text(
+                                    '${formatDecimal(client.weightKg)} kg',
+                                    textAlign: TextAlign.end,
+                                    style: kgStyle,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.xl),
+                                Expanded(
+                                  flex: 2,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: StatusPill(
+                                      state: demo.planFor(client.id).state,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -316,7 +409,24 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Filtrele', style: text.headlineMedium),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Filtrele', style: text.headlineMedium),
+                      ),
+                      if (_activeFilters > 0)
+                        EdgeButton(
+                          end: true,
+                          child: TextButton(
+                            onPressed: () => update(() {
+                              _goal = null;
+                              _planState = null;
+                            }),
+                            child: const Text('Temizle'),
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   Text('Hedef', style: text.titleMedium),
                   const SizedBox(height: AppSpacing.sm),
@@ -324,16 +434,13 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                     spacing: AppSpacing.sm,
                     runSpacing: AppSpacing.sm,
                     children: [
-                      choice(
-                        'Tüm hedefler',
-                        _goal == null,
-                        () => update(() => _goal = null),
-                      ),
                       for (final goal in goals)
                         choice(
                           goal,
                           _goal == goal,
-                          () => update(() => _goal = goal),
+                          // Tapping the chosen one again clears it.
+                          () =>
+                              update(() => _goal = _goal == goal ? null : goal),
                         ),
                     ],
                   ),
@@ -345,19 +452,22 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                     runSpacing: AppSpacing.sm,
                     children: [
                       choice(
-                        'Tümü',
-                        _planState == null,
-                        () => update(() => _planState = null),
-                      ),
-                      choice(
                         'Onay bekleyen',
                         _planState == PlanState.aiDraft,
-                        () => update(() => _planState = PlanState.aiDraft),
+                        () => update(
+                          () => _planState = _planState == PlanState.aiDraft
+                              ? null
+                              : PlanState.aiDraft,
+                        ),
                       ),
                       choice(
                         'Onaylanan',
                         _planState == PlanState.approved,
-                        () => update(() => _planState = PlanState.approved),
+                        () => update(
+                          () => _planState = _planState == PlanState.approved
+                              ? null
+                              : PlanState.approved,
+                        ),
                       ),
                     ],
                   ),

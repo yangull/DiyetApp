@@ -117,11 +117,8 @@ class AppointmentsScreen extends ConsumerWidget {
   }
 }
 
-String _when(DateTime at) {
-  final hh = at.hour.toString().padLeft(2, '0');
-  final mm = at.minute.toString().padLeft(2, '0');
-  return '${formatDayMonth(at)} ${trWeekdays[at.weekday - 1]} · $hh:$mm';
-}
+String _when(DateTime at) =>
+    '${formatDate(at)} ${trWeekdays[at.weekday - 1]} · ${formatTime(at)}';
 
 class _AppointmentRow extends ConsumerWidget {
   const _AppointmentRow({required this.appointment, required this.showDivider});

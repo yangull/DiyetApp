@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 /// Violet appears nowhere else in the app, and the dashed edge means the state
 /// survives for anyone who cannot separate the hues.
 ///
-/// Without [onApprove] the button is left out: on a narrow screen it lives in
-/// the plan editor's pinned bottom bar instead, and two would be one too many.
+/// Only the notice: the approve action is a button of its own beside it (the
+/// side panel) or in the pinned bottom bar (a phone), so a notice and an
+/// action are not merged in one box.
 class AiDraftBanner extends StatelessWidget {
-  const AiDraftBanner({super.key, required this.note, this.onApprove});
+  const AiDraftBanner({super.key, required this.note});
 
   final String note;
-  final VoidCallback? onApprove;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +38,6 @@ class AiDraftBanner extends StatelessWidget {
         ),
       ],
     );
-    final approve = onApprove == null
-        ? null
-        : FilledButton(
-            onPressed: onApprove,
-            child: const Text('Onayla ve danışana gönder'),
-          );
 
     return DottedBorderBox(
       color: violet,
@@ -52,28 +46,7 @@ class AiDraftBanner extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Side by side when there is room; stacked in the plan editor's
-            // side panel.
-            LayoutBuilder(
-              builder: (context, constraints) =>
-                  approve == null || constraints.maxWidth < 420
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        label,
-                        if (approve != null) ...[
-                          const SizedBox(height: AppSpacing.md),
-                          approve,
-                        ],
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(child: label),
-                        approve,
-                      ],
-                    ),
-            ),
+            label,
             const SizedBox(height: AppSpacing.md),
             Text(
               note,

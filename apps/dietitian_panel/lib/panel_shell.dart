@@ -74,7 +74,9 @@ class _PanelShellState extends State<PanelShell> {
           label: 'Takip',
         ),
       ],
-      railTrailing: Expanded(
+      extendedRail: true,
+      railLeading: const RailMark(),
+      compactRailTrailing: Expanded(
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
@@ -87,23 +89,38 @@ class _PanelShellState extends State<PanelShell> {
                   label: 'Hatırlatma ayarları',
                   selected: _index == _settingsIndex,
                   onPressed: () => setState(() => _index = _settingsIndex),
+                  stacked: true,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _ResetDemoButton(onReset: reset),
+                _ResetDemoButton(onReset: reset, stacked: true),
               ],
             ),
           ),
         ),
       ),
-      // A bottom bar only navigates, so on phones the demo's two utilities
-      // sit behind one labelled button above the screen.
-      phoneTopActions: [
-        TextButton.icon(
-          onPressed: () => _showDemoSheet(context, onReset: reset),
-          icon: const Icon(Icons.tune),
-          label: const Text('Demo'),
+      railTrailing: Align(
+        alignment: AlignmentDirectional.bottomStart,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: kRailInset - AppSpacing.md,
+            end: AppSpacing.lg,
+            bottom: AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _RailUtilityButton(
+                icon: Icons.notifications_none,
+                label: 'Hatırlatma ayarları',
+                selected: _index == _settingsIndex,
+                onPressed: () => setState(() => _index = _settingsIndex),
+              ),
+              _ResetDemoButton(onReset: reset),
+            ],
+          ),
         ),
-      ],
+      ),
       body: IndexedStack(
         key: ValueKey(_session),
         // On a phone, settings are a pushed page, never a stack index.
@@ -113,6 +130,9 @@ class _PanelShellState extends State<PanelShell> {
             onOpenClients: () => setState(() => _index = 1),
             onOpenAppointments: () => setState(() => _index = 2),
             onOpenMessages: () => setState(() => _index = 3),
+            // A bottom bar only navigates, so on phones the demo's two
+            // utilities sit behind one labelled button in this screen's header.
+            onOpenDemoMenu: () => _showDemoSheet(context, onReset: reset),
           ),
           const ClientsScreen(),
           const AppointmentsScreen(),
@@ -135,7 +155,11 @@ class _RailUtilityButton extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onPressed,
+    this.stacked = false,
   });
+
+  /// Icon over label in a narrow rail, instead of a row.
+  final bool stacked;
 
   final IconData icon;
   final String label;
@@ -148,25 +172,33 @@ class _RailUtilityButton extends StatelessWidget {
     final color = selected
         ? context.palette.ink
         : context.palette.textSecondary;
-    return TextButton(
-      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(color)),
-      onPressed: onPressed,
-      child: SizedBox(
-        width: 72,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelMedium
-                  ?.copyWith(fontWeight: selected ? FontWeight.w600 : null),
-            ),
-          ],
+    final style = Theme.of(context).textTheme.labelMedium
+        ?.copyWith(fontWeight: selected ? FontWeight.w600 : null);
+    if (stacked) {
+      return TextButton(
+        style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(color)),
+        onPressed: onPressed,
+        child: SizedBox(
+          width: 72,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon),
+              const SizedBox(height: AppSpacing.xs),
+              Text(label, textAlign: TextAlign.center, style: style),
+            ],
+          ),
         ),
+      );
+    }
+    return TextButton.icon(
+      style: ButtonStyle(
+        foregroundColor: WidgetStatePropertyAll(color),
+        alignment: AlignmentDirectional.centerStart,
       ),
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label, style: style),
     );
   }
 }
@@ -176,24 +208,37 @@ class _RailUtilityButton extends StatelessWidget {
 /// rail items above it: an icon alone would be a guess (docs/design-system.md,
 /// rule 12).
 class _ResetDemoButton extends ConsumerWidget {
-  const _ResetDemoButton({required this.onReset});
+  const _ResetDemoButton({required this.onReset, this.stacked = false});
 
   final VoidCallback onReset;
+  final bool stacked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final muted = context.palette.textSecondary;
-    return TextButton(
-      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(muted)),
-      onPressed: () => _confirmReset(context, ref, onReset),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.restart_alt),
-          const SizedBox(height: AppSpacing.xs),
-          Text('Sıfırla', style: Theme.of(context).textTheme.labelMedium),
-        ],
+    final label = Theme.of(context).textTheme.labelMedium;
+    if (stacked) {
+      return TextButton(
+        style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(muted)),
+        onPressed: () => _confirmReset(context, ref, onReset),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.restart_alt),
+            const SizedBox(height: AppSpacing.xs),
+            Text('Sıfırla', style: label),
+          ],
+        ),
+      );
+    }
+    return TextButton.icon(
+      style: ButtonStyle(
+        foregroundColor: WidgetStatePropertyAll(muted),
+        alignment: AlignmentDirectional.centerStart,
       ),
+      onPressed: () => _confirmReset(context, ref, onReset),
+      icon: const Icon(Icons.restart_alt),
+      label: Text('Sıfırla', style: label),
     );
   }
 }

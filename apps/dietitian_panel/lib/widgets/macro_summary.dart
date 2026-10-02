@@ -100,7 +100,7 @@ class _Macro extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: ' $unit',
-                    style: text.bodySmall?.copyWith(
+                    style: text.bodyMedium?.copyWith(
                       color: palette.textSecondary,
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../demo/demo_models.dart';
+import '../widgets/interview_note.dart';
 import '../widgets/readable_width.dart';
 import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
@@ -73,92 +74,6 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Danışan bilgileri', style: text.titleLarge),
-                      const SizedBox(height: AppSpacing.lg),
-                      Wrap(
-                        spacing: _Fact.gap,
-                        runSpacing: AppSpacing.lg,
-                        children: [
-                          _Fact(label: 'Yaş', value: '${client.age}'),
-                          _Fact(label: 'Boy', value: '${client.heightCm} cm'),
-                          _Fact(
-                            label: 'Güncel kilo',
-                            value: '${formatDecimal(client.weightKg)} kg',
-                          ),
-                          _Fact(label: 'Hedef', value: client.goal),
-                          _Fact(
-                            label: 'Hedef kilo',
-                            value: client.targetWeightKg == null
-                                ? '—'
-                                : '${formatDecimal(client.targetWeightKg!)} kg',
-                          ),
-                          _Fact(
-                            label: 'Başlangıç',
-                            value: formatDate(client.startedOn),
-                          ),
-                          _Fact(
-                            label: 'Cinsiyet',
-                            value: _sexLabel(client.sex),
-                          ),
-                          _Fact(
-                            label: 'Hareket düzeyi',
-                            value: _activityLabel(client.activityLevel),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Divider(color: palette.divider),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text('Sağlık bilgileri', style: text.titleMedium),
-                      const SizedBox(height: AppSpacing.lg),
-                      Wrap(
-                        spacing: _Fact.gap,
-                        runSpacing: AppSpacing.lg,
-                        children: [
-                          _Fact(label: 'Beslenme tipi', value: client.dietType),
-                          _Fact(
-                            label: 'Alerji / hassasiyet',
-                            value: _listOrDash(client.allergies),
-                          ),
-                          _Fact(
-                            label: 'Kronik rahatsızlık',
-                            value: _listOrDash(client.chronicConditions),
-                          ),
-                          _Fact(
-                            label: 'İlaç / takviye',
-                            value: _listOrDash(client.medications),
-                          ),
-                        ],
-                      ),
-                      if (client.note.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          'Not',
-                          style: text.bodySmall?.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          client.note,
-                          style: text.bodyMedium?.copyWith(
-                            color: palette.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _EnergyCard(client: client),
-              const SizedBox(height: AppSpacing.lg),
-              CloudCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
                       Wrap(
                         spacing: AppSpacing.md,
                         runSpacing: AppSpacing.xs,
@@ -211,6 +126,88 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
               CloudCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Danışan bilgileri', style: text.titleLarge),
+                      const SizedBox(height: AppSpacing.lg),
+                      _FactGrid(
+                        children: [
+                          _Fact(label: 'Yaş', value: '${client.age}'),
+                          _Fact(label: 'Boy', value: '${client.heightCm} cm'),
+                          _Fact(
+                            label: 'Güncel kilo',
+                            value: '${formatDecimal(client.weightKg)} kg',
+                          ),
+                          _Fact(label: 'Hedef', value: client.goal),
+                          _Fact(
+                            label: 'Hedef kilo',
+                            value: client.targetWeightKg == null
+                                ? _empty
+                                : '${formatDecimal(client.targetWeightKg!)} kg',
+                          ),
+                          _Fact(
+                            label: 'Başlangıç',
+                            value: formatDate(client.startedOn),
+                          ),
+                          _Fact(
+                            label: 'Cinsiyet',
+                            value: _sexLabel(client.sex),
+                          ),
+                          _Fact(
+                            label: 'Hareket düzeyi',
+                            value: _activityLabel(client.activityLevel),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Divider(color: palette.divider),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text('Sağlık bilgileri', style: text.titleMedium),
+                      const SizedBox(height: AppSpacing.lg),
+                      _FactGrid(
+                        children: [
+                          _Fact(label: 'Beslenme tipi', value: client.dietType),
+                          _Fact(
+                            label: 'Alerji / hassasiyet',
+                            value: _listOrDash(client.allergies),
+                          ),
+                          _Fact(
+                            label: 'Kronik rahatsızlık',
+                            value: _listOrDash(client.chronicConditions),
+                          ),
+                          _Fact(
+                            label: 'İlaç / takviye',
+                            value: _listOrDash(client.medications),
+                          ),
+                        ],
+                      ),
+                      if (client.note.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        Text(
+                          'Not',
+                          style: text.bodySmall?.copyWith(
+                            color: palette.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          client.note,
+                          style: text.bodyMedium?.copyWith(
+                            color: palette.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _EnergyCard(client: client),
+              const SizedBox(height: AppSpacing.lg),
+              CloudCard(
                 key: _weightsKey,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -250,8 +247,7 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                             ),
                             child: Row(
                               children: [
-                                SizedBox(
-                                  width: 96,
+                                Expanded(
                                   child: Text(
                                     formatDate(entry.date),
                                     style: text.bodyMedium?.copyWith(
@@ -259,10 +255,21 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                                     ),
                                   ),
                                 ),
-                                Flexible(
+                                // Right-aligned with a minimum width of the
+                                // widest weight, so decimals line up and a
+                                // narrow card can still squeeze it.
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minWidth: numberSlotWidth(
+                                      context,
+                                      '000,0 kg',
+                                      text.bodyLarge!,
+                                    ),
+                                  ),
                                   child: Text(
                                     '${formatDecimal(entry.kg)} kg',
-                                    style: text.titleMedium,
+                                    textAlign: TextAlign.end,
+                                    style: text.bodyLarge,
                                   ),
                                 ),
                               ],
@@ -270,13 +277,10 @@ class _ClientDetailScreenState extends ConsumerState<ClientDetailScreen> {
                           ),
                       ],
                       const SizedBox(height: AppSpacing.sm),
-                      Text(
+                      const InterviewNote(
                         'Ölçümleri şimdilik yalnızca görüntülüyoruz; danışan '
                         'kendisi giriyor. Tartımı siz mi alıyorsunuz, hangi '
                         'sıklıkla?',
-                        style: text.bodySmall?.copyWith(
-                          color: palette.textSecondary,
-                        ),
                       ),
                     ],
                   ),
@@ -356,6 +360,7 @@ class _MeasurementsCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
                             width: 96,
@@ -392,13 +397,12 @@ class _MeasurementsCard extends StatelessWidget {
                 ],
               ),
             const SizedBox(height: AppSpacing.md),
-            Text(
+            const InterviewNote(
               'Bu dört ölçüm bizim tahminimiz ve yağ / kas değerleri bir '
               'biyoelektrik impedans cihazı varsayıyor. Siz hangilerini, '
               'hangi cihazla, ne sıklıkla alıyorsunuz? Yağsız vücut kütlesini '
               'ölçüyorsanız enerji hesabında Cunningham formülünü '
               'kullanabiliriz.',
-              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
           ],
         ),
@@ -424,12 +428,15 @@ class _MeasurementHead extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
     child: Text(
       label,
+      textAlign: TextAlign.end,
       style: Theme.of(context).textTheme.bodySmall
           ?.copyWith(color: context.palette.textSecondary),
     ),
   );
 }
 
+/// One reading, right-aligned so the column's numbers line up, with the change
+/// since the last session under it, small and grey.
 class _MeasurementCell extends StatelessWidget {
   const _MeasurementCell({required this.value, required this.change});
 
@@ -440,20 +447,17 @@ class _MeasurementCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Expanded(
-      child: Wrap(
-        spacing: 6,
-        crossAxisAlignment: WrapCrossAlignment.end,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(value, style: text.bodyMedium),
-          if (change != null && change != 0) ...[
+          if (change != null && change != 0)
             Text(
-              '${change! > 0 ? '+' : '−'}'
-              '${formatDecimal(change!.abs())}',
+              '${change! > 0 ? '+' : '−'}${formatDecimal(change!.abs())}',
               style: text.bodySmall?.copyWith(
                 color: context.palette.textSecondary,
               ),
             ),
-          ],
         ],
       ),
     );
@@ -538,9 +542,7 @@ class _EnergyCard extends StatelessWidget {
             // Three facts on the same grid as the client's, the operators in
             // front of the values: loose "×" and "=" between them fell apart
             // on a phone.
-            Wrap(
-              spacing: _Fact.gap,
-              runSpacing: AppSpacing.lg,
+            _FactGrid(
               children: [
                 _Fact(label: 'BMH', value: '${bmh.round()} kcal'),
                 _Fact(
@@ -554,12 +556,11 @@ class _EnergyCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text(
+            const InterviewNote(
               'BMH için Harris-Benedict formülü kullanıldı. Cunningham '
               'formülü yağsız vücut kütlesi istiyor; onu ölçmüyoruz. Siz '
               'hangi formülü kullanıyorsunuz, biyoelektrik impedans '
               'ölçüyor musunuz?',
-              style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
           ],
         ),
@@ -568,8 +569,11 @@ class _EnergyCard extends StatelessWidget {
   }
 }
 
+/// An empty value: a dash, read aloud as "Girilmemiş" by [_Fact].
+const _empty = '—';
+
 String _listOrDash(List<String> values) =>
-    values.isEmpty ? '—' : values.join(', ');
+    values.isEmpty ? _empty : values.join(', ');
 
 String _sexLabel(Sex sex) => switch (sex) {
   Sex.kadin => 'Kadın',
@@ -584,35 +588,71 @@ String _activityLabel(ActivityLevel level) => switch (level) {
   ActivityLevel.cokAktif => 'Çok hareketli',
 };
 
-/// One fact of a fixed width, so every group of facts on the page shares
-/// its column edges; two fit side by side on a phone.
+/// Label above, value under it: quiet label, regular value; an empty value is
+/// a muted dash.
 class _Fact extends StatelessWidget {
   const _Fact({required this.label, required this.value});
 
   final String label;
   final String value;
 
-  static const width = 160.0;
-  static const gap = AppSpacing.lg;
-
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    return SizedBox(
-      width: width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: text.bodySmall?.copyWith(
-              color: context.palette.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(value, style: text.titleMedium),
-        ],
-      ),
+    final palette = context.palette;
+    final empty = value == _empty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: text.bodySmall?.copyWith(color: palette.textSecondary),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          semanticsLabel: empty ? 'Girilmemiş' : null,
+          style: empty
+              ? text.bodyLarge?.copyWith(color: palette.textSecondary)
+              : text.bodyLarge,
+        ),
+      ],
+    );
+  }
+}
+
+/// Facts in equal columns that use the card's width: one or two on a phone
+/// (by its width and text size), up to four on a computer, so every group shares its column edges and the card
+/// has no empty right half.
+class _FactGrid extends StatelessWidget {
+  const _FactGrid({required this.children});
+
+  final List<Widget> children;
+
+  static const _gap = AppSpacing.lg;
+  static const _minColumn = 150.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        final room = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : 600.0;
+        // The gaps count: n columns need n * min + (n - 1) * gap.
+        final columns = ((room + _gap) / (_minColumn * scale + _gap))
+            .floor()
+            .clamp(1, 4);
+        final width = (room - _gap * (columns - 1)) / columns;
+        return Wrap(
+          spacing: _gap,
+          runSpacing: AppSpacing.lg,
+          children: [
+            for (final c in children) SizedBox(width: width, child: c),
+          ],
+        );
+      },
     );
   }
 }

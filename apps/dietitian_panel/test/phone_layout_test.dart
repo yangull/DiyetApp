@@ -95,8 +95,8 @@ void main() {
         expect(find.byType(BackButton), findsOneWidget);
       });
 
-      // On a phone the label is short; the row's reason says whose message.
-      testWidgets('"Yanıtla" opens that thread on a $width dp phone '
+      // The row's reason says whose message.
+      testWidgets('"Mesajı yanıtla" opens that thread on a $width dp phone '
           'at $scale×', (tester) async {
         await pumpPhone(tester, width, scale);
         final reply = find.descendant(
@@ -104,7 +104,7 @@ void main() {
             of: find.text('47 saattir mesajı yanıtsız'),
             matching: find.byType(ActionRow),
           ),
-          matching: find.text('Yanıtla'),
+          matching: find.text('Mesajı yanıtla'),
         );
         await tester.scrollUntilVisible(
           find.text('47 saattir mesajı yanıtsız'),
@@ -169,16 +169,8 @@ void main() {
       });
 
       for (final (button, editor, lastText) in [
-        (
-          'Taslağı düzenle',
-          PlanEditorScreen,
-          'Bu ekran görüşme için hazırlanmış',
-        ),
-        (
-          'Değişim listesiyle dene',
-          ExchangePlanEditorScreen,
-          'Bu ekran bir deneme',
-        ),
+        ('Taslağı düzenle', PlanEditorScreen, 'Görüşme notu'),
+        ('Değişim listesiyle dene', ExchangePlanEditorScreen, 'Görüşme notu'),
       ]) {
         testWidgets('the $editor fits a $width dp phone at $scale×', (
           tester,
@@ -264,13 +256,19 @@ void main() {
 
         expect(inClients(find.text('Filtrele · 1')), findsOneWidget);
         expect(inClients(find.text('Ahmet Demir')), findsNothing);
-        final clear = inClients(find.text('Temizle'));
-        await tester.ensureVisible(clear);
+        // "Temizle" lives in the sheet now: open it again and clear there.
+        final reopen = inClients(find.text('Filtrele · 1'));
+        await tester.ensureVisible(reopen);
         await tester.pumpAndSettle();
-        await tester.tap(clear);
+        await tester.tap(reopen);
         await tester.pumpAndSettle();
-        // At large text "Temizle" wrapped under the button, so the button
-        // may now sit just above the view.
+        await tester.tap(find.text('Temizle'));
+        await tester.pumpAndSettle();
+        final done = find.textContaining('danışanı göster');
+        await tester.ensureVisible(done);
+        await tester.pumpAndSettle();
+        await tester.tap(done);
+        await tester.pumpAndSettle();
         await tester.scrollUntilVisible(
           inClients(find.text('Filtrele')),
           -200,

@@ -13,8 +13,9 @@ const kPlanEditorWideBreakpoint = 1100.0;
 /// The page both plan editors share, so that in an interview dietitians compare
 /// the two plan models rather than two page layouts (UI review #10).
 ///
-/// Status, energy and "Onayla" stay in view while the meals scroll: on a wide
-/// screen in a side panel, on a narrow one in a pinned bottom bar. The meal
+/// Status, energy and "Onayla" stay in view while the meals scroll on a wide
+/// screen, in a side panel; on a phone "Onayla" is a pinned bottom bar and the
+/// target, export and macros follow the meals, before the interview note. The meal
 /// column is capped so food labels stay near their controls.
 class PlanEditorLayout extends StatelessWidget {
   const PlanEditorLayout({
@@ -53,14 +54,24 @@ class PlanEditorLayout extends StatelessWidget {
     );
   }
 
-  List<Widget> _panel(BuildContext context, {required bool withApprove}) => [
+  /// The draft notice, and on a wide screen the approve action under it as a
+  /// button of its own.
+  List<Widget> _notice(BuildContext context, {required bool withApprove}) => [
     if (_isDraft) ...[
-      AiDraftBanner(
-        note: aiNote,
-        onApprove: withApprove ? () => _approve(context) : null,
-      ),
+      AiDraftBanner(note: aiNote),
+      if (withApprove) ...[
+        const SizedBox(height: AppSpacing.md),
+        FilledButton(
+          onPressed: () => _approve(context),
+          child: const Text('Onayla ve danışana gönder'),
+        ),
+      ],
       const SizedBox(height: AppSpacing.lg),
     ],
+  ];
+
+  /// Target, export and the macro boxes: what the plan is measured against.
+  List<Widget> _figures() => [
     CloudCard(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -72,8 +83,17 @@ class PlanEditorLayout extends StatelessWidget {
     if (summary != null) ...[const SizedBox(height: AppSpacing.lg), summary!],
   ];
 
-  List<Widget> _work() => [
+  List<Widget> _panel(BuildContext context, {required bool withApprove}) => [
+    ..._notice(context, withApprove: withApprove),
+    ..._figures(),
+  ];
+
+  List<Widget> _mealCards() => [
     for (final meal in meals) ...[meal, const SizedBox(height: AppSpacing.md)],
+  ];
+
+  List<Widget> _work() => [
+    ..._mealCards(),
     const SizedBox(height: AppSpacing.sm),
     ...footer,
   ];
@@ -153,9 +173,14 @@ class PlanEditorLayout extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                     ],
-                    ..._panel(context, withApprove: false),
+                    // The plan comes before the figures on a phone: the meals
+                    // are the work, and the target and macros wait under them.
+                    ..._notice(context, withApprove: false),
+                    ..._mealCards(),
+                    const SizedBox(height: AppSpacing.sm),
+                    ..._figures(),
                     const SizedBox(height: AppSpacing.xl),
-                    ..._work(),
+                    ...footer,
                   ],
                 ),
           bottomNavigationBar: !wide && _isDraft
