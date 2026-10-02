@@ -18,8 +18,10 @@ class WeightChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Taller as the labels grow, so the line keeps its room at large text.
+    final scale = MediaQuery.textScalerOf(context).scale(1);
     return SizedBox(
-      height: 170,
+      height: 170 + 40 * (scale - 1).clamp(0, 2),
       child: CustomPaint(
         painter: _WeightPainter(
           entries: entries,
@@ -32,6 +34,8 @@ class WeightChart extends StatelessWidget {
               .copyWith(color: context.palette.textSecondary),
           valueStyle: Theme.of(context).textTheme.titleMedium!
               .copyWith(fontWeight: FontWeight.w600),
+          // The labels grow with the system text size like any other text.
+          textScaler: MediaQuery.textScalerOf(context),
         ),
         size: Size.infinite,
       ),
@@ -54,6 +58,7 @@ class _WeightPainter extends CustomPainter {
     required this.surface,
     required this.labelStyle,
     required this.valueStyle,
+    required this.textScaler,
   });
 
   final List<WeightEntry> entries;
@@ -64,15 +69,17 @@ class _WeightPainter extends CustomPainter {
   final Color surface;
   final TextStyle labelStyle;
   final TextStyle valueStyle;
+  final TextScaler textScaler;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (entries.length < 2) return;
 
-    const leftPad = 44.0;
-    const rightPad = 56.0;
-    const topPad = 14.0;
-    const bottomPad = 24.0;
+    // The date labels sit under the plot and the end value's label is
+    // centred on its point, so both margins grow with the text.
+    final dateHeight = _size('00 Eyl', labelStyle).height;
+    final topPad = _size('0', valueStyle).height / 2 + 2;
+    final bottomPad = dateHeight + 6;
 
     final kgs = entries.map((e) => e.kg).toList();
     var lo = kgs.reduce((a, b) => a < b ? a : b);
@@ -92,8 +99,36 @@ class _WeightPainter extends CustomPainter {
     final maxKg = (hi / step).ceilToDouble() * step;
     final divisions = ((maxKg - minKg) / step).round().clamp(1, 8);
 
+    String tick(double kg) =>
+        step < 1 ? formatDecimal(kg) : formatDecimal(kg, 0);
+    // The axis is as wide as its widest label and the right margin as wide as
+    // the end value or the target label, so neither is cut off or crowded.
+    var tickWidth = 0.0;
+    for (var i = 0; i <= divisions; i++) {
+      final w = _size(tick(maxKg - step * i), labelStyle).width;
+      if (w > tickWidth) tickWidth = w;
+    }
+    final leftPad = tickWidth + 8;
+    final valueLabel = '${formatDecimal(kgs.last)} kg';
+    final targetLabel = targetKg == null
+        ? null
+        : 'hedef ${formatDecimal(targetKg!)} kg';
+    final valueSize = _size(valueLabel, valueStyle);
+    final targetSize = targetLabel == null
+        ? null
+        : _size(targetLabel, labelStyle);
+    final rightPad =
+        10 +
+        (targetSize != null && targetSize.width > valueSize.width
+            ? targetSize.width
+            : valueSize.width) +
+        2;
+
     final plotW = size.width - leftPad - rightPad;
+    // Large text in a narrow card can leave no room for the line at all.
+    if (plotW <= 0) return;
     final plotH = size.height - topPad - bottomPad;
+    if (plotH <= 0) return;
 
     double yFor(double kg) =>
         topPad + plotH * (1 - (kg - minKg) / (maxKg - minKg));
@@ -117,17 +152,20 @@ class _WeightPainter extends CustomPainter {
         Offset(leftPad + plotW, y),
         gridPaint,
       );
+      final label = tick(kg);
+      final labelSize = _size(label, labelStyle);
       _text(
         canvas,
-        step < 1 ? formatDecimal(kg) : formatDecimal(kg, 0),
-        Offset(0, y - 7),
+        label,
+        Offset(tickWidth, y - labelSize.height / 2),
         labelStyle,
+        alignRight: true,
       );
     }
 
     final last = pointAt(entries.length - 1);
-    final valueTop = last.dy - 10;
-    final valueHeight = _measure('${formatDecimal(kgs.last)} kg', valueStyle);
+    final valueTop = last.dy - valueSize.height / 2;
+    final valueHeight = valueSize.height;
 
     if (targetKg != null) {
       final y = yFor(targetKg!);
@@ -140,12 +178,12 @@ class _WeightPainter extends CustomPainter {
       }
       _text(
         canvas,
-        'hedef',
+        targetLabel!,
         Offset(
-          leftPad + plotW + 6,
+          leftPad + plotW + 10,
           targetLabelTop(
             targetY: y,
-            labelHeight: _measure('hedef', labelStyle),
+            labelHeight: targetSize!.height,
             valueTop: valueTop,
             valueHeight: valueHeight,
           ),
@@ -170,33 +208,34 @@ class _WeightPainter extends CustomPainter {
 
     canvas.drawCircle(last, 6, Paint()..color = surface);
     canvas.drawCircle(last, 4.5, Paint()..color = line);
-    _text(
-      canvas,
-      '${formatDecimal(kgs.last)} kg',
-      Offset(last.dx + 10, valueTop),
-      valueStyle,
-    );
+    _text(canvas, valueLabel, Offset(last.dx + 10, valueTop), valueStyle);
 
     // Read off the data rather than hard-coded, so the axis cannot go stale.
     _text(
       canvas,
       formatDate(entries.first.date),
-      Offset(leftPad, size.height - 16),
+      Offset(leftPad, size.height - dateHeight),
       labelStyle,
     );
     _text(
       canvas,
       formatDate(entries.last.date),
-      Offset(leftPad + plotW, size.height - 16),
+      Offset(leftPad + plotW, size.height - dateHeight),
       labelStyle,
       alignRight: true,
     );
   }
 
-  double _measure(String value, TextStyle style) => (TextPainter(
-    text: TextSpan(text: value, style: style),
-    textDirection: TextDirection.ltr,
-  )..layout()).height;
+  Size _size(String value, TextStyle style) {
+    final tp = TextPainter(
+      text: TextSpan(text: value, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+    )..layout();
+    final size = tp.size;
+    tp.dispose();
+    return size;
+  }
 
   void _text(
     Canvas canvas,
@@ -208,13 +247,22 @@ class _WeightPainter extends CustomPainter {
     final tp = TextPainter(
       text: TextSpan(text: value, style: style),
       textDirection: TextDirection.ltr,
+      textScaler: textScaler,
     )..layout();
     tp.paint(canvas, alignRight ? at.translate(-tp.width, 0) : at);
   }
 
   @override
   bool shouldRepaint(_WeightPainter old) =>
-      old.entries != entries || old.targetKg != targetKg;
+      old.entries != entries ||
+      old.targetKg != targetKg ||
+      old.textScaler != textScaler ||
+      old.labelStyle != labelStyle ||
+      old.valueStyle != valueStyle ||
+      old.line != line ||
+      old.grid != grid ||
+      old.target != target ||
+      old.surface != surface;
 }
 
 /// Where the "hedef" label goes: centred on the target line, unless the last

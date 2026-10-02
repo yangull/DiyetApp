@@ -1,4 +1,7 @@
 import 'package:core/core.dart';
+import 'package:dietitian_panel/demo/demo_models.dart';
+import 'package:dietitian_panel/demo/demo_repository.dart';
+import 'package:dietitian_panel/demo/progress.dart';
 import 'package:dietitian_panel/main_demo.dart';
 import 'package:dietitian_panel/screens/client_detail_screen.dart';
 import 'package:dietitian_panel/screens/clients_screen.dart';
@@ -6,6 +9,7 @@ import 'package:dietitian_panel/screens/intake_form_screen.dart';
 import 'package:dietitian_panel/screens/plan_editor_screen.dart';
 import 'package:dietitian_panel/screens/reports_screen.dart';
 import 'package:dietitian_panel/widgets/status_pill.dart';
+import 'package:dietitian_panel/widgets/weight_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -151,6 +155,161 @@ void main() {
       t,
       find.byType(Card).first,
       find.byType(ReportsScreen),
+    );
+  });
+
+  testWidgets('Takip: summary numbers line up, charts two to a row', (t) async {
+    await pumpAt(
+      t,
+      const Size(1600, 1400),
+      const Scaffold(body: ReportsScreen()),
+    );
+    final summary = find.ancestor(
+      of: find.text('Özet'),
+      matching: find.byType(Card),
+    );
+    double rightOf(String s) =>
+        t.getRect(find.descendant(of: summary, matching: find.text(s))).right;
+    expect(rightOf('72,4 kg'), moreOrLessEquals(rightOf('63,0 kg')));
+    expect(rightOf('7,4 kg'), moreOrLessEquals(rightOf('—')));
+    expect(rightOf('Hedefe kalan'), moreOrLessEquals(rightOf('7,4 kg')));
+    // A header never wraps over its column.
+    final row = t.getSize(find.text('Danışan'));
+    for (final header in ['Son tartım', 'Değişim', 'Hedefe kalan']) {
+      expect(
+        t.getSize(find.text(header)).height,
+        moreOrLessEquals(row.height),
+        reason: header,
+      );
+    }
+
+    final charts = find.ancestor(
+      of: find.byType(WeightChart),
+      matching: find.byType(Card),
+    );
+    expect(
+      t.getRect(charts.at(0)).top,
+      moreOrLessEquals(t.getRect(charts.at(1)).top),
+    );
+  });
+
+  testWidgets('Takip keeps one column just under 900 px of content', (t) async {
+    // 940 px less the compact page padding leaves 892 px.
+    await pumpAt(
+      t,
+      const Size(940, 2400),
+      const Scaffold(body: ReportsScreen()),
+    );
+    final charts = find.ancestor(
+      of: find.byType(WeightChart),
+      matching: find.byType(Card),
+    );
+    expect(
+      t.getRect(charts.at(1)).top,
+      greaterThan(t.getRect(charts.at(0)).bottom),
+    );
+  });
+
+  testWidgets('Takip: a client with one weigh-in is not judged yet', (t) async {
+    await pumpAt(
+      t,
+      const Size(1600, 2400),
+      const Scaffold(body: ReportsScreen()),
+    );
+    final container = ProviderScope.containerOf(
+      t.element(find.byType(ReportsScreen)),
+    );
+    final seeded = container.read(demoProvider).clients.first;
+    container
+        .read(demoProvider.notifier)
+        .addClient(
+          DemoClient(
+            id: 'c-new',
+            name: 'Ayşe Demir',
+            age: 30,
+            sex: seeded.sex,
+            heightCm: 165,
+            weightKg: 70,
+            goal: 'Kilo verme',
+            targetWeightKg: 62,
+            activityLevel: seeded.activityLevel,
+            dietType: 'standart',
+            allergies: const [],
+            chronicConditions: const [],
+            medications: const [],
+            note: '',
+            startedOn: DateTime.now(),
+          ),
+        );
+    await t.pumpAndSettle();
+    expect(find.text('tek tartım'), findsOneWidget);
+    expect(find.text('hedeften uzaklaşıyor'), findsNothing);
+    expect(find.text('Grafik ikinci tartımdan sonra görünür.'), findsOneWidget);
+  });
+
+  test('"Hedefe kalan" says hedefte once the target is reached or passed', () {
+    expect(
+      remainingToTarget(
+        target: 65,
+        last: 72.4,
+        direction: GoalDirection.losing,
+      ),
+      '7,4 kg',
+    );
+    expect(
+      remainingToTarget(target: 65, last: 63, direction: GoalDirection.losing),
+      'hedefte',
+    );
+    expect(
+      remainingToTarget(target: 70, last: 72, direction: GoalDirection.gaining),
+      'hedefte',
+    );
+    expect(
+      remainingToTarget(
+        target: 58,
+        last: 58.2,
+        direction: GoalDirection.maintaining,
+      ),
+      '0,2 kg',
+    );
+    expect(remainingToTarget(target: null, last: 60, direction: null), isNull);
+  });
+
+  // The review of D10 found the four-column table and the phone row
+  // overflowing at large text; a tall window builds every row and chart.
+  for (final width in [360.0, 412.0, 600.0, 800.0, 1024.0]) {
+    for (final scale in [1.3, 2.0]) {
+      testWidgets('Takip fits $width px at $scale× text', (t) async {
+        t.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+        await pumpAt(
+          t,
+          Size(width, 5000),
+          const Scaffold(body: ReportsScreen()),
+        );
+        expect(find.byType(WeightChart), findsNWidgets(5));
+      });
+    }
+  }
+
+  testWidgets('Takip on a phone: one chart per row, note folded', (t) async {
+    await pumpAt(
+      t,
+      const Size(412, 900),
+      const Scaffold(body: ReportsScreen()),
+    );
+    expect(find.textContaining('hangi ölçümleri'), findsNothing);
+    await t.tap(find.text('Görüşme notu'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('hangi ölçümleri'), findsOneWidget);
+
+    final charts = find.ancestor(
+      of: find.byType(WeightChart, skipOffstage: false),
+      matching: find.byType(Card, skipOffstage: false),
+    );
+    expect(
+      t.getRect(charts.at(1)).top,
+      greaterThan(t.getRect(charts.at(0)).bottom),
     );
   });
 
