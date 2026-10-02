@@ -114,7 +114,7 @@ class _MealCard extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.schedule,
+                      AppIcons.clock,
                       size: 18,
                       color: palette.textSecondary,
                     ),
@@ -184,7 +184,7 @@ class _MealCard extends ConsumerWidget {
                     onPressed: () =>
                         notifier.removeItem(clientId, mealIndex, i),
                     icon: Icon(
-                      Icons.close,
+                      AppIcons.close,
                       size: 18,
                       color: palette.textSecondary,
                     ),
@@ -198,7 +198,7 @@ class _MealCard extends ConsumerWidget {
             EdgeButton(
               child: TextButton.icon(
                 onPressed: () => notifier.addItem(clientId, mealIndex),
-                icon: const Icon(Icons.add, size: 18),
+                icon: const Icon(AppIcons.add, size: 18),
                 label: const Text('Besin ekle'),
               ),
             ),

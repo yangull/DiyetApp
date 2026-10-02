@@ -13,10 +13,15 @@ import 'app_density.dart';
 ///
 /// Bundled in `packages/core/fonts` with its licence, unmodified (no
 /// subsetting or conversion, as the licence requires); never fetched at
-/// runtime (#63).
+/// runtime (#63). The lira fallback is a separate, subset OFL font.
 abstract final class AppTypography {
   static const _family = 'Alpino';
   static const _package = 'core';
+
+  /// Alpino has no lira sign (U+20BA); it is drawn from this one-glyph font,
+  /// Plus Jakarta Sans, chosen by Can (2 Oct 2026) as the closest in weight
+  /// and warmth. Per-glyph: every other character stays Alpino.
+  static const _fallback = ['Lira'];
 
   static TextStyle _style(
     double size,
@@ -25,6 +30,7 @@ abstract final class AppTypography {
     double tracking = 0,
   ]) => TextStyle(
     fontFamily: _family,
+    fontFamilyFallback: _fallback,
     package: _package,
     fontSize: size,
     height: lineHeight / size,

@@ -5,6 +5,7 @@ import 'tokens/app_colors.dart';
 import 'tokens/app_density.dart';
 import 'tokens/app_spacing.dart';
 import 'tokens/app_typography.dart';
+import 'app_icons.dart';
 
 /// Light and dark (Can, 1 Oct 2026, was C43), built from one function over
 /// the measured [AppPalette.light] and [AppPalette.dark].
@@ -125,6 +126,10 @@ abstract final class AppTheme {
         selectionHandleColor: p.ink,
       ),
       iconTheme: IconThemeData(color: p.ink),
+      // The back button in the app bar is one of ours, not Material's arrow.
+      actionIconTheme: ActionIconThemeData(
+        backButtonIconBuilder: (context) => Icon(AppIcons.back),
+      ),
       appBarTheme: AppBarTheme(
         // Status bar icons dark on the light canvas, light on the dark one.
         systemOverlayStyle: b == Brightness.dark

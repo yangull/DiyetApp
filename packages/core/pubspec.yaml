@@ -26,6 +26,18 @@ flutter:
     - family: Alpino
       fonts:
         - asset: fonts/Alpino-Variable.ttf
+    # Only the ₺ glyph (U+20BA), subset from Plus Jakarta Sans (OFL, licence
+    # alongside): Alpino has no lira sign. Used as a per-glyph fallback.
+    - family: Lira
+      fonts:
+        - asset: fonts/PlusJakartaSans-Lira.ttf
+    # Lucide icons, see AppIcons: the regular (2 px) and heavy (3 px) strokes.
+    - family: AppIcons
+      fonts:
+        - asset: fonts/Lucide.ttf
+    - family: AppIconsHeavy
+      fonts:
+        - asset: fonts/Lucide-Heavy.ttf
     # Only for the plan PDF: the pdf package cannot read a variable font.
     - family: Figtree
       fonts:

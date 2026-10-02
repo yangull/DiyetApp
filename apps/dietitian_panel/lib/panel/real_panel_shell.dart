@@ -67,13 +67,13 @@ class _RealPanelShellState extends State<RealPanelShell> {
       },
       destinations: const [
         PanelDestination(
-          icon: Icons.dashboard_outlined,
-          selectedIcon: Icons.dashboard,
+          icon: AppIcons.dashboard,
+          selectedIcon: AppIcons.dashboardActive,
           label: 'Genel Bakış',
         ),
         PanelDestination(
-          icon: Icons.person_outline,
-          selectedIcon: Icons.person,
+          icon: AppIcons.profile,
+          selectedIcon: AppIcons.profileActive,
           label: 'Profil',
         ),
       ],

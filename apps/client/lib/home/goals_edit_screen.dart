@@ -127,7 +127,7 @@ class _GoalsEditScreenState extends ConsumerState<GoalsEditScreen> {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.error_outline, size: 20, color: onSnack),
+              Icon(AppIcons.error, size: 20, color: onSnack),
               const SizedBox(width: AppSpacing.sm),
               const Expanded(child: Text('Kaydedilemedi.')),
             ],
@@ -154,7 +154,7 @@ class _PrivacyNote extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.lock_outline, size: 22, color: palette.ink),
+            Icon(AppIcons.lock, size: 22, color: palette.ink),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(

@@ -24,6 +24,35 @@ Future<void> loadAppFonts() async {
     await loader.load();
   }
 
+  // The lira sign's fallback font (Alpino has none).
+  for (final family in ['Lira', 'packages/core/Lira']) {
+    final loader = FontLoader(family)
+      ..addFont(
+        Future.value(
+          ByteData.sublistView(
+            File('$dir/PlusJakartaSans-Lira.ttf').readAsBytesSync(),
+          ),
+        ),
+      );
+    await loader.load();
+  }
+
+  // Lucide, the icon set (AppIcons): a regular and a heavy stroke.
+  for (final (family, file) in [
+    ('AppIcons', 'Lucide.ttf'),
+    ('AppIconsHeavy', 'Lucide-Heavy.ttf'),
+  ]) {
+    for (final name in [family, 'packages/core/$family']) {
+      final loader = FontLoader(name)
+        ..addFont(
+          Future.value(
+            ByteData.sublistView(File('$dir/$file').readAsBytesSync()),
+          ),
+        );
+      await loader.load();
+    }
+  }
+
   final flutterRoot = Platform.environment['FLUTTER_ROOT'];
   if (flutterRoot == null) return;
   final icons = File(

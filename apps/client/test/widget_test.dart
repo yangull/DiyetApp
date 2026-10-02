@@ -361,7 +361,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(OutlinedButton, 'Yaz'));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    expect(find.byIcon(AppIcons.lock), findsOneWidget);
     await tester.enterText(_fieldLabelled('Hedefim'), 'yazıldı');
     await tester.ensureVisible(find.text('Vazgeç'));
     await tester.tap(find.text('Vazgeç'));

@@ -300,7 +300,11 @@ class _StepRow extends StatelessWidget {
                               ),
                       ),
                       child: done
-                          ? Icon(Icons.check, size: 16, color: palette.onFilled)
+                          ? Icon(
+                              AppIcons.check,
+                              size: 16,
+                              color: palette.onFilled,
+                            )
                           : null,
                     ),
                   ),

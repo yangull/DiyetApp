@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-/// Stands in for the embedded video call — PLANNING.md §3 hasn't picked an
-/// SDK yet (Agora / 100ms / Daily are candidates), so this screen is a mockup
+/// Stands in for the embedded video call — no video SDK has been picked yet
+/// (Agora / 100ms / Daily are candidates), so this screen is a mockup
 /// of the moment, not a working call. The dark background is deliberate and
 /// outside the brand palette on purpose: real call UIs (FaceTime, Meet, Zoom)
 /// go dark regardless of the host app's theme, and matching that here is what
@@ -41,34 +41,50 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     clientName,
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Bağlanıyor…',
-                    style: TextStyle(color: Colors.white54, fontSize: 14),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: Colors.white54),
                   ),
                 ],
               ),
             ),
             Positioned(
-              top: 16,
-              left: 16,
+              top: 8,
+              left: 8,
               right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black45,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Bu ekran temsilidir — video altyapısı henüz seçilmedi '
-                  '(PLANNING.md §3).',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
-                ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // A way out that is not the red hang-up button.
+                  IconButton(
+                    tooltip: 'Geri',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(AppIcons.back, color: Colors.white),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black45,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Bu ekran temsilidir; video altyapısı henüz seçilmedi.',
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: Colors.white70),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             // Above the call controls, not beside them: on a phone the
@@ -104,17 +120,17 @@ class VideoCallPlaceholderScreen extends StatelessWidget {
                   // mute yet, and a live-looking button that does nothing is
                   // exactly the fake UI PLANNING #50 rules out.
                   const _CallControl(
-                    icon: Icons.mic_none,
+                    icon: AppIcons.mic,
                     tooltip: 'Mikrofon — video henüz bağlı değil',
                   ),
                   const SizedBox(width: 16),
                   const _CallControl(
-                    icon: Icons.videocam_outlined,
+                    icon: AppIcons.video,
                     tooltip: 'Kamera — video henüz bağlı değil',
                   ),
                   const SizedBox(width: 16),
                   _CallControl(
-                    icon: Icons.call_end,
+                    icon: AppIcons.callEnd,
                     tooltip: 'Görüşmeyi bitir',
                     background: context.palette.error,
                     onPressed: () => Navigator.of(context).pop(),

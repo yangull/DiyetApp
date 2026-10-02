@@ -288,7 +288,7 @@ class _LineRow extends ConsumerWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               _StepButton(
-                icon: Icons.remove,
+                icon: AppIcons.remove,
                 tooltip: 'Azalt',
                 onPressed: line.count == 0
                     ? null
@@ -303,7 +303,7 @@ class _LineRow extends ConsumerWidget {
                 ),
               ),
               _StepButton(
-                icon: Icons.add,
+                icon: AppIcons.add,
                 tooltip: 'Artır',
                 onPressed: () => setCount(line.count + 1),
               ),
@@ -349,17 +349,18 @@ class _StepButton extends StatelessWidget {
       onPressed: onPressed,
       // The theme sets one foreground for every state, so a disabled button
       // looked like an enabled one: this one fades.
-      style: IconButton.styleFrom(
-        backgroundColor: palette.canvas,
-        disabledBackgroundColor: palette.canvas,
-        minimumSize: const Size(40, 40),
-      ).copyWith(
-        foregroundColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.disabled)
-              ? palette.textSecondary.withValues(alpha: 0.45)
-              : palette.ink,
-        ),
-      ),
+      style:
+          IconButton.styleFrom(
+            backgroundColor: palette.canvas,
+            disabledBackgroundColor: palette.canvas,
+            minimumSize: const Size(40, 40),
+          ).copyWith(
+            foregroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.disabled)
+                  ? palette.textSecondary.withValues(alpha: 0.45)
+                  : palette.ink,
+            ),
+          ),
       icon: Icon(icon, size: 20),
     );
   }

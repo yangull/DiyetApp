@@ -313,7 +313,7 @@ Full reference, including type scale, density numbers and the design rules:
     DESIGN.md is adapted, because parts of it were Sade-specific.
   - No glass or blur, on content or on bars (#135, was C41).
   - From `docs/design-system.md`'s numbered rules: 4, 5, 10, 12, 13 and 14 survive;
-    2 (one icon set) waits for the icon pack; 3 survives as part of the AI-draft
+    2 (one icon set) is Lucide since 2 Oct 2026 (`AppIcons`); 3 survives as part of the AI-draft
     safeguard; 15 is rewritten; 1 (no gradients) survives (C40 decided flat); 6, 7, 8, 9 and 11 are
     replaced by #135 and the new system.
 

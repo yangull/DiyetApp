@@ -57,7 +57,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     final addButton = FilledButton.icon(
       onPressed: () => Navigator.of(context)
           .push(MaterialPageRoute(builder: (_) => const IntakeFormScreen())),
-      icon: const Icon(Icons.add, size: 18),
+      icon: const Icon(AppIcons.add, size: 18),
       label: const Text('Danışan ekle'),
     );
 
@@ -131,7 +131,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               builder: (context, c) {
                 final filter = OutlinedButton.icon(
                   onPressed: () => _showFilters(goals),
-                  icon: const Icon(Icons.tune, size: 18),
+                  icon: const Icon(AppIcons.filter, size: 18),
                   label: Text(
                     _activeFilters == 0
                         ? 'Filtrele'
@@ -364,11 +364,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     onChanged: (_) => setState(() {}),
     decoration: InputDecoration(
       hintText: 'Danışan ara',
-      prefixIcon: const Icon(Icons.search, size: 20),
+      prefixIcon: const Icon(AppIcons.search, size: 20),
       suffixIcon: query.isEmpty
           ? null
           : IconButton(
-              icon: const Icon(Icons.close, size: 18),
+              icon: const Icon(AppIcons.close, size: 18),
               tooltip: 'Aramayı temizle',
               onPressed: () => setState(_search.clear),
             ),
@@ -537,7 +537,7 @@ class _PhoneClientRow extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: palette.textSecondary),
+          Icon(AppIcons.chevronRight, color: palette.textSecondary),
         ],
       ),
     );

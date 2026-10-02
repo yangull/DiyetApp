@@ -85,6 +85,8 @@ void main() {
         text.labelSmall,
       ]) {
         expect(style!.fontFamily, 'packages/core/Alpino');
+        // Alpino has no ₺: every style falls back to the one-glyph font.
+        expect(style.fontFamilyFallback, ['packages/core/Lira']);
         expect(style.fontWeight!.value, lessThanOrEqualTo(600));
         expect(style.fontSize, greaterThanOrEqualTo(11));
         // Alpino's ink spans 1.14 em; HIG's line heights stay above it.

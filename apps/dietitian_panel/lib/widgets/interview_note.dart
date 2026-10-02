@@ -27,7 +27,7 @@ class _InterviewNoteState extends State<InterviewNote> {
           child: EdgeButton(
             child: TextButton.icon(
               onPressed: () => setState(() => _open = !_open),
-              icon: const Icon(Icons.info_outline, size: 18),
+              icon: const Icon(AppIcons.info, size: 18),
               label: Text(_open ? 'Görüşme notunu gizle' : 'Görüşme notu'),
             ),
           ),

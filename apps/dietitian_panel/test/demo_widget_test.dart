@@ -100,8 +100,8 @@ void main() {
     )) {
       t.text.visitChildren((span) {
         final colour = span.style?.color;
-        // Icons are glyph text too; the pill's video icon shares its colour.
-        final icon = span.style?.fontFamily == 'MaterialIcons';
+        // Icons are glyph text too (the AppIcons fonts); the pill's video icon shares its colour.
+        final icon = span.style?.fontFamily?.contains('AppIcons') ?? false;
         if (!icon &&
             (colour == AppColors.accent || colour == AppColors.accentStrong)) {
           green.add(span.toPlainText());
@@ -183,7 +183,7 @@ void main() {
       findsNothing,
     );
     await tester.enterText(inMessages(find.byType(TextField)), 'Kolay gelsin');
-    await tester.tap(inMessages(find.byTooltip('Gönder')));
+    await tester.tap(inMessages(find.widgetWithText(FilledButton, 'Gönder')));
     await tester.pumpAndSettle();
     expect(bubbleOf('Kolay gelsin'), AppColors.charcoal);
   });
@@ -320,20 +320,18 @@ void main() {
       'Burak Şahin',
     ];
     expect(leftEdges(AppointmentsScreen, names), hasLength(1));
-    expect(
-      leftEdges(AppointmentsScreen, [
-        'Görüntülü görüşme',
-        'Yüz yüze',
-        'Görüşme yapıldı',
-        'Gelmedi',
-      ]),
-      hasLength(1),
-    );
+    // The kind column starts in one place whatever fills it: an icon and words
+    // in upcoming rows, a pill in past ones.
+    expect({
+      for (final e
+          in find.byKey(const ValueKey('appointments-what-column')).evaluate())
+        (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dx,
+    }, hasLength(1));
     expect(leftEdges(AppointmentsScreen, ['Görüşmeye başla']), hasLength(1));
     expect(leftEdges(AppointmentsScreen, ['İptal et']), hasLength(1));
     // The icons in the first action column: camera and "gelmedi" calendar.
     final icons = {
-      for (final icon in [Icons.videocam_outlined, Icons.event_busy_outlined])
+      for (final icon in [AppIcons.video, AppIcons.appointmentMissed])
         for (final e
             in find
                 .descendant(
@@ -448,7 +446,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The first group's minus: tap it down to zero; it then does nothing.
-    final minus = find.widgetWithIcon(IconButton, Icons.remove);
+    final minus = find.widgetWithIcon(IconButton, AppIcons.remove);
     expect(minus, findsWidgets);
     for (var i = 0; i < 12; i++) {
       if (tester.widget<IconButton>(minus.first).onPressed == null) break;
@@ -457,6 +455,51 @@ void main() {
     }
     expect(tester.widget<IconButton>(minus.first).onPressed, isNull);
   });
+
+  testWidgets('Kaydet from far down the form shows the first error', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 700);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Danışanlar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Danışan ekle'));
+    await tester.pumpAndSettle();
+
+    // Scroll to the end, where the required fields are far above.
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -3000));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaydet ve taslak oluştur'));
+    await tester.pumpAndSettle();
+
+    // Still on the form, and the first required field is back in view.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Yeni danışan'), findsOneWidget);
+    expect(find.text('Zorunlu alan').hitTestable(), findsWidgets);
+  });
+
+  for (final (width, expected) in [(1700.0, 2), (1200.0, 0)]) {
+    testWidgets('Randevular at $width px: $expected column-name rows', (
+      tester,
+    ) async {
+      // Column names appear only where the rows themselves are a grid.
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = Size(width, 1400);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const ProviderScope(child: DietitianPanelDemoApp()),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Randevular'));
+      await tester.pumpAndSettle();
+      expect(find.text('Saat'), findsNWidgets(expected));
+    });
+  }
 
   testWidgets('the interview question hides behind a toggle', (tester) async {
     await pumpWide(tester);
@@ -562,7 +605,13 @@ void main() {
               .evaluate())
         (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dy,
     };
-    expect(tops, hasLength(1));
+    // Within half a pixel of one line (the list row and the thread header lay
+    // their name out in different rows).
+    expect(
+      tops.reduce((a, b) => a > b ? a : b) -
+          tops.reduce((a, b) => a < b ? a : b),
+      lessThan(1),
+    );
     expect(find.text('Bugünün öğünleri'), findsOneWidget);
   });
 
@@ -585,7 +634,7 @@ void main() {
         matching: find.byType(TextFormField),
       ),
     );
-    final add = tester.getTopLeft(find.byIcon(Icons.add).first);
+    final add = tester.getTopLeft(find.byIcon(AppIcons.add).first);
     expect(add.dx, moreOrLessEquals(field.dx, epsilon: 0.5));
   });
 
@@ -641,7 +690,7 @@ void main() {
     expect(find.text('Elif Aydın'), findsWidgets);
 
     await tester.enterText(find.byType(TextField), 'Yarın görüşürüz.');
-    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.tap(find.byIcon(AppIcons.send));
     await tester.pumpAndSettle();
 
     // Appears twice by design: once in the message thread, once as the
@@ -759,7 +808,7 @@ void main() {
       tester.element(find.byType(MessagesScreen)),
     );
     expect(container.read(selectedConversationProvider), isNotNull);
-    expect(find.byIcon(Icons.send_outlined), findsOneWidget);
+    expect(find.byIcon(AppIcons.send), findsOneWidget);
   });
 
   group('Sıfırla starts a fresh interview', () {

@@ -62,7 +62,7 @@ class _ExportPlanButtonState extends State<ExportPlanButton> {
           onPressed: widget.enabled && !_busy ? _export : null,
           icon: _busy
               ? const ButtonSpinner(size: 16)
-              : const Icon(Icons.picture_as_pdf_outlined, size: 18),
+              : const Icon(AppIcons.pdf, size: 18),
           label: const Text('PDF olarak ver'),
         ),
         if (!widget.enabled)

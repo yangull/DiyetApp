@@ -9,7 +9,7 @@ Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFv
 - One session = one new chat in this folder (no worktree). Inside a session Claude works in small slices: analyze + tests, a subagent review, before/after captures in `C:\Users\jhana\Pictures\Wellkit polish\<slice>\`, then stops and shows Can. Commit only when Can says "commit", push only on "push".
 - Some items are decisions, not code. Claude asks them at the start of the session (listed under each session).
 - The model that writes the code is the one selected in the app's model picker. Reviews run as separate subagents on a stronger model.
-- Baseline tests (after Session 5): core 52, client 26 (+1 skipped capture), panel 209 (+3 skipped captures). Analyze must stay clean.
+- Baseline tests (2 Oct 2026, mid-Session 6): core 54, client 26 (+1 skipped capture), panel 212 (+3 skipped captures). Analyze must stay clean.
 
 ## Session 1: labelled fields and shared states (core)
 To-do:
@@ -68,16 +68,13 @@ Decisions (Can, 2 Oct 2026): the interview paragraphs (D1.8, D3.5, D10.1) stay b
 Done when: demo screens re-captured (captures in `Wellkit polish\S12-S15`) and `demo_widget_test.dart` and `demo_codec_test.dart` pass.
 
 ## Session 6: demo panel, part 2 (D6-D11), lira sign, icons
-To-do:
-- [ ] **D6 Yeni danışan**: grouped intake fields (after the DT7 answer, otherwise tidy only), consistent grid, a sticky action bar.
-- [ ] **D7 Randevular**: action alignment on phone, bigger time, table header on desktop, a status pill for "Gelmedi".
-- [ ] **D8 Görüşme**: remove "PLANNING.md §3" from the UI, Turkish tooltips on the icon buttons, a back path.
-- [ ] **D9 Mesajlar**: avatars and times on the list, thread header, labelled send button, no large empty gap, unread meaning in words.
-- [ ] **D10 Takip**: lighter intro, chart labels, a summary row.
+Status: **in progress.** Decisions (Can, 2 Oct 2026): icon pack **Lucide** (via `AppIcons` in core, fonts vendored, no wrapper package); lira fallback **Plus Jakarta Sans** (one-glyph subset `Lira`, metrics set to Alpino's).
+- [x] **X2 lira sign** and **X4 icons** (also fixes R5.4). Docs updated; `fonts_and_icons_test.dart` guards both.
+- [x] **D6 Yeni danışan**, **D7 Randevular** (reviewed, captured in `Wellkit polish\S17`).
+- [~] **D8 Görüşme** and **D9 Mesajlar**: coded and tests green; **not yet reviewed by a subagent or captured** (before images are in `S18`). D8: notice without "PLANNING.md §3", back arrow. D9: avatars, times, "Yanıt bekliyor" pill, header with "Danışanı aç", top-anchored thread, labelled "Gönder", cautions as pills.
+- [ ] **D10 Takip**: lighter intro, chart labels, a summary row; its interview paragraph goes behind `InterviewNote`.
 - [ ] **D11 Ayarlar and reset**: header on phone, "Açık/Kapalı" with the switches, wider reset dialog.
-- [ ] **X2 lira sign**: a fallback font in core so ₺ draws in a matching style; check on the Pixel.
-- [ ] **X4 icons**: pick one icon pack (Claude proposes two with a preview; adds a dependency, needs Can's OK) and replace Material icons everywhere.
-Ask Can: the icon pack; the fallback font for ₺.
+- [ ] Left from session 5: **X5** (number slots in the remaining demo screens: Takip, Ödemeler if shown), check **X6** (any date left in another format).
 Done when: every D screen re-captured on phone and computer, light and dark.
 
 ## Session 7: wrap-up

@@ -487,7 +487,7 @@ class _ProgressLabel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          progress.isLoss ? Icons.south : Icons.north,
+          progress.isLoss ? AppIcons.arrowDown : AppIcons.arrowUp,
           size: 16,
           color: color,
         ),

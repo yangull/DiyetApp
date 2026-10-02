@@ -43,34 +43,34 @@ class _PanelShellState extends State<PanelShell> {
       onSelected: (i) => setState(() => _index = i),
       destinations: const [
         PanelDestination(
-          icon: Icons.dashboard_outlined,
-          selectedIcon: Icons.dashboard,
+          icon: AppIcons.dashboard,
+          selectedIcon: AppIcons.dashboardActive,
           label: 'Genel Bakış',
         ),
         PanelDestination(
-          icon: Icons.people_outline,
-          selectedIcon: Icons.people,
+          icon: AppIcons.clients,
+          selectedIcon: AppIcons.clientsActive,
           label: 'Danışanlar',
         ),
         PanelDestination(
-          icon: Icons.event_outlined,
-          selectedIcon: Icons.event,
+          icon: AppIcons.appointments,
+          selectedIcon: AppIcons.appointmentsActive,
           label: 'Randevular',
         ),
         PanelDestination(
-          icon: Icons.chat_bubble_outline,
-          selectedIcon: Icons.chat_bubble,
+          icon: AppIcons.messages,
+          selectedIcon: AppIcons.messagesActive,
           label: 'Mesajlar',
         ),
         if (kShowMoney)
           PanelDestination(
-            icon: Icons.payments_outlined,
-            selectedIcon: Icons.payments,
+            icon: AppIcons.payments,
+            selectedIcon: AppIcons.paymentsActive,
             label: 'Ödemeler',
           ),
         PanelDestination(
-          icon: Icons.insights_outlined,
-          selectedIcon: Icons.insights,
+          icon: AppIcons.progress,
+          selectedIcon: AppIcons.progressActive,
           label: 'Takip',
         ),
       ],
@@ -85,7 +85,7 @@ class _PanelShellState extends State<PanelShell> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _RailUtilityButton(
-                  icon: Icons.notifications_none,
+                  icon: AppIcons.notifications,
                   label: 'Hatırlatma ayarları',
                   selected: _index == _settingsIndex,
                   onPressed: () => setState(() => _index = _settingsIndex),
@@ -111,7 +111,7 @@ class _PanelShellState extends State<PanelShell> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _RailUtilityButton(
-                icon: Icons.notifications_none,
+                icon: AppIcons.notifications,
                 label: 'Hatırlatma ayarları',
                 selected: _index == _settingsIndex,
                 onPressed: () => setState(() => _index = _settingsIndex),
@@ -224,7 +224,7 @@ class _ResetDemoButton extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.restart_alt),
+            const Icon(AppIcons.reset),
             const SizedBox(height: AppSpacing.xs),
             Text('Sıfırla', style: label),
           ],
@@ -237,7 +237,7 @@ class _ResetDemoButton extends ConsumerWidget {
         alignment: AlignmentDirectional.centerStart,
       ),
       onPressed: () => _confirmReset(context, ref, onReset),
-      icon: const Icon(Icons.restart_alt),
+      icon: const Icon(AppIcons.reset),
       label: Text('Sıfırla', style: label),
     );
   }
@@ -288,7 +288,7 @@ void _showDemoSheet(BuildContext context, {required VoidCallback onReset}) {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.notifications_none),
+              leading: const Icon(AppIcons.notifications),
               title: const Text('Hatırlatma ayarları'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -305,7 +305,7 @@ void _showDemoSheet(BuildContext context, {required VoidCallback onReset}) {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.restart_alt),
+              leading: const Icon(AppIcons.reset),
               title: const Text('Demoyu sıfırla'),
               onTap: () {
                 Navigator.of(sheetContext).pop();

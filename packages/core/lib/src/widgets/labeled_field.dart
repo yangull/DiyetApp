@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens/app_spacing.dart';
+import '../theme/app_icons.dart';
 
 /// A text field with its label above it (design-system "Inputs"). The label,
 /// helper and error are drawn here, not by `InputDecoration`, which only
@@ -99,9 +100,7 @@ class _LabeledFieldState extends State<LabeledField> {
                         ),
                         tooltip: _hidden ? 'Parolayı göster' : 'Parolayı gizle',
                         icon: Icon(
-                          _hidden
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                          _hidden ? AppIcons.show : AppIcons.hide,
                           size: 20,
                         ),
                         onPressed: () => setState(() => _hidden = !_hidden),
@@ -147,6 +146,7 @@ class LabeledDropdown<T> extends StatelessWidget {
           // the field instead of overflowing it at large text.
           isExpanded: true,
           iconSize: 20,
+          icon: Icon(AppIcons.chevronDown),
           // The content has a 24 px floor, taller than a text line, so the
           // padding is trimmed to land on the text fields' height.
           decoration: InputDecoration(
@@ -207,11 +207,7 @@ class FieldFrame extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 1),
-                    child: Icon(
-                      Icons.error_outline,
-                      size: 14,
-                      color: palette.error,
-                    ),
+                    child: Icon(AppIcons.error, size: 14, color: palette.error),
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(

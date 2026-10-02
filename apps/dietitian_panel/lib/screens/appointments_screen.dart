@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../demo/demo_models.dart';
 import '../demo/demo_repository.dart';
 import '../util/panel_date.dart';
+import '../widgets/tone_pill.dart';
 import 'video_call_placeholder_screen.dart';
 
 class AppointmentsScreen extends ConsumerWidget {
@@ -37,6 +38,7 @@ class AppointmentsScreen extends ConsumerWidget {
         CloudCard(
           child: Column(
             children: [
+              if (upcoming.isNotEmpty) const _AppointmentHeader(),
               for (var i = 0; i < upcoming.length; i++)
                 _AppointmentRow(appointment: upcoming[i], showDivider: i > 0),
               if (upcoming.isEmpty)
@@ -58,6 +60,7 @@ class AppointmentsScreen extends ConsumerWidget {
         CloudCard(
           child: Column(
             children: [
+              if (past.isNotEmpty) const _AppointmentHeader(whatLabel: 'Durum'),
               for (var i = 0; i < past.length; i++)
                 _PastRow(appointment: past[i], showDivider: i > 0),
               if (past.isEmpty)
@@ -135,41 +138,8 @@ class _AppointmentRow extends ConsumerWidget {
     final cancelled = appointment.status == AppointmentStatus.cancelled;
     final reminded = appointment.status == AppointmentStatus.reminderSent;
 
-    final kindIcon = Icon(
-      appointment.kind == AppointmentKind.online
-          ? Icons.videocam_outlined
-          : Icons.person_outline,
-      size: 20,
-      color: palette.textSecondary,
-    );
-    final kindLabel = Text(
-      appointment.kind == AppointmentKind.online
-          ? 'Görüntülü görüşme'
-          : 'Yüz yüze',
-      style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-    );
-    final who = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          client.name,
-          style: text.titleMedium?.copyWith(
-            decoration: cancelled ? TextDecoration.lineThrough : null,
-            color: cancelled ? palette.textSecondary : null,
-          ),
-        ),
-        Text(
-          _when(appointment.at),
-          style: text.bodySmall?.copyWith(color: palette.textSecondary),
-        ),
-      ],
-    );
-    // TextButton.icon insets its icon by 12; plain states in the same slot
-    // do the same, so a sent reminder lines up with an unsent one.
-    Widget inset(Widget child) => Padding(
-      padding: const EdgeInsetsDirectional.only(start: 12),
-      child: child,
-    );
+    final kind = _KindLabel(appointment.kind);
+    final who = _Who(name: client.name, at: appointment.at, struck: cancelled);
     final start = cancelled || appointment.kind != AppointmentKind.online
         ? null
         : OutlinedButton.icon(
@@ -179,37 +149,39 @@ class _AppointmentRow extends ConsumerWidget {
                     VideoCallPlaceholderScreen(clientName: client.name),
               ),
             ),
-            icon: const Icon(Icons.videocam_outlined, size: 18),
+            icon: const Icon(AppIcons.video, size: 18),
             label: const Text('Görüşmeye başla'),
           );
     final reminder = cancelled
-        ? inset(
-            Text(
-              'İptal edildi',
-              style: text.bodyMedium?.copyWith(color: palette.textSecondary),
-            ),
-          )
+        ? const TonePill(label: 'İptal edildi', tone: PillTone.neutral)
         : reminded
         // A done state, told like "Onaylı": a black tick, grey words.
-        ? inset(
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check, size: 16, color: context.palette.ink),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    'Hatırlatma gönderildi',
-                    style: text.bodyMedium?.copyWith(
-                      color: palette.textSecondary,
-                    ),
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon and gap as the reminder button's, so both read from one
+              // left edge.
+              Icon(AppIcons.check, size: 18, color: context.palette.ink),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'Hatırlatma gönderildi',
+                  style: text.bodyMedium?.copyWith(
+                    color: palette.textSecondary,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           )
         // One green action per row, "Görüşmeye başla" (Can, C29).
         : TextButton.icon(
+            // Fixed padding: the theme's scales with the text, and a sent
+            // reminder in the same slot has to start at the same place.
+            style: const ButtonStyle(
+              padding: WidgetStatePropertyAll(
+                EdgeInsets.symmetric(horizontal: 12),
+              ),
+            ),
             onPressed: () {
               ref.read(demoProvider.notifier).sendReminder(appointment.id);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -218,7 +190,7 @@ class _AppointmentRow extends ConsumerWidget {
                 ),
               );
             },
-            icon: const Icon(Icons.notifications_none, size: 18),
+            icon: const Icon(AppIcons.notifications, size: 18),
             label: const Text('Hatırlatma gönder'),
           );
     final cancel = cancelled
@@ -254,38 +226,46 @@ class _AppointmentRow extends ConsumerWidget {
 
     return _AppointmentGrid(
       showDivider: showDivider,
-      icon: kindIcon,
+      at: appointment.at,
       who: who,
-      what: kindLabel,
+      what: kind,
       first: start,
       second: reminder,
+      // A sent reminder and an "İptal edildi" pill are plain states, not
+      // buttons: in the grid they take a button's inset to line up with one.
+      secondIsState: cancelled || reminded,
       third: cancel,
     );
   }
 }
 
 /// One grid for every appointment row, upcoming and past (Can, 24 Sep 2026):
-/// a kind icon, who and when, what kind or what happened, then three action
+/// the time first, then who, what kind or what happened, then three action
 /// slots. Each slot starts at the same place in every row of both cards, so
 /// "Görüşmeye başla" does not move with the width of the text beside it.
-/// Below [_gridBreakpoint] the row stacks: the actions go under the name.
+/// Below [_gridBreakpoint] the row stacks: the actions go under the name, all
+/// on the text's left edge.
 class _AppointmentGrid extends StatelessWidget {
   const _AppointmentGrid({
     required this.showDivider,
-    required this.icon,
+    required this.at,
     required this.who,
     required this.what,
     this.first,
     this.second,
+    this.secondIsState = false,
     this.third,
   });
 
   final bool showDivider;
-  final Widget icon;
+  final DateTime at;
   final Widget who;
   final Widget what;
   final Widget? first;
   final Widget? second;
+
+  /// [second] is a state, not a button: in the grid it gets a button's inset.
+  final bool secondIsState;
   final Widget? third;
 
   /// Three action slots need about this much room; below it they would
@@ -294,8 +274,27 @@ class _AppointmentGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget slot(Widget? child) =>
-        Align(alignment: AlignmentDirectional.centerStart, child: child);
+    final text = Theme.of(context).textTheme;
+    // The time is the key fact of the row, so it is the biggest thing in it:
+    // figures style, in a slot sized to "00:00" so the colons line up.
+    final timeStyle = AppTypography.figures(
+      text.titleLarge!.fontSize!,
+      text.titleLarge!.height! * text.titleLarge!.fontSize!,
+    ).copyWith(color: context.palette.ink);
+    final time = SizedBox(
+      width: numberSlotWidth(context, '00:00', timeStyle),
+      child: Text(formatTime(at), textAlign: TextAlign.end, style: timeStyle),
+    );
+
+    Widget slot(Widget? child, {bool inset = false}) => Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: child == null
+          ? null
+          : Padding(
+              padding: EdgeInsetsDirectional.only(start: inset ? 12 : 0),
+              child: child,
+            ),
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -311,31 +310,64 @@ class _AppointmentGrid extends StatelessWidget {
         builder: (context, constraints) {
           if (constraints.maxWidth < _gridBreakpoint) {
             // Full width even with no action, or the row shrinks to its text.
+            // At large text the time column would leave the name too little
+            // room, so the time goes above it.
+            final stackTime = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+            final body = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (stackTime) Text(formatTime(at), style: timeStyle),
+                who,
+                const SizedBox(height: 2),
+                what,
+              ],
+            );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    icon,
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [who, what],
-                      ),
-                    ),
-                  ],
-                ),
+                if (stackTime)
+                  body
+                else
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      time,
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(child: body),
+                    ],
+                  ),
                 if (first != null || second != null || third != null) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Padding(
-                    padding: const EdgeInsets.only(left: 20 + AppSpacing.md),
+                    // Under the name, not under the time.
+                    padding: EdgeInsetsDirectional.only(
+                      start: stackTime
+                          ? 0
+                          : _timeWidth(context) + AppSpacing.md,
+                    ),
                     child: Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.xs,
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [?first, ?second, ?third],
+                      children: [
+                        ?first,
+                        // A text button's own inset is cancelled only when it
+                        // starts the line (EdgeButton shifts by 12): later ones
+                        // sit after a neighbour and keep it.
+                        ?(second == null
+                            ? null
+                            : secondIsState
+                            ? Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.sm,
+                                ),
+                                child: second,
+                              )
+                            : first == null
+                            ? EdgeButton(child: second!)
+                            : second),
+                        ?third,
+                      ],
                     ),
                   ),
                 ],
@@ -344,17 +376,143 @@ class _AppointmentGrid extends StatelessWidget {
           }
           return Row(
             children: [
-              icon,
-              const SizedBox(width: AppSpacing.md),
+              time,
+              const SizedBox(width: AppSpacing.lg),
               Expanded(flex: 3, child: who),
-              Expanded(flex: 2, child: what),
+              Expanded(
+                key: const ValueKey('appointments-what-column'),
+                flex: 2,
+                child: what,
+              ),
               Expanded(flex: 3, child: slot(first)),
-              Expanded(flex: 3, child: slot(second)),
+              Expanded(flex: 3, child: slot(second, inset: secondIsState)),
               Expanded(flex: 2, child: slot(third)),
             ],
           );
         },
       ),
+    );
+  }
+
+  static double _timeWidth(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final style = AppTypography.figures(
+      text.titleLarge!.fontSize!,
+      text.titleLarge!.height! * text.titleLarge!.fontSize!,
+    );
+    return numberSlotWidth(context, '00:00', style);
+  }
+}
+
+/// Column names above the rows on a wide screen; nothing on a phone, where
+/// the rows stack.
+class _AppointmentHeader extends StatelessWidget {
+  const _AppointmentHeader({this.whatLabel = 'Görüşme'});
+
+  /// The second column: the kind of an upcoming appointment, the outcome of a
+  /// past one.
+  final String whatLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // The rows measure inside their own padding: the same width here, or
+        // a header would sit over rows that have stacked.
+        if (constraints.maxWidth - 2 * AppSpacing.lg <
+            _AppointmentGrid._gridBreakpoint) {
+          return const SizedBox.shrink();
+        }
+        final style = text.bodySmall?.copyWith(color: palette.textSecondary);
+        final timeStyle = AppTypography.figures(
+          text.titleLarge!.fontSize!,
+          text.titleLarge!.height! * text.titleLarge!.fontSize!,
+        );
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: palette.divider)),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: numberSlotWidth(context, '00:00', timeStyle),
+                child: Text('Saat', textAlign: TextAlign.end, style: style),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(flex: 3, child: Text('Danışan', style: style)),
+              Expanded(flex: 2, child: Text(whatLabel, style: style)),
+              Expanded(flex: 8, child: Text('İşlemler', style: style)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Name, with the day under it: "28 Eyl Pazartesi". The time has its own
+/// column, so the day is all this carries.
+class _Who extends StatelessWidget {
+  const _Who({required this.name, required this.at, this.struck = false});
+
+  final String name;
+  final DateTime at;
+  final bool struck;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final palette = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: text.titleMedium?.copyWith(
+            decoration: struck ? TextDecoration.lineThrough : null,
+            color: struck ? palette.textSecondary : null,
+          ),
+        ),
+        Text(
+          '${formatDate(at)} ${trWeekdays[at.weekday - 1]}',
+          style: text.bodyMedium?.copyWith(color: palette.textSecondary),
+        ),
+      ],
+    );
+  }
+}
+
+/// The kind of appointment, the icon beside its words.
+class _KindLabel extends StatelessWidget {
+  const _KindLabel(this.kind);
+
+  final AppointmentKind kind;
+
+  @override
+  Widget build(BuildContext context) {
+    final online = kind == AppointmentKind.online;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          online ? AppIcons.video : AppIcons.inPerson,
+          size: 18,
+          color: context.palette.textSecondary,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            online ? 'Görüntülü görüşme' : 'Yüz yüze',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -370,32 +528,23 @@ class _PastRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final demo = ref.watch(demoProvider);
-    final client = demo.clientOf(appointment.clientId);
-    final text = Theme.of(context).textTheme;
-    final palette = context.palette;
+    final client = ref.watch(demoProvider).clientOf(appointment.clientId);
     final noShow = appointment.status == AppointmentStatus.noShow;
     final cancelled = appointment.status == AppointmentStatus.cancelled;
-    final who = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(client.name, style: text.titleMedium),
-        Text(
-          _when(appointment.at),
-          style: text.bodySmall?.copyWith(color: palette.textSecondary),
-        ),
-      ],
-    );
-    final status = Text(
-      switch (appointment.status) {
-        AppointmentStatus.noShow => 'Gelmedi',
-        AppointmentStatus.cancelled => 'İptal edildi',
-        _ => 'Görüşme yapıldı',
-      },
-      style: text.bodyMedium?.copyWith(
-        color: noShow ? palette.warning : palette.textSecondary,
+    final who = _Who(name: client.name, at: appointment.at);
+    final status = switch (appointment.status) {
+      AppointmentStatus.noShow => const TonePill(
+        label: 'Gelmedi',
+        tone: PillTone.warning,
       ),
-    );
+      AppointmentStatus.cancelled => const TonePill(
+        label: 'İptal edildi',
+        tone: PillTone.neutral,
+      ),
+      // Neutral, not green: green means an approved plan, and a held
+      // appointment is not an approval.
+      _ => const TonePill(label: 'Görüşme yapıldı', tone: PillTone.neutral),
+    };
     // Quiet: a record kept after the fact, not the row's next step.
     final markNoShow = noShow || cancelled
         ? null
@@ -409,21 +558,15 @@ class _PastRow extends ConsumerWidget {
             ),
             onPressed: () =>
                 ref.read(demoProvider.notifier).markNoShow(appointment.id),
-            icon: const Icon(Icons.event_busy_outlined, size: 18),
+            icon: const Icon(AppIcons.appointmentMissed, size: 18),
             label: const Text('Gelmedi olarak işaretle'),
           );
 
     return _AppointmentGrid(
       showDivider: showDivider,
-      icon: Icon(
-        appointment.kind == AppointmentKind.online
-            ? Icons.videocam_outlined
-            : Icons.person_outline,
-        size: 20,
-        color: palette.textSecondary,
-      ),
+      at: appointment.at,
       who: who,
-      what: status,
+      what: Align(alignment: AlignmentDirectional.centerStart, child: status),
       first: markNoShow,
     );
   }
@@ -481,7 +624,7 @@ class _UnpaidRow extends ConsumerWidget {
                 ),
               );
             },
-            icon: const Icon(Icons.campaign_outlined, size: 18),
+            icon: const Icon(AppIcons.announcement, size: 18),
             label: const Text('Ödeme hatırlat'),
           ),
           const SizedBox(width: AppSpacing.sm),

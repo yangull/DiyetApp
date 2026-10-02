@@ -237,7 +237,7 @@ class _ClientsFocalCard extends StatelessWidget {
     final pad = _cardPadding(context);
     final button = FilledButton.icon(
       onPressed: onInvite,
-      icon: const Icon(Icons.person_add_alt, size: 18),
+      icon: const Icon(AppIcons.invite, size: 18),
       label: const Text('Danışan davet et'),
     );
     final caption = Text(
@@ -405,7 +405,7 @@ class _ClientRow extends StatelessWidget {
             ),
             if (clientId != null)
               Icon(
-                Icons.chevron_right,
+                AppIcons.chevronRight,
                 size: isPanelPhone(context) ? 24 : 20,
                 color: palette.textSecondary,
               ),
@@ -475,7 +475,7 @@ class _InvitesCard extends StatelessWidget {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            Icons.mail_outline,
+                            AppIcons.mail,
                             size: avatar * 0.55,
                             color: palette.textSecondary,
                           ),

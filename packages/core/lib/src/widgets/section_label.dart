@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/edge_button.dart';
 import '../theme/tokens/app_spacing.dart';
 import 'action_row.dart';
+import '../theme/app_icons.dart';
 
 /// A section heading (PLANNING #135): Title 3 (`headlineSmall`, 600) in Ink,
 /// left-aligned, as Bevel sets its section labels. [count] follows in grey;
@@ -111,7 +112,7 @@ class SectionLink extends StatelessWidget {
       child: TextButton.icon(
         onPressed: onPressed,
         iconAlignment: IconAlignment.end,
-        icon: const Icon(Icons.chevron_right, size: 18),
+        icon: const Icon(AppIcons.chevronRight, size: 18),
         label: Text(label),
       ),
     );

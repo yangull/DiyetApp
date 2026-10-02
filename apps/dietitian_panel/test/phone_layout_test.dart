@@ -144,7 +144,7 @@ void main() {
         tester.view.viewInsets = const FakeViewPadding(bottom: 320 * 3);
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), 'Kolay gelsin');
-        await tester.tap(find.byTooltip('Gönder'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Gönder'));
         await tester.pumpAndSettle();
         expect(find.text('Kolay gelsin'), findsOneWidget);
         expect(find.byType(TextField).hitTestable(), findsOneWidget);
@@ -352,8 +352,10 @@ void main() {
             reason: '"$label" is cut off',
           );
         }
+        // The actions are pinned, so scroll to the form's real end instead:
+        // the last anamnez question.
         await tester.scrollUntilVisible(
-          find.text('Kaydet ve taslak oluştur'),
+          find.text('Diğer notlar'),
           300,
           scrollable: find
               .descendant(
@@ -361,6 +363,10 @@ void main() {
                 matching: find.byType(Scrollable),
               )
               .first,
+        );
+        expect(
+          find.text('Kaydet ve taslak oluştur').hitTestable(),
+          findsOneWidget,
         );
       });
 

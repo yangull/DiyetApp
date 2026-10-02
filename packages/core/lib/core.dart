@@ -17,6 +17,7 @@ export 'src/relationships/client_relationship_repository.dart';
 export 'src/relationships/fake_client_relationship_repository.dart';
 export 'src/relationships/models.dart';
 export 'src/relationships/supabase_client_relationship_repository.dart';
+export 'src/theme/app_icons.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/edge_button.dart';
 export 'src/theme/theme_choice.dart';

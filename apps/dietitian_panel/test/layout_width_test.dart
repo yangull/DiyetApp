@@ -86,17 +86,27 @@ void main() {
         )
         .first;
     expect(
-      left(t, box('Yaş')),
+      left(t, box('Cinsiyet')),
       moreOrLessEquals(left(t, box('Hedef kilo (kg)'))),
     );
+    expect(left(t, box('Yaş')), moreOrLessEquals(left(t, box('Kilo (kg)'))));
     expect(
       left(t, box('Alerji / hassasiyet')),
       moreOrLessEquals(left(t, box('Kilo (kg)'))),
     );
+    // Three equal columns, in every group: the second column starts in one
+    // place, and a lone field sits in the first.
+    expect(
+      left(t, box('Hareket düzeyi')),
+      moreOrLessEquals(left(t, box('Yaş'))),
+    );
     expect(
       left(t, box('İlaç / takviye')),
-      moreOrLessEquals(left(t, box('Hareket düzeyi'))),
+      moreOrLessEquals(left(t, box('Ad soyad'))),
     );
+    expect(left(t, box('Su tüketimi')), moreOrLessEquals(left(t, box('Yaş'))));
+    // The actions are pinned: in view without scrolling to the bottom.
+    expect(find.text('Kaydet ve taslak oluştur').hitTestable(), findsOneWidget);
     final heights = {
       for (final l in [
         'Ad soyad',

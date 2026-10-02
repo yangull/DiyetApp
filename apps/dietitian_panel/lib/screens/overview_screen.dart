@@ -184,7 +184,7 @@ class _Header extends StatelessWidget {
                 end: true,
                 child: TextButton.icon(
                   onPressed: menu,
-                  icon: const Icon(Icons.tune),
+                  icon: const Icon(AppIcons.settings),
                   label: const Text('Demo'),
                 ),
               ),
@@ -699,7 +699,7 @@ class _AgendaRow extends ConsumerWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check, size: 16, color: context.palette.ink),
+                  Icon(AppIcons.check, size: 16, color: context.palette.ink),
                   const SizedBox(width: AppSpacing.xs),
                   Flexible(
                     child: Text(

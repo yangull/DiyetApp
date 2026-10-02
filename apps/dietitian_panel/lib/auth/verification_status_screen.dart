@@ -30,7 +30,7 @@ class VerificationStatusScreen extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(color: palette.canvas, shape: BoxShape.circle),
       child: Icon(
-        rejected ? Icons.info_outline : Icons.hourglass_top_outlined,
+        rejected ? AppIcons.info : AppIcons.waiting,
         size: 28,
         color: rejected ? palette.warning : palette.textSecondary,
       ),

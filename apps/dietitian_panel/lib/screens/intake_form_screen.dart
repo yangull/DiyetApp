@@ -52,6 +52,38 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     'Son tahlil sonucu var mı': TextEditingController(),
   };
 
+  /// Which anamnez questions sit under which heading.
+  static const _groups = [
+    (
+      'Beslenme alışkanlıkları',
+      [
+        'Öğün düzeni (kaç öğün, saatleri)',
+        'Su tüketimi',
+        'Sevmediği / yemediği besinler',
+      ],
+    ),
+    ('Yaşam tarzı', ['Uyku düzeni', 'Sigara / alkol', 'Bağırsak düzeni']),
+    (
+      'Sağlık geçmişi',
+      [
+        'Ailede kronik hastalık',
+        'Daha önce uygulanan diyetler',
+        'Son tahlil sonucu var mı',
+      ],
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // A question missing from the groups would vanish from the form.
+    assert(
+      {..._groups.expand((g) => g.$2)}.length == _anamnesis.length &&
+          _groups.expand((g) => g.$2).every(_anamnesis.containsKey),
+      'every anamnez question belongs to exactly one group',
+    );
+  }
+
   Sex _sex = Sex.kadin;
   ActivityLevel _activity = ActivityLevel.ortaAktif;
 
@@ -139,24 +171,30 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
       },
       child: Scaffold(
         appBar: AppBar(title: const Text('Yeni danışan')),
+        // The actions stay in view however long the form is, as in the plan
+        // editor.
+        bottomNavigationBar: _ActionBar(onSave: _save, onLeave: _confirmLeave),
         body: Form(
           key: _formKey,
           child: LayoutBuilder(
-            builder: (context, constraints) => ListView(
+            // Not a lazy ListView: validate() only reaches fields that are
+            // built, and the first error has to be found to be shown.
+            builder: (context, constraints) => SingleChildScrollView(
               padding: readablePadding(
                 constraints.maxWidth,
                 context.density.pagePadding,
               ),
-              children: [
-                Text('Temel bilgiler', style: text.titleLarge),
-                const SizedBox(height: AppSpacing.md),
-                CloudCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      children: [
-                        _row(
-                          [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Temel bilgiler', style: text.titleLarge),
+                  const SizedBox(height: AppSpacing.md),
+                  CloudCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        children: [
+                          _row([
                             _field(_name, 'Ad soyad', required: true),
                             _number(_age, 'Yaş', min: 10, max: 100),
                             _dropdown<Sex>(
@@ -165,12 +203,9 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                               entries: {Sex.kadin: 'Kadın', Sex.erkek: 'Erkek'},
                               onChanged: (v) => setState(() => _sex = v),
                             ),
-                          ],
-                          spans: [4, 1, 1],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _row(
-                          [
+                          ]),
+                          const SizedBox(height: AppSpacing.lg),
+                          _row([
                             _number(_height, 'Boy (cm)', min: 100, max: 230),
                             _number(_weight, 'Kilo (kg)', min: 30, max: 300),
                             _number(
@@ -180,12 +215,9 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                               max: 300,
                               optional: true,
                             ),
-                          ],
-                          spans: [2, 2, 2],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _row(
-                          [
+                          ]),
+                          const SizedBox(height: AppSpacing.lg),
+                          _row([
                             _field(_goal, 'Hedef'),
                             _dropdown<ActivityLevel>(
                               label: 'Hareket düzeyi',
@@ -199,105 +231,98 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
                               },
                               onChanged: (v) => setState(() => _activity = v),
                             ),
-                          ],
-                          spans: [3, 3],
-                        ),
-                      ],
+                          ]),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text('Sağlık bilgileri', style: text.titleLarge),
-                const SizedBox(height: AppSpacing.md),
-                CloudCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      children: [
-                        _row(
-                          [
+                  const SizedBox(height: AppSpacing.xl),
+                  Text('Sağlık bilgileri', style: text.titleLarge),
+                  const SizedBox(height: AppSpacing.md),
+                  CloudCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        children: [
+                          _row([
                             _field(_dietType, 'Beslenme tipi'),
                             _field(
                               _allergies,
                               'Alerji / hassasiyet',
                               hint: 'virgülle ayırın',
                             ),
-                          ],
-                          spans: [2, 4],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _row(
-                          [
                             _field(
                               _conditions,
                               'Kronik rahatsızlık',
                               hint: 'virgülle ayırın',
                             ),
+                          ]),
+                          const SizedBox(height: AppSpacing.lg),
+                          _row([
                             _field(
                               _medications,
                               'İlaç / takviye',
                               hint: 'virgülle ayırın',
                             ),
+                          ]),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text('Anamnez', style: text.titleLarge),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Bu bölümdeki sorular bizim tahminimiz — ilk görüşmede gerçekte '
+                    'neleri sorduğunuzu bilmiyoruz. Sormadıklarınızı çizin, eksik '
+                    'olanları söyleyin: hangi cevap planı değiştiriyorsa onu '
+                    'modellemek istiyoruz.',
+                    style: text.bodyMedium?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  CloudCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Grouped so nine questions read as three topics. The
+                          // groups are a guess too (DT7 is still open).
+                          for (final (i, group) in _groups.indexed) ...[
+                            if (i > 0) ...[
+                              const SizedBox(height: AppSpacing.lg),
+                              Divider(color: palette.divider),
+                              const SizedBox(height: AppSpacing.lg),
+                            ],
+                            Text(group.$1, style: text.titleMedium),
+                            const SizedBox(height: AppSpacing.md),
+                            _row([
+                              for (final label in group.$2)
+                                _field(_anamnesis[label]!, label),
+                            ]),
                           ],
-                          spans: [3, 3],
-                        ),
-                      ],
+                          const SizedBox(height: AppSpacing.lg),
+                          Divider(color: palette.divider),
+                          const SizedBox(height: AppSpacing.lg),
+                          _row([
+                            _field(_note, 'Diğer notlar', maxLines: 3),
+                          ], cols: 1),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text('Anamnez', style: text.titleLarge),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Bu bölümdeki sorular bizim tahminimiz — ilk görüşmede gerçekte '
-                  'neleri sorduğunuzu bilmiyoruz. Sormadıklarınızı çizin, eksik '
-                  'olanları söyleyin: hangi cevap planı değiştiriyorsa onu '
-                  'modellemek istiyoruz.',
-                  style: text.bodyMedium?.copyWith(
-                    color: palette.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                CloudCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      children: [
-                        for (final entry in _anamnesis.entries)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSpacing.md,
-                            ),
-                            child: _field(entry.value, entry.key),
-                          ),
-                        _field(_note, 'Diğer notlar', maxLines: 3),
-                      ],
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
+                    'yapay zekâ taslağı hazırlanır ve onayınıza düşer.',
+                    style: text.bodySmall?.copyWith(
+                      color: palette.textSecondary,
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Wrap(
-                  spacing: AppSpacing.md,
-                  runSpacing: AppSpacing.sm,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    FilledButton(
-                      onPressed: _save,
-                      child: const Text('Kaydet ve taslak oluştur'),
-                    ),
-                    TextButton(
-                      onPressed: _confirmLeave,
-                      child: const Text('Vazgeç'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Kaydettiğinizde bu bilgilerden hesaplanan enerji hedefiyle bir '
-                  'yapay zekâ taslağı hazırlanır ve onayınıza düşer.',
-                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -305,13 +330,48 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     );
   }
 
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
+  /// Brings the first field with an error into view, after the frame that
+  /// draws the errors: a bar pinned at the bottom can say "Kaydet" from any
+  /// scroll position, so the invalid field may be far above.
+  void _showFirstError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      BuildContext? first;
+      void visit(Element element) {
+        if (first != null) return;
+        if (element is StatefulElement &&
+            element.state is FormFieldState &&
+            (element.state as FormFieldState).hasError) {
+          first = element;
+          return;
+        }
+        element.visitChildren(visit);
+      }
 
+      (_formKey.currentContext as Element?)?.visitChildren(visit);
+      final target = first;
+      if (target != null) {
+        Scrollable.ensureVisible(
+          target,
+          alignment: 0.1,
+          duration: AppMotion.of(context, AppMotion.pop),
+        );
+      }
+    });
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) {
+      _showFirstError();
+      return;
+    }
+
+    // In the order they are shown, group by group.
     final anamnesis = [
-      for (final entry in _anamnesis.entries)
-        if (entry.value.text.trim().isNotEmpty)
-          '${entry.key}: ${entry.value.text.trim()}',
+      for (final group in _groups)
+        for (final label in group.$2)
+          if (_anamnesis[label]!.text.trim().isNotEmpty)
+            '$label: ${_anamnesis[label]!.text.trim()}',
     ];
     final note = [
       if (_note.text.trim().isNotEmpty) _note.text.trim(),
@@ -361,13 +421,12 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
   /// meant vertical flex with unbounded height the moment one was, which is a
   /// crash.
   ///
-  /// Wide, every row sits on one six-column grid: [spans] says how many
-  /// columns each field takes (they sum to 6), so field edges line up from row
-  /// to row. On a phone every field gets its own line: three to a row left
-  /// "Yaş" as "Y…" and overflowed the dropdown.
-  Widget _row(List<Widget> children, {required List<int> spans}) {
-    assert(spans.length == children.length);
-    assert(spans.fold(0, (a, b) => a + b) == 6);
+  /// Wide, every row is on the same grid: [cols] equal columns (three by
+  /// default), so field edges line up from row to row, and a row with fewer
+  /// fields leaves the rest empty. On a phone every field gets its own line:
+  /// three to a row left "Yaş" as "Y…" and overflowed the dropdown.
+  Widget _row(List<Widget> children, {int cols = 3}) {
+    assert(children.length <= cols);
     if (isPanelPhone(context)) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -382,16 +441,13 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
     const gap = AppSpacing.lg;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final column = (constraints.maxWidth - 5 * gap) / 6;
+        final width = (constraints.maxWidth - (cols - 1) * gap) / cols;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (var i = 0; i < children.length; i++) ...[
               if (i > 0) const SizedBox(width: gap),
-              SizedBox(
-                width: spans[i] * column + (spans[i] - 1) * gap,
-                child: children[i],
-              ),
+              SizedBox(width: width, child: children[i]),
             ],
           ],
         );
@@ -456,6 +512,57 @@ class _IntakeFormScreenState extends ConsumerState<IntakeFormScreen> {
           ),
       ],
       onChanged: onChanged,
+    );
+  }
+}
+
+/// "Kaydet" and "Vazgeç" pinned to the bottom, so the form's two exits are
+/// always reachable: on a wide screen at the right, on a phone full width.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({required this.onSave, required this.onLeave});
+
+  final VoidCallback onSave;
+  final VoidCallback onLeave;
+
+  @override
+  Widget build(BuildContext context) {
+    final save = FilledButton(
+      onPressed: onSave,
+      child: const Text('Kaydet ve taslak oluştur'),
+    );
+    final leave = TextButton(onPressed: onLeave, child: const Text('Vazgeç'));
+    return Container(
+      decoration: BoxDecoration(
+        color: context.palette.canvas,
+        border: Border(top: BorderSide(color: context.palette.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: isPanelPhone(context)
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    save,
+                    const SizedBox(height: AppSpacing.xs),
+                    leave,
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    leave,
+                    const SizedBox(width: AppSpacing.md),
+                    save,
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }

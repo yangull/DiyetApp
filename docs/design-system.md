@@ -155,7 +155,10 @@ above the overlay, so its text is unaffected.
 
 **Alpino only**, from the single variable file `Alpino-Variable.ttf` (wght 100–900),
 bundled unmodified with its `FFL.txt` (no subsetting or conversion, as the licence
-requires). Checked on 1 Oct 2026:
+requires). One exception, the lira sign: Alpino has no ₺ (U+20BA), so every text style
+falls back per glyph to `Lira`, a one-glyph subset of Plus Jakarta Sans (OFL, chosen
+by Can on 2 Oct 2026) whose vertical metrics were set to Alpino's so a price does not
+grow its line (`fonts_and_icons_test.dart`). Checked on 1 Oct 2026:
 - **Flutter maps `FontWeight` onto the wght axis** of the variable file: in a test,
   `FontWeight.w600` measured exactly like `FontVariation.weight(600)` (and the same for
   400, 500, 700, 900). So one file gives 400, 500 and 600 with no `fontVariations` code.
@@ -313,7 +316,7 @@ Bevel's own nav has blur instead, which #135 rules out).
 - **Dialogs and sheets:** white, radius 24, title `headlineSmall`, actions right-aligned:
   cancel as a text action, confirm as a filled (or red) pill.
 - **Empty states:** a heading that says what will appear here, one line of grey text,
-  one action if there is one. No illustration until the icon pack exists.
+  one action if there is one. No illustration yet.
 - **AI draft container:** the card keeps its surface and gets a 1.5 px dashed violet
   border and the "Yapay zekâ taslağı" label (#57).
 - **Star rating:** gold stars, always followed by the number in Ink ("4,8").
@@ -328,7 +331,7 @@ as it stands in the new system.
 | # | Rule | Status |
 |---|---|---|
 | 1 | **No gradients.** Flat fills; depth comes from Cloud Card on white. | Survives (C40 decided flat, 1 Oct 2026) |
-| 2 | **No emoji as icons;** one icon set (Material outlined until the icon pack). | Waits for the icon pack |
+| 2 | **No emoji as icons;** one icon set: Lucide, through `AppIcons` in core (a role name per icon, a heavier stroke `...Active` for the selected nav entry). Never `Icons.*`; a test enforces it. | Done (2 Oct 2026) |
 | 3 | **No "✨ AI" badges.** Say what happened: "Yapay zekâ taslağı · onay bekliyor". | Survives, as part of the AI-draft safeguard |
 | 4 | **Only what exists is drawn;** something unbuilt is named once with "Yakında". | Survives |
 | 5 | **No invented numbers presented as real.** | Survives |

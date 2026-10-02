@@ -37,7 +37,7 @@ class TonePill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (tone == PillTone.approved) ...[
-            Icon(Icons.check, size: 14, color: ink),
+            Icon(AppIcons.check, size: 14, color: ink),
             const SizedBox(width: AppSpacing.xs),
           ],
           Flexible(child: Text(label, style: style)),

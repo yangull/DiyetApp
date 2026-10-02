@@ -7,6 +7,8 @@ import '../demo/demo_repository.dart';
 import '../demo/energy.dart';
 import '../util/panel_date.dart';
 import '../util/breakpoints.dart';
+import '../widgets/tone_pill.dart';
+import 'client_detail_screen.dart';
 
 /// In-app messaging, per PLANNING.md P2: chat stays in the product rather than
 /// moving to WhatsApp, for one record of care, quality control and KVKK. This
@@ -236,18 +238,40 @@ class _ConversationRow extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              PersonAvatar(name: client.name),
+              const SizedBox(width: ActionRow.gap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      client.name,
-                      style: text.titleMedium?.copyWith(
-                        fontWeight: conversation.awaitsReply
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            client.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.titleMedium?.copyWith(
+                              fontWeight: conversation.awaitsReply
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        if (last != null) ...[
+                          const SizedBox(width: AppSpacing.sm),
+                          // Today: the time; before that: the day.
+                          Text(
+                            DateUtils.isSameDay(last.sentAt, DateTime.now())
+                                ? formatTime(last.sentAt)
+                                : formatDate(last.sentAt),
+                            style: text.bodySmall?.copyWith(
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -261,20 +285,18 @@ class _ConversationRow extends StatelessWidget {
                             : FontWeight.normal,
                       ),
                     ),
+                    // In words, not a dot alone: a waiting message is news the
+                    // eye finds without reading the preview.
+                    if (conversation.awaitsReply) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      const TonePill(
+                        label: 'Yanıt bekliyor',
+                        tone: PillTone.neutral,
+                      ),
+                    ],
                   ],
                 ),
               ),
-              // Black, not green: a waiting message is news, not an action. The bold
-              // name and preview carry it too.
-              if (conversation.awaitsReply)
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: context.palette.ink,
-                    shape: BoxShape.circle,
-                  ),
-                ),
             ],
           ),
         ),
@@ -330,20 +352,26 @@ class _ClientContextPanel extends ConsumerWidget {
               value: plan.isDraft ? 'Onay bekliyor' : 'Onaylandı',
             ),
             _ContextFact(label: 'Beslenme tipi', value: client.dietType),
-            _ContextFact(
-              label: 'Alerji / hassasiyet',
-              value: client.allergies.isEmpty
-                  ? '—'
-                  : client.allergies.join(', '),
-              warn: client.allergies.isNotEmpty,
-            ),
-            _ContextFact(
-              label: 'Kronik rahatsızlık',
-              value: client.chronicConditions.isEmpty
-                  ? '—'
-                  : client.chronicConditions.join(', '),
-              warn: client.chronicConditions.isNotEmpty,
-            ),
+            // What to be careful about, as pills, not amber words in a grid.
+            if (client.allergies.isNotEmpty ||
+                client.chronicConditions.isNotEmpty) ...[
+              Text(
+                'Dikkat edilecekler',
+                style: text.bodySmall?.copyWith(color: palette.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (final item in [
+                    ...client.allergies,
+                    ...client.chronicConditions,
+                  ])
+                    TonePill(label: item, tone: PillTone.warning),
+                ],
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             Divider(color: palette.divider),
             const SizedBox(height: AppSpacing.md),
@@ -368,17 +396,11 @@ class _ClientContextPanel extends ConsumerWidget {
 }
 
 class _ContextFact extends StatelessWidget {
-  const _ContextFact({
-    required this.label,
-    required this.value,
-    this.hint,
-    this.warn = false,
-  });
+  const _ContextFact({required this.label, required this.value, this.hint});
 
   final String label;
   final String value;
   final String? hint;
-  final bool warn;
 
   @override
   Widget build(BuildContext context) {
@@ -395,12 +417,7 @@ class _ContextFact extends StatelessWidget {
             style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
           const SizedBox(height: 2),
-          Text(
-            value,
-            style: text.bodyMedium?.copyWith(
-              color: warn ? palette.warning : null,
-            ),
-          ),
+          Text(value, style: text.bodyMedium),
           if (hint != null)
             Text(
               hint!,
@@ -443,8 +460,9 @@ class _ConversationDetail extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Same top inset and style as the list's first name and the context
-        // panel's title, so the three columns start on one line.
+        // Who this is and where to go from here: the avatar, the name and
+        // goal, and a way to the client's record. On a phone the page's app
+        // bar already names them.
         if (showName)
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -453,7 +471,56 @@ class _ConversationDetail extends ConsumerWidget {
               0,
               AppSpacing.sm,
             ),
-            child: Text(client.name, style: text.titleMedium),
+            child: Row(
+              children: [
+                PersonAvatar(name: client.name),
+                const SizedBox(width: ActionRow.gap),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(client.name, style: text.titleMedium),
+                      Text(
+                        client.goal,
+                        style: text.bodySmall?.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                EdgeButton(
+                  end: true,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ClientDetailScreen(clientId: clientId),
+                      ),
+                    ),
+                    child: const Text('Danışanı aç'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        // On a phone the page's app bar names the client; the way to their
+        // record is a line of its own under it.
+        if (!showName)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.md),
+              child: EdgeButton(
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ClientDetailScreen(clientId: clientId),
+                    ),
+                  ),
+                  child: const Text('Danışanı aç'),
+                ),
+              ),
+            ),
           ),
         Expanded(
           child: conversation.messages.isEmpty
@@ -465,16 +532,29 @@ class _ConversationDetail extends ConsumerWidget {
                     ),
                   ),
                 )
-              : ListView(
-                  reverse: true,
-                  padding: EdgeInsets.symmetric(
-                    vertical: AppSpacing.lg,
-                    horizontal: showName ? 0 : AppSpacing.lg,
+              // Starts at the top while the thread is short (no empty half
+              // above it) and sticks to the newest message once it is long.
+              : LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    reverse: true,
+                    padding: EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                      horizontal: showName ? 0 : AppSpacing.lg,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight - 2 * AppSpacing.lg,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final message in conversation.messages)
+                            _MessageBubble(message: message),
+                        ],
+                      ),
+                    ),
                   ),
-                  children: [
-                    for (final message in conversation.messages.reversed)
-                      _MessageBubble(message: message),
-                  ],
                 ),
         ),
         Padding(
@@ -492,10 +572,11 @@ class _ConversationDetail extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              IconButton(
-                tooltip: 'Gönder',
+              // A word with the icon: a lone paper plane is a guess.
+              FilledButton.icon(
                 onPressed: () => _send(ref),
-                icon: const Icon(Icons.send_outlined),
+                icon: const Icon(AppIcons.send, size: 18),
+                label: const Text('Gönder'),
               ),
             ],
           ),

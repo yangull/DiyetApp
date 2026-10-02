@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/app_states.dart';
 import 'auth_providers.dart';
 import 'models.dart';
+import '../theme/app_icons.dart';
 
 /// What an authenticated or mismatched screen needs to act, beyond the data
 /// it was handed: refetch the identity (the "Durumu yenile" button), or sign
@@ -127,7 +128,7 @@ class AuthMismatchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppErrorView(
-        icon: Icons.info_outline,
+        icon: AppIcons.info,
         title: title,
         message: message,
         actionLabel: 'Çıkış yap',

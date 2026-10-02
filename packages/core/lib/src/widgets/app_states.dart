@@ -5,6 +5,7 @@ import '../theme/edge_button.dart';
 import '../theme/tokens/app_spacing.dart';
 import 'cloud_card.dart';
 import 'wellkit_mark.dart';
+import '../theme/app_icons.dart';
 
 /// The one waiting state: a spinner with an optional line under it, centred.
 /// [AppLoading.card] reserves a card's height instead, so the page doesn't
@@ -85,7 +86,7 @@ class AppErrorView extends StatelessWidget {
     this.onRetry,
     this.actionLabel,
     this.onAction,
-    this.icon = Icons.error_outline,
+    this.icon = AppIcons.error,
   }) : assert((actionLabel == null) == (onAction == null)),
        _shape = _ErrorShape.page;
 
@@ -96,7 +97,7 @@ class AppErrorView extends StatelessWidget {
     this.onRetry,
     this.actionLabel,
     this.onAction,
-    this.icon = Icons.error_outline,
+    this.icon = AppIcons.error,
   }) : assert((actionLabel == null) == (onAction == null)),
        _shape = _ErrorShape.card;
 
@@ -108,7 +109,7 @@ class AppErrorView extends StatelessWidget {
        message = null,
        actionLabel = null,
        onAction = null,
-       icon = Icons.error_outline,
+       icon = AppIcons.error,
        _shape = _ErrorShape.notice;
 
   final String title;

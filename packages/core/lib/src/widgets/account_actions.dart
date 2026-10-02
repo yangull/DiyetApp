@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/edge_button.dart';
 import '../theme/tokens/app_spacing.dart';
 import 'cloud_card.dart';
+import '../theme/app_icons.dart';
 
 /// The link under a login or sign-up form that switches to the other one
 /// ("Hesabın yok mu? Kayıt ol"). Left, on the fields' edge, in both apps.
@@ -54,7 +55,7 @@ class SignOutRow extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.logout,
+                    AppIcons.logout,
                     size: MediaQuery.textScalerOf(context).scale(22),
                     color: palette.ink,
                   ),

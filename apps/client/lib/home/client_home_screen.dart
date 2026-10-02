@@ -47,13 +47,13 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
+              icon: Icon(AppIcons.home),
+              selectedIcon: Icon(AppIcons.homeActive),
               label: 'Bugün',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
+              icon: Icon(AppIcons.profile),
+              selectedIcon: Icon(AppIcons.profileActive),
               label: 'Profil',
             ),
           ],
