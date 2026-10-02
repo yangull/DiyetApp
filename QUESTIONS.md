@@ -101,6 +101,15 @@ Product decisions nobody else can make. The most blocking come first. Money ques
 asked and answered on 1 Oct 2026, and C43 (dark mode) the same night (now PLANNING
 #134–#135 and `docs/design-system.md`). Still open:
 
+### C48. "Açık" means two things on the demo's Ayarlar page
+The reminder switches now say "Açık / Kapalı" beside them (audit D11.2, as asked on
+3 Oct 2026), and the Görünüm control on the same page says "Sistem / Açık / Koyu", where
+"Açık" means light. Options: (a) keep both, the switch and the segmented control look
+different enough; (b) word the switches by what they do, "Gönderilir / Gönderilmez".
+Proposal: (a) for the demo; revisit when the real panel gets reminder settings.
+_Blocks: nothing._
+>
+
 ### C47. Tablets in "desktop site" mode get the compact panel
 The panel is compact in a browser on Windows, macOS or Linux (#135). Chrome and Samsung
 Internet on Android tablets default to "desktop site", which reports Linux, so such a

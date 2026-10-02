@@ -6,7 +6,11 @@ import '../demo/demo_repository.dart';
 import '../widgets/readable_width.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.showHeading = true});
+
+  /// False when the page is pushed with its name in the app bar (a phone), so
+  /// the header is one layer, not a bare back arrow over a large heading.
+  final bool showHeading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,8 +27,10 @@ class SettingsScreen extends ConsumerWidget {
           context.density.pagePadding,
         ),
         children: [
-          Text('Hatırlatma ayarları', style: text.headlineLarge),
-          const SizedBox(height: AppSpacing.xs),
+          if (showHeading) ...[
+            Text('Hatırlatma ayarları', style: text.headlineLarge),
+            const SizedBox(height: AppSpacing.xs),
+          ],
           Text(
             'Danışanlarınıza otomatik gönderilecek hatırlatmaları buradan '
             'açıp kapatırsınız.',
@@ -34,30 +40,26 @@ class SettingsScreen extends ConsumerWidget {
           CloudCard(
             child: Column(
               children: [
-                SwitchListTile(
+                _ReminderSwitch(
                   value: r.dayBefore,
                   onChanged: (v) => notifier.toggleReminder('dayBefore', v),
-                  title: const Text('Randevudan 1 gün önce'),
-                  subtitle: const Text(
-                    'Danışan randevusunu unutmasın diye akşamdan hatırlatılır.',
-                  ),
+                  title: 'Randevudan 1 gün önce',
+                  subtitle: 'Danışan randevusunu unutmasın diye akşamdan hatırlatılır.',
                 ),
                 Divider(height: 1, color: palette.divider),
-                SwitchListTile(
+                _ReminderSwitch(
                   value: r.hoursBefore,
                   onChanged: (v) => notifier.toggleReminder('hoursBefore', v),
-                  title: const Text('Randevudan 2 saat önce'),
-                  subtitle: const Text('Son dakika iptallerini azaltır.'),
+                  title: 'Randevudan 2 saat önce',
+                  subtitle: 'Son dakika iptallerini azaltır.',
                 ),
                 if (kShowMoney) ...[
                   Divider(height: 1, color: palette.divider),
-                  SwitchListTile(
+                  _ReminderSwitch(
                     value: r.paymentReminder,
                     onChanged: (v) => notifier.toggleReminder('payment', v),
-                    title: const Text('Ödenmemiş seans hatırlatması'),
-                    subtitle: const Text(
-                      'Seans sonrası ödeme yapılmadıysa danışana hatırlatılır.',
-                    ),
+                    title: 'Ödenmemiş seans hatırlatması',
+                    subtitle: 'Seans sonrası ödeme yapılmadıysa danışana hatırlatılır.',
                   ),
                 ],
               ],
@@ -85,6 +87,65 @@ class SettingsScreen extends ConsumerWidget {
             style: text.bodySmall?.copyWith(color: palette.textSecondary),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A reminder's switch with its state in words beside it, so on and off are
+/// not told by the thumb's position alone (rule 10).
+class _ReminderSwitch extends StatelessWidget {
+  const _ReminderSwitch({
+    required this.value,
+    required this.onChanged,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final wordStyle = text.bodyMedium?.copyWith(
+      color: context.palette.textSecondary,
+    );
+    return MergeSemantics(
+      // Like SwitchListTile: one focus stop and one role (the switch), so a
+      // screen reader says "switch, on" rather than "button, switch".
+      child: ListTile(
+        internalAddSemanticForOnTap: false,
+        onTap: () => onChanged(!value),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // The switch already tells a screen reader its state. A slot as
+            // wide as "Kapalı", so the title doesn't reflow on each flip.
+            ExcludeSemantics(
+              child: SizedBox(
+                width: numberSlotWidth(context, 'Kapalı', wordStyle!),
+                child: Text(
+                  value ? 'Açık' : 'Kapalı',
+                  textAlign: TextAlign.end,
+                  style: wordStyle,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            ExcludeFocus(
+              child: Switch(
+                value: value,
+                onChanged: onChanged,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:core/core.dart';
 import 'package:dietitian_panel/demo/demo_models.dart';
 import 'package:dietitian_panel/demo/demo_repository.dart';
@@ -1146,7 +1148,91 @@ void main() {
       await tester.tap(find.text('Hatırlatma ayarları'));
       await tester.pumpAndSettle();
       expect(find.byType(BackButton), findsOneWidget);
+      // One header: the app bar names the page, the page has no heading.
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text('Hatırlatma ayarları'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Hatırlatma ayarları'), findsOneWidget);
     });
+  });
+
+  testWidgets('a reminder switch says Açık or Kapalı, and its row toggles', (
+    tester,
+  ) async {
+    await pumpWide(tester, 'Hatırlatma ayarları');
+    Finder tile(String title) =>
+        find.ancestor(of: find.text(title), matching: find.byType(ListTile));
+    Finder stateOf(String title) => find.descendant(
+      of: tile(title),
+      matching: find.byWidgetPredicate(
+        (w) => w is Text && (w.data == 'Açık' || w.data == 'Kapalı'),
+      ),
+    );
+    const row = 'Randevudan 2 saat önce';
+    expect(tester.widget<Text>(stateOf(row)).data, 'Açık');
+    await tester.tap(find.text(row));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(stateOf(row)).data, 'Kapalı');
+    final toggle = find.descendant(
+      of: tile(row),
+      matching: find.byType(Switch),
+    );
+    expect(tester.widget<Switch>(toggle).value, isFalse);
+    // The switch itself toggles once, not twice through the row.
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Switch>(toggle).value, isTrue);
+
+    // One role and one state for a screen reader: a toggle, not a button,
+    // and the word is not read on top of the switch's own state.
+    final handle = tester.ensureSemantics();
+    final data = tester.getSemantics(find.text(row)).getSemanticsData();
+    expect(data.flagsCollection.isToggled, Tristate.isTrue);
+    expect(data.flagsCollection.isButton, isFalse);
+    expect(data.label, isNot(contains('Açık')));
+    handle.dispose();
+  });
+
+  testWidgets('the reset dialog reads as a paragraph on a computer', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(find.text('Sıfırla'));
+    await tester.pumpAndSettle();
+    final body = find.textContaining('başlangıç verileri');
+    expect(tester.getSize(body).width, greaterThanOrEqualTo(400));
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, 'Sıfırla'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the reset dialog fits a 360 dp phone at 2×', (tester) async {
+    tester.view.devicePixelRatio = 3;
+    tester.view.physicalSize = const Size(360 * 3, 740 * 3);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Demo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Demoyu sıfırla'));
+    await tester.pumpAndSettle();
+    final body = tester.getRect(find.textContaining('başlangıç verileri'));
+    expect(body.left, greaterThan(0));
+    expect(body.right, lessThan(360));
+    // No clip check: the test font's square glyphs make one Turkish word
+    // wider than a 360 dp dialog at 2x; an overflow still fails the test.
   });
 
   for (final width in [360.0, 412.0]) {

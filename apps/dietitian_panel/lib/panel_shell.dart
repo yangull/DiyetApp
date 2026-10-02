@@ -243,6 +243,8 @@ class _ResetDemoButton extends ConsumerWidget {
   }
 }
 
+const _resetDialogWidth = 400.0;
+
 Future<void> _confirmReset(
   BuildContext context,
   WidgetRef ref,
@@ -252,9 +254,14 @@ Future<void> _confirmReset(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Demoyu sıfırla'),
-      content: const Text(
-        'Bu görüşmede yapılan tüm değişiklikler silinir ve '
-        'başlangıç verileri geri gelir.',
+      // Wide enough for the sentence to read as a paragraph on a computer
+      // (it was a 270 px column); a phone's dialog clamps it to the screen.
+      content: const SizedBox(
+        width: _resetDialogWidth,
+        child: Text(
+          'Bu görüşmede yapılan tüm değişiklikler silinir ve '
+          'başlangıç verileri geri gelir.',
+        ),
       ),
       actions: [
         TextButton(
@@ -295,10 +302,10 @@ void _showDemoSheet(BuildContext context, {required VoidCallback onReset}) {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => Scaffold(
-                      // The page's own heading names it; a title here too
-                      // said it twice.
-                      appBar: AppBar(),
-                      body: const SettingsScreen(),
+                      // The app bar names the page, so the page drops its
+                      // own heading: one header, not two layers.
+                      appBar: AppBar(title: const Text('Hatırlatma ayarları')),
+                      body: const SettingsScreen(showHeading: false),
                     ),
                   ),
                 );
