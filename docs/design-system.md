@@ -291,9 +291,10 @@ Bevel's own nav has blur instead, which #135 rules out).
 - **Status pills:** tint fill, coloured text, a word, no border. Neutral is Cloud Card.
   "Onaylı" is `accentStrong` + tick on `accentTint`; a draft is violet on `aiDraftTint`.
 - **Inputs:** white fill, 1 px `borderStrong`, radius 12 (8 compact); focused: 2 px Ink.
-  Label above the field in `titleSmall` (a small core wrapper widget, since
-  `InputDecoration` only floats labels inside), helper in `bodySmall` grey, error in red
-  with an icon.
+  Always core's `LabeledField`: the label above the field in `titleSmall` (never
+  `InputDecoration.labelText`, which floats inside and cuts the outline), helper in
+  `bodySmall` grey and the error in red, both on the field's edge, and an optional
+  show/hide for passwords.
 - **Cards:** Cloud Card, radius 24, padding 20, no border, no shadow. Always core's
   `CloudCard`, never a bare `Card`: it re-themes its contents so the secondary pill, a
   disabled button, an off chip and `inset` turn white instead of
@@ -309,19 +310,37 @@ Bevel's own nav has blur instead, which #135 rules out).
 - **Bottom bar:** a solid white floating capsule, 16 from the screen edges and above the
   safe area, the floating shadow, no blur, no press ripple (as on iOS). Selected item Ink
   600, others `textSecondary` 500, no indicator pill. Labels always shown.
-- **Navigation rail (wide panel):** white, selected Ink 600, others `textSecondary`, no
-  pill.
+- **Navigation rail (wide panel):** white, selected Ink 600 with the heavy-stroke
+  icon, others `textSecondary`, no pill. From a 900 px window the rail is extended
+  (220 px): the mark on top, labels beside the icons, utilities and the signed-in name
+  pinned to the bottom. Below 900 it is the narrow rail with labels under the icons.
 - **Progress:** a 8 px rounded bar or a ring, green fill on the `track` grey (the same on the canvas
   and inside a card). It animates only when its value changes (rule 12).
 - **Dialogs and sheets:** white, radius 24, title `headlineSmall`, actions right-aligned:
   cancel as a text action, confirm as a filled (or red) pill.
 - **Empty states:** a heading that says what will appear here, one line of grey text,
-  one action if there is one. No illustration yet.
+  one action if there is one. No illustration yet. Core's `EmptyState`.
+- **Loading and errors:** core's `AppLoading` (the mark over a spinner for a whole
+  screen; `.card` reserves a card's height so the page doesn't jump) and `AppErrorView`
+  (Turkish words, never a raw exception; "Tekrar dene" is the main action, with a second
+  way out such as "Çıkış yap"; `.card` and one-line `.notice` for part of a screen). A
+  button that waits shows `ButtonSpinner`.
+- **Mark:** `WellkitMark`, a placeholder "W" on a Charcoal tile drawn in code, on the
+  auth screens, `AppLoading` and the top of the extended rail. Callers only pass a
+  size, so the real logo replaces its body alone.
+- **Interview notes (panel demo only):** a question for the dietitian in an interview
+  sits behind `InterviewNote`, one quiet "Görüşme notu" line that opens the paragraph.
+  Never plain grey copy under a card: it read as leftover text.
 - **AI draft container:** the card keeps its surface and gets a 1.5 px dashed violet
   border and the "Yapay zekâ taslağı" label (#57).
 - **Star rating:** gold stars, always followed by the number in Ink ("4,8").
 - **Numbers:** Alpino 600, the hero number in `displaySmall`; aligned columns use
-  fixed-width right-aligned slots.
+  fixed-width right-aligned slots sized by core's `numberSlotWidth` to the widest
+  value ("00:00", "000,0 kg") and, in a table, to the column's header if wider.
+- **Dates:** one short form in lists, tables and chart axes, `formatDate` ("28 Eyl",
+  the year only when not the current one); a time is `formatTime` ("08:00"). Long forms
+  ("Pazartesi, 28 Eylül": weekday first, with a comma) only in agenda headings and
+  sentences.
 
 ## Rules
 
@@ -375,3 +394,4 @@ the panel; "danışan", never "müşteri"; short button labels ("Kaydet", "Vazge
 ## Open
 
 - **Compact scale and sizes:** raised on 2 Oct 2026 (12 px floor); Can judges it again on the real panel.
+- **Logo and app icon:** `WellkitMark` is a placeholder until a real logo exists.

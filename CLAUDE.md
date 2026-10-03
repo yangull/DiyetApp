@@ -222,7 +222,24 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   off-screen children, so a screen with a "jump to" link (Genel Bakış, the client
   record) is a `SingleChildScrollView`.
 
+- Alpino has no ₺. Every theme text style falls back per glyph to the one-glyph `Lira`
+  family (`AppTypography`, checked in `core_test.dart`). A bare `TextStyle(...)` not
+  derived from the theme loses the fallback and draws ₺ in the system font: derive
+  styles with `copyWith`.
+- Icons come from core's `AppIcons` (Lucide, two vendored fonts). `Icons.*` anywhere in
+  `lib/` fails `fonts_and_icons_test.dart`. A new icon is a `const IconData` with its
+  Lucide codepoint (both families for a nav entry); never build `IconData` at runtime,
+  or a release build can't tree-shake the icon fonts and fails.
+- `Form.validate()` only reaches fields that are built. A form inside a lazy `ListView`
+  silently passes the fields scrolled off-screen, so the intake form is a
+  `SingleChildScrollView`.
+- The panel's rail is extended (220 px, mark on top, utilities pinned below) from a
+  900 px window and narrow below it. A layout test at 1280–1600 px gets the extended
+  rail, one at 600–899 the narrow one.
+
 **Demo panel**
+- An interview question for the dietitian goes behind `InterviewNote` ("Görüşme notu"),
+  never as grey copy under a card.
 - All money UI (Ödemeler tab, "Tahsil edilmemiş" figures, payment reminder) is gated by
   `kShowMoney` in `lib/demo/demo_repository.dart`, off because of PLANNING P6. Gate any
   new fee or commission display the same way; `demo_widget_test.dart` checks nothing shows.
@@ -257,6 +274,10 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   path; that is how the 24 Sep alignment audit was done.
 - The test font draws every glyph as a square, much wider than Alpino: a label that
   truncates at 2× in a test may fit on a device. Check real layouts on the emulator.
+  Anything that measures text to pick a layout (`ActionRow`, Mesajlar's "Gönder" that
+  falls back to an icon, its single-column switch, `numberSlotWidth`) flips at other
+  widths in a test than on a device: find a control by its icon or role, not by one
+  form of its label.
 - `test/screenshots_test.dart` produces captures, not regression goldens. It is tagged and
   skipped by default. Regenerate with
   `flutter test test/screenshots_test.dart --tags screenshots --run-skipped --update-goldens`.

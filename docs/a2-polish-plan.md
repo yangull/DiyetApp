@@ -1,5 +1,7 @@
 # Wellkit A2 polish pass: plan (7 sessions, all 119 audit items)
 
+**Status (3 Oct 2026): done.** 118 items fixed, 1 skipped by decision (C4.3). Final captures in `C:\Users\jhana\Pictures\Wellkit polish\FINAL\`; the audit page shows before/after and a status per item.
+
 Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFvF1otcXXEa6VqMM
 "Before" captures: `C:\Users\jhana\Pictures\Wellkit polish\00 before\`
 
@@ -9,7 +11,7 @@ Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFv
 - One session = one new chat in this folder (no worktree). Inside a session Claude works in small slices: analyze + tests, a subagent review, before/after captures in `C:\Users\jhana\Pictures\Wellkit polish\<slice>\`, then stops and shows Can. Commit only when Can says "commit", push only on "push".
 - Some items are decisions, not code. Claude asks them at the start of the session (listed under each session).
 - The model that writes the code is the one selected in the app's model picker. Reviews run as separate subagents on a stronger model.
-- Baseline tests (2 Oct 2026, mid-Session 6): core 54, client 26 (+1 skipped capture), panel 212 (+3 skipped captures). Analyze must stay clean.
+- Tests at the end of the pass (3 Oct 2026): core 54, client 26 (+1 skipped capture), panel 246 (+3 skipped captures). Analyze must stay clean.
 
 ## Session 1: labelled fields and shared states (core)
 To-do:
@@ -68,21 +70,21 @@ Decisions (Can, 2 Oct 2026): the interview paragraphs (D1.8, D3.5, D10.1) stay b
 Done when: demo screens re-captured (captures in `Wellkit polish\S12-S15`) and `demo_widget_test.dart` and `demo_codec_test.dart` pass.
 
 ## Session 6: demo panel, part 2 (D6-D11), lira sign, icons
-Status: **in progress.** Decisions (Can, 2 Oct 2026): icon pack **Lucide** (via `AppIcons` in core, fonts vendored, no wrapper package); lira fallback **Plus Jakarta Sans** (one-glyph subset `Lira`, metrics set to Alpino's).
+Status: **done (3 Oct 2026), committed locally.** Decisions (Can, 2 Oct 2026): icon pack **Lucide** (via `AppIcons` in core, fonts vendored, no wrapper package); lira fallback **Plus Jakarta Sans** (one-glyph subset `Lira`, metrics set to Alpino's).
 - [x] **X2 lira sign** and **X4 icons** (also fixes R5.4). Docs updated; `fonts_and_icons_test.dart` guards both.
 - [x] **D6 Yeni danışan**, **D7 Randevular** (reviewed, captured in `Wellkit polish\S17`).
-- [~] **D8 Görüşme** and **D9 Mesajlar**: coded and tests green; **not yet reviewed by a subagent or captured** (before images are in `S18`). D8: notice without "PLANNING.md §3", back arrow. D9: avatars, times, "Yanıt bekliyor" pill, header with "Danışanı aç", top-anchored thread, labelled "Gönder", cautions as pills.
-- [ ] **D10 Takip**: lighter intro, chart labels, a summary row; its interview paragraph goes behind `InterviewNote`.
-- [ ] **D11 Ayarlar and reset**: header on phone, "Açık/Kapalı" with the switches, wider reset dialog.
-- [ ] Left from session 5: **X5** (number slots in the remaining demo screens: Takip, Ödemeler if shown), check **X6** (any date left in another format).
+- [x] **D8 Görüşme** and **D9 Mesajlar** (reviewed; overflow fixes; captured in `S18`). D8: notice without "PLANNING.md §3", back arrow. D9: avatars, times, "Yanıt bekliyor" pill, header with "Danışanı aç", top-anchored thread, labelled "Gönder", cautions as pills.
+- [x] **D10 Takip**: one-line intro, `InterviewNote`, an "Özet" summary card, right-aligned axis labels and a valued target label, charts two to a row (captured in `S19`).
+- [x] **D11 Ayarlar and reset**: app-bar title on phone, "Açık/Kapalı" with the switches (C48 asks about the word), 400 px reset text (captured in `S20`).
+- [x] Left from session 5: **X5** (Takip summary and axis, Mesajlar meal times; Ödemeler stays hidden) and **X6** (checked: no other date format left) (captured in `S21`).
 Done when: every D screen re-captured on phone and computer, light and dark.
 
 ## Session 7: wrap-up
-To-do:
-- [ ] A full re-capture of all 170 screens and a final before/after on the audit page (updated in place).
-- [ ] Refresh the private design-system artifact and the panel tour (HANDOFF to-do 2).
-- [ ] Update `docs/design-system.md` (labels above, shared states, mark, compact scale, icon pack) and `CLAUDE.md` gotchas if new traps appeared; PLANNING.md only for decisions that changed.
-- [ ] Rewrite `HANDOFF.md`; ask before commit and push; fast-forward the Codex branch after Can's OK.
+Status: **done (3 Oct 2026)**, except the push and the Codex fast-forward, which wait on Can.
+- [x] A full re-capture of both apps (`FINAL\`) and a final before/after on the audit page (updated in place).
+- [x] Refresh the private design-system artifact and the panel tour (HANDOFF to-do 2).
+- [x] Update `docs/design-system.md` (labels above, shared states, mark, extended rail, interview notes, number slots, dates) and the `CLAUDE.md` gotchas (Lira, AppIcons, lazy-list validate, extended rail, InterviewNote, test-font widths).
+- [x] Rewrite `HANDOFF.md`. Push and the Codex fast-forward wait on Can.
 Done when: all 119 items are Fixed or Skipped on the page.
 
 ## Starting prompts (paste one per new chat)
