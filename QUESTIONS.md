@@ -101,6 +101,21 @@ Product decisions nobody else can make. The most blocking come first. Money ques
 asked and answered on 1 Oct 2026, and C43 (dark mode) the same night (now PLANNING
 #134–#135 and `docs/design-system.md`). Still open:
 
+### C49–C52. Weigh-ins (to-do 6): four questions from the design canvas
+The draft is at https://claude.ai/artifact/HBYyqJgeUVXA7ZmbcVnj81 (6 screens, client and
+panel). Measurements follow DT8's placeholder (weight, waist, hip; fat % and muscle
+optional).
+- **C49.** Does the client see the dietitian's measurements (waist, hip), or only their
+  weight? Proposal: the latest measurements on the Kilo screen, no history.
+- **C50.** Does Bugün show "Hedefin 65 kg"? The draft names the goal but never "kalan
+  7,4 kg" (P7: no praise or blame). Proposal: keep the goal, no remainder.
+- **C51.** Can a client enter a weigh-in for an earlier date? Proposal: yes, up to 7 days
+  back, so a missed day can be filled in.
+- **C52.** When the dietitian hides the weight chart (P9), is the client told? The draft
+  says nothing and keeps "Tartı ekle". Proposal: say nothing (eating-disorder risk).
+_Blocks: to-do 6 (weigh-ins and measurements)._
+>
+
 ### C48. "Açık" means two things on the demo's Ayarlar page
 The reminder switches now say "Açık / Kapalı" beside them (audit D11.2, as asked on
 3 Oct 2026), and the Görünüm control on the same page says "Sistem / Açık / Koyu", where

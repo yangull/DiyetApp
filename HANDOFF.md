@@ -20,10 +20,9 @@
   `numberSlotWidth`; in the panel: `InterviewNote`, the extended rail.
 - **Tests**: core 54, client 26, panel 250 (+1 and +3 skipped capture files); analyze
   clean.
-- **Not pushed.** Local commits on `main` since `origin/main`: `d411b24`, `75ab19f`,
-  `65f65aa`, `ff4ad05`, `f868170`, `862cd25`, `e48d6fa`, `2cb659f` (docs) and the final-review fixes.
-  The Codex worktree (`../dietician-app-codex`) is not fast-forwarded either:
-  `git -C ../dietician-app-codex merge --ff-only main` after the push.
+- **Pushed** (`bd03ea6`, 3 Oct 2026) and the Codex worktree fast-forwarded to it.
+- **Weigh-ins design draft** (to-do 6): a Design canvas with 6 screens, client and panel,
+  https://claude.ai/artifact/HBYyqJgeUVXA7ZmbcVnj81. Its open questions are C49–C52.
 - Captures: `C:\Users\jhana\Pictures\Wellkit polish\` (`00 before`, one folder per
   slice with `before` / `after`, and `FINAL` with all 180 final screens).
 
@@ -35,7 +34,8 @@ commit on Can's word, push on "push".
 
 ### A. Close the polish (Can, small)
 
-1. **Push and fast-forward Codex** once Can has looked.
+1. **Codex review of the A2 pass (optional, Can starts it).** Review mode, over
+   `git diff c987d6e..bd03ea6`; findings verified against the code before acting.
 2. **Pixel 8a check** (the test font is wider than Alpino, so a few layouts can only be
    judged on a device):
    - Lucide icons and the ₺ sign in a release build (Profil budget line, client record).
@@ -62,7 +62,8 @@ commit on Can's word, push on "push".
 
 6. **Weigh-ins and measurements** (P8). The client logs weight, the dietitian adds
    measurements, both see a chart. P9 (hide numbers per client) applies. DT8 placeholder:
-   weight, waist, hip.
+   weight, waist, hip. **Start from the design canvas** above once Can has marked it up
+   and answered C49–C52; plan mode first (table `measurements`, §7 of PLANNING).
 7. **Plan editor + `diet_plans`** (P4, P10, #121–#123). Exchange list first, weekly,
    copied from last week, written by hand. **Needs DT3.**
 8. **Meal ticks on Bugün** (P7). One tap per meal, time recorded, "Bu hafta 5/7 gün".
@@ -112,6 +113,7 @@ Most blocking first. Details in QUESTIONS.md.
 - **C21**: how much plan editing on a phone?
 - **C14 / C15 / C16**: launch surfaces, what counts as a successful pilot, who runs
   operations (C16 also gives the rejected-application screen its real address).
+- **C49–C52**: weigh-in details from the design canvas (blocks to-do 6).
 - **C47**: tablets in "desktop site" mode; **C46**: the names rule; **C48**: "Açık"
   means both "on" and "light" on the demo's Ayarlar page.
 - **C6–C12**: marketplace flow details.
@@ -123,6 +125,7 @@ Most blocking first. Details in QUESTIONS.md.
 | Page | For | Link |
 |---|---|---|
 | Wellkit status report (TR/EN) | Can's general showcase. Update it when the state changes | https://claude.ai/artifact/8XtstTkUXxgnup4Q4Ywy5Z |
+| Weigh-ins design | Draft of to-do 6: 6 screens, client and panel; mark it up | https://claude.ai/artifact/HBYyqJgeUVXA7ZmbcVnj81 |
 | Polish audit | Every screen before and after the A2 pass, 119 items with status | https://claude.ai/artifact/DPUhmDFvF1otcXXEa6VqMM |
 | Wellkit Bevel system | The design system now in the code, dark theme included (private: Alpino's licence) | https://claude.ai/artifact/HCeGviNk93ac9jDJB7t7QV |
 | Panel tour | 11 demo screens with the interview questions (3 Oct screens; move the share pin) | https://claude.ai/artifact/12HiiqJV6Xyh8HbLoKhpQm |
