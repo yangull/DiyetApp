@@ -8,11 +8,11 @@ void main() {
     expect(formatDayHeading(DateTime(2026, 9, 25, 11), now: friday), 'Bugün');
     expect(
       formatDayHeading(DateTime(2026, 9, 26, 10), now: friday),
-      'Yarın · Cumartesi 26 Eylül',
+      'Yarın · Cumartesi, 26 Eylül',
     );
     expect(
       formatDayHeading(DateTime(2026, 9, 28, 11, 30), now: friday),
-      'Pazartesi 28 Eylül',
+      'Pazartesi, 28 Eylül',
     );
   });
 

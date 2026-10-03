@@ -239,7 +239,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.xl),
-                        _head(context, 'Plan durumu', flex: 3),
+                        _head(context, 'Plan durumu', flex: 2),
                       ],
                     ),
                   ),

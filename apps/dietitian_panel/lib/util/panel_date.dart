@@ -23,12 +23,14 @@ int _daysBetween(DateTime from, DateTime to) => DateTime.utc(
   to.day,
 ).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
 
-/// An agenda's day heading: "Bugün", "Yarın · Cumartesi 26 Eylül",
-/// "Pazartesi 28 Eylül". The screen's header already carries today's date.
+/// An agenda's day heading: "Bugün", "Yarın · Cumartesi, 26 Eylül",
+/// "Pazartesi, 28 Eylül": weekday first with a comma, like core's header
+/// date ("Cuma, 2 Ekim"). The screen's header already carries today's date.
 String formatDayHeading(DateTime day, {DateTime? now}) {
   final d = _dateOnly(day);
   final days = _daysBetween(now ?? DateTime.now(), d);
-  final date = '${trWeekdays[d.weekday - 1]} ${d.day} ${trMonths[d.month - 1]}';
+  final date =
+      '${trWeekdays[d.weekday - 1]}, ${d.day} ${trMonths[d.month - 1]}';
   if (days == 0) return 'Bugün';
   if (days == 1) return 'Yarın · $date';
   return date;

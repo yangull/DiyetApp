@@ -121,7 +121,7 @@ class AppointmentsScreen extends ConsumerWidget {
 }
 
 String _when(DateTime at) =>
-    '${formatDate(at)} ${trWeekdays[at.weekday - 1]} · ${formatTime(at)}';
+    '${trWeekdays[at.weekday - 1]}, ${formatDate(at)} · ${formatTime(at)}';
 
 class _AppointmentRow extends ConsumerWidget {
   const _AppointmentRow({required this.appointment, required this.showDivider});
@@ -480,7 +480,7 @@ class _Who extends StatelessWidget {
           ),
         ),
         Text(
-          '${formatDate(at)} ${trWeekdays[at.weekday - 1]}',
+          '${trWeekdays[at.weekday - 1]}, ${formatDate(at)}',
           style: text.bodyMedium?.copyWith(color: palette.textSecondary),
         ),
       ],

@@ -349,6 +349,7 @@ class _ClientContextPanel extends ConsumerWidget {
     final plan = demo.planFor(clientId);
     final text = Theme.of(context).textTheme;
     final palette = context.palette;
+    final mealStyle = text.bodySmall!.copyWith(color: palette.textSecondary);
 
     // Scrolls on a short window: the facts and the day's meals are taller
     // than a laptop in landscape leaves under the heading.
@@ -411,12 +412,29 @@ class _ClientContextPanel extends ConsumerWidget {
               style: text.bodySmall?.copyWith(color: palette.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xs),
+            // The times in a fixed, right-aligned slot so the meal names
+            // start on one edge (Alpino has no tabular figures, #135).
             for (final meal in plan.meals)
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  '${meal.time}  ${meal.name}',
-                  style: text.bodySmall?.copyWith(color: palette.textSecondary),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // A minimum, not a fixed width: the time is free text in
+                    // the plan editor and may be longer than "00:00".
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: numberSlotWidth(context, '00:00', mealStyle),
+                      ),
+                      child: Text(
+                        meal.time,
+                        textAlign: TextAlign.end,
+                        style: mealStyle,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: Text(meal.name, style: mealStyle)),
+                  ],
                 ),
               ),
           ],
@@ -686,8 +704,13 @@ class _MessageBubble extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
+                    // The day too once it isn't today, like the list rows: a
+                    // message from two days ago read as this morning's.
                     Text(
-                      formatTime(message.sentAt),
+                      DateUtils.isSameDay(message.sentAt, DateTime.now())
+                          ? formatTime(message.sentAt)
+                          : '${formatDate(message.sentAt)} '
+                                '${formatTime(message.sentAt)}',
                       style: text.bodySmall?.copyWith(
                         color: fromDietitian
                             ? palette.onCharcoal

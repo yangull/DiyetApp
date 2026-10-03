@@ -374,10 +374,12 @@ class _MeasurementsCard extends StatelessWidget {
                           _MeasurementCell(
                             value: '${formatDecimal(rows[i].waistCm)} cm',
                             change: _delta(rows, i, (m) => m.waistCm),
+                            unit: 'cm',
                           ),
                           _MeasurementCell(
                             value: '${formatDecimal(rows[i].hipCm)} cm',
                             change: _delta(rows, i, (m) => m.hipCm),
+                            unit: 'cm',
                           ),
                           _MeasurementCell(
                             value: formatDecimal(rows[i].waistHipRatio, 2),
@@ -386,10 +388,12 @@ class _MeasurementsCard extends StatelessWidget {
                           _MeasurementCell(
                             value: '${formatDecimal(rows[i].bodyFatPct)} %',
                             change: _delta(rows, i, (m) => m.bodyFatPct),
+                            unit: '%',
                           ),
                           _MeasurementCell(
                             value: '${formatDecimal(rows[i].muscleMassKg)} kg',
                             change: _delta(rows, i, (m) => m.muscleMassKg),
+                            unit: 'kg',
                           ),
                         ],
                       ),
@@ -438,10 +442,17 @@ class _MeasurementHead extends StatelessWidget {
 /// One reading, right-aligned so the column's numbers line up, with the change
 /// since the last session under it, small and grey.
 class _MeasurementCell extends StatelessWidget {
-  const _MeasurementCell({required this.value, required this.change});
+  const _MeasurementCell({
+    required this.value,
+    required this.change,
+    this.unit,
+  });
 
   final String value;
   final double? change;
+
+  /// The value's unit, repeated on the change so both end on one edge.
+  final String? unit;
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +464,8 @@ class _MeasurementCell extends StatelessWidget {
           Text(value, style: text.bodyMedium),
           if (change != null && change != 0)
             Text(
-              '${change! > 0 ? '+' : '−'}${formatDecimal(change!.abs())}',
+              '${change! > 0 ? '+' : '−'}${formatDecimal(change!.abs())}'
+              '${unit == null ? '' : ' $unit'}',
               style: text.bodySmall?.copyWith(
                 color: context.palette.textSecondary,
               ),
