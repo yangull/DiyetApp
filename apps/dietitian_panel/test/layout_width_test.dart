@@ -171,6 +171,19 @@ void main() {
     double rightOf(String s) =>
         t.getRect(find.descendant(of: summary, matching: find.text(s))).right;
     expect(rightOf('72,4 kg'), moreOrLessEquals(rightOf('63,0 kg')));
+    // A slot's rect is the slot, not the glyphs: the numbers must also be
+    // right-aligned inside it.
+    for (final value in ['72,4 kg', '7,4 kg', 'Hedefe kalan']) {
+      expect(
+        t
+            .widget<Text>(
+              find.descendant(of: summary, matching: find.text(value)),
+            )
+            .textAlign,
+        TextAlign.end,
+        reason: value,
+      );
+    }
     expect(rightOf('7,4 kg'), moreOrLessEquals(rightOf('—')));
     expect(rightOf('Hedefe kalan'), moreOrLessEquals(rightOf('7,4 kg')));
     // A header never wraps over its column.
@@ -246,6 +259,21 @@ void main() {
     expect(find.text('hedeften uzaklaşıyor'), findsNothing);
     expect(find.text('Grafik ikinci tartımdan sonra görünür.'), findsOneWidget);
   });
+
+  // The review found the rail's footer overflowing on short windows at 2x.
+  for (final size in const [Size(800, 600), Size(915, 412)]) {
+    testWidgets('the demo rail fits a ${size.width.toInt()}×'
+        '${size.height.toInt()} window at 2× text', (t) async {
+      t.view.devicePixelRatio = 1;
+      t.view.physicalSize = size;
+      t.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(t.view.reset);
+      addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+      await t.pumpWidget(const ProviderScope(child: DietitianPanelDemoApp()));
+      await t.pumpAndSettle();
+      expect(find.byType(NavigationRail), findsOneWidget);
+    });
+  }
 
   test('"Hedefe kalan" says hedefte once the target is reached or passed', () {
     expect(

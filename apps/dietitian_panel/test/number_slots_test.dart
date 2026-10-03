@@ -65,6 +65,14 @@ void main() {
           .first,
     );
     expect(rectOf('Kilo').right, moreOrLessEquals(rectOf('72,4 kg').right));
+    for (final s in ['Kilo', '72,4 kg']) {
+      final text = tester.widget<Text>(
+        find
+            .descendant(of: find.byType(ClientsScreen), matching: find.text(s))
+            .first,
+      );
+      expect(text.textAlign, TextAlign.end, reason: s);
+    }
     // The filter above the table is labelled "Hedef" too; the header's is
     // the last one.
     final header = tester.getRect(

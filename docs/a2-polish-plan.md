@@ -11,7 +11,7 @@ Audit page (items X1.., C1.1.., R1.., D1..): https://claude.ai/artifact/DPUhmDFv
 - One session = one new chat in this folder (no worktree). Inside a session Claude works in small slices: analyze + tests, a subagent review, before/after captures in `C:\Users\jhana\Pictures\Wellkit polish\<slice>\`, then stops and shows Can. Commit only when Can says "commit", push only on "push".
 - Some items are decisions, not code. Claude asks them at the start of the session (listed under each session).
 - The model that writes the code is the one selected in the app's model picker. Reviews run as separate subagents on a stronger model.
-- Tests at the end of the pass (3 Oct 2026): core 54, client 26 (+1 skipped capture), panel 246 (+3 skipped captures). Analyze must stay clean.
+- Tests at the end of the pass (3 Oct 2026): core 54, client 26 (+1 skipped capture), panel 250 (+3 skipped captures). Analyze must stay clean.
 
 ## Session 1: labelled fields and shared states (core)
 To-do:

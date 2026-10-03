@@ -583,9 +583,17 @@ void main() {
     await tester.tap(find.text('Danışan ekle'));
     await tester.pumpAndSettle();
 
-    // Scroll to the end, where the required fields are far above.
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -3000));
+    // Scroll the form itself to the end, where the required fields are far
+    // above (`Scrollable.last` was a text field's own scrollable).
+    final formScroll = find
+        .ancestor(
+          of: find.text('Temel bilgiler'),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.drag(formScroll, const Offset(0, -3000));
     await tester.pumpAndSettle();
+    expect(find.text('Temel bilgiler').hitTestable(), findsNothing);
     await tester.tap(find.text('Kaydet ve taslak oluştur'));
     await tester.pumpAndSettle();
 
@@ -1211,6 +1219,65 @@ void main() {
         matching: find.widgetWithText(FilledButton, 'Sıfırla'),
       ),
       findsOneWidget,
+    );
+  });
+
+  // From the phone's demo sheet the reset used the sheet's ref, which is
+  // disposed once the sheet closes: confirming threw and nothing was reset.
+  testWidgets('the demo resets from the phone sheet', (tester) async {
+    tester.view.devicePixelRatio = 3;
+    tester.view.physicalSize = const Size(412 * 3, 900 * 3);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const ProviderScope(child: DietitianPanelDemoApp()),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    );
+    final seeded = container.read(demoProvider).clients.length;
+    final first = container.read(demoProvider).clients.first;
+    container
+        .read(demoProvider.notifier)
+        .addClient(
+          DemoClient(
+            id: 'c-reset',
+            name: 'Ayşe Demir',
+            age: 30,
+            sex: first.sex,
+            heightCm: 165,
+            weightKg: 60,
+            goal: 'Kilo verme',
+            targetWeightKg: 55,
+            activityLevel: first.activityLevel,
+            dietType: 'standart',
+            allergies: const [],
+            chronicConditions: const [],
+            medications: const [],
+            note: '',
+            startedOn: DateTime.now(),
+          ),
+        );
+    await tester.pumpAndSettle();
+    expect(container.read(demoProvider).clients, hasLength(seeded + 1));
+
+    await tester.tap(find.text('Demo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Demoyu sıfırla'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, 'Sıfırla'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(
+      ProviderScope.containerOf(tester.element(find.byType(MaterialApp)))
+          .read(demoProvider)
+          .clients,
+      hasLength(seeded),
     );
   });
 

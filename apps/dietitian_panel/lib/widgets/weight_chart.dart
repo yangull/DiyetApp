@@ -211,15 +211,26 @@ class _WeightPainter extends CustomPainter {
     _text(canvas, valueLabel, Offset(last.dx + 10, valueTop), valueStyle);
 
     // Read off the data rather than hard-coded, so the axis cannot go stale.
+    // The end date always shows; the start date only where it clears it (a
+    // narrow card at large text put "5 Ağu" over "30 Eyl").
+    final endLabel = formatDate(entries.last.date);
+    final startLabel = formatDate(entries.first.date);
+    if (startDateFits(
+      plotLeft: leftPad,
+      plotRight: leftPad + plotW,
+      startWidth: _size(startLabel, labelStyle).width,
+      endWidth: _size(endLabel, labelStyle).width,
+    )) {
+      _text(
+        canvas,
+        startLabel,
+        Offset(leftPad, size.height - dateHeight),
+        labelStyle,
+      );
+    }
     _text(
       canvas,
-      formatDate(entries.first.date),
-      Offset(leftPad, size.height - dateHeight),
-      labelStyle,
-    );
-    _text(
-      canvas,
-      formatDate(entries.last.date),
+      endLabel,
       Offset(leftPad + plotW, size.height - dateHeight),
       labelStyle,
       alignRight: true,
@@ -264,6 +275,15 @@ class _WeightPainter extends CustomPainter {
       old.target != target ||
       old.surface != surface;
 }
+
+/// Whether the start date fits left of the right-aligned end date with a gap.
+@visibleForTesting
+bool startDateFits({
+  required double plotLeft,
+  required double plotRight,
+  required double startWidth,
+  required double endWidth,
+}) => plotLeft + startWidth + 8 <= plotRight - endWidth;
 
 /// Where the "hedef" label goes: centred on the target line, unless the last
 /// weight's label is there (a weight close to its target, like 58,2 over

@@ -76,9 +76,11 @@ class _PanelShellState extends State<PanelShell> {
       ],
       extendedRail: true,
       railLeading: const RailMark(),
+      // Scrolls rather than overflows on a short window at large text;
+      // reverse keeps the utilities at the foot while they fit.
       compactRailTrailing: Expanded(
-        child: Align(
-          alignment: Alignment.bottomCenter,
+        child: SingleChildScrollView(
+          reverse: true,
           child: Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: Column(
@@ -98,8 +100,8 @@ class _PanelShellState extends State<PanelShell> {
           ),
         ),
       ),
-      railTrailing: Align(
-        alignment: AlignmentDirectional.bottomStart,
+      railTrailing: SingleChildScrollView(
+        reverse: true,
         child: Padding(
           padding: const EdgeInsetsDirectional.only(
             start: kRailInset - AppSpacing.md,
@@ -207,20 +209,20 @@ class _RailUtilityButton extends StatelessWidget {
 /// dietitian typed is kept until this is pressed. Icon and label, like the
 /// rail items above it: an icon alone would be a guess (docs/design-system.md,
 /// rule 12).
-class _ResetDemoButton extends ConsumerWidget {
+class _ResetDemoButton extends StatelessWidget {
   const _ResetDemoButton({required this.onReset, this.stacked = false});
 
   final VoidCallback onReset;
   final bool stacked;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final muted = context.palette.textSecondary;
     final label = Theme.of(context).textTheme.labelMedium;
     if (stacked) {
       return TextButton(
         style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(muted)),
-        onPressed: () => _confirmReset(context, ref, onReset),
+        onPressed: () => _confirmReset(context, onReset),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -236,7 +238,7 @@ class _ResetDemoButton extends ConsumerWidget {
         foregroundColor: WidgetStatePropertyAll(muted),
         alignment: AlignmentDirectional.centerStart,
       ),
-      onPressed: () => _confirmReset(context, ref, onReset),
+      onPressed: () => _confirmReset(context, onReset),
       icon: const Icon(AppIcons.reset),
       label: Text('Sıfırla', style: label),
     );
@@ -245,11 +247,11 @@ class _ResetDemoButton extends ConsumerWidget {
 
 const _resetDialogWidth = 400.0;
 
-Future<void> _confirmReset(
-  BuildContext context,
-  WidgetRef ref,
-  VoidCallback onReset,
-) async {
+/// Reads the providers through the shell's container, not a caller's
+/// [WidgetRef]: from the phone's demo sheet that ref belonged to the sheet,
+/// which is gone by the time the dialog closes, so the reset threw.
+Future<void> _confirmReset(BuildContext context, VoidCallback onReset) async {
+  final container = ProviderScope.containerOf(context, listen: false);
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
@@ -277,8 +279,8 @@ Future<void> _confirmReset(
     ),
   );
   if (confirmed ?? false) {
-    ref.read(demoProvider.notifier).resetDemo();
-    ref.invalidate(selectedConversationProvider);
+    container.read(demoProvider.notifier).resetDemo();
+    container.invalidate(selectedConversationProvider);
     onReset();
   }
 }
@@ -316,7 +318,7 @@ void _showDemoSheet(BuildContext context, {required VoidCallback onReset}) {
               title: const Text('Demoyu sıfırla'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
-                _confirmReset(context, ref, onReset);
+                _confirmReset(context, onReset);
               },
             ),
           ],

@@ -59,8 +59,9 @@ class _RealPanelShellState extends State<RealPanelShell> {
       ),
       selectedIndex: _index,
       onSelected: (i) {
-        // Tapping the current tab again returns to its first screen.
-        if (i == _index) {
+        // Tapping Genel Bakış again returns to its first screen; the
+        // navigator belongs to that tab alone.
+        if (i == _index && i == 0) {
           _overviewNavigator.currentState?.popUntil((r) => r.isFirst);
         }
         setState(() => _index = i);

@@ -18,10 +18,10 @@
   shared pieces in core: `LabeledField`, `AppLoading` / `AppErrorView` / `EmptyState`,
   `WellkitMark` (placeholder), `AppIcons` (Lucide), the `Lira` fallback font for ₺,
   `numberSlotWidth`; in the panel: `InterviewNote`, the extended rail.
-- **Tests**: core 54, client 26, panel 246 (+1 and +3 skipped capture files); analyze
+- **Tests**: core 54, client 26, panel 250 (+1 and +3 skipped capture files); analyze
   clean.
 - **Not pushed.** Local commits on `main` since `origin/main`: `d411b24`, `75ab19f`,
-  `65f65aa`, `ff4ad05`, `f868170`, `862cd25`, `e48d6fa` and the session-7 docs commit.
+  `65f65aa`, `ff4ad05`, `f868170`, `862cd25`, `e48d6fa`, `2cb659f` (docs) and the final-review fixes.
   The Codex worktree (`../dietician-app-codex`) is not fast-forwarded either:
   `git -C ../dietician-app-codex merge --ff-only main` after the push.
 - Captures: `C:\Users\jhana\Pictures\Wellkit polish\` (`00 before`, one folder per
@@ -53,6 +53,10 @@ commit on Can's word, push on "push".
    - `EdgeButton`'s outer 12 px is not tappable (from the S3 review).
    - The payments screen's ₺ columns need number slots before money is ever shown (P6).
    - A real logo and app icon replace `WellkitMark`.
+   - From the final review, not fixed: with reminder settings open on the rail, narrowing
+     the window to a phone keeps showing them while the bottom bar says Genel Bakış;
+     `AppIcons.settings` and `filter` share one Lucide glyph, `inPerson` reuses
+     `profile`'s (decide whether that is intended).
 
 ### B. Phase 1 features: the next build (one slice each, plan mode first)
 

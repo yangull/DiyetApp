@@ -56,5 +56,30 @@ void main() {
     }
 
     expect(height('\u20ba250'), height('250'));
+
+    // And the sign is drawn by Lira, not by whatever the platform falls back
+    // to: a fixed line height alone would hold with any font.
+    double width(TextStyle s) {
+      final painter = TextPainter(
+        text: TextSpan(text: '\u20ba', style: s),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final w = painter.width;
+      painter.dispose();
+      return w;
+    }
+
+    final viaLira = width(style.copyWith(fontFamily: 'packages/core/Lira'));
+    expect(width(style), viaLira);
+    expect(
+      width(
+        TextStyle(
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          height: style.height,
+        ),
+      ),
+      isNot(viaLira),
+    );
   });
 }

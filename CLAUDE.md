@@ -223,9 +223,10 @@ approval gate, the 1919 energy constants) are in PLANNING §3 with their reasons
   record) is a `SingleChildScrollView`.
 
 - Alpino has no ₺. Every theme text style falls back per glyph to the one-glyph `Lira`
-  family (`AppTypography`, checked in `core_test.dart`). A bare `TextStyle(...)` not
-  derived from the theme loses the fallback and draws ₺ in the system font: derive
-  styles with `copyWith`.
+  family (`AppTypography`, checked in `core_test.dart`). A `Text` style merges into the
+  theme's and keeps it, but a `TextPainter` or `CustomPainter` style, or one with
+  `inherit: false`, built from a bare `TextStyle(...)` loses it and draws ₺ in the
+  system font: derive those from the theme with `copyWith`.
 - Icons come from core's `AppIcons` (Lucide, two vendored fonts). `Icons.*` anywhere in
   `lib/` fails `fonts_and_icons_test.dart`. A new icon is a `const IconData` with its
   Lucide codepoint (both families for a nav entry); never build `IconData` at runtime,

@@ -158,7 +158,8 @@ bundled unmodified with its `FFL.txt` (no subsetting or conversion, as the licen
 requires). One exception, the lira sign: Alpino has no ₺ (U+20BA), so every text style
 falls back per glyph to `Lira`, a one-glyph subset of Plus Jakarta Sans (OFL, chosen
 by Can on 2 Oct 2026) whose vertical metrics were set to Alpino's so a price does not
-grow its line (`fonts_and_icons_test.dart`). Checked on 1 Oct 2026:
+grow its line (`fonts_and_icons_test.dart` checks both the line height and that
+Lira draws the sign). Checked on 1 Oct 2026:
 - **Flutter maps `FontWeight` onto the wght axis** of the variable file: in a test,
   `FontWeight.w600` measured exactly like `FontVariation.weight(600)` (and the same for
   400, 500, 700, 900). So one file gives 400, 500 and 600 with no `fontVariations` code.
